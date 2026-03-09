@@ -22,7 +22,6 @@ env:
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   backend-lint:
@@ -190,20 +189,36 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Backend image metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-backend
+          tags: |
+            type=sha,prefix=sha-
+
       - name: Build backend image
         uses: docker/build-push-action@v5
         with:
           context: ./cauc-sep/backend
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+          tags: ${{ steps.meta-backend.outputs.tags }}
           no-cache: true
+
+      - name: Frontend image metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-frontend
+          tags: |
+            type=sha,prefix=sha-
 
       - name: Build frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./cauc-sep/frontend
           push: false
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+          tags: ${{ steps.meta-frontend.outputs.tags }}
           no-cache: true
 
   test-summary:
