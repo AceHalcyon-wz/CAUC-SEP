@@ -370,9 +370,9 @@ class ExperimentProgressData:
 @dataclass
 class BackpressureState:
     """反压状态数据类。
-    
+
     监控客户端消息队列状态，实现反压控制。
-    
+
     Attributes:
         message_queue: 消息队列（FIFO）
         queue_size: 队列最大容量
@@ -386,7 +386,7 @@ class BackpressureState:
         unacked_messages: 未确认消息字典 {message_id: timestamp}
         ack_enabled: 是否启用消息确认机制
     """
-    
+
     message_queue: deque = field(default_factory=lambda: deque(maxlen=BACKPRESSURE_QUEUE_SIZE))
     queue_size: int = BACKPRESSURE_QUEUE_SIZE
     high_watermark: float = BACKPRESSURE_WATERMARK_HIGH
@@ -398,37 +398,37 @@ class BackpressureState:
     last_backpressure_warning: float = 0.0
     unacked_messages: dict[str, float] = field(default_factory=dict)
     ack_enabled: bool = False
-    
+
     @property
     def queue_usage(self) -> float:
         """计算队列使用率。
-        
+
         Returns:
             float: 队列使用率（0.0-1.0）
         """
         return len(self.message_queue) / self.queue_size
-    
+
     @property
     def should_throttle(self) -> bool:
         """判断是否应该启动节流。
-        
+
         Returns:
             bool: 是否启动节流
         """
         return self.queue_usage >= self.high_watermark
-    
+
     @property
     def can_resume(self) -> bool:
         """判断是否可以恢复正常发送。
-        
+
         Returns:
             bool: 是否可以恢复
         """
         return self.queue_usage <= self.low_watermark
-    
+
     def to_dict(self) -> dict[str, Any]:
         """转换为字典格式。
-        
+
         Returns:
             Dict[str, Any]: 反压状态字典
         """
@@ -595,9 +595,7 @@ class ConnectionManager:
         self._connection_info[websocket] = connection_info
 
         # 启动心跳检测任务
-        self._heartbeat_tasks[websocket] = asyncio.create_task(
-            self._heartbeat_monitor(websocket)
-        )
+        self._heartbeat_tasks[websocket] = asyncio.create_task(self._heartbeat_monitor(websocket))
 
         # 启动反压监控任务
         self._backpressure_tasks[websocket] = asyncio.create_task(
@@ -605,9 +603,7 @@ class ConnectionManager:
         )
 
         # 启动消息发送任务
-        self._sender_tasks[websocket] = asyncio.create_task(
-            self._message_sender(websocket)
-        )
+        self._sender_tasks[websocket] = asyncio.create_task(self._message_sender(websocket))
 
         logger.info(
             f"[WS-{connection_id}] Client connected from {client_ip}, "
@@ -655,7 +651,7 @@ class ConnectionManager:
                         "type": MessageType.PING.value,
                         "timestamp": datetime.now().isoformat(),
                     }
-                    
+
                     if protocol == ProtocolType.MSGPACK:
                         # MessagePack二进制格式
                         ping_message = msgpack.packb(ping_data, use_bin_type=True)
@@ -664,7 +660,7 @@ class ConnectionManager:
                         # JSON文本格式（默认）
                         ping_message = json.dumps(ping_data)
                         await websocket.send_text(ping_message)
-                    
+
                     logger.debug(f"[WS-{connection_id}] Ping sent via {protocol.value}")
                 except Exception as e:
                     logger.error(f"[WS-{connection_id}] Failed to send ping: {e}")
@@ -702,12 +698,12 @@ class ConnectionManager:
                 if backpressure_state.should_throttle and not backpressure_state.is_throttled:
                     backpressure_state.is_throttled = True
                     backpressure_state.throttle_start_time = time.time()
-                    
+
                     logger.warning(
                         f"[WS-{connection_id}] Backpressure activated: "
                         f"queue_usage={backpressure_state.queue_usage:.2%}"
                     )
-                    
+
                     # 发送反压警告
                     await self._send_backpressure_warning(websocket, backpressure_state)
 
@@ -715,13 +711,13 @@ class ConnectionManager:
                 elif backpressure_state.can_resume and backpressure_state.is_throttled:
                     backpressure_state.is_throttled = False
                     throttle_duration = time.time() - backpressure_state.throttle_start_time
-                    
+
                     logger.info(
                         f"[WS-{connection_id}] Backpressure deactivated: "
                         f"queue_usage={backpressure_state.queue_usage:.2%}, "
                         f"throttle_duration={throttle_duration:.2f}s"
                     )
-                    
+
                     # 发送流量恢复通知
                     await self._send_flow_control_resume(websocket)
 
@@ -729,16 +725,15 @@ class ConnectionManager:
                 if backpressure_state.ack_enabled:
                     current_time = time.time()
                     expired_msgs = [
-                        msg_id for msg_id, timestamp in backpressure_state.unacked_messages.items()
+                        msg_id
+                        for msg_id, timestamp in backpressure_state.unacked_messages.items()
                         if current_time - timestamp > MESSAGE_ACK_TIMEOUT
                     ]
-                    
+
                     for msg_id in expired_msgs:
                         del backpressure_state.unacked_messages[msg_id]
                         backpressure_state.total_messages_dropped += 1
-                        logger.warning(
-                            f"[WS-{connection_id}] Message ack timeout: {msg_id}"
-                        )
+                        logger.warning(f"[WS-{connection_id}] Message ack timeout: {msg_id}")
 
         except asyncio.CancelledError:
             logger.debug(f"[WS-{connection_id}] Backpressure monitor cancelled")
@@ -775,13 +770,13 @@ class ConnectionManager:
 
                 # 取出消息
                 message_data = backpressure_state.message_queue.popleft()
-                
+
                 # 检查是否需要等待消息确认
                 if backpressure_state.ack_enabled:
                     # 等待未确认消息数降低
                     while len(backpressure_state.unacked_messages) >= MAX_UNACKED_MESSAGES:
                         await asyncio.sleep(0.01)
-                    
+
                     # 记录未确认消息
                     message_id = message_data.get("message_id", str(uuid.uuid4())[:8])
                     backpressure_state.unacked_messages[message_id] = time.time()
@@ -792,10 +787,10 @@ class ConnectionManager:
                         await websocket.send_bytes(message_data["content"])
                     else:
                         await websocket.send_text(message_data["content"])
-                    
+
                     backpressure_state.total_messages_sent += 1
                     self.update_message_stats(websocket, sent=True)
-                    
+
                 except Exception as e:
                     logger.error(f"[WS-{connection_id}] Failed to send message: {e}")
                     backpressure_state.total_messages_dropped += 1
@@ -822,7 +817,7 @@ class ConnectionManager:
         current_time = time.time()
         if current_time - backpressure_state.last_backpressure_warning < 5.0:
             return
-        
+
         backpressure_state.last_backpressure_warning = current_time
 
         warning_data = {
@@ -867,9 +862,7 @@ class ConnectionManager:
         except Exception as e:
             logger.error(f"Failed to send flow control resume: {e}")
 
-    async def _close_connection(
-        self, websocket: WebSocket, reason: str = "unknown"
-    ) -> None:
+    async def _close_connection(self, websocket: WebSocket, reason: str = "unknown") -> None:
         """关闭连接。
 
         Args:
@@ -901,8 +894,7 @@ class ConnectionManager:
             self._connection_info[websocket].last_heartbeat = time.time()
             self._connection_info[websocket].last_message_time = time.time()
             logger.debug(
-                f"[WS-{self._connection_info[websocket].connection_id}] "
-                f"Heartbeat updated"
+                f"[WS-{self._connection_info[websocket].connection_id}] " f"Heartbeat updated"
             )
 
     def update_message_stats(
@@ -1013,9 +1005,7 @@ class ConnectionManager:
 
         logger.info(f"Client unsubscribed from: {message_types}")
 
-    async def send_personal_message(
-        self, message: str | bytes, websocket: WebSocket
-    ) -> bool:
+    async def send_personal_message(self, message: str | bytes, websocket: WebSocket) -> bool:
         """发送个人消息（通过消息队列）。
 
         支持JSON和MessagePack两种协议格式：
@@ -1046,8 +1036,7 @@ class ConnectionManager:
             backpressure_state.message_queue.popleft()
             backpressure_state.total_messages_dropped += 1
             logger.warning(
-                f"[WS-{connection_info.connection_id}] Queue full, "
-                f"dropping oldest message"
+                f"[WS-{connection_info.connection_id}] Queue full, " f"dropping oldest message"
             )
 
         # 将消息加入队列
@@ -1173,9 +1162,7 @@ class ConnectionManager:
         for connection in disconnected:
             self.disconnect(connection)
 
-    async def handle_client_message(
-        self, websocket: WebSocket, message: str | bytes
-    ) -> bool:
+    async def handle_client_message(self, websocket: WebSocket, message: str | bytes) -> bool:
         """处理客户端消息。
 
         处理心跳响应、订阅请求和消息确认。
@@ -1198,7 +1185,7 @@ class ConnectionManager:
             else:
                 # JSON文本格式
                 data = json.loads(message)
-            
+
             msg_type = data.get("type")
 
             # 处理心跳响应
@@ -1227,23 +1214,23 @@ class ConnectionManager:
             if data.get("action") == "subscribe":
                 message_types = data.get("types", [])
                 self.subscribe(websocket, message_types)
-                
+
                 # 获取连接协议类型
                 connection_info = self._connection_info.get(websocket)
                 protocol = connection_info.protocol if connection_info else ProtocolType.JSON
-                
+
                 # 根据协议类型发送确认消息
                 confirm_data = {
                     "type": "subscription_confirmed",
                     "timestamp": datetime.now().isoformat(),
                     "subscribed_types": message_types,
                 }
-                
+
                 if protocol == ProtocolType.MSGPACK:
                     confirm_message = msgpack.packb(confirm_data, use_bin_type=True)
                 else:
                     confirm_message = json.dumps(confirm_data)
-                
+
                 await self.send_personal_message(confirm_message, websocket)
                 return True
 
@@ -1320,9 +1307,7 @@ class ConnectionManager:
         )
         await self.broadcast_by_type(message)
 
-    async def broadcast_experiment_progress(
-        self, progress_data: ExperimentProgressData
-    ) -> None:
+    async def broadcast_experiment_progress(self, progress_data: ExperimentProgressData) -> None:
         """广播实验进度消息。
 
         Args:
@@ -1350,10 +1335,7 @@ class ConnectionManager:
         Returns:
             Dict[str, int]: 各消息类型的订阅数量
         """
-        return {
-            msg_type: len(connections)
-            for msg_type, connections in self._subscriptions.items()
-        }
+        return {msg_type: len(connections) for msg_type, connections in self._subscriptions.items()}
 
     def get_connection_stats(self) -> dict[str, Any]:
         """获取连接统计信息。
@@ -1364,9 +1346,7 @@ class ConnectionManager:
         return {
             "total_connections": len(self._active_connections),
             "subscription_stats": self.get_subscription_stats(),
-            "connections": [
-                info.to_dict() for info in self._connection_info.values()
-            ],
+            "connections": [info.to_dict() for info in self._connection_info.values()],
             "push_intervals": self._push_intervals.copy(),
         }
 
@@ -1398,24 +1378,26 @@ class ConnectionManager:
 
         for connection_info in self._connection_info.values():
             backpressure_state = connection_info.backpressure_state
-            
+
             if backpressure_state.is_throttled:
                 stats["connections_with_backpressure"] += 1
-            
+
             stats["total_messages_sent"] += backpressure_state.total_messages_sent
             stats["total_messages_dropped"] += backpressure_state.total_messages_dropped
             stats["total_queued_messages"] += len(backpressure_state.message_queue)
 
-            stats["connections"].append({
-                "connection_id": connection_info.connection_id,
-                "endpoint": connection_info.endpoint,
-                "queue_usage": round(backpressure_state.queue_usage, 3),
-                "is_throttled": backpressure_state.is_throttled,
-                "queued_messages": len(backpressure_state.message_queue),
-                "total_sent": backpressure_state.total_messages_sent,
-                "total_dropped": backpressure_state.total_messages_dropped,
-                "unacked_count": len(backpressure_state.unacked_messages),
-            })
+            stats["connections"].append(
+                {
+                    "connection_id": connection_info.connection_id,
+                    "endpoint": connection_info.endpoint,
+                    "queue_usage": round(backpressure_state.queue_usage, 3),
+                    "is_throttled": backpressure_state.is_throttled,
+                    "queued_messages": len(backpressure_state.message_queue),
+                    "total_sent": backpressure_state.total_messages_sent,
+                    "total_dropped": backpressure_state.total_messages_dropped,
+                    "unacked_count": len(backpressure_state.unacked_messages),
+                }
+            )
 
         return stats
 
@@ -1434,18 +1416,16 @@ class ConnectionManager:
         """
         for connection_info in self._connection_info.values():
             backpressure_state = connection_info.backpressure_state
-            
+
             if queue_size is not None:
                 backpressure_state.queue_size = queue_size
                 # 重新创建队列（保留现有消息）
                 old_queue = list(backpressure_state.message_queue)
-                backpressure_state.message_queue = deque(
-                    old_queue[-queue_size:], maxlen=queue_size
-                )
-            
+                backpressure_state.message_queue = deque(old_queue[-queue_size:], maxlen=queue_size)
+
             if high_watermark is not None:
                 backpressure_state.high_watermark = high_watermark
-            
+
             if low_watermark is not None:
                 backpressure_state.low_watermark = low_watermark
 
@@ -1479,9 +1459,7 @@ class MessageRouter:
 
         logger.info("MessageRouter initialized")
 
-    def register_status_handler(
-        self, device_type: DeviceType, handler: Callable
-    ) -> None:
+    def register_status_handler(self, device_type: DeviceType, handler: Callable) -> None:
         """注册设备状态处理器。
 
         Args:
@@ -1491,9 +1469,7 @@ class MessageRouter:
         self._status_handlers[device_type] = handler
         logger.info(f"Registered status handler for device type: {device_type.value}")
 
-    def register_waveform_handler(
-        self, device_type: DeviceType, handler: Callable
-    ) -> None:
+    def register_waveform_handler(self, device_type: DeviceType, handler: Callable) -> None:
         """注册波形数据处理器。
 
         Args:
@@ -1801,19 +1777,15 @@ def parse_protocol_from_query(query_params: dict[str, str]) -> ProtocolType:
         ProtocolType.MSGPACK
     """
     protocol_str = query_params.get("protocol", "json").lower()
-    
+
     try:
         return ProtocolType(protocol_str)
     except ValueError:
-        logger.warning(
-            f"Invalid protocol '{protocol_str}', falling back to JSON"
-        )
+        logger.warning(f"Invalid protocol '{protocol_str}', falling back to JSON")
         return ProtocolType.JSON
 
 
-def serialize_message(
-    message: WebSocketMessage, protocol: ProtocolType
-) -> str | bytes:
+def serialize_message(message: WebSocketMessage, protocol: ProtocolType) -> str | bytes:
     """根据协议类型序列化消息。
 
     统一的序列化接口，简化消息发送逻辑。
@@ -1836,9 +1808,7 @@ def serialize_message(
         return message.to_json()
 
 
-def deserialize_message(
-    data: str | bytes, protocol: ProtocolType
-) -> dict[str, Any]:
+def deserialize_message(data: str | bytes, protocol: ProtocolType) -> dict[str, Any]:
     """根据协议类型反序列化消息。
 
     统一的反序列化接口，简化消息接收逻辑。

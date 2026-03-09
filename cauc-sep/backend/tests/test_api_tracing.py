@@ -98,9 +98,7 @@ class TestTracingAPI:
 
     def test_list_traces_by_service_name(self, test_client, sample_traces):
         """测试按服务名称查询追踪。"""
-        response = test_client.get(
-            "/api/v1/tracing/traces?service_name=test-service"
-        )
+        response = test_client.get("/api/v1/tracing/traces?service_name=test-service")
 
         assert response.status_code == 200
         data = response.json()
@@ -172,9 +170,7 @@ class TestTracingAPI:
 
     def test_cleanup_old_traces(self, test_client, sample_traces):
         """测试清理过期追踪。"""
-        response = test_client.delete(
-            "/api/v1/tracing/traces/cleanup?max_age_days=0"
-        )
+        response = test_client.delete("/api/v1/tracing/traces/cleanup?max_age_days=0")
 
         assert response.status_code == 200
         data = response.json()
@@ -192,9 +188,7 @@ class TestTracingAPI:
 
     def test_search_traces(self, test_client, sample_traces):
         """测试搜索追踪。"""
-        response = test_client.get(
-            "/api/v1/tracing/search?query=operation&limit=10"
-        )
+        response = test_client.get("/api/v1/tracing/search?query=operation&limit=10")
 
         assert response.status_code == 200
         data = response.json()

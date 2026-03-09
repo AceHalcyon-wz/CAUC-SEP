@@ -131,9 +131,7 @@ class DatabaseConnectionPool:
         # 初始化连接池
         self._initialize_pool()
 
-        logger.info(
-            f"DatabaseConnectionPool initialized: {db_type.value} - {db_path}"
-        )
+        logger.info(f"DatabaseConnectionPool initialized: {db_type.value} - {db_path}")
 
     def _initialize_pool(self) -> None:
         """初始化数据库连接池。"""
@@ -415,9 +413,7 @@ class DatabaseConnectionPool:
             return
 
         self._is_running = True
-        self._health_check_task = asyncio.create_task(
-            self._health_check_loop(interval)
-        )
+        self._health_check_task = asyncio.create_task(self._health_check_loop(interval))
         logger.info(f"Health check task started (interval: {interval}s)")
 
     async def stop_health_check_task(self) -> None:
@@ -449,9 +445,7 @@ class DatabaseConnectionPool:
                 result = self.health_check()
 
                 if not result["healthy"]:
-                    logger.warning(
-                        f"Database health check failed: {result['errors']}"
-                    )
+                    logger.warning(f"Database health check failed: {result['errors']}")
                     # 尝试重新初始化连接池
                     try:
                         self._initialize_pool()
@@ -578,10 +572,7 @@ class DatabasePoolManager:
         Returns:
             统计信息字典
         """
-        return {
-            name: pool.get_statistics()
-            for name, pool in self._pools.items()
-        }
+        return {name: pool.get_statistics() for name, pool in self._pools.items()}
 
     def health_check_all(self) -> dict[str, dict[str, Any]]:
         """检查所有数据库健康状态。
@@ -589,10 +580,7 @@ class DatabasePoolManager:
         Returns:
             健康检查结果字典
         """
-        return {
-            name: pool.health_check()
-            for name, pool in self._pools.items()
-        }
+        return {name: pool.health_check() for name, pool in self._pools.items()}
 
     def close_all(self) -> None:
         """关闭所有连接池。"""

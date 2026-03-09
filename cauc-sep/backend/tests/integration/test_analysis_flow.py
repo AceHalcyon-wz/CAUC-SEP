@@ -36,20 +36,24 @@ class TestAnalysisFlow:
     def sample_hysteresis_data(self):
         """生成模拟磁滞回线数据。"""
         # 生成完整的磁滞回线
-        h_field = np.concatenate([
-            np.linspace(-1000, 1000, 100),  # 正向扫描
-            np.linspace(1000, -1000, 100),  # 负向扫描
-        ])
+        h_field = np.concatenate(
+            [
+                np.linspace(-1000, 1000, 100),  # 正向扫描
+                np.linspace(1000, -1000, 100),  # 负向扫描
+            ]
+        )
 
         # 使用Braunbeck模型生成磁滞回线
         Bs = 1.5  # 饱和磁感应强度
         Hc = 100  # 矫顽力
-        S = 50    # 磁滞宽度参数
+        S = 50  # 磁滞宽度参数
 
-        b_data = np.concatenate([
-            braunbeck_function(h_field[:100], Bs, Hc, S),
-            braunbeck_function(h_field[100:], Bs, Hc, S),
-        ])
+        b_data = np.concatenate(
+            [
+                braunbeck_function(h_field[:100], Bs, Hc, S),
+                braunbeck_function(h_field[100:], Bs, Hc, S),
+            ]
+        )
 
         # 添加噪声
         noise = np.random.normal(0, 0.02, len(b_data))
@@ -188,7 +192,7 @@ class TestAnalysisFlow:
             model_name="braunbeck",
             params=fit_result["parameters"],
             r_squared=fit_result["r_squared"],
-            rmse=np.sqrt(np.mean(fit_result["residuals"]**2)),
+            rmse=np.sqrt(np.mean(fit_result["residuals"] ** 2)),
             mae=np.mean(np.abs(fit_result["residuals"])),
             aic=0.0,
             bic=0.0,
@@ -307,13 +311,15 @@ class TestSignalProcessingPipeline:
         )
 
         # 2. 巴特沃斯滤波
-        butter_filtered = analyzer.butterworth_filter(
-            noisy_signal, cutoff=2.0, fs=50.0, order=4
-        )
+        butter_filtered = analyzer.butterworth_filter(noisy_signal, cutoff=2.0, fs=50.0, order=4)
 
         # 验证滤波效果
-        sg_noise_reduction = np.std(noisy_signal - clean_signal) / np.std(sg_filtered - clean_signal)
-        butter_noise_reduction = np.std(noisy_signal - clean_signal) / np.std(butter_filtered - clean_signal)
+        sg_noise_reduction = np.std(noisy_signal - clean_signal) / np.std(
+            sg_filtered - clean_signal
+        )
+        butter_noise_reduction = np.std(noisy_signal - clean_signal) / np.std(
+            butter_filtered - clean_signal
+        )
 
         assert sg_noise_reduction > 1.0
         assert butter_noise_reduction > 1.0
@@ -325,10 +331,12 @@ class TestHysteresisAnalysisPipeline:
     def test_hysteresis_analysis_pipeline(self):
         """测试磁滞回线分析管道。"""
         # 生成磁滞回线数据
-        h_field = np.concatenate([
-            np.linspace(-1000, 1000, 200),
-            np.linspace(1000, -1000, 200),
-        ])
+        h_field = np.concatenate(
+            [
+                np.linspace(-1000, 1000, 200),
+                np.linspace(1000, -1000, 200),
+            ]
+        )
 
         # 添加线性背景
         background = 0.0001 * h_field + 0.01
@@ -465,6 +473,7 @@ class TestPerformance:
 
         # 注册多个模型
         for i in range(5):
+
             def poly(x, *coeffs):
                 result = np.zeros_like(x)
                 for j, c in enumerate(coeffs):
@@ -496,6 +505,7 @@ class TestConcurrentAnalysis:
     @pytest.mark.asyncio
     async def test_concurrent_analysis(self):
         """测试并发分析。"""
+
         async def analyze_dataset(dataset_id):
             h_field = np.linspace(-500, 500, 100)
             b_data = np.tanh(h_field / 100) + np.random.normal(0, 0.01, 100)

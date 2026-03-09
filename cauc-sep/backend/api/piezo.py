@@ -448,7 +448,11 @@ async def get_control_mode(controller: PiezoController = Depends(get_piezo)):
     mode = controller.get_control_mode()
     return {
         "mode": mode.value,
-        "description": "Open loop (voltage control)" if mode == PiezoControlMode.OPEN_LOOP else "Closed loop (displacement control)",
+        "description": (
+            "Open loop (voltage control)"
+            if mode == PiezoControlMode.OPEN_LOOP
+            else "Closed loop (displacement control)"
+        ),
     }
 
 

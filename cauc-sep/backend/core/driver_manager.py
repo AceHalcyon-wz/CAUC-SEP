@@ -484,9 +484,7 @@ class DriverProcessManager:
                 raise ValueError(f"驱动ID '{driver_id}' 已存在")
 
             if not issubclass(driver_class, AbstractDevice):
-                raise ValueError(
-                    f"驱动类 {driver_class.__name__} 必须继承自 AbstractDevice"
-                )
+                raise ValueError(f"驱动类 {driver_class.__name__} 必须继承自 AbstractDevice")
 
             driver_config = DriverProcessConfig(
                 driver_id=driver_id,
@@ -592,9 +590,7 @@ class DriverProcessManager:
             info.status = DriverProcessStatus.RUNNING
             info.last_heartbeat = time.time()
 
-            logger.info(
-                f"驱动 '{driver_id}' 进程已启动，PID: {process.pid}"
-            )
+            logger.info(f"驱动 '{driver_id}' 进程已启动，PID: {process.pid}")
 
             # 启动监控线程（如果尚未启动）
             self._start_monitor_thread()
@@ -809,10 +805,7 @@ class DriverProcessManager:
         Returns:
             Dict[str, Dict[str, Any]]: 所有驱动信息
         """
-        return {
-            driver_id: self.get_driver_info(driver_id)
-            for driver_id in self._drivers
-        }
+        return {driver_id: self.get_driver_info(driver_id) for driver_id in self._drivers}
 
     def _start_monitor_thread(self) -> None:
         """启动监控线程。"""
@@ -904,13 +897,9 @@ class DriverProcessManager:
                 info.last_error = "进程异常终止"
 
                 # 自动重启
-                if (
-                    config.auto_restart
-                    and info.restart_count < config.max_restart_count
-                ):
+                if config.auto_restart and info.restart_count < config.max_restart_count:
                     logger.info(
-                        f"准备自动重启驱动 [{driver_id}]，"
-                        f"延迟 {config.restart_delay} 秒"
+                        f"准备自动重启驱动 [{driver_id}]，" f"延迟 {config.restart_delay} 秒"
                     )
                     threading.Timer(
                         config.restart_delay,
@@ -932,10 +921,7 @@ class DriverProcessManager:
                 info.last_error = "心跳超时"
 
                 # 自动重启
-                if (
-                    config.auto_restart
-                    and info.restart_count < config.max_restart_count
-                ):
+                if config.auto_restart and info.restart_count < config.max_restart_count:
                     logger.info(f"准备重启心跳超时的驱动 [{driver_id}]")
                     self.restart_driver(driver_id, delay=config.restart_delay)
 

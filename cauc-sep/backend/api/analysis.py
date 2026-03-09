@@ -86,9 +86,9 @@ async def smooth_signal(request: SmoothRequest):
                 status_code=400,
                 detail=f"数据点数量超过最大限制 {MAX_DATA_POINTS}，当前 {len(request.y_data)} 个",
             )
-        
+
         y_data = np.array(request.y_data)
-        
+
         # 验证数据点数量最小值
         MIN_DATA_POINTS = 3
         if len(y_data) < MIN_DATA_POINTS:
@@ -148,17 +148,17 @@ async def fit_curve(request: FitRequest):
                 status_code=400,
                 detail=f"y_data数据点数量超过最大限制 {MAX_DATA_POINTS}，当前 {len(request.y_data)} 个",
             )
-        
+
         x_data = np.array(request.x_data)
         y_data = np.array(request.y_data)
-        
+
         # 验证x_data和y_data长度一致性
         if len(x_data) != len(y_data):
             raise HTTPException(
                 status_code=400,
                 detail=f"x_data和y_data长度不一致: x_data={len(x_data)}, y_data={len(y_data)}",
             )
-        
+
         # 验证数据点数量最小值
         MIN_DATA_POINTS = 2
         if len(x_data) < MIN_DATA_POINTS:
@@ -231,17 +231,17 @@ async def analyze_hysteresis(request: HysteresisRequest):
                 status_code=400,
                 detail=f"y_moment数据点数量超过最大限制 {MAX_DATA_POINTS}，当前 {len(request.y_moment)} 个",
             )
-        
+
         x_field = np.array(request.x_field)
         y_moment = np.array(request.y_moment)
-        
+
         # 验证x_field和y_moment长度一致性
         if len(x_field) != len(y_moment):
             raise HTTPException(
                 status_code=400,
                 detail=f"x_field和y_moment长度不一致: x_field={len(x_field)}, y_moment={len(y_moment)}",
             )
-        
+
         # 验证数据点数量最小值
         MIN_DATA_POINTS = 10
         if len(x_field) < MIN_DATA_POINTS:
@@ -332,9 +332,7 @@ def _langevin_function(H: np.ndarray, Ms: float, alpha: float) -> np.ndarray:
     # 小参数区域：使用泰勒展开
     small_mask = np.abs(ax) < 0.1
     result[small_mask] = (
-        ax[small_mask] / 3.0
-        - (ax[small_mask] ** 3) / 45.0
-        + 2 * (ax[small_mask] ** 5) / 945.0
+        ax[small_mask] / 3.0 - (ax[small_mask] ** 3) / 45.0 + 2 * (ax[small_mask] ** 5) / 945.0
     )
 
     # 大参数区域：使用渐近展开
@@ -533,9 +531,13 @@ def _generate_fit_recommendations(
 
     # 拟合质量建议
     if best_result.r_squared >= 0.95:
-        recommendations.append(f"最佳模型 {best_result.model_name} 拟合效果优秀 (R²={best_result.r_squared:.4f})")
+        recommendations.append(
+            f"最佳模型 {best_result.model_name} 拟合效果优秀 (R²={best_result.r_squared:.4f})"
+        )
     elif best_result.r_squared >= 0.90:
-        recommendations.append(f"最佳模型 {best_result.model_name} 拟合效果良好 (R²={best_result.r_squared:.4f})")
+        recommendations.append(
+            f"最佳模型 {best_result.model_name} 拟合效果良好 (R²={best_result.r_squared:.4f})"
+        )
     elif best_result.r_squared >= 0.80:
         recommendations.append(
             f"最佳模型 {best_result.model_name} 拟合效果一般 (R²={best_result.r_squared:.4f})，"
@@ -565,10 +567,7 @@ def _generate_fit_recommendations(
 
     # RMSE建议
     if best_result.rmse > 0.1 * np.max(np.abs(best_result.y_predicted)):
-        recommendations.append(
-            f"拟合误差较大 (RMSE={best_result.rmse:.4f})，"
-            "可能存在异常数据点"
-        )
+        recommendations.append(f"拟合误差较大 (RMSE={best_result.rmse:.4f})，" "可能存在异常数据点")
 
     if not recommendations:
         recommendations.append("多模型拟合完成，结果质量良好")
@@ -1042,7 +1041,7 @@ async def query_history_data(
 
         # 查询数据
         all_data = []
-        
+
         try:
             # 如果指定了实验ID，查询这些实验的数据
             if exp_id_list:
@@ -1059,10 +1058,14 @@ async def query_history_data(
                     experiments = storage.list_experiments(limit=10)
                     for exp in experiments:
                         try:
-                            records = storage.get_experiment_data(exp["id"], limit=limit // len(experiments) if experiments else limit)
+                            records = storage.get_experiment_data(
+                                exp["id"], limit=limit // len(experiments) if experiments else limit
+                            )
                             all_data.extend(records)
                         except Exception as e:
-                            logger.warning(f"Failed to get experiment {exp.get('id', 'unknown')} data: {e}")
+                            logger.warning(
+                                f"Failed to get experiment {exp.get('id', 'unknown')} data: {e}"
+                            )
                             continue
                 except Exception as e:
                     logger.warning(f"Failed to list experiments: {e}")
@@ -1085,14 +1088,26 @@ async def query_history_data(
             # 确定主要数值和单位
             value = 0.0
             unit = ""
-            
-            if data_type_list and "field" in data_type_list and record.get("field_value") is not None:
+
+            if (
+                data_type_list
+                and "field" in data_type_list
+                and record.get("field_value") is not None
+            ):
                 value = record["field_value"]
                 unit = "T"
-            elif data_type_list and "current" in data_type_list and record.get("current_value") is not None:
+            elif (
+                data_type_list
+                and "current" in data_type_list
+                and record.get("current_value") is not None
+            ):
                 value = record["current_value"]
                 unit = "A"
-            elif data_type_list and "temperature" in data_type_list and record.get("temperature") is not None:
+            elif (
+                data_type_list
+                and "temperature" in data_type_list
+                and record.get("temperature") is not None
+            ):
                 value = record["temperature"]
                 unit = "K"
             elif record.get("field_value") is not None:
@@ -1108,17 +1123,19 @@ async def query_history_data(
                 value = record["position_mm"]
                 unit = "mm"
 
-            data_points.append({
-                "timestamp": record.get("timestamp", ""),
-                "experiment_id": record.get("experiment_id", 0),
-                "device": record.get("device"),
-                "position_mm": record.get("position_mm"),
-                "field_value": record.get("field_value"),
-                "current_value": record.get("current_value"),
-                "temperature": record.get("temperature"),
-                "value": value,
-                "unit": unit,
-            })
+            data_points.append(
+                {
+                    "timestamp": record.get("timestamp", ""),
+                    "experiment_id": record.get("experiment_id", 0),
+                    "device": record.get("device"),
+                    "position_mm": record.get("position_mm"),
+                    "field_value": record.get("field_value"),
+                    "current_value": record.get("current_value"),
+                    "temperature": record.get("temperature"),
+                    "value": value,
+                    "unit": unit,
+                }
+            )
 
         # 计算统计信息
         values = [d["value"] for d in data_points if d["value"] != 0]
@@ -1177,7 +1194,7 @@ async def compare_datasets(request: CompareRequest):
 
         # 收集各数据集的数据
         dataset_results = []
-        
+
         for dataset in request.datasets:
             # 查询实验数据
             records = storage.get_experiment_data(dataset.experiment_id, limit=10000)
@@ -1196,10 +1213,12 @@ async def compare_datasets(request: CompareRequest):
                     value = record["position_mm"]
 
                 if value is not None:
-                    data_points.append({
-                        "timestamp": record.get("timestamp", ""),
-                        "value": value,
-                    })
+                    data_points.append(
+                        {
+                            "timestamp": record.get("timestamp", ""),
+                            "value": value,
+                        }
+                    )
 
             # 归一化处理
             if request.normalize and data_points:
@@ -1222,12 +1241,14 @@ async def compare_datasets(request: CompareRequest):
                     "std": float(np.std(values)),
                 }
 
-            dataset_results.append({
-                "experiment_id": dataset.experiment_id,
-                "name": dataset.name,
-                "data": data_points,
-                "statistics": statistics,
-            })
+            dataset_results.append(
+                {
+                    "experiment_id": dataset.experiment_id,
+                    "name": dataset.name,
+                    "data": data_points,
+                    "statistics": statistics,
+                }
+            )
 
         # 计算差异指标
         difference_metrics = {}
@@ -1243,13 +1264,15 @@ async def compare_datasets(request: CompareRequest):
 
                 # 计算差异
                 diff = [v1 - v2 for v1, v2 in zip(values1, values2)]
-                
+
                 difference_metrics = {
                     "mean_difference": float(np.mean(diff)),
                     "max_difference": float(np.max(diff)),
                     "min_difference": float(np.min(diff)),
                     "std_difference": float(np.std(diff)),
-                    "correlation": float(np.corrcoef(values1, values2)[0, 1]) if min_len > 1 else 0.0,
+                    "correlation": (
+                        float(np.corrcoef(values1, values2)[0, 1]) if min_len > 1 else 0.0
+                    ),
                 }
 
         return CompareResponse(

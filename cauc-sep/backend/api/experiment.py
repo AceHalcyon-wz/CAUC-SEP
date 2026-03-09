@@ -81,16 +81,16 @@ async def start_experiment(
     span = get_current_span()
     if span:
         span.set_attribute("experiment.name", request.name)
-    
+
     exp_id = db.start_experiment(
         name=request.name,
         description=request.description,
     )
-    
+
     # 记录实验ID到追踪
     if span:
         span.set_attribute("experiment.id", exp_id)
-    
+
     return {
         "success": True,
         "message": f"Experiment '{request.name}' started",
@@ -119,10 +119,9 @@ async def stop_experiment(
     # SubTask 13.1: 输入验证 - 验证exp_id范围
     if not validate_experiment_id(exp_id):
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
+            status_code=400, detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
         )
-    
+
     db.stop_experiment()
     return {
         "success": True,
@@ -175,10 +174,9 @@ async def get_experiment(
     # SubTask 13.1: 输入验证 - 验证exp_id范围
     if not validate_experiment_id(exp_id):
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
+            status_code=400, detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
         )
-    
+
     experiment = db.get_experiment(exp_id)
     if not experiment:
         raise HTTPException(status_code=404, detail="Experiment not found")
@@ -206,26 +204,22 @@ async def export_experiment(
     # SubTask 13.1: 输入验证 - 验证exp_id范围
     if not validate_experiment_id(exp_id):
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
+            status_code=400, detail=f"Invalid experiment ID: {exp_id}. Must be a positive integer."
         )
-    
+
     export_dir = "exports"
     os.makedirs(export_dir, exist_ok=True)
 
     # 使用安全的文件名格式（避免路径遍历攻击）
     safe_filename = f"experiment_{exp_id}.csv"
     filepath = os.path.join(export_dir, safe_filename)
-    
+
     # 确保文件路径在导出目录内（防止路径遍历）
     real_export_dir = os.path.realpath(export_dir)
     real_filepath = os.path.realpath(filepath)
     if not real_filepath.startswith(real_export_dir):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid file path"
-        )
-    
+        raise HTTPException(status_code=400, detail="Invalid file path")
+
     result = db.export_to_csv(exp_id, filepath)
 
     if result:

@@ -35,11 +35,11 @@ logger = logging.getLogger(__name__)
 
 # 技术规范常量
 MAX_CURRENT = 10.0  # 最大电流（A）
-MIN_CURRENT = 0.0   # 最小电流（A）
+MIN_CURRENT = 0.0  # 最小电流（A）
 CURRENT_PRECISION = 0.001  # 电流精度（A），±0.1%
-MAX_FIELD = 2.0     # 最大磁场（T）
+MAX_FIELD = 2.0  # 最大磁场（T）
 MIN_SCAN_RATE = 0.01  # 最小扫描速率（A/s）
-MAX_SCAN_RATE = 1.0   # 最大扫描速率（A/s）
+MAX_SCAN_RATE = 1.0  # 最大扫描速率（A/s）
 OVERCURRENT_THRESHOLD = 10.5  # 过流保护阈值（A）
 MAX_TEMPERATURE = 80.0  # 过温保护阈值（°C）
 
@@ -52,6 +52,7 @@ class ScanMode(Enum):
         REVERSE: 反向扫描（从起始电流到目标电流）
         TRIANGULAR: 三角波扫描（往返扫描）
     """
+
     FORWARD = "forward"
     REVERSE = "reverse"
     TRIANGULAR = "triangular"
@@ -68,6 +69,7 @@ class ElectromagnetStatus(Enum):
         OVERTEMPERATURE: 过温保护触发
         CALIBRATING: 校准中
     """
+
     IDLE = "idle"
     CONSTANT_CURRENT = "constant_current"
     SCANNING = "scanning"
@@ -84,6 +86,7 @@ class CalibrationPoint:
         current: 电流值（A）
         field: 磁场值（T）
     """
+
     current: float
     field: float
 
@@ -101,6 +104,7 @@ class ScanParameters:
         cycles: 扫描周期数（仅三角波模式有效）
         step_interval_ms: 步进间隔（毫秒），可选参数
     """
+
     mode: ScanMode
     start_current: float
     end_current: float
@@ -143,10 +147,7 @@ class ElectromagnetDriver(AbstractDevice):
         self.simulation = config.get("simulation", True)
 
         # 电流限制
-        self.max_current_limit = min(
-            config.get("max_current", MAX_CURRENT),
-            MAX_CURRENT
-        )
+        self.max_current_limit = min(config.get("max_current", MAX_CURRENT), MAX_CURRENT)
 
         # 状态变量
         self._current_value = 0.0
@@ -172,8 +173,7 @@ class ElectromagnetDriver(AbstractDevice):
             if isinstance(point, dict):
                 self._calibration_points.append(
                     CalibrationPoint(
-                        current=point.get("current", 0.0),
-                        field=point.get("field", 0.0)
+                        current=point.get("current", 0.0), field=point.get("field", 0.0)
                     )
                 )
 
@@ -212,9 +212,7 @@ class ElectromagnetDriver(AbstractDevice):
         """获取扫描进度（0-1）。"""
         return self._scan_progress
 
-    def set_status_callback(
-        self, callback: Callable[[dict[str, Any]], None] | None
-    ) -> None:
+    def set_status_callback(self, callback: Callable[[dict[str, Any]], None] | None) -> None:
         """
         设置状态回调函数。
 
@@ -223,9 +221,7 @@ class ElectromagnetDriver(AbstractDevice):
         """
         self._status_callback = callback
 
-    def set_progress_callback(
-        self, callback: Callable[[float], None] | None
-    ) -> None:
+    def set_progress_callback(self, callback: Callable[[float], None] | None) -> None:
         """
         设置进度回调函数。
 
@@ -249,16 +245,12 @@ class ElectromagnetDriver(AbstractDevice):
                 self._electromagnet_status = ElectromagnetStatus.IDLE
                 # 启动保护监控
                 self._start_protection_monitor()
-                logger.info(
-                    f"ElectromagnetDriver {self.device_id} connected (simulation mode)"
-                )
+                logger.info(f"ElectromagnetDriver {self.device_id} connected (simulation mode)")
                 return True
 
             # 真实硬件连接逻辑（待实现）
             # TODO: 实现真实硬件通信协议
-            logger.warning(
-                "Real hardware mode not implemented, falling back to simulation"
-            )
+            logger.warning("Real hardware mode not implemented, falling back to simulation")
             self.simulation = True
             self.status = DeviceStatus.READY
             # 启动保护监控
@@ -464,20 +456,14 @@ class ElectromagnetDriver(AbstractDevice):
             if cycles < 1:
                 raise ValueError("Cycles must be at least 1 for triangular mode")
             if cycles > 100:
-                logger.warning(
-                    f"Large cycle count ({cycles}) may cause long scan duration"
-                )
+                logger.warning(f"Large cycle count ({cycles}) may cause long scan duration")
 
         # 参数校验：步进间隔
         if step_interval_ms is not None:
             if step_interval_ms < 1.0:
-                raise ValueError(
-                    f"Step interval {step_interval_ms}ms is below minimum 1ms"
-                )
+                raise ValueError(f"Step interval {step_interval_ms}ms is below minimum 1ms")
             if step_interval_ms > 1000.0:
-                raise ValueError(
-                    f"Step interval {step_interval_ms}ms exceeds maximum 1000ms"
-                )
+                raise ValueError(f"Step interval {step_interval_ms}ms exceeds maximum 1000ms")
 
         # 参数校验：扫描时间预估（防止过长时间）
         estimated_duration = self._estimate_scan_duration(
@@ -509,8 +495,7 @@ class ElectromagnetDriver(AbstractDevice):
             ElectromagnetStatus.OVERTEMPERATURE,
         ):
             logger.error(
-                f"Cannot start scan: protection triggered "
-                f"({self._electromagnet_status.value})"
+                f"Cannot start scan: protection triggered " f"({self._electromagnet_status.value})"
             )
             return False
 
@@ -535,9 +520,7 @@ class ElectromagnetDriver(AbstractDevice):
             )
 
             # 启动扫描任务
-            self._scan_task = asyncio.create_task(
-                self._execute_scan(params)
-            )
+            self._scan_task = asyncio.create_task(self._execute_scan(params))
 
             logger.info(
                 f"Scan started: mode={mode.value}, "
@@ -562,7 +545,7 @@ class ElectromagnetDriver(AbstractDevice):
         start_current: float,
         end_current: float,
         scan_rate: float,
-        cycles: int
+        cycles: int,
     ) -> float:
         """
         估算扫描持续时间。
@@ -656,9 +639,7 @@ class ElectromagnetDriver(AbstractDevice):
         end = max(params.start_current, params.end_current)
 
         if start != params.start_current:
-            logger.warning(
-                f"Forward scan auto-adjusted: start={params.start_current}A -> {start}A"
-            )
+            logger.warning(f"Forward scan auto-adjusted: start={params.start_current}A -> {start}A")
 
         await self._ramp_current(
             start=start,
@@ -682,9 +663,7 @@ class ElectromagnetDriver(AbstractDevice):
         end = min(params.start_current, params.end_current)
 
         if start != params.start_current:
-            logger.warning(
-                f"Reverse scan auto-adjusted: start={params.start_current}A -> {start}A"
-            )
+            logger.warning(f"Reverse scan auto-adjusted: start={params.start_current}A -> {start}A")
 
         await self._ramp_current(
             start=start,
@@ -798,7 +777,9 @@ class ElectromagnetDriver(AbstractDevice):
                 cycle_idx, total_cycles, start_prog, end_prog = cycle_progress
                 cycle_base = cycle_idx / total_cycles
                 cycle_range = (end_prog - start_prog) / total_cycles
-                self._scan_progress = cycle_base + start_prog / total_cycles + progress * cycle_range
+                self._scan_progress = (
+                    cycle_base + start_prog / total_cycles + progress * cycle_range
+                )
             else:
                 self._scan_progress = progress
 
@@ -810,10 +791,7 @@ class ElectromagnetDriver(AbstractDevice):
 
     # ==================== 磁场-电流校准 ====================
 
-    async def calibrate(
-        self,
-        calibration_points: list[dict[str, float]]
-    ) -> bool:
+    async def calibrate(self, calibration_points: list[dict[str, float]]) -> bool:
         """
         执行磁场-电流校准。
 
@@ -834,17 +812,11 @@ class ElectromagnetDriver(AbstractDevice):
 
         for point in calibration_points:
             if "current" not in point or "field" not in point:
-                raise ValueError(
-                    "Each calibration point must contain 'current' and 'field'"
-                )
+                raise ValueError("Each calibration point must contain 'current' and 'field'")
             if not self._validate_current(point["current"]):
-                raise ValueError(
-                    f"Current {point['current']}A exceeds valid range"
-                )
+                raise ValueError(f"Current {point['current']}A exceeds valid range")
             if point["field"] < 0 or point["field"] > MAX_FIELD:
-                raise ValueError(
-                    f"Field {point['field']}T exceeds valid range [0, {MAX_FIELD}]T"
-                )
+                raise ValueError(f"Field {point['field']}T exceeds valid range [0, {MAX_FIELD}]T")
 
         # 检查设备状态
         if self.status != DeviceStatus.READY:
@@ -857,8 +829,7 @@ class ElectromagnetDriver(AbstractDevice):
 
             # 保存校准点
             self._calibration_points = [
-                CalibrationPoint(current=p["current"], field=p["field"])
-                for p in calibration_points
+                CalibrationPoint(current=p["current"], field=p["field"]) for p in calibration_points
             ]
 
             # 计算校准系数（线性拟合）
@@ -971,9 +942,8 @@ class ElectromagnetDriver(AbstractDevice):
                 ratio = (current - sorted_points[i].current) / (
                     sorted_points[i + 1].current - sorted_points[i].current
                 )
-                return (
-                    sorted_points[i].field +
-                    ratio * (sorted_points[i + 1].field - sorted_points[i].field)
+                return sorted_points[i].field + ratio * (
+                    sorted_points[i + 1].field - sorted_points[i].field
                 )
 
         return current * self._calibration_coefficient
@@ -991,8 +961,7 @@ class ElectromagnetDriver(AbstractDevice):
         """
         return {
             "calibration_points": [
-                {"current": p.current, "field": p.field}
-                for p in self._calibration_points
+                {"current": p.current, "field": p.field} for p in self._calibration_points
             ],
             "calibration_coefficient": round(self._calibration_coefficient, 4),
             "calibration_intercept": round(self._calibration_intercept, 4),
@@ -1027,9 +996,7 @@ class ElectromagnetDriver(AbstractDevice):
     def _start_protection_monitor(self) -> None:
         """启动保护监控任务。"""
         if self._protection_monitor_task is None or self._protection_monitor_task.done():
-            self._protection_monitor_task = asyncio.create_task(
-                self._protection_monitor_loop()
-            )
+            self._protection_monitor_task = asyncio.create_task(self._protection_monitor_loop())
             logger.info("Protection monitor started")
 
     def _stop_protection_monitor(self) -> None:
@@ -1104,7 +1071,9 @@ class ElectromagnetDriver(AbstractDevice):
         # 更新状态
         self._electromagnet_status = ElectromagnetStatus.OVERTEMPERATURE
         self.status = DeviceStatus.ERROR
-        self._last_error = f"Overtemperature protection triggered: {self._current_temperature:.1f}°C"
+        self._last_error = (
+            f"Overtemperature protection triggered: {self._current_temperature:.1f}°C"
+        )
 
         self._notify_status_change()
 
@@ -1122,8 +1091,7 @@ class ElectromagnetDriver(AbstractDevice):
         # 检查温度是否已恢复正常
         if self._current_temperature > MAX_TEMPERATURE * 0.9:
             logger.error(
-                f"Cannot reset: temperature still high "
-                f"({self._current_temperature:.1f}°C)"
+                f"Cannot reset: temperature still high " f"({self._current_temperature:.1f}°C)"
             )
             return False
 
@@ -1146,8 +1114,7 @@ class ElectromagnetDriver(AbstractDevice):
             current: 触发过流的电流值（A）
         """
         logger.error(
-            f"OVERCURRENT PROTECTION TRIGGERED: {current}A > "
-            f"{OVERCURRENT_THRESHOLD}A threshold"
+            f"OVERCURRENT PROTECTION TRIGGERED: {current}A > " f"{OVERCURRENT_THRESHOLD}A threshold"
         )
 
         # 停止所有操作
@@ -1216,7 +1183,10 @@ class ElectromagnetDriver(AbstractDevice):
         if current > self.max_current_limit:
             return False, f"Current {current}A exceeds maximum {self.max_current_limit}A"
         if current > OVERCURRENT_THRESHOLD:
-            return False, f"Current {current}A exceeds overcurrent threshold {OVERCURRENT_THRESHOLD}A"
+            return (
+                False,
+                f"Current {current}A exceeds overcurrent threshold {OVERCURRENT_THRESHOLD}A",
+            )
         return True, ""
 
     def validate_scan_params(
@@ -1225,7 +1195,7 @@ class ElectromagnetDriver(AbstractDevice):
         start_current: float,
         end_current: float,
         scan_rate: float,
-        cycles: int = 1
+        cycles: int = 1,
     ) -> tuple[bool, list[str]]:
         """
         验证扫描参数（不执行扫描）。
@@ -1255,13 +1225,9 @@ class ElectromagnetDriver(AbstractDevice):
 
         # 验证扫描速率
         if scan_rate < MIN_SCAN_RATE:
-            errors.append(
-                f"Scan rate {scan_rate}A/s is below minimum {MIN_SCAN_RATE}A/s"
-            )
+            errors.append(f"Scan rate {scan_rate}A/s is below minimum {MIN_SCAN_RATE}A/s")
         if scan_rate > MAX_SCAN_RATE:
-            errors.append(
-                f"Scan rate {scan_rate}A/s exceeds maximum {MAX_SCAN_RATE}A/s"
-            )
+            errors.append(f"Scan rate {scan_rate}A/s exceeds maximum {MAX_SCAN_RATE}A/s")
 
         # 验证周期数
         if mode == ScanMode.TRIANGULAR:
@@ -1278,9 +1244,7 @@ class ElectromagnetDriver(AbstractDevice):
                 mode, start_current, end_current, scan_rate, cycles
             )
             if duration > 3600 * 24:
-                errors.append(
-                    f"Estimated duration ({duration/3600:.1f}h) exceeds 24h limit"
-                )
+                errors.append(f"Estimated duration ({duration/3600:.1f}h) exceeds 24h limit")
 
         return len(errors) == 0, errors
 
@@ -1326,9 +1290,7 @@ class ElectromagnetDriver(AbstractDevice):
             ValueError: 磁场值超出范围
         """
         if field < 0 or field > MAX_FIELD:
-            raise ValueError(
-                f"Field {field}T exceeds valid range [0, {MAX_FIELD}]T"
-            )
+            raise ValueError(f"Field {field}T exceeds valid range [0, {MAX_FIELD}]T")
 
         # 反向计算电流（考虑截距）
         if abs(self._calibration_coefficient) > 1e-10:
@@ -1340,18 +1302,14 @@ class ElectromagnetDriver(AbstractDevice):
         # 验证计算出的电流值
         if current < MIN_CURRENT:
             logger.warning(
-                f"Calculated current {current:.4f}A is negative, "
-                f"clamping to {MIN_CURRENT}A"
+                f"Calculated current {current:.4f}A is negative, " f"clamping to {MIN_CURRENT}A"
             )
             current = MIN_CURRENT
 
         return await self.set_current(current)
 
     async def quick_scan(
-        self,
-        start_field: float,
-        end_field: float,
-        scan_rate: float = 0.1
+        self, start_field: float, end_field: float, scan_rate: float = 0.1
     ) -> bool:
         """
         快速启动磁场扫描（自动转换电流值）。
@@ -1371,9 +1329,7 @@ class ElectromagnetDriver(AbstractDevice):
             start_current = (
                 start_field - self._calibration_intercept
             ) / self._calibration_coefficient
-            end_current = (
-                end_field - self._calibration_intercept
-            ) / self._calibration_coefficient
+            end_current = (end_field - self._calibration_intercept) / self._calibration_coefficient
         else:
             start_current = start_field / 0.2
             end_current = end_field / 0.2
@@ -1389,10 +1345,7 @@ class ElectromagnetDriver(AbstractDevice):
             mode = ScanMode.REVERSE
 
         return await self.start_scan(
-            mode=mode,
-            start_current=start_current,
-            end_current=end_current,
-            scan_rate=scan_rate
+            mode=mode, start_current=start_current, end_current=end_current, scan_rate=scan_rate
         )
 
     async def emergency_stop(self) -> bool:

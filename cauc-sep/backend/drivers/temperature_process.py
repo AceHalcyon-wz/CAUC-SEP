@@ -56,10 +56,10 @@ class TemperatureDriverProcess(DriverProcessBase):
     Example:
         >>> from backend.drivers import create_driver_process
         >>> import multiprocessing as mp
-        >>> 
+        >>>
         >>> command_queue = mp.Queue()
         >>> response_queue = mp.Queue()
-        >>> 
+        >>>
         >>> process = create_driver_process(
         ...     TemperatureDriverProcess,
         ...     "temp_controller_1",
@@ -68,7 +68,7 @@ class TemperatureDriverProcess(DriverProcessBase):
         ...     response_queue,
         ... )
         >>> process.start()
-        >>> 
+        >>>
         >>> # 发送命令
         >>> command_queue.put(IPCMessage(
         ...     msg_type=IPCMessageType.COMMAND,
@@ -123,9 +123,7 @@ class TemperatureDriverProcess(DriverProcessBase):
             bool: 初始化是否成功
         """
         try:
-            self.logger.info(
-                f"初始化温控驱动: simulation={self.simulation}"
-            )
+            self.logger.info(f"初始化温控驱动: simulation={self.simulation}")
 
             # 创建驱动实例
             self.driver = TemperatureController(
@@ -181,16 +179,15 @@ class TemperatureDriverProcess(DriverProcessBase):
 
         # 检查驱动状态（部分命令需要READY状态）
         control_commands = [
-            "set_temperature", "set_output", "start_pid_control", 
-            "start_program", "load_program"
+            "set_temperature",
+            "set_output",
+            "start_pid_control",
+            "start_program",
+            "load_program",
         ]
 
-        if command in control_commands and self.driver.status not in (
-            DeviceStatus.READY,
-        ):
-            raise RuntimeError(
-                f"驱动状态不允许执行命令: {self.driver.status.value}"
-            )
+        if command in control_commands and self.driver.status not in (DeviceStatus.READY,):
+            raise RuntimeError(f"驱动状态不允许执行命令: {self.driver.status.value}")
 
         # 检查保护状态
         if command in control_commands and self.driver._protection_triggered:
@@ -230,7 +227,7 @@ class TemperatureDriverProcess(DriverProcessBase):
                     timeout=seg_data.get("timeout", 0.0),
                 )
                 segments.append(segment)
-            
+
             return await self.driver.load_program(segments=segments)
 
         elif command == "start_program":
@@ -299,9 +296,7 @@ class TemperatureDriverProcess(DriverProcessBase):
             return True
 
         elif command == "export_temperature_history":
-            data = await self.driver.export_temperature_history(
-                format=params.get("format", "csv")
-            )
+            data = await self.driver.export_temperature_history(format=params.get("format", "csv"))
             return {"data": data}
 
         elif command == "emergency_stop":
@@ -349,7 +344,9 @@ class TemperatureDriverProcess(DriverProcessBase):
         elif command == "is_protection_triggered":
             return {
                 "protection_triggered": self.driver._protection_triggered,
-                "protection_type": self.driver._protection_type.value if self.driver._protection_type else None,
+                "protection_type": (
+                    self.driver._protection_type.value if self.driver._protection_type else None
+                ),
             }
 
         else:

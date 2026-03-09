@@ -377,7 +377,9 @@ def record_operation(
         history = OperationHistory(
             user_id=user_id,
             operation_type=operation_type,
-            operation_detail=json.dumps(operation_detail, ensure_ascii=False) if operation_detail else None,
+            operation_detail=(
+                json.dumps(operation_detail, ensure_ascii=False) if operation_detail else None
+            ),
             device_id=device_id,
         )
         db.add(history)
@@ -657,9 +659,15 @@ async def update_preferences(
     if request.language is not None:
         preferences["language"] = request.language
     if request.notifications is not None:
-        preferences["notifications"] = {**preferences.get("notifications", {}), **request.notifications}
+        preferences["notifications"] = {
+            **preferences.get("notifications", {}),
+            **request.notifications,
+        }
     if request.display_options is not None:
-        preferences["display_options"] = {**preferences.get("display_options", {}), **request.display_options}
+        preferences["display_options"] = {
+            **preferences.get("display_options", {}),
+            **request.display_options,
+        }
 
     # 保存偏好设置
     current_user.set_preferences(preferences)
@@ -671,7 +679,10 @@ async def update_preferences(
         db,
         current_user.id,
         "config_change",
-        {"action": "update_preferences", "fields": list(request.model_dump(exclude_none=True).keys())},
+        {
+            "action": "update_preferences",
+            "fields": list(request.model_dump(exclude_none=True).keys()),
+        },
     )
 
     logger.info(f"User preferences updated: {current_user.username}")

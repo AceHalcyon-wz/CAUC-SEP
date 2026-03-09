@@ -514,14 +514,8 @@ class TestStreamProcessorHysteresisDetection:
         processor = StreamProcessor()
 
         # 生成模拟磁滞回线数据
-        h_field = np.concatenate([
-            np.linspace(-100, 100, 50),
-            np.linspace(100, -100, 50)
-        ])
-        moment = np.concatenate([
-            np.tanh(h_field[:50] / 30),
-            np.tanh(h_field[50:] / 30)
-        ])
+        h_field = np.concatenate([np.linspace(-100, 100, 50), np.linspace(100, -100, 50)])
+        moment = np.concatenate([np.tanh(h_field[:50] / 30), np.tanh(h_field[50:] / 30)])
 
         result = processor.detect_hysteresis_loop(h_field, moment)
 
@@ -747,15 +741,19 @@ class TestDataPipelineChannels:
         """测试多通道数据。"""
         pipeline = DataPipeline()
 
-        await pipeline.consume_hardware_stream({
-            "channel": "channel_a",
-            "values": np.array([1.0, 2.0, 3.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "channel_a",
+                "values": np.array([1.0, 2.0, 3.0]),
+            }
+        )
 
-        await pipeline.consume_hardware_stream({
-            "channel": "channel_b",
-            "values": np.array([4.0, 5.0, 6.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "channel_b",
+                "values": np.array([4.0, 5.0, 6.0]),
+            }
+        )
 
         channels = pipeline.get_all_channels()
 
@@ -767,10 +765,12 @@ class TestDataPipelineChannels:
         """测试获取通道数据。"""
         pipeline = DataPipeline()
 
-        await pipeline.consume_hardware_stream({
-            "channel": "test_channel",
-            "values": np.array([1.0, 2.0, 3.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "test_channel",
+                "values": np.array([1.0, 2.0, 3.0]),
+            }
+        )
 
         data = pipeline.get_channel_data("test_channel")
 
@@ -789,10 +789,12 @@ class TestDataPipelineChannels:
         """测试清空通道。"""
         pipeline = DataPipeline()
 
-        await pipeline.consume_hardware_stream({
-            "channel": "test",
-            "values": np.array([1.0, 2.0, 3.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "test",
+                "values": np.array([1.0, 2.0, 3.0]),
+            }
+        )
 
         result = pipeline.clear_channel("test")
 
@@ -813,15 +815,19 @@ class TestDataPipelineChannels:
         """测试清空所有通道。"""
         pipeline = DataPipeline()
 
-        await pipeline.consume_hardware_stream({
-            "channel": "channel_a",
-            "values": np.array([1.0, 2.0, 3.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "channel_a",
+                "values": np.array([1.0, 2.0, 3.0]),
+            }
+        )
 
-        await pipeline.consume_hardware_stream({
-            "channel": "channel_b",
-            "values": np.array([4.0, 5.0, 6.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "channel_b",
+                "values": np.array([4.0, 5.0, 6.0]),
+            }
+        )
 
         pipeline.clear_all_channels()
 
@@ -865,10 +871,12 @@ class TestDataPipelineStatistics:
         """测试获取统计信息。"""
         pipeline = DataPipeline()
 
-        await pipeline.consume_hardware_stream({
-            "channel": "test",
-            "values": np.array([1.0, 2.0, 3.0]),
-        })
+        await pipeline.consume_hardware_stream(
+            {
+                "channel": "test",
+                "values": np.array([1.0, 2.0, 3.0]),
+            }
+        )
 
         stats = pipeline.get_statistics()
 

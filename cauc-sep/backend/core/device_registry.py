@@ -102,8 +102,7 @@ class DeviceRegistry:
         """
         if device_id not in cls._devices:
             raise KeyError(
-                f"设备ID '{device_id}' 不存在。"
-                f"当前已注册设备: {list(cls._devices.keys())}"
+                f"设备ID '{device_id}' 不存在。" f"当前已注册设备: {list(cls._devices.keys())}"
             )
 
         del cls._devices[device_id]
@@ -129,8 +128,7 @@ class DeviceRegistry:
         """
         if device_id not in cls._devices:
             raise KeyError(
-                f"设备ID '{device_id}' 不存在。"
-                f"当前已注册设备: {list(cls._devices.keys())}"
+                f"设备ID '{device_id}' 不存在。" f"当前已注册设备: {list(cls._devices.keys())}"
             )
 
         return cls._devices[device_id]

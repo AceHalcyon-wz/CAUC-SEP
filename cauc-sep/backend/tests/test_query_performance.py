@@ -21,6 +21,7 @@ from sqlalchemy.orm import sessionmaker
 
 # 添加项目根目录到系统路径
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.index_optimizer import (
@@ -56,7 +57,7 @@ class TestQueryPerformance:
                 username="test_user",
                 password_hash="a" * 64,  # 64字符的模拟密码哈希
                 role="user",
-                email="test@example.com"
+                email="test@example.com",
             )
             session.add(user)
             session.commit()
@@ -116,6 +117,7 @@ class TestQueryPerformance:
 
         # 清理（确保所有连接已关闭）
         import time
+
         time.sleep(0.1)  # 短暂等待确保连接释放
         if os.path.exists(db_path):
             try:
@@ -433,7 +435,7 @@ class TestBenchmarkQueries:
                 username="benchmark_user",
                 password_hash="b" * 64,  # 64字符的模拟密码哈希
                 role="user",
-                email="benchmark@example.com"
+                email="benchmark@example.com",
             )
             session.add(user)
             session.commit()
@@ -537,7 +539,9 @@ class TestBenchmarkQueries:
                     "rows_returned": result["rows_returned"],
                 }
             )
-            print(f"\n{query['name']}: {result['duration_ms']:.2f}ms, {result['rows_returned']} rows")
+            print(
+                f"\n{query['name']}: {result['duration_ms']:.2f}ms, {result['rows_returned']} rows"
+            )
 
         # 所有查询应该成功完成
         assert all(r["duration_ms"] < 1000 for r in results)  # 应该在1秒内完成

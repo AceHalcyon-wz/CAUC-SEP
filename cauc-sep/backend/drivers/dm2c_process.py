@@ -42,10 +42,10 @@ class DM2CDriverProcess(DriverProcessBase):
     Example:
         >>> from backend.drivers import create_driver_process
         >>> import multiprocessing as mp
-        >>> 
+        >>>
         >>> command_queue = mp.Queue()
         >>> response_queue = mp.Queue()
-        >>> 
+        >>>
         >>> process = create_driver_process(
         ...     DM2CDriverProcess,
         ...     "motor_1",
@@ -54,7 +54,7 @@ class DM2CDriverProcess(DriverProcessBase):
         ...     response_queue,
         ... )
         >>> process.start()
-        >>> 
+        >>>
         >>> # 发送命令
         >>> command_queue.put(IPCMessage(
         ...     msg_type=IPCMessageType.COMMAND,
@@ -172,17 +172,20 @@ class DM2CDriverProcess(DriverProcessBase):
 
         # 检查驱动状态（部分命令需要READY状态）
         motion_commands = [
-            "move_abs", "move_rel", "jog", "home", "stop",
-            "jog_stop", "emergency_stop"
+            "move_abs",
+            "move_rel",
+            "jog",
+            "home",
+            "stop",
+            "jog_stop",
+            "emergency_stop",
         ]
 
         if command in motion_commands and self.driver.status not in (
             DeviceStatus.READY,
             DeviceStatus.BUSY,
         ):
-            raise RuntimeError(
-                f"驱动状态不允许执行命令: {self.driver.status.value}"
-            )
+            raise RuntimeError(f"驱动状态不允许执行命令: {self.driver.status.value}")
 
         # 执行命令
         if command == "move_abs":
@@ -248,9 +251,7 @@ class DM2CDriverProcess(DriverProcessBase):
             return {"alarm_code": alarm_code}
 
         elif command == "get_alarm_details":
-            return await self.driver.get_alarm_details(
-                language=params.get("language", "zh")
-            )
+            return await self.driver.get_alarm_details(language=params.get("language", "zh"))
 
         elif command == "clear_alarm":
             return await self.driver.clear_alarm()
@@ -295,9 +296,7 @@ class DM2CDriverProcess(DriverProcessBase):
             )
 
         elif command == "trigger_pr_path":
-            return await self.driver.trigger_pr_path(
-                path_number=params["path_number"]
-            )
+            return await self.driver.trigger_pr_path(path_number=params["path_number"])
 
         elif command == "read_trigger_status":
             return await self.driver.read_trigger_status()
@@ -315,9 +314,7 @@ class DM2CDriverProcess(DriverProcessBase):
             return await self.driver.configure_home_offset(offset=params["offset"])
 
         elif command == "configure_home_direction":
-            return await self.driver.configure_home_direction(
-                direction=params["direction"]
-            )
+            return await self.driver.configure_home_direction(direction=params["direction"])
 
         elif command == "configure_di":
             return await self.driver.configure_di(
@@ -332,15 +329,11 @@ class DM2CDriverProcess(DriverProcessBase):
             )
 
         elif command == "read_di_config":
-            function = await self.driver.read_di_config(
-                di_number=params["di_number"]
-            )
+            function = await self.driver.read_di_config(di_number=params["di_number"])
             return {"function": function}
 
         elif command == "read_do_config":
-            function = await self.driver.read_do_config(
-                do_number=params["do_number"]
-            )
+            function = await self.driver.read_do_config(do_number=params["do_number"])
             return {"function": function}
 
         elif command == "read_di_status":

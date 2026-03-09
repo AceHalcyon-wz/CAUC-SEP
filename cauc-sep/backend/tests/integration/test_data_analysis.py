@@ -43,20 +43,24 @@ class TestDataLoading:
     def sample_experiment_data(self):
         """生成示例实验数据。"""
         # 生成磁滞回线数据
-        h_field = np.concatenate([
-            np.linspace(-1000, 1000, 200),
-            np.linspace(1000, -1000, 200),
-        ])
+        h_field = np.concatenate(
+            [
+                np.linspace(-1000, 1000, 200),
+                np.linspace(1000, -1000, 200),
+            ]
+        )
 
         # 使用物理模型生成数据
         Bs = 1.5  # 饱和磁感应强度
         Hc = 100  # 矫顽力
-        S = 50    # 磁滞宽度参数
+        S = 50  # 磁滞宽度参数
 
-        b_data = np.concatenate([
-            braunbeck_function(h_field[:200], Bs, Hc, S),
-            braunbeck_function(h_field[200:], Bs, Hc, S),
-        ])
+        b_data = np.concatenate(
+            [
+                braunbeck_function(h_field[:200], Bs, Hc, S),
+                braunbeck_function(h_field[200:], Bs, Hc, S),
+            ]
+        )
 
         # 添加噪声
         noise = np.random.normal(0, 0.02, len(b_data))
@@ -84,10 +88,12 @@ class TestDataLoading:
             csv_path = Path(tmpdir) / "test_data.csv"
 
             # 创建CSV文件
-            df = pd.DataFrame({
-                "h_field": h_field,
-                "b_data": b_data,
-            })
+            df = pd.DataFrame(
+                {
+                    "h_field": h_field,
+                    "b_data": b_data,
+                }
+            )
             df.to_csv(csv_path, index=False)
 
             # 加载数据
@@ -216,19 +222,23 @@ class TestDataAnalysis:
     @pytest.fixture
     def hysteresis_data(self):
         """生成磁滞回线数据。"""
-        h_field = np.concatenate([
-            np.linspace(-1000, 1000, 200),
-            np.linspace(1000, -1000, 200),
-        ])
+        h_field = np.concatenate(
+            [
+                np.linspace(-1000, 1000, 200),
+                np.linspace(1000, -1000, 200),
+            ]
+        )
 
         Bs = 1.5
         Hc = 100
         S = 50
 
-        b_data = np.concatenate([
-            braunbeck_function(h_field[:200], Bs, Hc, S),
-            braunbeck_function(h_field[200:], Bs, Hc, S),
-        ])
+        b_data = np.concatenate(
+            [
+                braunbeck_function(h_field[:200], Bs, Hc, S),
+                braunbeck_function(h_field[200:], Bs, Hc, S),
+            ]
+        )
 
         return h_field, b_data, Bs, Hc, S
 
@@ -428,7 +438,7 @@ class TestAnalysisReport:
             model_name="braunbeck",
             params=fit_result["parameters"],
             r_squared=fit_result["r_squared"],
-            rmse=np.sqrt(np.mean(fit_result["residuals"]**2)),
+            rmse=np.sqrt(np.mean(fit_result["residuals"] ** 2)),
             mae=np.mean(np.abs(fit_result["residuals"])),
             aic=0.0,
             bic=0.0,
@@ -498,12 +508,14 @@ class TestDataPipelineIntegration:
         # 创建数据点
         data_points = []
         for i in range(100):
-            data_points.append({
-                "timestamp": i * 0.1,
-                "position_mm": i * 0.5,
-                "field_value": np.sin(i * 0.1) * 100,
-                "current_value": np.cos(i * 0.1) * 10,
-            })
+            data_points.append(
+                {
+                    "timestamp": i * 0.1,
+                    "position_mm": i * 0.5,
+                    "field_value": np.sin(i * 0.1) * 100,
+                    "current_value": np.cos(i * 0.1) * 10,
+                }
+            )
 
         # 创建处理器
         processor = StreamProcessor(buffer_size=1000)
@@ -606,6 +618,7 @@ class TestConcurrentAnalysis:
     @pytest.mark.asyncio
     async def test_concurrent_analysis_tasks(self):
         """测试并发分析任务。"""
+
         async def analyze_dataset(dataset_id):
             h_field = np.linspace(-500, 500, 100)
             b_data = np.tanh(h_field / 100) + np.random.normal(0, 0.01, 100)
@@ -636,7 +649,10 @@ class TestConcurrentAnalysis:
         models = {
             "linear": (lambda x, a, b: a * x + b, [0.001, 0.0]),
             "quadratic": (lambda x, a, b, c: a * x**2 + b * x + c, [1e-6, 0.001, 0.0]),
-            "cubic": (lambda x, a, b, c, d: a * x**3 + b * x**2 + c * x + d, [1e-9, 1e-6, 0.001, 0.0]),
+            "cubic": (
+                lambda x, a, b, c, d: a * x**3 + b * x**2 + c * x + d,
+                [1e-9, 1e-6, 0.001, 0.0],
+            ),
         }
 
         for name, (func, p0) in models.items():
@@ -739,6 +755,7 @@ class TestPerformance:
 
         # 注册多个模型
         for i in range(5):
+
             def poly(x, *coeffs):
                 result = np.zeros_like(x)
                 for j, c in enumerate(coeffs):

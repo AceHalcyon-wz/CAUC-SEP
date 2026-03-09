@@ -256,9 +256,7 @@ class TestGetDeviceHealthList:
         """测试包含温控系统的列表。"""
         mock_temp = MagicMock()
         mock_temp.device_id = "test_temp"
-        mock_temp.read_status = AsyncMock(
-            return_value={"status": "ready", "connected": True}
-        )
+        mock_temp.read_status = AsyncMock(return_value={"status": "ready", "connected": True})
 
         set_devices(None, None, mock_temp, None, None)
 
@@ -275,9 +273,7 @@ class TestGetDeviceHealthList:
         """测试包含压电陶瓷控制器的列表。"""
         mock_piezo = MagicMock()
         mock_piezo.device_id = "test_piezo"
-        mock_piezo.read_status = AsyncMock(
-            return_value={"status": "ready"}
-        )
+        mock_piezo.read_status = AsyncMock(return_value={"status": "ready"})
 
         set_devices(None, None, None, mock_piezo, None)
 
@@ -667,9 +663,7 @@ class TestDeviceStatusEndpoint:
         data = response.json()
 
         # 验证计数一致性
-        assert data["total_devices"] == (
-            data["connected_devices"] + data["disconnected_devices"]
-        )
+        assert data["total_devices"] == (data["connected_devices"] + data["disconnected_devices"])
 
     def test_device_status_summary_no_devices(self, test_client):
         """测试设备状态汇总计数一致性。"""
@@ -678,10 +672,8 @@ class TestDeviceStatusEndpoint:
         data = response.json()
 
         # 验证计数一致性（total = connected + disconnected）
-        assert data["total_devices"] == (
-            data["connected_devices"] + data["disconnected_devices"]
-        )
-        
+        assert data["total_devices"] == (data["connected_devices"] + data["disconnected_devices"])
+
         # 注意：lifespan 函数会初始化 5 个仿真设备
         # 所以这里验证设备数量 >= 0 而不是 == 0
         assert data["total_devices"] >= 0

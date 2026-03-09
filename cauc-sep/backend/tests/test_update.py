@@ -38,7 +38,6 @@ from api.update import (
     VersionInfo,
 )
 
-
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -128,9 +127,7 @@ class TestVersionInfo:
 
         # 构建号格式: MMmmpp
         parts = APP_VERSION.split(".")
-        expected_build = (
-            int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
-        )
+        expected_build = int(parts[0]) * 10000 + int(parts[1]) * 100 + int(parts[2])
 
         assert version_info.build_number == expected_build
 
@@ -364,9 +361,7 @@ class TestBackupOperations:
     async def test_delete_backup(self, update_manager):
         """测试删除备份。"""
         # 创建备份
-        backup_info = await update_manager.create_backup(
-            backup_id="backup_to_delete"
-        )
+        backup_info = await update_manager.create_backup(backup_id="backup_to_delete")
 
         # 删除备份
         success = await update_manager.delete_backup(backup_info.backup_id)
@@ -385,9 +380,7 @@ class TestBackupOperations:
             await update_manager.create_backup(backup_id=f"backup_{i:03d}")
 
         # 清理旧备份
-        deleted_count = await update_manager.cleanup_old_backups(
-            max_count=MAX_BACKUP_COUNT
-        )
+        deleted_count = await update_manager.cleanup_old_backups(max_count=MAX_BACKUP_COUNT)
 
         assert deleted_count >= 3
 
@@ -456,9 +449,7 @@ class TestRollback:
     async def test_rollback_success(self, update_manager):
         """测试成功回滚。"""
         # 创建备份
-        backup_info = await update_manager.create_backup(
-            backup_id="rollback_test_backup"
-        )
+        backup_info = await update_manager.create_backup(backup_id="rollback_test_backup")
 
         # 执行回滚
         response = await update_manager.rollback(
@@ -612,9 +603,7 @@ class TestIntegration:
         assert check_response.has_update is True
 
         # 2. 创建备份
-        backup_info = await update_manager.create_backup(
-            description="更新前备份"
-        )
+        backup_info = await update_manager.create_backup(description="更新前备份")
         assert backup_info.backup_id is not None
 
         # 3. 列出备份
@@ -629,9 +618,7 @@ class TestIntegration:
     async def test_backup_rollback_workflow(self, update_manager):
         """测试备份和回滚工作流程。"""
         # 1. 创建备份
-        backup_info = await update_manager.create_backup(
-            backup_id="workflow_test_backup"
-        )
+        backup_info = await update_manager.create_backup(backup_id="workflow_test_backup")
 
         # 2. 验证备份存在
         backups = await update_manager.list_backups()
@@ -662,10 +649,7 @@ class TestPerformance:
     async def test_concurrent_backup_operations(self, update_manager):
         """测试并发备份操作。"""
         # 创建多个备份任务
-        tasks = [
-            update_manager.create_backup(backup_id=f"concurrent_{i:03d}")
-            for i in range(5)
-        ]
+        tasks = [update_manager.create_backup(backup_id=f"concurrent_{i:03d}") for i in range(5)]
 
         # 并发执行
         results = await asyncio.gather(*tasks, return_exceptions=True)

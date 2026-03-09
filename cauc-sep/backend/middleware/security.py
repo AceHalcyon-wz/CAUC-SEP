@@ -168,7 +168,7 @@ class RateLimitConfig:
 class ClientRateLimit:
     """
     客户端速率限制状态。
-    
+
     跟踪单个客户端的请求历史和阻止状态。
     使用滑动窗口算法记录请求时间戳。
     """
@@ -179,7 +179,7 @@ class ClientRateLimit:
     def is_blocked(self) -> bool:
         """
         检查客户端是否被阻止。
-        
+
         Returns:
             bool: 如果当前时间小于阻止截止时间，返回True
         """
@@ -188,7 +188,7 @@ class ClientRateLimit:
     def cleanup_old_requests(self, window_seconds: int) -> None:
         """
         清理超出时间窗口的过期请求记录。
-        
+
         Args:
             window_seconds: 时间窗口大小（秒）
         """
@@ -198,7 +198,7 @@ class ClientRateLimit:
     def add_request(self) -> None:
         """
         添加新的请求记录。
-        
+
         记录当前时间戳到请求列表中。
         """
         self.requests.append(time.time())
@@ -206,7 +206,7 @@ class ClientRateLimit:
     def get_request_count(self) -> int:
         """
         获取当前请求计数。
-        
+
         Returns:
             int: 请求列表长度
         """
@@ -218,13 +218,13 @@ class RateLimiter:
     速率限制器。
 
     使用滑动窗口算法实现速率限制，支持按路径配置不同的限制策略。
-    
+
     特性：
     - 基于客户端IP和User-Agent的标识
     - 可配置的请求限制和突发大小
     - 自动清理不活跃客户端记录
     - 支持敏感操作的严格限制
-    
+
     Example:
         >>> limiter = RateLimiter()
         >>> allowed, remaining, reset_time = limiter.is_allowed(request)
@@ -250,8 +250,12 @@ class RateLimiter:
             "/api/motor/emergency_stop": RateLimitConfig(requests_per_minute=30, burst_size=10),
             "/api/v1/motor/reset": RateLimitConfig(requests_per_minute=30, burst_size=10),
             "/api/motor/reset": RateLimitConfig(requests_per_minute=30, burst_size=10),
-            "/api/electromagnet/emergency_stop": RateLimitConfig(requests_per_minute=30, burst_size=10),
-            "/api/temperature/emergency_stop": RateLimitConfig(requests_per_minute=30, burst_size=10),
+            "/api/electromagnet/emergency_stop": RateLimitConfig(
+                requests_per_minute=30, burst_size=10
+            ),
+            "/api/temperature/emergency_stop": RateLimitConfig(
+                requests_per_minute=30, burst_size=10
+            ),
             # 校准操作
             "/api/electromagnet/calibrate": RateLimitConfig(requests_per_minute=10, burst_size=5),
             "/api/piezo/calibrate/perform": RateLimitConfig(requests_per_minute=10, burst_size=5),
@@ -276,7 +280,7 @@ class RateLimiter:
 
         Returns:
             str: 32字符的客户端标识哈希值
-            
+
         Note:
             如果无法获取客户端信息，将使用默认值"unknown"
         """
@@ -284,7 +288,7 @@ class RateLimiter:
             ip = request.client.host if request.client else "unknown"
         except (AttributeError, TypeError):
             ip = "unknown"
-            
+
         try:
             user_agent = request.headers.get("user-agent", "")[:100]
         except (AttributeError, TypeError):
@@ -305,7 +309,7 @@ class RateLimiter:
 
         Returns:
             RateLimitConfig: 速率限制配置对象
-            
+
         Note:
             配置优先级：敏感路径 > 导出路径 > 默认配置
         """
@@ -328,11 +332,11 @@ class RateLimiter:
             request: FastAPI请求对象
 
         Returns:
-            tuple[bool, int, int]: 
+            tuple[bool, int, int]:
                 - bool: 是否允许请求
                 - int: 剩余请求数
                 - int: 重置时间（秒）
-                
+
         Note:
             超过限制时，客户端将被阻止60秒
         """
@@ -341,8 +345,12 @@ class RateLimiter:
             path = request.url.path
         except (AttributeError, TypeError):
             # 无法获取请求信息时，允许通过
-            return True, self._default_config.requests_per_minute, self._default_config.window_seconds
-            
+            return (
+                True,
+                self._default_config.requests_per_minute,
+                self._default_config.window_seconds,
+            )
+
         config = self._get_config(path)
 
         client = self._clients[client_key]
@@ -383,13 +391,14 @@ class RateLimiter:
 
         Returns:
             int: 清理的客户端数量
-            
+
         Note:
             只清理已解除阻止且无最近请求的客户端
         """
         cutoff = time.time() - max_age_seconds
         inactive_clients = [
-            key for key, client in self._clients.items()
+            key
+            for key, client in self._clients.items()
             if (not client.requests or client.requests[-1] < cutoff)
             and client.blocked_until < time.time()
         ]
@@ -408,13 +417,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     速率限制中间件。
 
     在请求处理前检查速率限制，超过限制时返回429错误。
-    
+
     特性：
     - 自动跳过静态文件和文档路径
     - 跳过WebSocket连接
     - 添加速率限制响应头
     - 记录阻止日志
-    
+
     Example:
         >>> app.add_middleware(RateLimitMiddleware, rate_limiter=my_limiter)
     """
@@ -444,7 +453,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         Returns:
             Response: 响应对象，如果被限制则返回429响应
-            
+
         Note:
             跳过以下路径：
             - /static/ 静态文件
@@ -469,7 +478,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 client_ip = request.client.host if request.client else "unknown"
             except (AttributeError, TypeError):
                 pass
-                
+
             logger.warning(f"Rate limit blocked: {path} from {client_ip}")
             return Response(
                 content='{"detail":"Too many requests. Please try again later.","error_code":"RATE_LIMIT_EXCEEDED"}',
@@ -499,7 +508,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     安全响应头中间件。
 
     添加安全相关的HTTP响应头，防止常见Web安全攻击。
-    
+
     添加的安全头包括：
     - X-Content-Type-Options: 防止MIME类型嗅探
     - X-Frame-Options: 防止点击劫持
@@ -508,7 +517,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     - Permissions-Policy: 权限策略
     - Content-Security-Policy: 内容安全策略（仅HTML响应）
     - Cache-Control: 缓存控制（仅API响应）
-    
+
     Example:
         >>> app.add_middleware(SecurityHeadersMiddleware)
     """
@@ -600,13 +609,13 @@ def validate_device_id(device_id: str) -> bool:
 
     Returns:
         bool: 如果ID格式有效返回True
-        
+
     Note:
         有效格式：字母、数字、下划线、连字符，长度1-100
     """
     if not device_id or not isinstance(device_id, str):
         return False
-        
+
     if len(device_id) > 100 or len(device_id) == 0:
         return False
 
@@ -624,17 +633,17 @@ def validate_experiment_id(exp_id: int) -> bool:
 
     Returns:
         bool: 如果ID有效返回True
-        
+
     Note:
         有效范围：1 到 2^31-1（正32位整数）
     """
     if not isinstance(exp_id, int):
         return False
-        
+
     # 排除布尔类型（Python中bool是int的子类）
     if isinstance(exp_id, bool):
         return False
-        
+
     return exp_id > 0 and exp_id < 2**31
 
 
@@ -648,13 +657,13 @@ def validate_array_length(data: list, max_length: int = 10000) -> bool:
 
     Returns:
         bool: 如果数组长度有效返回True
-        
+
     Raises:
         TypeError: 如果max_length不是正整数
     """
     if not isinstance(max_length, int) or max_length <= 0:
         raise TypeError("max_length must be a positive integer")
-        
+
     return isinstance(data, list) and len(data) <= max_length
 
 
@@ -668,13 +677,13 @@ def validate_string_length(text: str, max_length: int = 10000) -> bool:
 
     Returns:
         bool: 如果字符串长度有效返回True
-        
+
     Raises:
         TypeError: 如果max_length不是正整数
     """
     if not isinstance(max_length, int) or max_length <= 0:
         raise TypeError("max_length must be a positive integer")
-        
+
     return isinstance(text, str) and len(text) <= max_length
 
 
@@ -689,7 +698,7 @@ def sanitize_filename(filename: str) -> str:
 
     Returns:
         str: 安全的文件名
-        
+
     Note:
         - 移除路径遍历字符（..、/、\）
         - 只保留字母、数字、点、下划线、连字符
@@ -697,7 +706,7 @@ def sanitize_filename(filename: str) -> str:
     """
     if not filename or not isinstance(filename, str):
         return "unnamed"
-        
+
     # 移除路径遍历字符
     filename = filename.replace("..", "").replace("/", "").replace("\\", "")
 
@@ -728,7 +737,7 @@ def get_rate_limiter() -> RateLimiter:
 
     Returns:
         RateLimiter: 全局速率限制器实例
-        
+
     Example:
         >>> limiter = get_rate_limiter()
         >>> allowed, remaining, reset = limiter.is_allowed(request)
@@ -753,7 +762,7 @@ def get_client_ip(request: Request) -> str:
 
     Returns:
         str: 客户端IP地址，无法获取时返回"unknown"
-        
+
     Note:
         检查顺序：
         1. X-Forwarded-For 头（取第一个IP）
@@ -797,13 +806,13 @@ def log_security_event(
         request: FastAPI请求对象
         detail: 详细描述信息
         severity: 严重程度，可选值："info", "warning", "critical"
-        
+
     Note:
         日志会自动包含客户端IP、请求路径、方法等信息
         detail参数会自动进行敏感信息脱敏
     """
     client_ip = get_client_ip(request)
-    
+
     try:
         path = request.url.path
         method = request.method

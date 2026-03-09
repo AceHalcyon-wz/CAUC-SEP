@@ -327,8 +327,7 @@ class AbstractDevice(ABC):
         """
         if not self._status.can_transition_to(value):
             raise ValueError(
-                f"非法状态转换: {self._status.value} -> {value.value} "
-                f"(设备: {self.device_id})"
+                f"非法状态转换: {self._status.value} -> {value.value} " f"(设备: {self.device_id})"
             )
         self._status = value
 

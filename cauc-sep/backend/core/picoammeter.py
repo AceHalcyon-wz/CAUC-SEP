@@ -356,9 +356,7 @@ class Picoammeter(AbstractDevice):
                 f"Invalid sample rate: {rate}Hz, "
                 f"must be {self.MIN_SAMPLE_RATE}-{self.MAX_SAMPLE_RATE}Hz"
             )
-            raise ValueError(
-                f"Sample rate must be {self.MIN_SAMPLE_RATE}-{self.MAX_SAMPLE_RATE}Hz"
-            )
+            raise ValueError(f"Sample rate must be {self.MIN_SAMPLE_RATE}-{self.MAX_SAMPLE_RATE}Hz")
 
         self._acq_config.sample_rate = rate
         logger.info(f"Sample rate set to {rate}Hz")
@@ -583,9 +581,7 @@ class Picoammeter(AbstractDevice):
                 f"to {selected_range.value} (avg={avg_current:.2f}pA, max={max_current:.2f}pA)"
             )
         else:
-            logger.debug(
-                f"Channel {channel}: Auto-range unchanged ({selected_range.value})"
-            )
+            logger.debug(f"Channel {channel}: Auto-range unchanged ({selected_range.value})")
 
         return selected_range
 
@@ -782,7 +778,7 @@ class Picoammeter(AbstractDevice):
         recent_data = list(buffer)[-window:]
         currents = np.array([d.current_pa for d in recent_data])
 
-        return float(np.sqrt(np.mean(currents ** 2)))
+        return float(np.sqrt(np.mean(currents**2)))
 
     @staticmethod
     def get_range_resolution(current_range: CurrentRange) -> float:
@@ -795,13 +791,13 @@ class Picoammeter(AbstractDevice):
             float: 分辨率（pA）
         """
         range_resolutions = {
-            CurrentRange.RANGE_1NA: 1.0,      # 1pA
-            CurrentRange.RANGE_10NA: 10.0,    # 10pA
+            CurrentRange.RANGE_1NA: 1.0,  # 1pA
+            CurrentRange.RANGE_10NA: 10.0,  # 10pA
             CurrentRange.RANGE_100NA: 100.0,  # 100pA
-            CurrentRange.RANGE_1UA: 1000.0,   # 1nA = 1000pA
+            CurrentRange.RANGE_1UA: 1000.0,  # 1nA = 1000pA
             CurrentRange.RANGE_10UA: 10000.0,  # 10nA = 10000pA
             CurrentRange.RANGE_100UA: 100000.0,  # 100nA = 100000pA
-            CurrentRange.RANGE_1MA: 1000000.0,   # 1μA = 1000000pA
+            CurrentRange.RANGE_1MA: 1000000.0,  # 1μA = 1000000pA
         }
         return range_resolutions[current_range]
 
@@ -816,12 +812,12 @@ class Picoammeter(AbstractDevice):
             float: 最大值（pA）
         """
         range_max_values = {
-            CurrentRange.RANGE_1NA: 1000.0,      # 1nA = 1000pA
-            CurrentRange.RANGE_10NA: 10000.0,    # 10nA = 10000pA
+            CurrentRange.RANGE_1NA: 1000.0,  # 1nA = 1000pA
+            CurrentRange.RANGE_10NA: 10000.0,  # 10nA = 10000pA
             CurrentRange.RANGE_100NA: 100000.0,  # 100nA = 100000pA
-            CurrentRange.RANGE_1UA: 1000000.0,   # 1μA = 1000000pA
+            CurrentRange.RANGE_1UA: 1000000.0,  # 1μA = 1000000pA
             CurrentRange.RANGE_10UA: 10000000.0,  # 10μA = 10000000pA
             CurrentRange.RANGE_100UA: 100000000.0,  # 100μA = 100000000pA
-            CurrentRange.RANGE_1MA: 1000000000.0,   # 1mA = 1000000000pA
+            CurrentRange.RANGE_1MA: 1000000000.0,  # 1mA = 1000000000pA
         }
         return range_max_values[current_range]

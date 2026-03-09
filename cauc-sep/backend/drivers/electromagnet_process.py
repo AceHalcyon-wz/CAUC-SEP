@@ -42,10 +42,10 @@ class ElectromagnetDriverProcess(DriverProcessBase):
     Example:
         >>> from backend.drivers import create_driver_process
         >>> import multiprocessing as mp
-        >>> 
+        >>>
         >>> command_queue = mp.Queue()
         >>> response_queue = mp.Queue()
-        >>> 
+        >>>
         >>> process = create_driver_process(
         ...     ElectromagnetDriverProcess,
         ...     "electromagnet_1",
@@ -54,7 +54,7 @@ class ElectromagnetDriverProcess(DriverProcessBase):
         ...     response_queue,
         ... )
         >>> process.start()
-        >>> 
+        >>>
         >>> # 发送命令
         >>> command_queue.put(IPCMessage(
         ...     msg_type=IPCMessageType.COMMAND,
@@ -176,25 +176,17 @@ class ElectromagnetDriverProcess(DriverProcessBase):
         # 检查驱动状态（部分命令需要READY状态）
         motion_commands = ["set_current", "start_scan", "set_field", "quick_scan"]
 
-        if command in motion_commands and self.driver.status not in (
-            DeviceStatus.READY,
-        ):
-            raise RuntimeError(
-                f"驱动状态不允许执行命令: {self.driver.status.value}"
-            )
+        if command in motion_commands and self.driver.status not in (DeviceStatus.READY,):
+            raise RuntimeError(f"驱动状态不允许执行命令: {self.driver.status.value}")
 
         # 检查保护状态
-        protection_commands = [
-            "set_current", "start_scan", "set_field", "quick_scan"
-        ]
+        protection_commands = ["set_current", "start_scan", "set_field", "quick_scan"]
 
         if command in protection_commands and self.driver.electromagnet_status in (
             ElectromagnetStatus.OVERCURRENT,
             ElectromagnetStatus.OVERTEMPERATURE,
         ):
-            raise RuntimeError(
-                f"保护状态不允许执行命令: {self.driver.electromagnet_status.value}"
-            )
+            raise RuntimeError(f"保护状态不允许执行命令: {self.driver.electromagnet_status.value}")
 
         # 执行命令
         if command == "set_current":
@@ -214,9 +206,7 @@ class ElectromagnetDriverProcess(DriverProcessBase):
             return await self.driver.stop_scan()
 
         elif command == "calibrate":
-            return await self.driver.calibrate(
-                calibration_points=params["calibration_points"]
-            )
+            return await self.driver.calibrate(calibration_points=params["calibration_points"])
 
         elif command == "clear_calibration":
             return await self.driver.clear_calibration()

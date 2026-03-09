@@ -41,13 +41,13 @@ class AuditLogger:
     审计日志记录器。
 
     负责记录和管理审计日志，支持异步批量写入数据库。
-    
+
     特性：
     - 自动识别关键操作类型
     - 敏感信息自动脱敏
     - 批量写入优化性能
     - 支持设备事件和报警事件记录
-    
+
     Example:
         >>> logger = AuditLogger(storage)
         >>> logger.log_request("POST", "/api/motor/move", {"position": 100}, 200)
@@ -293,7 +293,7 @@ class AuditLogger:
             duration_ms: 请求处理时间（毫秒）
             extra_data: 额外数据
             device_id: 设备ID（可选，不提供时自动从路径/参数提取）
-            
+
         Note:
             - 敏感字段会自动脱敏
             - 日志先写入缓冲区，满50条时批量写入数据库
@@ -381,13 +381,13 @@ class AuditMiddleware(BaseHTTPMiddleware):
     审计日志中间件。
 
     拦截所有 HTTP 请求，记录关键操作日志。
-    
+
     特性：
     - 自动记录请求/响应信息
     - 敏感信息自动脱敏
     - 计算请求处理时间
     - 排除静态文件和文档路径
-    
+
     Example:
         >>> app.add_middleware(AuditMiddleware, storage=data_storage)
     """
@@ -450,7 +450,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         Returns:
             Response: 响应对象
-            
+
         Note:
             - POST/PUT/PATCH请求体会被脱敏后记录
             - 响应体中的message/detail字段会被记录
@@ -502,7 +502,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             ip_address = request.client.host if request.client else None
         except (AttributeError, TypeError):
             pass
-            
+
         user_agent = request.headers.get("user-agent")
 
         # 获取用户ID（如果存在）
@@ -527,6 +527,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
             # 重新设置 body_iterator（使用异步生成器）
             async def async_body_iterator():
                 yield body
+
             response.body_iterator = async_body_iterator()
 
             try:
@@ -572,7 +573,7 @@ def log_alarm_event(
         alarm_text: 报警文本描述
         alarm_level: 报警级别，可选值："info", "warning", "error", "critical"
         extra_data: 额外数据（JSON序列化存储）
-        
+
     Example:
         >>> log_alarm_event("stepper_01", 1001, "Over temperature", "critical")
     """
@@ -605,7 +606,7 @@ def log_device_event(
         device_id: 设备ID
         event_type: 事件类型（如 "connected", "disconnected", "error", "calibrated"）
         event_data: 事件数据（JSON序列化存储）
-        
+
     Example:
         >>> log_device_event("stepper_01", "connected", {"port": "COM3"})
     """

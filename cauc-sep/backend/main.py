@@ -42,7 +42,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from api import ammeter, analysis, device, electromagnet, experiment, health, logs, motor, piezo, temperature, user, tracing, crash_report, update, performance
+from api import (
+    ammeter,
+    analysis,
+    device,
+    electromagnet,
+    experiment,
+    health,
+    logs,
+    motor,
+    piezo,
+    temperature,
+    user,
+    tracing,
+    crash_report,
+    update,
+    performance,
+)
 from api import cache_api
 from api.websocket import (
     AlarmLevel,
@@ -173,22 +189,22 @@ async def lifespan(app: FastAPI):
     if "memory_total_gb" in system_info:
         logger.info(f"内存总量: {system_info['memory_total_gb']:.2f} GB")
     logger.info("=" * 60)
-    
+
     # 检查依赖
     deps_status = check_dependencies()
     missing_deps = [k for k, v in deps_status.items() if v["status"] == "missing"]
     if missing_deps:
         logger.warning(f"缺少依赖包: {missing_deps}")
-    
+
     logger.info("Starting CAUC-SEP Platform...")
 
     # 初始化数据存储
     storage = DataStorage("experiments.db")
-    
+
     # 初始化缓存系统
     from core.cache import init_cache_manager, RedisConfig
     from core.local_cache import start_all_cache_cleanup_tasks
-    
+
     cache_manager = init_cache_manager(
         config=RedisConfig(
             host="localhost",
@@ -200,15 +216,15 @@ async def lifespan(app: FastAPI):
         key_prefix="cauc_sep:",
     )
     logger.info(f"Cache system initialized: backend={cache_manager._backend.value}")
-    
+
     # 启动本地缓存自动清理任务
     await start_all_cache_cleanup_tasks()
     logger.info("Local cache cleanup tasks started")
-    
+
     # 初始化链路追踪系统
     init_tracing(db_path="traces.db")
     logger.info("Tracing system initialized")
-    
+
     # 初始化崩溃报告系统
     init_crash_report_manager(
         app_start_time=time.time(),
@@ -293,7 +309,7 @@ async def lifespan(app: FastAPI):
     electromagnet.set_electromagnet(electromagnet_driver)
     temperature.set_temperature_controller(temp_controller)
     logs.set_storage(storage)
-    
+
     # 设置健康监控设备引用
     health.set_devices(
         motor=dm2c,
@@ -302,10 +318,10 @@ async def lifespan(app: FastAPI):
         piezo=piezo_controller,
         ammeter=picoammeter,
     )
-    
+
     # 设置审计日志记录器的存储实例
     audit_logger.set_storage(storage)
-    
+
     # 初始化用户系统（创建默认管理员）
     user.init_user_system()
 
@@ -315,19 +331,19 @@ async def lifespan(app: FastAPI):
 
     # 清理资源
     logger.info("Shutting down...")
-    
+
     # 停止缓存系统
     from core.local_cache import stop_all_cache_cleanup_tasks
     from core.cache import get_cache_manager
-    
+
     await stop_all_cache_cleanup_tasks()
     logger.info("Local cache cleanup tasks stopped")
-    
+
     cache_mgr = get_cache_manager()
     if cache_mgr:
         await cache_mgr.async_close()
         logger.info("Redis cache manager closed")
-    
+
     if picoammeter:
         await picoammeter.disconnect()
     if piezo_controller:
@@ -342,7 +358,7 @@ async def lifespan(app: FastAPI):
     # 记录日志统计信息
     log_stats = get_log_stats("logs")
     logger.info(f"日志统计: {log_stats['file_count']} 个文件, {log_stats['total_size_mb']:.2f} MB")
-    
+
     logger.info("All devices disconnected")
     logger.info("CAUC-SEP Platform shutdown complete")
 
@@ -706,9 +722,7 @@ async def websocket_receive_loop(
         while True:
             try:
                 # 非阻塞接收消息
-                data = await asyncio.wait_for(
-                    websocket.receive_text(), timeout=1.0
-                )
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
                 await manager.handle_client_message(websocket, data)
             except asyncio.TimeoutError:
                 pass
@@ -726,15 +740,11 @@ async def motor_websocket(websocket: WebSocket):
     支持心跳检测和推送频率控制。
     """
     client_ip = get_client_ip(websocket)
-    connection_id = await manager.connect(
-        websocket, endpoint="/ws/motor", client_ip=client_ip
-    )
+    connection_id = await manager.connect(websocket, endpoint="/ws/motor", client_ip=client_ip)
     logger.info(f"[WS-{connection_id}] Motor WebSocket client connected from {client_ip}")
 
     # 启动消息接收任务
-    receive_task = asyncio.create_task(
-        websocket_receive_loop(websocket, "motor")
-    )
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "motor"))
 
     try:
         push_interval = manager.get_push_interval("stepper")
@@ -761,11 +771,13 @@ async def motor_websocket(websocket: WebSocket):
                 await manager.send_personal_message(message.to_json(), websocket)
             else:
                 await manager.send_personal_message(
-                    json.dumps({
-                        "type": "error",
-                        "timestamp": datetime.now().isoformat(),
-                        "message": "Motor not initialized",
-                    }),
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Motor not initialized",
+                        }
+                    ),
                     websocket,
                 )
 
@@ -794,9 +806,7 @@ async def electromagnet_websocket(websocket: WebSocket):
     logger.info(f"[WS-{connection_id}] Electromagnet WebSocket client connected from {client_ip}")
 
     # 启动消息接收任务
-    receive_task = asyncio.create_task(
-        websocket_receive_loop(websocket, "electromagnet")
-    )
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "electromagnet"))
 
     try:
         push_interval = manager.get_push_interval("electromagnet")
@@ -819,11 +829,13 @@ async def electromagnet_websocket(websocket: WebSocket):
                 await manager.send_personal_message(message.to_json(), websocket)
             else:
                 await manager.send_personal_message(
-                    json.dumps({
-                        "type": "error",
-                        "timestamp": datetime.now().isoformat(),
-                        "message": "Electromagnet not initialized",
-                    }),
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Electromagnet not initialized",
+                        }
+                    ),
                     websocket,
                 )
 
@@ -852,9 +864,7 @@ async def temperature_websocket(websocket: WebSocket):
     logger.info(f"[WS-{connection_id}] Temperature WebSocket client connected from {client_ip}")
 
     # 启动消息接收任务
-    receive_task = asyncio.create_task(
-        websocket_receive_loop(websocket, "temperature")
-    )
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "temperature"))
 
     try:
         push_interval = manager.get_push_interval("temperature")
@@ -880,11 +890,13 @@ async def temperature_websocket(websocket: WebSocket):
                 await manager.send_personal_message(message.to_json(), websocket)
             else:
                 await manager.send_personal_message(
-                    json.dumps({
-                        "type": "error",
-                        "timestamp": datetime.now().isoformat(),
-                        "message": "Temperature controller not initialized",
-                    }),
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Temperature controller not initialized",
+                        }
+                    ),
                     websocket,
                 )
 
@@ -907,15 +919,11 @@ async def piezo_websocket(websocket: WebSocket):
     支持心跳检测和推送频率控制。
     """
     client_ip = get_client_ip(websocket)
-    connection_id = await manager.connect(
-        websocket, endpoint="/ws/piezo", client_ip=client_ip
-    )
+    connection_id = await manager.connect(websocket, endpoint="/ws/piezo", client_ip=client_ip)
     logger.info(f"[WS-{connection_id}] Piezo WebSocket client connected from {client_ip}")
 
     # 启动消息接收任务
-    receive_task = asyncio.create_task(
-        websocket_receive_loop(websocket, "piezo")
-    )
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "piezo"))
 
     try:
         push_interval = manager.get_push_interval("piezo")
@@ -939,11 +947,13 @@ async def piezo_websocket(websocket: WebSocket):
                 await manager.send_personal_message(message.to_json(), websocket)
             else:
                 await manager.send_personal_message(
-                    json.dumps({
-                        "type": "error",
-                        "timestamp": datetime.now().isoformat(),
-                        "message": "Piezo controller not initialized",
-                    }),
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Piezo controller not initialized",
+                        }
+                    ),
                     websocket,
                 )
 
@@ -966,15 +976,11 @@ async def ammeter_websocket(websocket: WebSocket):
     支持心跳检测和推送频率控制。
     """
     client_ip = get_client_ip(websocket)
-    connection_id = await manager.connect(
-        websocket, endpoint="/ws/ammeter", client_ip=client_ip
-    )
+    connection_id = await manager.connect(websocket, endpoint="/ws/ammeter", client_ip=client_ip)
     logger.info(f"[WS-{connection_id}] Ammeter WebSocket client connected from {client_ip}")
 
     # 启动消息接收任务
-    receive_task = asyncio.create_task(
-        websocket_receive_loop(websocket, "ammeter")
-    )
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "ammeter"))
 
     try:
         push_interval = manager.get_push_interval("ammeter")
@@ -1007,11 +1013,13 @@ async def ammeter_websocket(websocket: WebSocket):
                 await manager.send_personal_message(message.to_json(), websocket)
             else:
                 await manager.send_personal_message(
-                    json.dumps({
-                        "type": "error",
-                        "timestamp": datetime.now().isoformat(),
-                        "message": "Picoammeter not initialized",
-                    }),
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Picoammeter not initialized",
+                        }
+                    ),
                     websocket,
                 )
 
@@ -1034,9 +1042,7 @@ async def all_devices_websocket(websocket: WebSocket):
     支持心跳检测和推送频率控制。
     """
     client_ip = get_client_ip(websocket)
-    connection_id = await manager.connect(
-        websocket, endpoint="/ws/devices", client_ip=client_ip
-    )
+    connection_id = await manager.connect(websocket, endpoint="/ws/devices", client_ip=client_ip)
     logger.info(f"[WS-{connection_id}] All devices WebSocket client connected from {client_ip}")
 
     try:

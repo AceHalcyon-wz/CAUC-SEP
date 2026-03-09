@@ -283,7 +283,11 @@ class PhysicsAnalyzer:
 
         if np.sum(high_field_mask) < 2:
             warnings.warn("高场数据点不足，无法拟合背景")
-            return x_field, y_moment, {"coefficients": [0.0], "r_squared": 1.0, "method": method.value}
+            return (
+                x_field,
+                y_moment,
+                {"coefficients": [0.0], "r_squared": 1.0, "method": method.value},
+            )
 
         x_high = x_field[high_field_mask]
         y_high = y_moment[high_field_mask]
@@ -389,7 +393,11 @@ class PhysicsAnalyzer:
             return {"Hc": float(hc_avg), "Hc_positive": float(hc_avg), "Hc_negative": float(hc_avg)}
 
         # 平均矫顽力
-        hc_avg = (hc_positive + hc_negative) / 2 if (hc_positive > 0 and hc_negative > 0) else max(hc_positive, hc_negative)
+        hc_avg = (
+            (hc_positive + hc_negative) / 2
+            if (hc_positive > 0 and hc_negative > 0)
+            else max(hc_positive, hc_negative)
+        )
 
         return {
             "Hc": float(hc_avg),
@@ -468,7 +476,11 @@ class PhysicsAnalyzer:
         # 如果只有一个过零点，使用该值
         if mr_positive == 0.0 and mr_negative == 0.0:
             mr_avg = float(np.mean(np.abs(mr_values)))
-            return {"Mr": mr_avg, "Mr_positive": float(mr_values[0]), "Mr_negative": float(mr_values[0])}
+            return {
+                "Mr": mr_avg,
+                "Mr_positive": float(mr_values[0]),
+                "Mr_negative": float(mr_values[0]),
+            }
 
         # 平均剩磁
         mr_avg = (abs(mr_positive) + abs(mr_negative)) / 2
@@ -687,9 +699,7 @@ class PhysicsAnalyzer:
         else:
             raise ValueError(f"不支持的模型类型: {model_type}")
 
-    def _fit_linear(
-        self, x_data: np.ndarray, y_data: np.ndarray
-    ) -> dict[str, Any]:
+    def _fit_linear(self, x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
         """线性拟合。
 
         模型: y = a * x + b
@@ -915,9 +925,7 @@ class PhysicsAnalyzer:
             "residuals": residuals,
         }
 
-    def _fit_langevin_wrapper(
-        self, x_data: np.ndarray, y_data: np.ndarray
-    ) -> dict[str, Any]:
+    def _fit_langevin_wrapper(self, x_data: np.ndarray, y_data: np.ndarray) -> dict[str, Any]:
         """Langevin 函数拟合包装器。
 
         Args:
@@ -1020,9 +1028,7 @@ class PhysicsAnalyzer:
             "residuals": residuals,
         }
 
-    def _calculate_r_squared(
-        self, y_data: np.ndarray, y_fit: np.ndarray
-    ) -> float:
+    def _calculate_r_squared(self, y_data: np.ndarray, y_fit: np.ndarray) -> float:
         """计算 R² 值（决定系数）。
 
         R² = 1 - SS_res / SS_tot
@@ -1294,8 +1300,7 @@ class PhysicsAnalyzer:
 
         # 构建元数据（排除数组数据）
         metadata = {
-            k: v for k, v in analysis_results.items()
-            if k not in ["x_corrected", "y_corrected"]
+            k: v for k, v in analysis_results.items() if k not in ["x_corrected", "y_corrected"]
         }
 
         return self.export_data(filepath, x_data, y_data, format, metadata, **kwargs)
@@ -1383,9 +1388,7 @@ def braunbeck_function(H: np.ndarray, Bs: float, Hc: float, S: float) -> np.ndar
     # 中等参数区域：使用标准 tanh
     medium_mask = (np.abs(x1) <= 20) & (np.abs(x2) <= 20)
     if np.any(medium_mask):
-        result[medium_mask] = Bs * (
-            np.tanh(x1[medium_mask]) + np.tanh(x2[medium_mask])
-        )
+        result[medium_mask] = Bs * (np.tanh(x1[medium_mask]) + np.tanh(x2[medium_mask]))
 
     # 大参数区域：使用渐近近似
     large_mask = (np.abs(x1) > 20) | (np.abs(x2) > 20)
@@ -1445,9 +1448,7 @@ def calculate_goodness_of_fit(
     y_predicted = np.asarray(y_predicted, dtype=float)
 
     if len(y_observed) != len(y_predicted):
-        raise ValueError(
-            f"观测值和预测值数组长度不匹配: {len(y_observed)} vs {len(y_predicted)}"
-        )
+        raise ValueError(f"观测值和预测值数组长度不匹配: {len(y_observed)} vs {len(y_predicted)}")
 
     n = len(y_observed)
     if n == 0:
@@ -1806,9 +1807,7 @@ class MultiModelFitter:
 
         valid_criteria = ["aic", "bic", "r_squared", "rmse"]
         if criterion not in valid_criteria:
-            raise ValueError(
-                f"无效的选择准则: {criterion}。可选: {', '.join(valid_criteria)}"
-            )
+            raise ValueError(f"无效的选择准则: {criterion}。可选: {', '.join(valid_criteria)}")
 
         if criterion in ["aic", "bic", "rmse"]:
             # 越小越好
@@ -1996,21 +1995,16 @@ def _generate_recommendations(
 
         if best_result.rmse > 0.1 * quality_metrics.get("b_range", 1.0):
             recommendations.append(
-                f"拟合误差较大 (RMSE={best_result.rmse:.4f})，"
-                "可能存在异常数据点或模型选择不当"
+                f"拟合误差较大 (RMSE={best_result.rmse:.4f})，" "可能存在异常数据点或模型选择不当"
             )
 
     # 磁滞特性建议
     if hysteresis_params:
         squareness = hysteresis_params.get("squareness", 0)
         if squareness < 0.3:
-            recommendations.append(
-                f"矩形比较低 ({squareness:.3f})，材料可能具有软磁特性"
-            )
+            recommendations.append(f"矩形比较低 ({squareness:.3f})，材料可能具有软磁特性")
         elif squareness > 0.8:
-            recommendations.append(
-                f"矩形比较高 ({squareness:.3f})，材料可能具有硬磁特性"
-            )
+            recommendations.append(f"矩形比较高 ({squareness:.3f})，材料可能具有硬磁特性")
 
         hc = hysteresis_params.get("Hc", 0)
         if hc > 0:

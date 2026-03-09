@@ -387,9 +387,7 @@ class TestAnalysisAPIEdgeCases:
         """测试包含NaN值的平滑。"""
         y_data = [1.0, 2.0, 3.0, 4.0, 5.0]
 
-        response = client_with_analysis.post(
-            "/api/v1/analysis/smooth", json={"y_data": y_data}
-        )
+        response = client_with_analysis.post("/api/v1/analysis/smooth", json={"y_data": y_data})
 
         assert response.status_code == 200
 

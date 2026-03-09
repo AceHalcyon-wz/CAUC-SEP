@@ -584,9 +584,7 @@ class UpdateManager:
         actual_checksum = await self.calculate_checksum(package_path)
 
         if actual_checksum != expected_checksum:
-            logger.error(
-                f"校验和不匹配: 期望 {expected_checksum}, 实际 {actual_checksum}"
-            )
+            logger.error(f"校验和不匹配: 期望 {expected_checksum}, 实际 {actual_checksum}")
             return False
 
         logger.info(f"更新包校验通过: {package_path}")

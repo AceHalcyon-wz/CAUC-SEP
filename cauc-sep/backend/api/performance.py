@@ -99,7 +99,11 @@ async def get_cpu_stats():
     return {
         "cpu_percent": monitor.get_cpu_percent(interval=0.1),
         "cpu_count": monitor._psutil.cpu_count() if monitor._available else 0,
-        "cpu_freq": monitor._psutil.cpu_freq()._asdict() if monitor._available and monitor._psutil.cpu_freq() else {},
+        "cpu_freq": (
+            monitor._psutil.cpu_freq()._asdict()
+            if monitor._available and monitor._psutil.cpu_freq()
+            else {}
+        ),
         "timestamp": datetime.now().isoformat(),
     }
 

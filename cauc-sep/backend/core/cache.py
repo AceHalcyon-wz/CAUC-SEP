@@ -157,8 +157,7 @@ class RedisCacheManager:
         self._initialize()
 
         logger.info(
-            f"RedisCacheManager initialized: backend={self._backend.value}, "
-            f"prefix={key_prefix}"
+            f"RedisCacheManager initialized: backend={self._backend.value}, " f"prefix={key_prefix}"
         )
 
     def _initialize(self) -> None:
@@ -193,14 +192,10 @@ class RedisCacheManager:
             )
 
             self._backend = CacheBackend.REDIS
-            logger.info(
-                f"Redis connection pool created: {self._config.host}:{self._config.port}"
-            )
+            logger.info(f"Redis connection pool created: {self._config.host}:{self._config.port}")
 
         except ImportError:
-            logger.warning(
-                "Redis package not installed, falling back to memory cache"
-            )
+            logger.warning("Redis package not installed, falling back to memory cache")
             self._backend = CacheBackend.MEMORY if self._fallback_to_memory else CacheBackend.NONE
         except Exception as e:
             logger.error(f"Failed to initialize Redis: {e}")
@@ -571,8 +566,7 @@ class RedisCacheManager:
 
                 with self._memory_cache_lock:
                     keys_to_delete = [
-                        k for k in self._memory_cache
-                        if fnmatch.fnmatch(k, full_pattern)
+                        k for k in self._memory_cache if fnmatch.fnmatch(k, full_pattern)
                     ]
                     for k in keys_to_delete:
                         del self._memory_cache[k]
@@ -966,6 +960,7 @@ def cached(
         ... def get_user(user_id: int):
         ...     return db.query(User).get(user_id)
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
@@ -982,6 +977,7 @@ def cached(
                 try:
                     # 获取函数参数名
                     import inspect
+
                     sig = inspect.signature(func)
                     bound = sig.bind(*args, **kwargs)
                     bound.apply_defaults()
@@ -1028,6 +1024,7 @@ def async_cached(
         ... async def get_device_status(device_id: str):
         ...     return await device.read_status()
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> T:
@@ -1042,6 +1039,7 @@ def async_cached(
             else:
                 try:
                     import inspect
+
                     sig = inspect.signature(func)
                     bound = sig.bind(*args, **kwargs)
                     bound.apply_defaults()

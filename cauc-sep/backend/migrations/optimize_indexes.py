@@ -143,7 +143,9 @@ def migrate_indexes(db_path: str, dry_run: bool = False, skip_backup: bool = Fal
     logger.info("\n迁移结果:")
     logger.info(f"  创建索引: {len(result['created_indexes'])} 个")
     for idx in result["created_indexes"]:
-        logger.info(f"    + {idx['index_name']} on {idx['table_name']}({', '.join(idx['columns'])})")
+        logger.info(
+            f"    + {idx['index_name']} on {idx['table_name']}({', '.join(idx['columns'])})"
+        )
 
     logger.info(f"  跳过索引: {len(result['skipped_indexes'])} 个")
     for idx in result["skipped_indexes"]:
@@ -201,14 +203,12 @@ def verify_indexes(db_path: str) -> dict:
 
     with engine.connect() as conn:
         # 获取所有索引
-        result = conn.execute(
-            text("""
+        result = conn.execute(text("""
                 SELECT m.name AS table_name, il.name AS index_name
                 FROM sqlite_master m, pragma_index_list(m.name) il
                 WHERE m.type = 'table' AND m.name NOT LIKE 'sqlite_%'
                 ORDER BY m.name, il.name
-            """)
-        )
+            """))
         indexes = result.fetchall()
 
         logger.info(f"\n总索引数: {len(indexes)}")

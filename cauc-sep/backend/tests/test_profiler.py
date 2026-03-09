@@ -123,9 +123,7 @@ class TestMemorySnapshot:
         snapshot = MemorySnapshot(
             current_memory_mb=256.0,
             peak_memory_mb=512.0,
-            top_allocations=[
-                {"file": "test.py", "size_mb": 100.0, "count": 10}
-            ],
+            top_allocations=[{"file": "test.py", "size_mb": 100.0, "count": 10}],
         )
 
         result = snapshot.to_dict()
@@ -399,6 +397,7 @@ class TestSystemMonitorAdvanced:
 
         # Windows系统使用C:，Linux使用/
         import platform
+
         if platform.system() == "Windows":
             disk_info = monitor.get_disk_info("C:\\")
         else:
@@ -554,6 +553,7 @@ class TestProfileFunctionDecoratorAdvanced:
 
     def test_decorator_preserves_function_name(self):
         """测试装饰器保留函数名。"""
+
         @profile_function()
         def my_function():
             pass

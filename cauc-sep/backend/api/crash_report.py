@@ -73,10 +73,7 @@ def _get_storage() -> CrashReportStorage:
     """
     storage = _crash_storage or get_crash_report_storage()
     if not storage:
-        raise HTTPException(
-            status_code=503,
-            detail="Crash report storage not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Crash report storage not initialized")
     return storage
 
 
@@ -161,10 +158,7 @@ async def list_crash_reports(
         raise HTTPException(status_code=400, detail=f"Invalid parameter: {str(e)}")
     except Exception as e:
         logger.error(f"Failed to list crash reports: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list crash reports: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to list crash reports: {str(e)}")
 
 
 @router.get("/statistics")
@@ -209,10 +203,7 @@ async def get_crash_statistics(
         raise HTTPException(status_code=400, detail=f"Invalid parameter: {str(e)}")
     except Exception as e:
         logger.error(f"Failed to get crash statistics: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get crash statistics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get crash statistics: {str(e)}")
 
 
 @router.get("/{report_id}")
@@ -242,10 +233,7 @@ async def get_crash_report(report_id: str):
         report = storage.get_report(report_id)
 
         if not report:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Crash report not found: {report_id}"
-            )
+            raise HTTPException(status_code=404, detail=f"Crash report not found: {report_id}")
 
         return report.to_dict()
 
@@ -253,10 +241,7 @@ async def get_crash_report(report_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to get crash report: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get crash report: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get crash report: {str(e)}")
 
 
 @router.put("/{report_id}/status")
@@ -304,8 +289,7 @@ async def update_crash_report_status(
         ]
         if status not in valid_statuses:
             raise HTTPException(
-                status_code=400,
-                detail=f"Invalid status: {status}. Valid values: {valid_statuses}"
+                status_code=400, detail=f"Invalid status: {status}. Valid values: {valid_statuses}"
             )
 
         # 更新状态
@@ -317,10 +301,7 @@ async def update_crash_report_status(
         )
 
         if not success:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Crash report not found: {report_id}"
-            )
+            raise HTTPException(status_code=404, detail=f"Crash report not found: {report_id}")
 
         return {
             "success": True,
@@ -334,8 +315,7 @@ async def update_crash_report_status(
     except Exception as e:
         logger.error(f"Failed to update crash report status: {e}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to update crash report status: {str(e)}"
+            status_code=500, detail=f"Failed to update crash report status: {str(e)}"
         )
 
 
@@ -368,8 +348,7 @@ async def export_crash_report(report_id: str):
 
         if not filepath:
             raise HTTPException(
-                status_code=404,
-                detail=f"Crash report not found or export failed: {report_id}"
+                status_code=404, detail=f"Crash report not found or export failed: {report_id}"
             )
 
         return FileResponse(
@@ -382,10 +361,7 @@ async def export_crash_report(report_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to export crash report: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to export crash report: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to export crash report: {str(e)}")
 
 
 @router.post("/cleanup")
@@ -423,10 +399,7 @@ async def cleanup_old_crash_reports(
 
     except Exception as e:
         logger.error(f"Failed to cleanup crash reports: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to cleanup crash reports: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to cleanup crash reports: {str(e)}")
 
 
 # ==================== 辅助端点 ====================

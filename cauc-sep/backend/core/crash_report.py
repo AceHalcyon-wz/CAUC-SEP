@@ -136,13 +136,13 @@ class SystemInfo:
                 platform_version=platform.version(),
                 architecture=platform.machine(),
                 cpu_count=psutil.cpu_count(logical=True),
-                memory_total_mb=round(memory.total / (1024 ** 2), 2),
-                memory_available_mb=round(memory.available / (1024 ** 2), 2),
-                disk_total_gb=round(disk.total / (1024 ** 3), 2),
-                disk_free_gb=round(disk.free / (1024 ** 3), 2),
+                memory_total_mb=round(memory.total / (1024**2), 2),
+                memory_available_mb=round(memory.available / (1024**2), 2),
+                disk_total_gb=round(disk.total / (1024**3), 2),
+                disk_free_gb=round(disk.free / (1024**3), 2),
                 hostname=platform.node(),
                 process_id=process.pid,
-                process_memory_mb=round(process.memory_info().rss / (1024 ** 2), 2),
+                process_memory_mb=round(process.memory_info().rss / (1024**2), 2),
                 process_cpu_percent=round(process.cpu_percent(interval=0.1), 2),
                 app_version=app_version,
                 uptime_seconds=round(time.time() - app_start_time, 2),
@@ -447,9 +447,7 @@ class CrashReportStorage:
             if device_id:
                 query = query.filter(self.CrashReportRecord.device_id == device_id)
             if experiment_id:
-                query = query.filter(
-                    self.CrashReportRecord.experiment_id == experiment_id
-                )
+                query = query.filter(self.CrashReportRecord.experiment_id == experiment_id)
             if user_id:
                 query = query.filter(self.CrashReportRecord.user_id == user_id)
             if start_time:
@@ -768,6 +766,7 @@ class CrashReportManager:
         # 安装异步异常处理器
         try:
             import asyncio
+
             loop = asyncio.get_event_loop()
             self._original_async_exception_handler = loop.get_exception_handler()
             loop.set_exception_handler(self._handle_async_exception)
@@ -788,6 +787,7 @@ class CrashReportManager:
         if self._original_async_exception_handler:
             try:
                 import asyncio
+
                 loop = asyncio.get_event_loop()
                 loop.set_exception_handler(self._original_async_exception_handler)
             except RuntimeError:
@@ -809,9 +809,7 @@ class CrashReportManager:
                 exc_info=(exc_type, exc_value, exc_traceback),
                 severity=self._determine_severity(exc_value),
             )
-            logger.critical(
-                f"[CrashReport] Unhandled exception captured: {report.report_id}"
-            )
+            logger.critical(f"[CrashReport] Unhandled exception captured: {report.report_id}")
         except Exception as e:
             logger.error(f"[CrashReport] Failed to capture exception: {e}")
 
@@ -835,9 +833,7 @@ class CrashReportManager:
                     severity=self._determine_severity(exception),
                     context_data={"async_context": context.get("message", "")},
                 )
-                logger.critical(
-                    f"[CrashReport] Async exception captured: {report.report_id}"
-                )
+                logger.critical(f"[CrashReport] Async exception captured: {report.report_id}")
             except Exception as e:
                 logger.error(f"[CrashReport] Failed to capture async exception: {e}")
 
@@ -1055,6 +1051,7 @@ def capture_crashes(
                     raise
 
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:

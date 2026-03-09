@@ -170,15 +170,11 @@ class TestMotorMoveEndpoints:
         """测试超出软件限位。"""
         mock_dm2c.status = DeviceStatus.READY
         mock_dm2c.move_abs = AsyncMock(return_value=False)
-        
+
         response = client_with_motor.post(
-            "/api/v1/motor/move",
-            json={
-                "position_mm": 50.0,
-                "velocity_mm_s": 5.0
-            }
+            "/api/v1/motor/move", json={"position_mm": 50.0, "velocity_mm_s": 5.0}
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is False

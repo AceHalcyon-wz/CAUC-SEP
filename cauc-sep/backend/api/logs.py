@@ -286,9 +286,17 @@ async def get_log_statistics(
                 AuditLog.operation_category,
                 func.count(AuditLog.id).label("count"),
             )
-            .filter(*[getattr(AuditLog, col) == val for col, val in locals().items()
-                     if col in ["start_time", "end_time", "device_id"] and val is not None]
-                    if any([start_time, end_time, device_id]) else [True])
+            .filter(
+                *(
+                    [
+                        getattr(AuditLog, col) == val
+                        for col, val in locals().items()
+                        if col in ["start_time", "end_time", "device_id"] and val is not None
+                    ]
+                    if any([start_time, end_time, device_id])
+                    else [True]
+                )
+            )
             .group_by(AuditLog.operation_category)
             .all()
         )
@@ -304,7 +312,9 @@ async def get_log_statistics(
             category_query = category_query.filter(AuditLog.timestamp <= end_time)
         if device_id:
             category_query = category_query.filter(AuditLog.device_id == device_id)
-        by_category = {r[0]: r[1] for r in category_query.group_by(AuditLog.operation_category).all()}
+        by_category = {
+            r[0]: r[1] for r in category_query.group_by(AuditLog.operation_category).all()
+        }
 
         # 按操作类型统计
         type_query = session.query(
@@ -328,7 +338,9 @@ async def get_log_statistics(
             device_query = device_query.filter(AuditLog.timestamp >= start_time)
         if end_time:
             device_query = device_query.filter(AuditLog.timestamp <= end_time)
-        by_device = {r[0] or "unknown": r[1] for r in device_query.group_by(AuditLog.device_id).all()}
+        by_device = {
+            r[0] or "unknown": r[1] for r in device_query.group_by(AuditLog.device_id).all()
+        }
 
         # 按响应状态统计
         status_query = session.query(
@@ -341,7 +353,9 @@ async def get_log_statistics(
             status_query = status_query.filter(AuditLog.timestamp <= end_time)
         if device_id:
             status_query = status_query.filter(AuditLog.device_id == device_id)
-        by_status = {str(r[0] or "N/A"): r[1] for r in status_query.group_by(AuditLog.response_status).all()}
+        by_status = {
+            str(r[0] or "N/A"): r[1] for r in status_query.group_by(AuditLog.response_status).all()
+        }
 
         return LogStatisticsResponse(
             total_count=total_count,
@@ -374,16 +388,32 @@ async def get_operation_types():
         OperationTypeInfo(type="emergency_reset", category="safety", description="紧急停止复位"),
         OperationTypeInfo(type="limit_config", category="parameter", description="限位配置"),
         OperationTypeInfo(type="pr_path_config", category="parameter", description="PR路径配置"),
-        OperationTypeInfo(type="electromagnet_set_current", category="parameter", description="电磁铁电流设置"),
-        OperationTypeInfo(type="electromagnet_scan", category="experiment", description="电磁铁扫描"),
-        OperationTypeInfo(type="electromagnet_calibrate", category="calibration", description="电磁铁校准"),
-        OperationTypeInfo(type="temperature_setpoint", category="parameter", description="温度设定"),
+        OperationTypeInfo(
+            type="electromagnet_set_current", category="parameter", description="电磁铁电流设置"
+        ),
+        OperationTypeInfo(
+            type="electromagnet_scan", category="experiment", description="电磁铁扫描"
+        ),
+        OperationTypeInfo(
+            type="electromagnet_calibrate", category="calibration", description="电磁铁校准"
+        ),
+        OperationTypeInfo(
+            type="temperature_setpoint", category="parameter", description="温度设定"
+        ),
         OperationTypeInfo(type="pid_config", category="parameter", description="PID参数配置"),
-        OperationTypeInfo(type="temperature_program", category="experiment", description="温度程序"),
-        OperationTypeInfo(type="piezo_set_voltage", category="parameter", description="压电电压设置"),
-        OperationTypeInfo(type="piezo_set_displacement", category="parameter", description="压电位移设置"),
+        OperationTypeInfo(
+            type="temperature_program", category="experiment", description="温度程序"
+        ),
+        OperationTypeInfo(
+            type="piezo_set_voltage", category="parameter", description="压电电压设置"
+        ),
+        OperationTypeInfo(
+            type="piezo_set_displacement", category="parameter", description="压电位移设置"
+        ),
         OperationTypeInfo(type="piezo_calibrate", category="calibration", description="压电校准"),
-        OperationTypeInfo(type="ammeter_start", category="experiment", description="微电流采集启动"),
+        OperationTypeInfo(
+            type="ammeter_start", category="experiment", description="微电流采集启动"
+        ),
         OperationTypeInfo(type="ammeter_stop", category="experiment", description="微电流采集停止"),
         OperationTypeInfo(type="experiment_start", category="experiment", description="实验开始"),
         OperationTypeInfo(type="experiment_stop", category="experiment", description="实验停止"),
@@ -592,50 +622,64 @@ async def export_logs(
             filepath = f"{export_dir}/audit_logs_{timestamp_str}.csv"
             with open(filepath, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow([
-                    "id", "timestamp", "user_id", "device_id",
-                    "operation_type", "operation_category",
-                    "request_method", "request_path", "request_params",
-                    "response_status", "response_message",
-                    "ip_address", "duration_ms",
-                ])
+                writer.writerow(
+                    [
+                        "id",
+                        "timestamp",
+                        "user_id",
+                        "device_id",
+                        "operation_type",
+                        "operation_category",
+                        "request_method",
+                        "request_path",
+                        "request_params",
+                        "response_status",
+                        "response_message",
+                        "ip_address",
+                        "duration_ms",
+                    ]
+                )
 
                 for log in logs:
-                    writer.writerow([
-                        log.id,
-                        log.timestamp.isoformat() if log.timestamp else "",
-                        log.user_id or "",
-                        log.device_id or "",
-                        log.operation_type,
-                        log.operation_category,
-                        log.request_method,
-                        log.request_path,
-                        log.request_params or "",
-                        log.response_status or "",
-                        log.response_message or "",
-                        log.ip_address or "",
-                        log.duration_ms or "",
-                    ])
+                    writer.writerow(
+                        [
+                            log.id,
+                            log.timestamp.isoformat() if log.timestamp else "",
+                            log.user_id or "",
+                            log.device_id or "",
+                            log.operation_type,
+                            log.operation_category,
+                            log.request_method,
+                            log.request_path,
+                            log.request_params or "",
+                            log.response_status or "",
+                            log.response_message or "",
+                            log.ip_address or "",
+                            log.duration_ms or "",
+                        ]
+                    )
         else:
             filepath = f"{export_dir}/audit_logs_{timestamp_str}.json"
             logs_data = []
             for log in logs:
-                logs_data.append({
-                    "id": log.id,
-                    "timestamp": log.timestamp.isoformat() if log.timestamp else None,
-                    "user_id": log.user_id,
-                    "device_id": log.device_id,
-                    "operation_type": log.operation_type,
-                    "operation_category": log.operation_category,
-                    "request_method": log.request_method,
-                    "request_path": log.request_path,
-                    "request_params": log.request_params,
-                    "response_status": log.response_status,
-                    "response_message": log.response_message,
-                    "ip_address": log.ip_address,
-                    "user_agent": log.user_agent,
-                    "duration_ms": log.duration_ms,
-                })
+                logs_data.append(
+                    {
+                        "id": log.id,
+                        "timestamp": log.timestamp.isoformat() if log.timestamp else None,
+                        "user_id": log.user_id,
+                        "device_id": log.device_id,
+                        "operation_type": log.operation_type,
+                        "operation_category": log.operation_category,
+                        "request_method": log.request_method,
+                        "request_path": log.request_path,
+                        "request_params": log.request_params,
+                        "response_status": log.response_status,
+                        "response_message": log.response_message,
+                        "ip_address": log.ip_address,
+                        "user_agent": log.user_agent,
+                        "duration_ms": log.duration_ms,
+                    }
+                )
 
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(logs_data, f, ensure_ascii=False, indent=2)

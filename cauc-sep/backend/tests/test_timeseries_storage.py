@@ -159,16 +159,18 @@ class TestTimeSeriesStorage:
         """创建临时存储环境。"""
         temp_dir = tempfile.mkdtemp()
         db_path = os.path.join(temp_dir, "test_timeseries.db")
-        
+
         yield db_path, temp_dir
-        
+
         # 清理
         import gc
         import time
+
         gc.collect()
         time.sleep(0.05)
         try:
             import shutil
+
             shutil.rmtree(temp_dir, ignore_errors=True)
         except Exception:
             pass  # Windows文件锁问题，忽略
@@ -257,10 +259,7 @@ class TestTimeSeriesStorage:
 
         storage = TimeSeriesStorage(db_path=db_path, buffer_size=100)
 
-        data_list = [
-            {"position_steps": i * 100, "field_value": i * 10.0}
-            for i in range(10)
-        ]
+        data_list = [{"position_steps": i * 100, "field_value": i * 10.0} for i in range(10)]
 
         count = await storage.write_data(1, data_list)
 
@@ -457,7 +456,9 @@ class TestDataTierManager:
         with patch.object(manager, "_Session") as mock_session:
             mock_session_instance = MagicMock()
             mock_session.return_value = mock_session_instance
-            mock_session_instance.query.return_value.filter.return_value.limit.return_value.all.return_value = []
+            mock_session_instance.query.return_value.filter.return_value.limit.return_value.all.return_value = (
+                []
+            )
 
             result = await manager.migrate_data_tiers()
 
@@ -785,6 +786,7 @@ class TestQueryOptimizer:
 
         # 等待过期
         import time
+
         time.sleep(0.2)
 
         # 过期后应该返回None

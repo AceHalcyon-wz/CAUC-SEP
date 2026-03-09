@@ -422,7 +422,9 @@ class PerformanceProfiler:
         # 按累计时间排序
         function_profiles.sort(key=lambda x: x.cumulative_time, reverse=True)
 
-        logger.debug(f"[PerformanceProfiler] Profiling stopped, {len(function_profiles)} functions profiled")
+        logger.debug(
+            f"[PerformanceProfiler] Profiling stopped, {len(function_profiles)} functions profiled"
+        )
 
         return {
             "function_profiles": [fp.to_dict() for fp in function_profiles[:100]],  # TOP 100
@@ -472,7 +474,9 @@ class PerformanceProfiler:
         tracemalloc.stop()
         self._is_memory_tracking = False
 
-        logger.debug(f"[PerformanceProfiler] Memory tracking stopped, peak: {memory_snapshot.peak_memory_mb:.2f} MB")
+        logger.debug(
+            f"[PerformanceProfiler] Memory tracking stopped, peak: {memory_snapshot.peak_memory_mb:.2f} MB"
+        )
 
         return memory_snapshot
 
@@ -491,7 +495,9 @@ class PerformanceProfiler:
             yield self
         finally:
             result = self.stop_profiling()
-            logger.info(f"[PerformanceProfiler] Profile session '{name}' completed: {result['total_functions']} functions")
+            logger.info(
+                f"[PerformanceProfiler] Profile session '{name}' completed: {result['total_functions']} functions"
+            )
 
     @contextmanager
     def track_memory(self):
@@ -722,7 +728,9 @@ class PerformanceReport:
             if "function_profiles" in data:
                 # 函数性能表格
                 html_parts.append("            <table>")
-                html_parts.append("                <tr><th>函数名</th><th>调用次数</th><th>总时间(s)</th><th>平均时间(s)</th><th>累计时间(s)</th></tr>")
+                html_parts.append(
+                    "                <tr><th>函数名</th><th>调用次数</th><th>总时间(s)</th><th>平均时间(s)</th><th>累计时间(s)</th></tr>"
+                )
                 for func in data["function_profiles"][:20]:  # TOP 20
                     html_parts.append(
                         f"                <tr>"

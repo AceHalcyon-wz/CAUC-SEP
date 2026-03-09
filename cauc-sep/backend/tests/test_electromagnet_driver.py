@@ -30,8 +30,8 @@ from core.electromagnet_driver import (
     OVERCURRENT_THRESHOLD,
 )
 
-
 # ==================== Fixtures ====================
+
 
 @pytest.fixture
 def electromagnet_config():
@@ -52,10 +52,7 @@ def electromagnet_config():
 @pytest.fixture
 def electromagnet(electromagnet_config):
     """创建电磁铁驱动器实例。"""
-    driver = ElectromagnetDriver(
-        device_id="test_electromagnet",
-        config=electromagnet_config
-    )
+    driver = ElectromagnetDriver(device_id="test_electromagnet", config=electromagnet_config)
     return driver
 
 
@@ -68,6 +65,7 @@ async def connected_electromagnet(electromagnet):
 
 
 # ==================== 基础功能测试 ====================
+
 
 class TestElectromagnetDriverBasics:
     """基础功能测试类。"""
@@ -126,6 +124,7 @@ class TestElectromagnetDriverBasics:
 
 
 # ==================== 恒流模式测试 ====================
+
 
 class TestConstantCurrentMode:
     """恒流模式测试类。"""
@@ -199,6 +198,7 @@ class TestConstantCurrentMode:
 
 # ==================== 扫描模式测试 ====================
 
+
 class TestScanMode:
     """扫描模式测试类。"""
 
@@ -206,10 +206,7 @@ class TestScanMode:
     async def test_start_forward_scan(self, connected_electromagnet):
         """测试启动正向扫描。"""
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=5.0,
-            scan_rate=0.5
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=5.0, scan_rate=0.5
         )
         assert result is True
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.SCANNING
@@ -217,10 +214,7 @@ class TestScanMode:
         # 等待扫描任务完成（5A / 0.5 A/s = 10s）
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=20.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
             except asyncio.TimeoutError:
                 connected_electromagnet._scan_task.cancel()
                 try:
@@ -240,10 +234,7 @@ class TestScanMode:
         await connected_electromagnet.set_current(5.0)
 
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.REVERSE,
-            start_current=5.0,
-            end_current=0.0,
-            scan_rate=0.5
+            mode=ScanMode.REVERSE, start_current=5.0, end_current=0.0, scan_rate=0.5
         )
         assert result is True
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.SCANNING
@@ -251,10 +242,7 @@ class TestScanMode:
         # 等待扫描任务完成（5A / 0.5 A/s = 10s）
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=20.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
             except asyncio.TimeoutError:
                 connected_electromagnet._scan_task.cancel()
                 try:
@@ -271,11 +259,7 @@ class TestScanMode:
     async def test_start_triangular_scan(self, connected_electromagnet):
         """测试启动三角波扫描。"""
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.TRIANGULAR,
-            start_current=0.0,
-            end_current=2.0,
-            scan_rate=1.0,
-            cycles=2
+            mode=ScanMode.TRIANGULAR, start_current=0.0, end_current=2.0, scan_rate=1.0, cycles=2
         )
         assert result is True
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.SCANNING
@@ -283,10 +267,7 @@ class TestScanMode:
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=15.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=15.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -296,10 +277,7 @@ class TestScanMode:
     async def test_stop_scan(self, connected_electromagnet):
         """测试停止扫描。"""
         await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=10.0,
-            scan_rate=0.1  # 慢速扫描
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=10.0, scan_rate=0.1  # 慢速扫描
         )
 
         # 等待一小段时间
@@ -315,10 +293,7 @@ class TestScanMode:
         """测试无效起始电流。"""
         with pytest.raises(ValueError):
             await connected_electromagnet.start_scan(
-                mode=ScanMode.FORWARD,
-                start_current=-1.0,
-                end_current=5.0,
-                scan_rate=0.5
+                mode=ScanMode.FORWARD, start_current=-1.0, end_current=5.0, scan_rate=0.5
             )
 
     @pytest.mark.asyncio
@@ -326,10 +301,7 @@ class TestScanMode:
         """测试无效目标电流。"""
         with pytest.raises(ValueError):
             await connected_electromagnet.start_scan(
-                mode=ScanMode.FORWARD,
-                start_current=0.0,
-                end_current=15.0,
-                scan_rate=0.5
+                mode=ScanMode.FORWARD, start_current=0.0, end_current=15.0, scan_rate=0.5
             )
 
     @pytest.mark.asyncio
@@ -337,10 +309,7 @@ class TestScanMode:
         """测试扫描速率过低。"""
         with pytest.raises(ValueError):
             await connected_electromagnet.start_scan(
-                mode=ScanMode.FORWARD,
-                start_current=0.0,
-                end_current=5.0,
-                scan_rate=0.001
+                mode=ScanMode.FORWARD, start_current=0.0, end_current=5.0, scan_rate=0.001
             )
 
     @pytest.mark.asyncio
@@ -348,10 +317,7 @@ class TestScanMode:
         """测试扫描速率过高。"""
         with pytest.raises(ValueError):
             await connected_electromagnet.start_scan(
-                mode=ScanMode.FORWARD,
-                start_current=0.0,
-                end_current=5.0,
-                scan_rate=2.0
+                mode=ScanMode.FORWARD, start_current=0.0, end_current=5.0, scan_rate=2.0
             )
 
     @pytest.mark.asyncio
@@ -363,16 +329,14 @@ class TestScanMode:
                 start_current=0.0,
                 end_current=5.0,
                 scan_rate=0.5,
-                cycles=0
+                cycles=0,
             )
 
     @pytest.mark.asyncio
     async def test_quick_scan(self, connected_electromagnet):
         """测试快速扫描。"""
         result = await connected_electromagnet.quick_scan(
-            start_field=0.0,
-            end_field=1.0,
-            scan_rate=0.5
+            start_field=0.0, end_field=1.0, scan_rate=0.5
         )
         assert result is True
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.SCANNING
@@ -380,10 +344,7 @@ class TestScanMode:
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=10.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=10.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -400,19 +361,13 @@ class TestScanMode:
         connected_electromagnet.set_progress_callback(progress_callback)
 
         await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=1.0,
-            scan_rate=1.0
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=1.0, scan_rate=1.0
         )
 
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=5.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=5.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -423,6 +378,7 @@ class TestScanMode:
 
 
 # ==================== 校准功能测试 ====================
+
 
 class TestCalibration:
     """校准功能测试类。"""
@@ -521,6 +477,7 @@ class TestCalibration:
 
 # ==================== 过流保护测试 ====================
 
+
 class TestOvercurrentProtection:
     """过流保护测试类。"""
 
@@ -559,6 +516,7 @@ class TestOvercurrentProtection:
 
 # ==================== 紧急停止测试 ====================
 
+
 class TestEmergencyStop:
     """紧急停止测试类。"""
 
@@ -579,10 +537,7 @@ class TestEmergencyStop:
         """测试扫描中紧急停止。"""
         # 启动扫描
         await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=10.0,
-            scan_rate=0.1
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=10.0, scan_rate=0.1
         )
 
         await asyncio.sleep(0.5)
@@ -606,6 +561,7 @@ class TestEmergencyStop:
 
 
 # ==================== 回调功能测试 ====================
+
 
 class TestCallbacks:
     """回调功能测试类。"""
@@ -640,10 +596,7 @@ class TestCallbacks:
 
         # 启动扫描
         await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=1.0,
-            scan_rate=1.0
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=1.0, scan_rate=1.0
         )
 
         await asyncio.sleep(2)
@@ -654,6 +607,7 @@ class TestCallbacks:
     @pytest.mark.asyncio
     async def test_callback_error_handling(self, connected_electromagnet):
         """测试回调错误处理。"""
+
         def bad_callback(status):
             raise RuntimeError("Callback error")
 
@@ -666,6 +620,7 @@ class TestCallbacks:
 
 # ==================== 边界条件测试 ====================
 
+
 class TestBoundaryConditions:
     """边界条件测试类。"""
 
@@ -673,20 +628,14 @@ class TestBoundaryConditions:
     async def test_min_scan_rate(self, connected_electromagnet):
         """测试最小扫描速率。"""
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=0.1,
-            scan_rate=MIN_SCAN_RATE
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=0.1, scan_rate=MIN_SCAN_RATE
         )
         assert result is True
 
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=20.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -694,20 +643,14 @@ class TestBoundaryConditions:
     async def test_max_scan_rate(self, connected_electromagnet):
         """测试最大扫描速率。"""
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=1.0,
-            scan_rate=MAX_SCAN_RATE
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=1.0, scan_rate=MAX_SCAN_RATE
         )
         assert result is True
 
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=5.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=5.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -735,10 +678,7 @@ class TestBoundaryConditions:
 
         # 启动扫描
         await electromagnet.start_scan(
-            mode=ScanMode.FORWARD,
-            start_current=0.0,
-            end_current=10.0,
-            scan_rate=0.1
+            mode=ScanMode.FORWARD, start_current=0.0, end_current=10.0, scan_rate=0.1
         )
 
         await asyncio.sleep(0.5)
@@ -751,6 +691,7 @@ class TestBoundaryConditions:
 
 
 # ==================== 集成测试 ====================
+
 
 class TestIntegration:
     """集成测试类。"""
@@ -774,21 +715,14 @@ class TestIntegration:
 
         # 3. 执行扫描
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.TRIANGULAR,
-            start_current=0.0,
-            end_current=2.0,
-            scan_rate=1.0,
-            cycles=1
+            mode=ScanMode.TRIANGULAR, start_current=0.0, end_current=2.0, scan_rate=1.0, cycles=1
         )
         assert result is True
 
         # 等待扫描任务完成
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=10.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=10.0)
             except asyncio.TimeoutError:
                 pass
 
@@ -817,6 +751,7 @@ class TestIntegration:
 
 # ==================== 性能测试 ====================
 
+
 class TestPerformance:
     """性能测试类。"""
 
@@ -825,21 +760,14 @@ class TestPerformance:
     async def test_long_duration_scan(self, connected_electromagnet):
         """测试长时间扫描。"""
         result = await connected_electromagnet.start_scan(
-            mode=ScanMode.TRIANGULAR,
-            start_current=0.0,
-            end_current=5.0,
-            scan_rate=0.1,
-            cycles=3
+            mode=ScanMode.TRIANGULAR, start_current=0.0, end_current=5.0, scan_rate=0.1, cycles=3
         )
         assert result is True
 
         # 等待扫描任务完成（每个周期100秒，3个周期）
         if connected_electromagnet._scan_task:
             try:
-                await asyncio.wait_for(
-                    connected_electromagnet._scan_task,
-                    timeout=350.0
-                )
+                await asyncio.wait_for(connected_electromagnet._scan_task, timeout=350.0)
             except asyncio.TimeoutError:
                 pass
 

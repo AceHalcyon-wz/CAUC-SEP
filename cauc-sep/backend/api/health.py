@@ -274,9 +274,7 @@ class AlertManager:
                     continue
 
                 # 检查阈值条件
-                condition_met = self._check_condition(
-                    metric_value, rule.threshold, rule.comparison
-                )
+                condition_met = self._check_condition(metric_value, rule.threshold, rule.comparison)
 
                 if not condition_met:
                     # 条件不满足，解决活跃告警
@@ -303,15 +301,11 @@ class AlertManager:
                 self._alert_history.append(alert)
                 self._last_alert_time[rule.rule_id] = current_time
 
-                logger.warning(
-                    f"Alert triggered: [{alert.level}] {rule.name} - {alert.message}"
-                )
+                logger.warning(f"Alert triggered: [{alert.level}] {rule.name} - {alert.message}")
 
         return triggered_alerts
 
-    def _check_condition(
-        self, value: float, threshold: float, comparison: str
-    ) -> bool:
+    def _check_condition(self, value: float, threshold: float, comparison: str) -> bool:
         """检查条件是否满足。
 
         Args:
@@ -363,9 +357,7 @@ class AlertManager:
 
         return True
 
-    def _create_alert(
-        self, rule: AlertRule, metric_value: float, current_time: float
-    ) -> Alert:
+    def _create_alert(self, rule: AlertRule, metric_value: float, current_time: float) -> Alert:
         """创建告警记录。
 
         Args:
@@ -486,9 +478,7 @@ class HealthScore(BaseModel):
 class HealthResponse(BaseModel):
     """健康检查响应模型。"""
 
-    status: str = Field(
-        ..., description="整体健康状态：healthy/degraded/unhealthy"
-    )
+    status: str = Field(..., description="整体健康状态：healthy/degraded/unhealthy")
     timestamp: str = Field(..., description="检查时间戳（ISO格式）")
     system: SystemHealth = Field(..., description="系统健康状态")
     version: str = Field(..., description="应用版本号")
@@ -690,7 +680,10 @@ def _calculate_health_score(
         sum(1 for d in device_health_list if d.connected) / max(1, total_devices) * 100, 2
     )
     details["device_error_rate"] = round(
-        sum(1 for d in device_health_list if d.status in ["error", "fault"]) / max(1, total_devices) * 100, 2
+        sum(1 for d in device_health_list if d.status in ["error", "fault"])
+        / max(1, total_devices)
+        * 100,
+        2,
     )
 
     # ==================== 性能评分 ====================
@@ -792,7 +785,9 @@ def _generate_recommendations(
         error_devices = sum(1 for d in device_health_list if d.status in ["error", "fault"])
 
         if disconnected_devices > 0:
-            recommendations.append(f"有 {disconnected_devices} 个设备断开连接，建议检查设备连接状态")
+            recommendations.append(
+                f"有 {disconnected_devices} 个设备断开连接，建议检查设备连接状态"
+            )
         if error_devices > 0:
             recommendations.append(f"有 {error_devices} 个设备处于错误状态，建议检查设备日志")
 
@@ -943,9 +938,7 @@ async def _get_device_health_list() -> list[DeviceHealth]:
     return devices
 
 
-def _calculate_health_status(
-    system_metrics: dict, device_health_list: list[DeviceHealth]
-) -> str:
+def _calculate_health_status(system_metrics: dict, device_health_list: list[DeviceHealth]) -> str:
     """
     计算整体健康状态。
 
@@ -1042,9 +1035,7 @@ async def get_health():
             "cpu": system_metrics["cpu_percent"],
             "memory": system_metrics["memory_percent"],
             "disk": system_metrics["disk_percent"],
-            "device_disconnected": float(
-                sum(1 for d in device_health_list if not d.connected)
-            ),
+            "device_disconnected": float(sum(1 for d in device_health_list if not d.connected)),
             "device_error": float(
                 sum(1 for d in device_health_list if d.status in ["error", "fault"])
             ),
@@ -1073,10 +1064,7 @@ async def get_health():
 
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Health check failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
 
 
 @router.get("/metrics")
@@ -1287,10 +1275,7 @@ async def get_metrics():
 
     except Exception as e:
         logger.error(f"Failed to generate metrics: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to generate metrics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to generate metrics: {str(e)}")
 
 
 @router.get("/devices/status", response_model=DeviceStatusSummary)
@@ -1317,8 +1302,7 @@ async def get_devices_status():
         connected_devices = sum(1 for d in device_health_list if d.connected)
         disconnected_devices = total_devices - connected_devices
         error_devices = sum(
-            1 for d in device_health_list
-            if d.status in ["error", "fault", "warning"]
+            1 for d in device_health_list if d.status in ["error", "fault", "warning"]
         )
 
         return DeviceStatusSummary(
@@ -1331,10 +1315,7 @@ async def get_devices_status():
 
     except Exception as e:
         logger.error(f"Failed to get devices status: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get devices status: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get devices status: {str(e)}")
 
 
 @router.get("/resources", response_model=SystemResourcesResponse)
@@ -1374,12 +1355,12 @@ async def get_system_resources():
         swap = psutil.swap_memory()
 
         memory_info = {
-            "total_gb": round(memory.total / (1024 ** 3), 2),
-            "available_gb": round(memory.available / (1024 ** 3), 2),
-            "used_gb": round(memory.used / (1024 ** 3), 2),
+            "total_gb": round(memory.total / (1024**3), 2),
+            "available_gb": round(memory.available / (1024**3), 2),
+            "used_gb": round(memory.used / (1024**3), 2),
             "percent": round(memory.percent, 2),
-            "swap_total_gb": round(swap.total / (1024 ** 3), 2),
-            "swap_used_gb": round(swap.used / (1024 ** 3), 2),
+            "swap_total_gb": round(swap.total / (1024**3), 2),
+            "swap_used_gb": round(swap.used / (1024**3), 2),
             "swap_percent": round(swap.percent, 2),
         }
 
@@ -1392,9 +1373,9 @@ async def get_system_resources():
         disk_io = psutil.disk_io_counters()
 
         disk_info = {
-            "total_gb": round(disk.total / (1024 ** 3), 2),
-            "used_gb": round(disk.used / (1024 ** 3), 2),
-            "free_gb": round(disk.free / (1024 ** 3), 2),
+            "total_gb": round(disk.total / (1024**3), 2),
+            "used_gb": round(disk.used / (1024**3), 2),
+            "free_gb": round(disk.free / (1024**3), 2),
             "percent": round(disk.percent, 2),
             "read_bytes": disk_io.read_bytes if disk_io else 0,
             "write_bytes": disk_io.write_bytes if disk_io else 0,
@@ -1415,7 +1396,7 @@ async def get_system_resources():
             pid=process.pid,
             name=process.name(),
             cpu_percent=round(process.cpu_percent(interval=0.1), 2),
-            memory_mb=round(process.memory_info().rss / (1024 ** 2), 2),
+            memory_mb=round(process.memory_info().rss / (1024**2), 2),
             num_threads=process.num_threads(),
         )
 
@@ -1429,10 +1410,7 @@ async def get_system_resources():
 
     except Exception as e:
         logger.error(f"Failed to get system resources: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get system resources: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get system resources: {str(e)}")
 
 
 # ==================== 告警 API 端点 ====================
@@ -1470,10 +1448,7 @@ async def get_alerts(limit: int = 100):
 
     except Exception as e:
         logger.error(f"Failed to get alerts: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get alerts: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get alerts: {str(e)}")
 
 
 @router.get("/alerts/active")
@@ -1493,10 +1468,7 @@ async def get_active_alerts():
         return alert_manager.get_active_alerts()
     except Exception as e:
         logger.error(f"Failed to get active alerts: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get active alerts: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get active alerts: {str(e)}")
 
 
 @router.post("/alerts/{alert_id}/acknowledge")
@@ -1520,18 +1492,12 @@ async def acknowledge_alert(alert_id: str):
         if success:
             return {"success": True, "message": f"Alert {alert_id} acknowledged"}
         else:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Alert {alert_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to acknowledge alert: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to acknowledge alert: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {str(e)}")
 
 
 @router.get("/alerts/rules")
@@ -1551,10 +1517,7 @@ async def get_alert_rules():
         return alert_manager.get_rules()
     except Exception as e:
         logger.error(f"Failed to get alert rules: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get alert rules: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get alert rules: {str(e)}")
 
 
 @router.post("/alerts/rules")
@@ -1580,10 +1543,7 @@ async def add_alert_rule(rule: AlertRule):
         return {"success": True, "message": f"Alert rule {rule.rule_id} added"}
     except Exception as e:
         logger.error(f"Failed to add alert rule: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to add alert rule: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to add alert rule: {str(e)}")
 
 
 @router.delete("/alerts/rules/{rule_id}")
@@ -1607,18 +1567,12 @@ async def remove_alert_rule(rule_id: str):
         if success:
             return {"success": True, "message": f"Alert rule {rule_id} removed"}
         else:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Alert rule {rule_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Alert rule {rule_id} not found")
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to remove alert rule: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to remove alert rule: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to remove alert rule: {str(e)}")
 
 
 @router.get("/health/score")
@@ -1651,7 +1605,4 @@ async def get_health_score():
 
     except Exception as e:
         logger.error(f"Failed to get health score: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get health score: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get health score: {str(e)}")

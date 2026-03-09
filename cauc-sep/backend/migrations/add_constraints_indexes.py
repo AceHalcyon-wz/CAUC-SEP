@@ -30,10 +30,7 @@ from sqlalchemy.orm import sessionmaker
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -76,10 +73,8 @@ def check_table_exists(engine, table_name: str) -> bool:
     """
     with engine.connect() as conn:
         result = conn.execute(
-            text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"
-            ),
-            {"table_name": table_name}
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"),
+            {"table_name": table_name},
         )
         return result.fetchone() is not None
 
@@ -168,7 +163,9 @@ def migrate_devices_table(conn):
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_devices_device_id ON devices(device_id)"))
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_devices_device_type ON devices(device_type)"))
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_devices_status ON devices(status)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_devices_type_status ON devices(device_type, status)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_devices_type_status ON devices(device_type, status)")
+    )
 
     logger.info("  devices 表迁移完成")
 
@@ -214,12 +211,22 @@ def migrate_experiments_table(conn):
     conn.execute(text("ALTER TABLE experiments_new RENAME TO experiments"))
 
     # 创建索引
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_exp_name ON experiments(exp_name)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_exp_type ON experiments(exp_type)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_experiments_exp_name ON experiments(exp_name)")
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_experiments_exp_type ON experiments(exp_type)")
+    )
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_user_id ON experiments(user_id)"))
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_status ON experiments(status)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_created_at ON experiments(created_at)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_experiments_user_status ON experiments(user_id, status)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_experiments_created_at ON experiments(created_at)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_experiments_user_status ON experiments(user_id, status)"
+        )
+    )
 
     logger.info("  experiments 表迁移完成")
 
@@ -260,9 +267,19 @@ def migrate_data_records_table(conn):
     conn.execute(text("ALTER TABLE data_records_new RENAME TO data_records"))
 
     # 创建索引
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_data_records_experiment_id ON data_records(experiment_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_data_records_timestamp ON data_records(timestamp)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_data_records_exp_timestamp ON data_records(experiment_id, timestamp)"))
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_data_records_experiment_id ON data_records(experiment_id)"
+        )
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_data_records_timestamp ON data_records(timestamp)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_data_records_exp_timestamp ON data_records(experiment_id, timestamp)"
+        )
+    )
 
     logger.info("  data_records 表迁移完成")
 
@@ -323,7 +340,11 @@ def migrate_pr_paths_table(conn):
 
     # 创建索引
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_pr_paths_device_id ON pr_paths(device_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_pr_paths_device_path ON pr_paths(device_id, path_number)"))
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_pr_paths_device_path ON pr_paths(device_id, path_number)"
+        )
+    )
 
     logger.info("  pr_paths 表迁移完成")
 
@@ -380,17 +401,49 @@ def migrate_audit_logs_table(conn):
     conn.execute(text("ALTER TABLE audit_logs_new RENAME TO audit_logs"))
 
     # 创建索引
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_timestamp ON audit_logs(timestamp)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_audit_logs_timestamp ON audit_logs(timestamp)")
+    )
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_user_id ON audit_logs(user_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_device_id ON audit_logs(device_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_operation_type ON audit_logs(operation_type)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_operation_category ON audit_logs(operation_category)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_request_path ON audit_logs(request_path)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_response_status ON audit_logs(response_status)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_ip_address ON audit_logs(ip_address)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_user_timestamp ON audit_logs(user_id, timestamp)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_device_timestamp ON audit_logs(device_id, timestamp)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_audit_logs_category_timestamp ON audit_logs(operation_category, timestamp)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_audit_logs_device_id ON audit_logs(device_id)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_operation_type ON audit_logs(operation_type)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_operation_category ON audit_logs(operation_category)"
+        )
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_audit_logs_request_path ON audit_logs(request_path)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_response_status ON audit_logs(response_status)"
+        )
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_audit_logs_ip_address ON audit_logs(ip_address)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_user_timestamp ON audit_logs(user_id, timestamp)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_device_timestamp ON audit_logs(device_id, timestamp)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_audit_logs_category_timestamp ON audit_logs(operation_category, timestamp)"
+        )
+    )
 
     logger.info("  audit_logs 表迁移完成")
 
@@ -430,13 +483,33 @@ def migrate_operation_logs_table(conn):
     conn.execute(text("ALTER TABLE operation_logs_new RENAME TO operation_logs"))
 
     # 创建索引
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_user_id ON operation_logs(user_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_device_id ON operation_logs(device_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_operation ON operation_logs(operation)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_result ON operation_logs(result)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_created_at ON operation_logs(created_at)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_user_created ON operation_logs(user_id, created_at)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_operation_logs_device_created ON operation_logs(device_id, created_at)"))
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_operation_logs_user_id ON operation_logs(user_id)")
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_operation_logs_device_id ON operation_logs(device_id)")
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_operation_logs_operation ON operation_logs(operation)")
+    )
+    conn.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_operation_logs_result ON operation_logs(result)")
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_operation_logs_created_at ON operation_logs(created_at)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_operation_logs_user_created ON operation_logs(user_id, created_at)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_operation_logs_device_created ON operation_logs(device_id, created_at)"
+        )
+    )
 
     logger.info("  operation_logs 表迁移完成")
 
@@ -475,9 +548,21 @@ def migrate_device_calibrations_table(conn):
     conn.execute(text("ALTER TABLE device_calibrations_new RENAME TO device_calibrations"))
 
     # 创建索引
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_calibrations_device_id ON device_calibrations(device_id)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_calibrations_valid_until ON device_calibrations(valid_until)"))
-    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_calibrations_device_param ON device_calibrations(device_id, param_name)"))
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_calibrations_device_id ON device_calibrations(device_id)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_calibrations_valid_until ON device_calibrations(valid_until)"
+        )
+    )
+    conn.execute(
+        text(
+            "CREATE INDEX IF NOT EXISTS ix_calibrations_device_param ON device_calibrations(device_id, param_name)"
+        )
+    )
 
     logger.info("  device_calibrations 表迁移完成")
 
@@ -540,10 +625,7 @@ def migrate_database(db_path: str = "experiments.db", skip_backup: bool = False)
         logger.info(f"如需回滚,请将 {backup_path} 重命名为 {db_path}")
 
     # 创建数据库引擎
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
 
     # 定义迁移顺序（考虑外键依赖）
     migrations = [
@@ -608,15 +690,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="数据库迁移脚本 - 添加约束和索引")
     parser.add_argument(
-        "--db",
-        default="experiments.db",
-        help="数据库文件路径 (默认: experiments.db)"
+        "--db", default="experiments.db", help="数据库文件路径 (默认: experiments.db)"
     )
-    parser.add_argument(
-        "--skip-backup",
-        action="store_true",
-        help="跳过数据库备份"
-    )
+    parser.add_argument("--skip-backup", action="store_true", help="跳过数据库备份")
 
     args = parser.parse_args()
 

@@ -35,10 +35,10 @@ def example_basic_tracing():
     print("=" * 60)
     print("示例1: 基础追踪使用")
     print("=" * 60)
-    
+
     # 初始化追踪系统
     tracer = init_tracing(db_path="example_traces.db")
-    
+
     # 开始追踪
     trace = tracer.start_trace(
         name="example_operation",
@@ -48,35 +48,36 @@ def example_basic_tracing():
             "operation_type": "data_processing",
         },
     )
-    
+
     print(f"✓ 开始追踪: {trace.trace_id}")
-    
+
     # 创建子Span
     span1 = tracer.start_span(name="step1_validation")
     span1.set_attribute("validation_type", "input_check")
-    
+
     # 模拟工作
     import time
+
     time.sleep(0.1)
-    
+
     span1.set_status(SpanStatus.OK)
     span1.end()
     print(f"✓ 完成步骤1: 数据验证")
-    
+
     # 创建另一个子Span
     span2 = tracer.start_span(name="step2_processing")
     span2.set_attribute("data_size", 1000)
-    
+
     # 添加事件
     span2.add_event("data_loaded", {"records": 1000})
-    
+
     time.sleep(0.15)
-    
+
     span2.add_event("processing_complete", {"success_rate": 0.98})
     span2.set_status(SpanStatus.OK)
     span2.end()
     print(f"✓ 完成步骤2: 数据处理")
-    
+
     # 结束追踪
     tracer.end_trace(trace)
     print(f"✓ 追踪完成，持续时间: {trace.root_span.duration_ms}ms")
@@ -89,13 +90,13 @@ def example_decorated_function(data: list) -> int:
     span = get_current_span()
     if span:
         span.set_attribute("data_length", len(data))
-    
+
     # 模拟处理
     result = sum(data)
-    
+
     if span:
         span.set_attribute("result", result)
-    
+
     return result
 
 
@@ -105,15 +106,15 @@ async def example_async_decorated_function(url: str) -> dict:
     span = get_current_span()
     if span:
         span.set_attribute("url", url)
-    
+
     # 模拟异步操作
     await asyncio.sleep(0.1)
-    
+
     result = {"status": "success", "url": url}
-    
+
     if span:
         span.set_attribute("response_status", 200)
-    
+
     return result
 
 
@@ -122,18 +123,18 @@ def example_decorator_tracing():
     print("=" * 60)
     print("示例2: 装饰器追踪")
     print("=" * 60)
-    
+
     # 初始化追踪系统
     tracer = init_tracing(db_path="example_traces.db")
-    
+
     # 同步函数追踪
     result1 = example_decorated_function([1, 2, 3, 4, 5])
     print(f"✓ 同步函数结果: {result1}")
-    
+
     # 异步函数追踪
     result2 = asyncio.run(example_async_decorated_function("https://api.example.com/data"))
     print(f"✓ 异步函数结果: {result2}")
-    
+
     print()
 
 
@@ -142,26 +143,26 @@ def example_error_tracing():
     print("=" * 60)
     print("示例3: 错误追踪")
     print("=" * 60)
-    
+
     tracer = init_tracing(db_path="example_traces.db")
-    
+
     @traced(name="error_function")
     def function_with_error():
         """会抛出异常的函数。"""
         span = get_current_span()
         if span:
             span.set_attribute("attempt", 1)
-        
+
         # 模拟错误
         raise ValueError("示例错误：数据格式不正确")
-    
+
     try:
         function_with_error()
     except ValueError as e:
         print(f"✓ 捕获异常: {e}")
         # 装饰器会自动记录异常到Span
         print("✓ 异常已自动记录到追踪数据")
-    
+
     print()
 
 
@@ -170,14 +171,14 @@ def example_trace_query():
     print("=" * 60)
     print("示例4: 追踪数据查询")
     print("=" * 60)
-    
+
     from tracing import get_trace_storage
-    
+
     storage = get_trace_storage()
     if not storage:
         print("✗ 追踪存储未初始化")
         return
-    
+
     # 查询最近的追踪记录
     traces = storage.query_traces(limit=5)
     print(f"✓ 最近 {len(traces)} 条追踪记录:")
@@ -187,7 +188,7 @@ def example_trace_query():
         print(f"    持续时间: {trace['duration_ms']}ms")
         print(f"    状态: {trace['status']}")
         print()
-    
+
     # 获取统计信息
     stats = storage.get_statistics()
     print("✓ 追踪统计信息:")
@@ -203,7 +204,7 @@ def example_api_integration():
     print("=" * 60)
     print("示例5: FastAPI集成")
     print("=" * 60)
-    
+
     print("FastAPI集成步骤:")
     print("1. 在main.py中初始化追踪系统:")
     print("   from core.tracing import init_tracing, TracingMiddleware, tracer")
@@ -234,7 +235,7 @@ def example_distributed_tracing():
     print("=" * 60)
     print("示例6: 分布式追踪")
     print("=" * 60)
-    
+
     print("分布式追踪支持:")
     print("1. W3C Trace Context格式:")
     print("   - 请求头: traceparent")
@@ -262,7 +263,7 @@ def main():
     print("\n" + "=" * 60)
     print("链路追踪系统使用示例")
     print("=" * 60 + "\n")
-    
+
     # 运行示例
     example_basic_tracing()
     example_decorator_tracing()
@@ -270,13 +271,14 @@ def main():
     example_trace_query()
     example_api_integration()
     example_distributed_tracing()
-    
+
     print("=" * 60)
     print("所有示例完成！")
     print("=" * 60)
-    
+
     # 清理示例数据库
     import os
+
     if os.path.exists("example_traces.db"):
         os.remove("example_traces.db")
         print("\n✓ 清理示例数据库")

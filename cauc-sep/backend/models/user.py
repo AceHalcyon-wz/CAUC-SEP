@@ -83,18 +83,9 @@ class User(Base):
 
     # 角色有效性约束
     __table_args__ = (
-        CheckConstraint(
-            f"role IN {VALID_USER_ROLES}",
-            name="ck_user_role_valid"
-        ),
-        CheckConstraint(
-            "LENGTH(username) >= 3",
-            name="ck_user_username_length"
-        ),
-        CheckConstraint(
-            "LENGTH(password_hash) >= 32",
-            name="ck_user_password_hash_length"
-        ),
+        CheckConstraint(f"role IN {VALID_USER_ROLES}", name="ck_user_role_valid"),
+        CheckConstraint("LENGTH(username) >= 3", name="ck_user_username_length"),
+        CheckConstraint("LENGTH(password_hash) >= 32", name="ck_user_password_hash_length"),
         Index("ix_users_role_active", "role", "is_active"),
     )
 
@@ -102,7 +93,9 @@ class User(Base):
     experiments = relationship("Experiment", back_populates="user")
     operation_logs = relationship("OperationLog", back_populates="user")
     audit_logs = relationship("AuditLog", back_populates="user")
-    operation_histories = relationship("OperationHistory", back_populates="user", cascade="all, delete-orphan")
+    operation_histories = relationship(
+        "OperationHistory", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, username='{self.username}', role='{self.role}')>"
@@ -115,6 +108,7 @@ class User(Base):
             dict: 用户偏好设置字典
         """
         import json
+
         if self.preferences:
             try:
                 return json.loads(self.preferences)
@@ -130,4 +124,5 @@ class User(Base):
             preferences: 用户偏好设置字典
         """
         import json
+
         self.preferences = json.dumps(preferences, ensure_ascii=False)

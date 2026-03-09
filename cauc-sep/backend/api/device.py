@@ -148,57 +148,67 @@ async def list_devices():
 
     # 步进电机
     if dm2c:
-        devices.append({
-            "device_id": dm2c.device_id,
-            "device_type": "stepper_motor",
-            "device_name": "雷赛DM2C步进电机",
-            "status": dm2c.status.value,
-            "connected": dm2c.status != DeviceStatus.DISCONNECTED,
-        })
+        devices.append(
+            {
+                "device_id": dm2c.device_id,
+                "device_type": "stepper_motor",
+                "device_name": "雷赛DM2C步进电机",
+                "status": dm2c.status.value,
+                "connected": dm2c.status != DeviceStatus.DISCONNECTED,
+            }
+        )
 
     # 电磁铁
     if electromagnet_driver:
         status_data = await electromagnet_driver.read_status()
-        devices.append({
-            "device_id": electromagnet_driver.device_id,
-            "device_type": "electromagnet",
-            "device_name": "电磁铁控制器",
-            "status": status_data.get("electromagnet_status", "unknown"),
-            "connected": status_data.get("connected", False),
-        })
+        devices.append(
+            {
+                "device_id": electromagnet_driver.device_id,
+                "device_type": "electromagnet",
+                "device_name": "电磁铁控制器",
+                "status": status_data.get("electromagnet_status", "unknown"),
+                "connected": status_data.get("connected", False),
+            }
+        )
 
     # 温控系统
     if temp_controller:
         status_data = await temp_controller.read_status()
-        devices.append({
-            "device_id": temp_controller.device_id,
-            "device_type": "temperature_controller",
-            "device_name": "温控系统",
-            "status": status_data.get("status", "unknown"),
-            "connected": status_data.get("connected", False),
-        })
+        devices.append(
+            {
+                "device_id": temp_controller.device_id,
+                "device_type": "temperature_controller",
+                "device_name": "温控系统",
+                "status": status_data.get("status", "unknown"),
+                "connected": status_data.get("connected", False),
+            }
+        )
 
     # 压电陶瓷控制器
     if piezo_controller:
         status_data = await piezo_controller.read_status()
-        devices.append({
-            "device_id": piezo_controller.device_id,
-            "device_type": "piezo_controller",
-            "device_name": "压电陶瓷控制器",
-            "status": status_data.get("status", "unknown"),
-            "connected": True,
-        })
+        devices.append(
+            {
+                "device_id": piezo_controller.device_id,
+                "device_type": "piezo_controller",
+                "device_name": "压电陶瓷控制器",
+                "status": status_data.get("status", "unknown"),
+                "connected": True,
+            }
+        )
 
     # 微电流计
     if picoammeter:
         status_data = await picoammeter.read_status()
-        devices.append({
-            "device_id": picoammeter.device_id,
-            "device_type": "picoammeter",
-            "device_name": "微电流计",
-            "status": status_data.get("status", "unknown"),
-            "connected": picoammeter.status != DeviceStatus.DISCONNECTED,
-        })
+        devices.append(
+            {
+                "device_id": picoammeter.device_id,
+                "device_type": "picoammeter",
+                "device_name": "微电流计",
+                "status": status_data.get("status", "unknown"),
+                "connected": picoammeter.status != DeviceStatus.DISCONNECTED,
+            }
+        )
 
     return {
         "count": len(devices),
@@ -226,11 +236,11 @@ async def get_device_status(device_id: str):
     if not validate_device_id(device_id):
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid device_id format: '{device_id}'. Must contain only letters, numbers, underscores, and hyphens."
+            detail=f"Invalid device_id format: '{device_id}'. Must contain only letters, numbers, underscores, and hyphens.",
         )
-    
+
     device_info = _get_device_info(device_id)
-    
+
     if not device_info:
         raise HTTPException(status_code=404, detail=f"Device '{device_id}' not found")
 
@@ -240,7 +250,7 @@ async def get_device_status(device_id: str):
 
     # 从设备驱动获取实时状态
     status_data = await instance.read_status()
-    
+
     return {
         "device_id": device_id,
         "device_type": device_info["device_type"],
@@ -253,19 +263,23 @@ async def get_device_status(device_id: str):
 
 # ==================== IO配置请求模型 ====================
 
+
 class DIConfigRequest(BaseModel):
     """DI端口配置请求模型"""
+
     di_number: int = Field(..., ge=1, le=7, description="DI端口号(1-7)")
     function: int = Field(..., ge=0, le=0xAC, description="功能代码")
 
 
 class DOConfigRequest(BaseModel):
     """DO端口配置请求模型"""
+
     do_number: int = Field(..., ge=1, le=3, description="DO端口号(1-3)")
     function: int = Field(..., ge=0, le=0xA5, description="功能代码")
 
 
 # ==================== IO配置API端点 ====================
+
 
 @router.get("/{device_id}/io/di/functions")
 async def get_di_functions(device_id: str):
@@ -284,7 +298,7 @@ async def get_di_functions(device_id: str):
     return {
         "device_id": device_id,
         "functions": {f"0x{k:02X}": v for k, v in DI_FUNCTIONS.items()},
-        "description": "常开模式: 功能代码 | 常闭模式: 功能代码 + 0x80"
+        "description": "常开模式: 功能代码 | 常闭模式: 功能代码 + 0x80",
     }
 
 
@@ -305,7 +319,7 @@ async def get_do_functions(device_id: str):
     return {
         "device_id": device_id,
         "functions": {f"0x{k:02X}": v for k, v in DO_FUNCTIONS.items()},
-        "description": "常开模式: 功能代码 | 常闭模式: 功能代码 + 0x80"
+        "description": "常开模式: 功能代码 | 常闭模式: 功能代码 + 0x80",
     }
 
 
@@ -328,7 +342,9 @@ async def configure_di(device_id: str, request: DIConfigRequest):
         raise HTTPException(status_code=503, detail="DM2C driver not initialized")
 
     if dm2c.device_id != device_id and device_id != "stepper_01":
-        raise HTTPException(status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor")
+        raise HTTPException(
+            status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor"
+        )
 
     success = await dm2c.configure_di(request.di_number, request.function)
 
@@ -343,7 +359,7 @@ async def configure_di(device_id: str, request: DIConfigRequest):
             "function": request.function,
             "function_name": func_name,
             "polarity": polarity,
-            "message": f"DI{request.di_number} configured as {func_name} ({polarity})"
+            "message": f"DI{request.di_number} configured as {func_name} ({polarity})",
         }
     else:
         raise HTTPException(status_code=500, detail=f"Failed to configure DI{request.di_number}")
@@ -368,7 +384,9 @@ async def configure_do(device_id: str, request: DOConfigRequest):
         raise HTTPException(status_code=503, detail="DM2C driver not initialized")
 
     if dm2c.device_id != device_id and device_id != "stepper_01":
-        raise HTTPException(status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor")
+        raise HTTPException(
+            status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor"
+        )
 
     success = await dm2c.configure_do(request.do_number, request.function)
 
@@ -383,7 +401,7 @@ async def configure_do(device_id: str, request: DOConfigRequest):
             "function": request.function,
             "function_name": func_name,
             "polarity": polarity,
-            "message": f"DO{request.do_number} configured as {func_name} ({polarity})"
+            "message": f"DO{request.do_number} configured as {func_name} ({polarity})",
         }
     else:
         raise HTTPException(status_code=500, detail=f"Failed to configure DO{request.do_number}")
@@ -407,14 +425,12 @@ async def read_di_status(device_id: str):
         raise HTTPException(status_code=503, detail="DM2C driver not initialized")
 
     if dm2c.device_id != device_id and device_id != "stepper_01":
-        raise HTTPException(status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor")
+        raise HTTPException(
+            status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor"
+        )
 
     status = await dm2c.read_di_status()
-    return {
-        "success": True,
-        "device_id": device_id,
-        **status
-    }
+    return {"success": True, "device_id": device_id, **status}
 
 
 @router.get("/{device_id}/io/do/status")
@@ -435,14 +451,12 @@ async def read_do_status(device_id: str):
         raise HTTPException(status_code=503, detail="DM2C driver not initialized")
 
     if dm2c.device_id != device_id and device_id != "stepper_01":
-        raise HTTPException(status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor")
+        raise HTTPException(
+            status_code=404, detail=f"Device '{device_id}' not found or not a stepper motor"
+        )
 
     status = await dm2c.read_do_status()
-    return {
-        "success": True,
-        "device_id": device_id,
-        **status
-    }
+    return {"success": True, "device_id": device_id, **status}
 
 
 @router.get("/{device_id}/io/di/{di_number}/config")
@@ -478,7 +492,7 @@ async def read_di_config(device_id: str, di_number: int):
             "di_number": di_number,
             "function": function,
             "function_name": func_name,
-            "polarity": polarity
+            "polarity": polarity,
         }
     else:
         raise HTTPException(status_code=500, detail=f"Failed to read DI{di_number} config")
@@ -517,7 +531,7 @@ async def read_do_config(device_id: str, do_number: int):
             "do_number": do_number,
             "function": function,
             "function_name": func_name,
-            "polarity": polarity
+            "polarity": polarity,
         }
     else:
         raise HTTPException(status_code=500, detail=f"Failed to read DO{do_number} config")

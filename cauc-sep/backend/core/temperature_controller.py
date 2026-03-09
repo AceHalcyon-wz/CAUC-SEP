@@ -66,6 +66,7 @@ class TemperatureControllerMode(Enum):
         PROGRAM: 程序控温模式
         PID: PID闭环控制模式
     """
+
     MANUAL = "manual"
     PROGRAM = "program"
     PID = "pid"
@@ -79,6 +80,7 @@ class TemperatureProtectionType(Enum):
         LOW_TEMP: 低温保护
         RATE_LIMIT: 温度变化率保护
     """
+
     HIGH_TEMP = "high_temperature"
     LOW_TEMP = "low_temperature"
     RATE_LIMIT = "rate_limit"
@@ -101,11 +103,12 @@ class PIDParameters:
         output_min: 最小输出（%），支持负值用于冷却
         output_max: 最大输出（%）
         integral_limit: 积分限幅（防止积分饱和），默认自动计算
-    
+
     Note:
         output_min可以为负值，表示冷却功率（如液氮流量控制）
         典型配置：output_min=-100（全速冷却），output_max=100（全速加热）
     """
+
     kp: float = 1.0
     ki: float = 0.1
     kd: float = 0.01
@@ -128,36 +131,32 @@ class PIDParameters:
         if not (0.1 <= self.kp <= 100):
             logger.error(f"Invalid Kp: {self.kp}, must be 0.1-100")
             return False
-        
+
         # 验证Ki范围
         if not (0.001 <= self.ki <= 10):
             logger.error(f"Invalid Ki: {self.ki}, must be 0.001-10")
             return False
-        
+
         # 验证Kd范围
         if not (0.001 <= self.kd <= 10):
             logger.error(f"Invalid Kd: {self.kd}, must be 0.001-10")
             return False
-        
+
         # 验证setpoint范围
         if not (min_temp <= self.setpoint <= max_temp):
-            logger.error(
-                f"Invalid setpoint: {self.setpoint}K, must be {min_temp}K-{max_temp}K"
-            )
+            logger.error(f"Invalid setpoint: {self.setpoint}K, must be {min_temp}K-{max_temp}K")
             return False
-        
+
         # 验证输出范围（允许负值用于冷却）
         if self.output_min >= self.output_max:
-            logger.error(
-                f"Invalid output range: min={self.output_min}%, max={self.output_max}%"
-            )
+            logger.error(f"Invalid output range: min={self.output_min}%, max={self.output_max}%")
             return False
-        
+
         # 验证输出范围绝对值不超过100%
         if abs(self.output_min) > 100 or abs(self.output_max) > 100:
             logger.error("Output range must be within -100% to 100%")
             return False
-        
+
         return True
 
 
@@ -177,6 +176,7 @@ class SensorChannel:
         fault_detected: 是否检测到故障
         fault_message: 故障信息
     """
+
     channel_id: int = 0
     enabled: bool = True
     name: str = ""
@@ -213,17 +213,16 @@ class SensorChannel:
         if not (min_temp <= self.temperature <= max_temp):
             self.fault_detected = True
             self.fault_message = (
-                f"Temperature {self.temperature:.1f}K out of range "
-                f"[{min_temp}K, {max_temp}K]"
+                f"Temperature {self.temperature:.1f}K out of range " f"[{min_temp}K, {max_temp}K]"
             )
             return True
-        
+
         # 检查校准参数是否合理
         if self.calibration_scale <= 0:
             self.fault_detected = True
             self.fault_message = f"Invalid calibration_scale: {self.calibration_scale}"
             return True
-        
+
         # 清除故障标志
         self.fault_detected = False
         self.fault_message = ""
@@ -242,6 +241,7 @@ class TemperatureProgramSegment:
         tolerance: 温度跟随容差（K），默认0.5K
         timeout: 段执行超时时间（秒），0表示无限制
     """
+
     target_temperature: float
     ramp_rate: float = 1.0  # K/min
     hold_time: float = 0.0  # 秒
@@ -267,9 +267,7 @@ class TemperatureProgramSegment:
             return False
         # ramp_rate为0表示立即跳转，允许0值
         if abs(self.ramp_rate) > 10:
-            logger.error(
-                f"Invalid ramp rate: {self.ramp_rate}K/min, must be -10 to 10 K/min"
-            )
+            logger.error(f"Invalid ramp rate: {self.ramp_rate}K/min, must be -10 to 10 K/min")
             return False
         if self.hold_time < 0:
             logger.error(f"Invalid hold time: {self.hold_time}s, must be >= 0")
@@ -293,6 +291,7 @@ class TemperatureProtectionConfig:
         enable_rate_limit: 启用温度变化率保护
         rate_window_size: 变化率计算窗口大小（数据点数）
     """
+
     high_temp_limit: float = 450.0
     low_temp_limit: float = 70.0
     max_rate_limit: float = 20.0
@@ -333,6 +332,7 @@ class TemperatureDataPoint:
         output: 输出功率（%）
         mode: 控制模式
     """
+
     timestamp: float
     temperature: float
     setpoint: float
@@ -350,6 +350,7 @@ class PIDState:
         last_time: 上次更新时间
         last_derivative: 上次微分项
     """
+
     integral: float = 0.0
     last_error: float = 0.0
     last_time: float = 0.0
@@ -383,7 +384,7 @@ class TemperatureController(AbstractDevice):
     """
 
     # 温度范围常量
-    MIN_TEMPERATURE = 77.0   # K (液氮温度)
+    MIN_TEMPERATURE = 77.0  # K (液氮温度)
     MAX_TEMPERATURE = 400.0  # K
     TEMPERATURE_TOLERANCE = 0.1  # K
 
@@ -464,25 +465,22 @@ class TemperatureController(AbstractDevice):
         # 保护触发标志
         self._protection_triggered = False
         self._protection_type: TemperatureProtectionType | None = None
-        
+
         # 保护回调函数列表
         self._protection_callbacks: list[ProtectionCallback] = []
 
         # 多路传感器通道
         self._sensor_channels: list[SensorChannel] = [
             SensorChannel(
-                channel_id=i, 
-                name=f"Sensor_{i}",
-                is_primary=(i == 0)  # 通道0默认为主传感器
-            ) 
+                channel_id=i, name=f"Sensor_{i}", is_primary=(i == 0)  # 通道0默认为主传感器
+            )
             for i in range(NUM_SENSOR_CHANNELS)
         ]
         # 主传感器通道ID
         self._primary_sensor_id = 0
 
         logger.info(
-            f"TemperatureController {device_id} initialized "
-            f"(simulation={self.simulation_mode})"
+            f"TemperatureController {device_id} initialized " f"(simulation={self.simulation_mode})"
         )
 
     @property
@@ -624,16 +622,13 @@ class TemperatureController(AbstractDevice):
 
             # 限制温度范围（使用保护阈值作为仿真边界）
             min_sim_temp = max(
-                self.MIN_TEMPERATURE * 0.9,
-                self.protection_config.low_temp_limit - 10
+                self.MIN_TEMPERATURE * 0.9, self.protection_config.low_temp_limit - 10
             )
             max_sim_temp = min(
-                self.MAX_TEMPERATURE * 1.1,
-                self.protection_config.high_temp_limit + 10
+                self.MAX_TEMPERATURE * 1.1, self.protection_config.high_temp_limit + 10
             )
             self._current_temperature = max(
-                min_sim_temp,
-                min(max_sim_temp, self._current_temperature)
+                min_sim_temp, min(max_sim_temp, self._current_temperature)
             )
 
             logger.debug(
@@ -649,7 +644,7 @@ class TemperatureController(AbstractDevice):
 
         Returns:
             List[Dict[str, Any]]: 所有传感器通道数据列表
-        
+
         Note:
             - 主传感器数据用于控制，其他传感器用于监控
             - 自动检测传感器故障并标记
@@ -687,8 +682,7 @@ class TemperatureController(AbstractDevice):
 
             # 检查传感器故障
             channel.check_fault(
-                min_temp=self.MIN_TEMPERATURE * 0.5,
-                max_temp=self.MAX_TEMPERATURE * 1.5
+                min_temp=self.MIN_TEMPERATURE * 0.5, max_temp=self.MAX_TEMPERATURE * 1.5
             )
 
             # 记录主传感器温度
@@ -700,16 +694,18 @@ class TemperatureController(AbstractDevice):
                         f"{channel.fault_message}"
                     )
 
-            results.append({
-                "channel_id": channel.channel_id,
-                "name": channel.name,
-                "temperature": round(calibrated_temp, 2),
-                "enabled": channel.enabled,
-                "is_primary": channel.is_primary,
-                "last_update": current_time,
-                "fault_detected": channel.fault_detected,
-                "fault_message": channel.fault_message,
-            })
+            results.append(
+                {
+                    "channel_id": channel.channel_id,
+                    "name": channel.name,
+                    "temperature": round(calibrated_temp, 2),
+                    "enabled": channel.enabled,
+                    "is_primary": channel.is_primary,
+                    "last_update": current_time,
+                    "fault_detected": channel.fault_detected,
+                    "fault_message": channel.fault_message,
+                }
+            )
 
         # 更新当前温度（使用主传感器）
         if primary_temp is not None:
@@ -823,9 +819,7 @@ class TemperatureController(AbstractDevice):
                 f"Invalid temperature: {temperature}K, "
                 f"must be {self.MIN_TEMPERATURE}K-{self.MAX_TEMPERATURE}K"
             )
-            raise ValueError(
-                f"Temperature must be {self.MIN_TEMPERATURE}K-{self.MAX_TEMPERATURE}K"
-            )
+            raise ValueError(f"Temperature must be {self.MIN_TEMPERATURE}K-{self.MAX_TEMPERATURE}K")
 
         # 检查保护状态
         if self._protection_triggered:
@@ -878,7 +872,7 @@ class TemperatureController(AbstractDevice):
 
         Returns:
             float: PID控制输出（%）
-        
+
         Note:
             输出可以为负值，表示冷却（如液氮流量控制）
             积分限幅采用输出范围的比例，防止积分饱和
@@ -891,7 +885,7 @@ class TemperatureController(AbstractDevice):
 
         # 积分项（带抗饱和）
         self._pid_state.integral += error * dt
-        
+
         # 计算积分限幅（基于输出范围）
         if self.pid_params.integral_limit > 0:
             integral_limit = self.pid_params.integral_limit
@@ -899,11 +893,10 @@ class TemperatureController(AbstractDevice):
             # 自动计算：积分限幅 = 输出范围 / Ki
             output_range = self.pid_params.output_max - self.pid_params.output_min
             integral_limit = output_range / max(self.pid_params.ki, 0.001) * 0.5
-        
+
         # 积分限幅（双向）
         self._pid_state.integral = max(
-            -integral_limit,
-            min(integral_limit, self._pid_state.integral)
+            -integral_limit, min(integral_limit, self._pid_state.integral)
         )
         i_term = self.pid_params.ki * self._pid_state.integral
 
@@ -926,10 +919,7 @@ class TemperatureController(AbstractDevice):
         output = p_term + i_term + d_term
 
         # 输出限幅（支持负值）
-        output = max(
-            self.pid_params.output_min,
-            min(self.pid_params.output_max, output)
-        )
+        output = max(self.pid_params.output_min, min(self.pid_params.output_max, output))
 
         logger.debug(
             f"PID: error={error:.2f}K, P={p_term:.2f}, I={i_term:.2f}, "
@@ -1105,7 +1095,7 @@ class TemperatureController(AbstractDevice):
 
     async def _program_control_loop(self) -> None:
         """程序控温循环（异步任务）。
-        
+
         Note:
             执行流程：升温段 -> 恒温段 -> 降温段
             每段支持温度跟随监控和超时保护
@@ -1134,26 +1124,24 @@ class TemperatureController(AbstractDevice):
             # 等待温度稳定
             if self._program_running:
                 await self._wait_temperature_stable(
-                    segment.target_temperature,
-                    segment.tolerance,
-                    timeout=30.0  # 最多等待30秒稳定
+                    segment.target_temperature, segment.tolerance, timeout=30.0  # 最多等待30秒稳定
                 )
 
             # 恒温阶段
             if segment.hold_time > 0 and self._program_running:
                 logger.info(f"Holding at {segment.target_temperature}K for {segment.hold_time}s")
-                
+
                 # 确保PID控制运行
                 if not self._pid_running:
                     await self.start_pid_control()
-                
+
                 # 分段等待，支持中途停止
                 hold_elapsed = 0.0
                 hold_interval = 1.0  # 每秒检查一次
                 while hold_elapsed < segment.hold_time and self._program_running:
                     await asyncio.sleep(hold_interval)
                     hold_elapsed += hold_interval
-                    
+
                     # 恒温期间监控温度偏差
                     temp_error = abs(self._current_temperature - segment.target_temperature)
                     if temp_error > segment.tolerance:
@@ -1170,10 +1158,7 @@ class TemperatureController(AbstractDevice):
         logger.info("Program control completed")
 
     async def _wait_temperature_stable(
-        self,
-        target_temp: float,
-        tolerance: float,
-        timeout: float = 30.0
+        self, target_temp: float, tolerance: float, timeout: float = 30.0
     ) -> bool:
         """等待温度稳定在目标值附近。
 
@@ -1191,7 +1176,7 @@ class TemperatureController(AbstractDevice):
 
         while self._program_running:
             elapsed = time.time() - start_time
-            
+
             # 超时检查
             if elapsed > timeout:
                 logger.warning(
@@ -1222,7 +1207,7 @@ class TemperatureController(AbstractDevice):
 
         Args:
             segment: 程序段
-        
+
         Note:
             支持温度跟随监控，当实际温度偏离设定温度超过容差时会记录警告
             支持超时保护，超时后强制进入下一段
@@ -1262,8 +1247,7 @@ class TemperatureController(AbstractDevice):
             # 超时检查
             if segment.timeout > 0 and elapsed_time > segment.timeout:
                 logger.warning(
-                    f"Segment timeout ({segment.timeout}s) reached, "
-                    f"moving to next segment"
+                    f"Segment timeout ({segment.timeout}s) reached, " f"moving to next segment"
                 )
                 break
 
@@ -1414,26 +1398,26 @@ class TemperatureController(AbstractDevice):
             float: 温度变化率（K/min），正值表示升温，负值表示降温
         """
         current_time = time.time()
-        
+
         # 添加当前数据点到窗口
         self._temperature_history_window.append((current_time, current_temp))
-        
+
         # 需要至少2个数据点才能计算变化率
         if len(self._temperature_history_window) < 2:
             return 0.0
-        
+
         # 使用窗口内所有数据点计算平均变化率（线性拟合）
         times = [t for t, _ in self._temperature_history_window]
         temps = [temp for _, temp in self._temperature_history_window]
-        
+
         # 计算时间跨度
         time_span = times[-1] - times[0]
         if time_span < 0.1:  # 时间跨度太小，返回0
             return 0.0
-        
+
         # 简单线性拟合：rate = (T_end - T_start) / time_span
         rate = (temps[-1] - temps[0]) / time_span * 60.0  # K/min
-        
+
         return rate
 
     async def _check_protection(self, current_temp: float) -> bool:
@@ -1444,7 +1428,7 @@ class TemperatureController(AbstractDevice):
 
         Returns:
             bool: 是否触发保护
-        
+
         Note:
             使用滑动窗口计算温度变化率，避免瞬时波动误触发
         """
@@ -1459,7 +1443,7 @@ class TemperatureController(AbstractDevice):
             await self._trigger_protection(
                 TemperatureProtectionType.RATE_LIMIT,
                 current_temp,
-                self.protection_config.max_rate_limit
+                self.protection_config.max_rate_limit,
             )
             return True
 
@@ -1471,7 +1455,7 @@ class TemperatureController(AbstractDevice):
             await self._trigger_protection(
                 TemperatureProtectionType.HIGH_TEMP,
                 current_temp,
-                self.protection_config.high_temp_limit
+                self.protection_config.high_temp_limit,
             )
             return True
 
@@ -1483,17 +1467,14 @@ class TemperatureController(AbstractDevice):
             await self._trigger_protection(
                 TemperatureProtectionType.LOW_TEMP,
                 current_temp,
-                self.protection_config.low_temp_limit
+                self.protection_config.low_temp_limit,
             )
             return True
 
         return False
 
     async def _trigger_protection(
-        self,
-        protection_type: TemperatureProtectionType,
-        current_temp: float,
-        threshold: float
+        self, protection_type: TemperatureProtectionType, current_temp: float, threshold: float
     ) -> None:
         """触发温度保护。
 
@@ -1625,7 +1606,7 @@ class TemperatureController(AbstractDevice):
 
         # 限制历史记录长度
         if len(self._temperature_history) > self.MAX_HISTORY_LENGTH:
-            self._temperature_history = self._temperature_history[-self.MAX_HISTORY_LENGTH:]
+            self._temperature_history = self._temperature_history[-self.MAX_HISTORY_LENGTH :]
 
     async def get_temperature_history(
         self,
@@ -1698,6 +1679,7 @@ class TemperatureController(AbstractDevice):
 
         elif format == "json":
             import json
+
             data = await self.get_temperature_history()
             return json.dumps(data, indent=2)
 

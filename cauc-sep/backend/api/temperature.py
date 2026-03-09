@@ -62,10 +62,7 @@ def get_temperature_controller() -> TemperatureController:
     try:
         return DeviceRegistry.get_device(TEMPERATURE_CONTROLLER_ID)
     except KeyError:
-        raise HTTPException(
-            status_code=503,
-            detail="Temperature controller not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Temperature controller not initialized")
 
 
 def set_temperature_controller(instance: TemperatureController) -> None:
@@ -114,7 +111,7 @@ async def set_temperature_setpoint(
         raise HTTPException(
             status_code=400,
             detail=f"Temperature {request.temperature}K out of range. "
-                   f"Valid range: {controller.MIN_TEMPERATURE}K-{controller.MAX_TEMPERATURE}K"
+            f"Valid range: {controller.MIN_TEMPERATURE}K-{controller.MAX_TEMPERATURE}K",
         )
 
     try:
@@ -123,7 +120,11 @@ async def set_temperature_setpoint(
         result = await controller.set_temperature(temperature_k)
         return SuccessResponse(
             success=result,
-            message=f"Setpoint set to {request.temperature}K ({request.temperature - 273.15:.1f}°C)" if result else "Failed to set setpoint",
+            message=(
+                f"Setpoint set to {request.temperature}K ({request.temperature - 273.15:.1f}°C)"
+                if result
+                else "Failed to set setpoint"
+            ),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -169,14 +170,11 @@ async def set_temperature_program(
             )
         # 验证保持时间
         if seg.hold_time < 0:
-            validation_errors.append(
-                f"Segment {i}: hold_time {seg.hold_time}s must be >= 0"
-            )
+            validation_errors.append(f"Segment {i}: hold_time {seg.hold_time}s must be >= 0")
 
     if validation_errors:
         raise HTTPException(
-            status_code=400,
-            detail="Program validation failed: " + "; ".join(validation_errors)
+            status_code=400, detail="Program validation failed: " + "; ".join(validation_errors)
         )
 
     # 转换请求为程序段（schema中已经是K单位）
@@ -199,7 +197,11 @@ async def set_temperature_program(
     result = await controller.start_program()
     return SuccessResponse(
         success=result,
-        message=f"Temperature program started with {len(segments)} segments" if result else "Failed to start program",
+        message=(
+            f"Temperature program started with {len(segments)} segments"
+            if result
+            else "Failed to start program"
+        ),
     )
 
 
@@ -249,24 +251,15 @@ async def set_pid_parameters(
 
     # 验证PID参数范围
     if not (0.1 <= request.kp <= 100):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid Kp: {request.kp}, must be 0.1-100"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid Kp: {request.kp}, must be 0.1-100")
     if not (0.001 <= request.ki <= 10):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid Ki: {request.ki}, must be 0.001-10"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid Ki: {request.ki}, must be 0.001-10")
     if not (0.001 <= request.kd <= 10):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid Kd: {request.kd}, must be 0.001-10"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid Kd: {request.kd}, must be 0.001-10")
     if not (controller.MIN_TEMPERATURE <= request.setpoint <= controller.MAX_TEMPERATURE):
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid setpoint: {request.setpoint}K, must be {controller.MIN_TEMPERATURE}K-{controller.MAX_TEMPERATURE}K"
+            detail=f"Invalid setpoint: {request.setpoint}K, must be {controller.MIN_TEMPERATURE}K-{controller.MAX_TEMPERATURE}K",
         )
 
     result = await controller.set_pid_parameters(
@@ -278,7 +271,11 @@ async def set_pid_parameters(
 
     return SuccessResponse(
         success=result,
-        message=f"PID parameters updated: Kp={request.kp}, Ki={request.ki}, Kd={request.kd}, setpoint={request.setpoint}K" if result else "Failed to update PID parameters",
+        message=(
+            f"PID parameters updated: Kp={request.kp}, Ki={request.ki}, Kd={request.kd}, setpoint={request.setpoint}K"
+            if result
+            else "Failed to update PID parameters"
+        ),
     )
 
 
@@ -397,7 +394,11 @@ async def start_pid_control(
     setpoint_c = controller.pid_params.setpoint - 273.15
     return SuccessResponse(
         success=result,
-        message=f"PID control started (setpoint={setpoint_c:.1f}°C)" if result else "Failed to start PID control",
+        message=(
+            f"PID control started (setpoint={setpoint_c:.1f}°C)"
+            if result
+            else "Failed to start PID control"
+        ),
     )
 
 
@@ -497,7 +498,11 @@ async def set_protection_config(
 
     return SuccessResponse(
         success=result,
-        message=f"Protection config updated: high={request.max_temperature}K, low={request.min_temperature}K" if result else "Failed to update protection config",
+        message=(
+            f"Protection config updated: high={request.max_temperature}K, low={request.min_temperature}K"
+            if result
+            else "Failed to update protection config"
+        ),
     )
 
 

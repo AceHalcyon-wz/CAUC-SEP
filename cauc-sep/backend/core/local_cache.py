@@ -455,18 +455,12 @@ class TTLCache(Generic[K, V]):
             return {
                 "key": key,
                 "expire_at": (
-                    datetime.fromtimestamp(entry.expire_at).isoformat()
-                    if entry.expire_at
-                    else None
+                    datetime.fromtimestamp(entry.expire_at).isoformat() if entry.expire_at else None
                 ),
                 "created_at": datetime.fromtimestamp(entry.created_at).isoformat(),
                 "access_count": entry.access_count,
-                "last_access_at": datetime.fromtimestamp(
-                    entry.last_access_at
-                ).isoformat(),
-                "ttl_remaining": (
-                    entry.expire_at - time.time() if entry.expire_at else None
-                ),
+                "last_access_at": datetime.fromtimestamp(entry.last_access_at).isoformat(),
+                "ttl_remaining": (entry.expire_at - time.time() if entry.expire_at else None),
                 "is_expired": entry.is_expired(),
             }
 
@@ -586,6 +580,7 @@ def local_cached(
             elif key is not None:
                 try:
                     import inspect
+
                     sig = inspect.signature(func)
                     bound = sig.bind(*args, **kwargs)
                     bound.apply_defaults()
@@ -648,6 +643,7 @@ def async_local_cached(
             elif key is not None:
                 try:
                     import inspect
+
                     sig = inspect.signature(func)
                     bound = sig.bind(*args, **kwargs)
                     bound.apply_defaults()

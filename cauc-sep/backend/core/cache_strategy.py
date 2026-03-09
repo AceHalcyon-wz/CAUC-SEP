@@ -449,9 +449,7 @@ class DeviceStatusCacheManager:
         await self.invalidate_device_config(device_id)
 
         # 失效依赖键
-        dependent_keys = self._invalidation_manager.invalidate_dependents(
-            f"device:{device_id}"
-        )
+        dependent_keys = self._invalidation_manager.invalidate_dependents(f"device:{device_id}")
         for key in dependent_keys:
             self._local_status_cache.delete(key)
             self._local_config_cache.delete(key)
@@ -539,6 +537,7 @@ class DeviceStatusCacheManager:
 
 
 # ==================== 缓存穿透保护 ====================
+
 
 class CachePenetrationProtector:
     """
@@ -674,6 +673,7 @@ class CachePenetrationProtector:
 
 # ==================== 缓存预热 ====================
 
+
 class CachePreloader:
     """
     缓存预热器。
@@ -752,9 +752,7 @@ class CachePreloader:
             try:
                 config = await fetch_func(device_id)
                 if config:
-                    await self._device_cache_manager.set_device_config(
-                        device_id, config
-                    )
+                    await self._device_cache_manager.set_device_config(device_id, config)
                     results[device_id] = True
                 else:
                     results[device_id] = False
@@ -767,6 +765,7 @@ class CachePreloader:
 
 
 # ==================== 设备状态缓存装饰器 ====================
+
 
 def device_status_cached(
     device_id_param: str = "device_id",
@@ -793,6 +792,7 @@ def device_status_cached(
         ... async def get_motor_status(device_id: str):
         ...     return await motor.read_status()
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> T:
@@ -867,6 +867,7 @@ def device_config_cached(
         ... async def get_motor_config(device_id: str):
         ...     return await motor.read_config()
     """
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> T:

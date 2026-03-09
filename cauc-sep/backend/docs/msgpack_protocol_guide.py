@@ -46,7 +46,7 @@ manager = ConnectionManager()
 async def websocket_device_endpoint(websocket: WebSocket):
     """
     WebSocket设备端点示例。
-    
+
     支持协议协商：
     - 默认使用JSON协议
     - 客户端可通过查询参数指定MessagePack协议
@@ -54,7 +54,7 @@ async def websocket_device_endpoint(websocket: WebSocket):
     # 解析协议类型
     query_params = dict(websocket.query_params)
     protocol = parse_protocol_from_query(query_params)
-    
+
     # 建立连接
     connection_id = await manager.connect(
         websocket,
@@ -62,7 +62,7 @@ async def websocket_device_endpoint(websocket: WebSocket):
         client_ip=websocket.client.host if websocket.client else "unknown",
         protocol=protocol,
     )
-    
+
     try:
         while True:
             # 接收消息（支持JSON和MessagePack两种格式）
@@ -73,15 +73,15 @@ async def websocket_device_endpoint(websocket: WebSocket):
             except Exception:
                 # 如果失败，尝试接收二进制消息（MessagePack）
                 data = await websocket.receive_bytes()
-            
+
             # 处理客户端消息
             is_control = await manager.handle_client_message(websocket, data)
-            
+
             if not is_control:
                 # 处理业务消息
                 # ...
                 pass
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
@@ -154,15 +154,12 @@ import websockets
 async def json_client():
     """JSON协议客户端示例。"""
     uri = "ws://localhost:8000/ws/device"
-    
+
     async with websockets.connect(uri) as websocket:
         # 发送消息
-        message = {
-            "type": "ping",
-            "timestamp": "2026-03-07T12:00:00"
-        }
+        message = {"type": "ping", "timestamp": "2026-03-07T12:00:00"}
         await websocket.send(json.dumps(message))
-        
+
         # 接收消息
         response = await websocket.recv()
         data = json.loads(response)
@@ -172,15 +169,12 @@ async def json_client():
 async def msgpack_client():
     """MessagePack协议客户端示例。"""
     uri = "ws://localhost:8000/ws/device?protocol=msgpack"
-    
+
     async with websockets.connect(uri) as websocket:
         # 发送消息
-        message = {
-            "type": "ping",
-            "timestamp": "2026-03-07T12:00:00"
-        }
+        message = {"type": "ping", "timestamp": "2026-03-07T12:00:00"}
         await websocket.send(msgpack.packb(message, use_bin_type=True))
-        
+
         # 接收消息
         response = await websocket.recv()
         data = msgpack.unpackb(response, raw=False)
@@ -258,10 +252,11 @@ MessagePack协议相比JSON协议的优势：
 # 7. 完整示例：设备状态推送
 # ============================================================================
 
+
 async def broadcast_device_status_example():
     """
     设备状态推送示例。
-    
+
     演示如何向不同协议的客户端推送消息。
     """
     # 创建设备状态消息
@@ -272,10 +267,10 @@ async def broadcast_device_status_example():
         position_mm=25.5,
         velocity_mm_s=5.0,
     )
-    
+
     # 广播消息（自动适配每个客户端的协议）
     await manager.broadcast(message)
-    
+
     # ConnectionManager会自动处理：
     # - JSON协议客户端：发送JSON文本
     # - MessagePack协议客户端：发送二进制数据
@@ -285,23 +280,24 @@ async def broadcast_device_status_example():
 # 8. 错误处理
 # ============================================================================
 
+
 async def handle_client_message_example(websocket: WebSocket, data: str | bytes):
     """
     处理客户端消息示例。
-    
+
     支持JSON和MessagePack两种格式的消息解析。
     """
     try:
         # ConnectionManager会自动识别消息格式
         is_control = await manager.handle_client_message(websocket, data)
-        
+
         if is_control:
             # 心跳或订阅消息，已处理
             return
-        
+
         # 业务消息处理
         # ...
-        
+
     except (json.JSONDecodeError, msgpack.UnpackException) as e:
         # 消息格式错误
         print(f"Invalid message format: {e}")
@@ -314,17 +310,18 @@ async def handle_client_message_example(websocket: WebSocket, data: str | bytes)
 # 9. 监控和调试
 # ============================================================================
 
+
 def get_connection_stats():
     """
     获取连接统计信息。
-    
+
     包含每个连接使用的协议类型。
     """
     stats = manager.get_connection_stats()
-    
+
     print(f"Total connections: {stats['total_connections']}")
-    
-    for conn in stats['connections']:
+
+    for conn in stats["connections"]:
         print(
             f"Connection {conn['connection_id']}: "
             f"protocol={conn['protocol']}, "

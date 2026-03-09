@@ -52,15 +52,15 @@ def example_1_braunbeck_fitting():
 
     # 绘图
     plt.figure(figsize=(10, 6))
-    plt.plot(H, B_noisy, 'b.', label='实验数据', alpha=0.5)
-    plt.plot(H, result['y_fit'], 'r-', linewidth=2, label='Braunbeck 拟合')
-    plt.xlabel('磁场强度 H (A/m)')
-    plt.ylabel('磁感应强度 B (T)')
-    plt.title('Braunbeck 磁滞模型拟合')
+    plt.plot(H, B_noisy, "b.", label="实验数据", alpha=0.5)
+    plt.plot(H, result["y_fit"], "r-", linewidth=2, label="Braunbeck 拟合")
+    plt.xlabel("磁场强度 H (A/m)")
+    plt.ylabel("磁感应强度 B (T)")
+    plt.title("Braunbeck 磁滞模型拟合")
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('braunbeck_fit.png', dpi=150)
+    plt.savefig("braunbeck_fit.png", dpi=150)
     plt.close()
     print("\n图表已保存: braunbeck_fit.png")
 
@@ -129,31 +129,34 @@ def example_2_multi_model_fitting():
     plt.figure(figsize=(12, 8))
 
     plt.subplot(2, 1, 1)
-    plt.plot(H, B_noisy, 'k.', label='实验数据', alpha=0.3, markersize=4)
-    colors = ['r', 'g', 'b']
+    plt.plot(H, B_noisy, "k.", label="实验数据", alpha=0.3, markersize=4)
+    colors = ["r", "g", "b"]
     for i, result in enumerate(results):
-        plt.plot(H, result.y_predicted, colors[i], 
-                label=f"{result.model_name} (R²={result.r_squared:.3f})", 
-                linewidth=2)
-    plt.xlabel('磁场强度 H (A/m)')
-    plt.ylabel('磁感应强度 B (T)')
-    plt.title('多模型拟合比较')
+        plt.plot(
+            H,
+            result.y_predicted,
+            colors[i],
+            label=f"{result.model_name} (R²={result.r_squared:.3f})",
+            linewidth=2,
+        )
+    plt.xlabel("磁场强度 H (A/m)")
+    plt.ylabel("磁感应强度 B (T)")
+    plt.title("多模型拟合比较")
     plt.legend()
     plt.grid(True, alpha=0.3)
 
     # 绘制残差
     plt.subplot(2, 1, 2)
     for i, result in enumerate(results):
-        plt.plot(H, result.residuals, colors[i], 
-                label=f"{result.model_name}", alpha=0.7)
-    plt.xlabel('磁场强度 H (A/m)')
-    plt.ylabel('残差 (T)')
-    plt.title('拟合残差比较')
+        plt.plot(H, result.residuals, colors[i], label=f"{result.model_name}", alpha=0.7)
+    plt.xlabel("磁场强度 H (A/m)")
+    plt.ylabel("残差 (T)")
+    plt.title("拟合残差比较")
     plt.legend()
     plt.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('multi_model_comparison.png', dpi=150)
+    plt.savefig("multi_model_comparison.png", dpi=150)
     plt.close()
     print("\n图表已保存: multi_model_comparison.png")
 

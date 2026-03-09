@@ -31,8 +31,7 @@ from models import Base, DeviceCalibration, ExperimentConfig, OperationLog
 
 # 配置日志
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -50,10 +49,8 @@ def check_table_exists(engine, table_name: str) -> bool:
     """
     with engine.connect() as conn:
         result = conn.execute(
-            text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"
-            ),
-            {"table_name": table_name}
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"),
+            {"table_name": table_name},
         )
         return result.fetchone() is not None
 
@@ -68,10 +65,7 @@ def migrate_database(db_path: str = "experiments.db"):
     logger.info(f"开始数据库迁移: {db_path}")
 
     # 创建数据库引擎
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
 
     # 检查并创建新表
     tables_to_create = {
@@ -171,17 +165,16 @@ def rollback_migration(db_path: str = "experiments.db"):
         此操作会删除表及数据,请谨慎使用
     """
     logger.warning("警告: 即将删除新创建的表,数据将丢失!")
-    logger.warning("请确认是否继续 (yes/no): ", )
+    logger.warning(
+        "请确认是否继续 (yes/no): ",
+    )
 
     confirmation = input().strip().lower()
     if confirmation != "yes":
         logger.info("回滚操作已取消")
         return
 
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
 
     tables_to_drop = [
         "device_calibrations",
@@ -206,15 +199,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="数据库迁移脚本")
     parser.add_argument(
-        "--db",
-        default="experiments.db",
-        help="数据库文件路径 (默认: experiments.db)"
+        "--db", default="experiments.db", help="数据库文件路径 (默认: experiments.db)"
     )
-    parser.add_argument(
-        "--rollback",
-        action="store_true",
-        help="回滚迁移（删除新表）"
-    )
+    parser.add_argument("--rollback", action="store_true", help="回滚迁移（删除新表）")
 
     args = parser.parse_args()
 

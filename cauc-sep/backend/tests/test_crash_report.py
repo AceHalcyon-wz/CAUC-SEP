@@ -109,6 +109,7 @@ class TestCrashReportStorage:
         yield db_path
         # Windows上需要确保数据库连接关闭后才能删除文件
         import time
+
         time.sleep(0.1)
         try:
             Path(db_path).unlink(missing_ok=True)
@@ -279,6 +280,7 @@ class TestCrashReportManager:
         yield db_path
         # Windows上需要等待文件释放
         import time
+
         time.sleep(0.1)
         try:
             Path(db_path).unlink(missing_ok=True)
@@ -346,6 +348,7 @@ class TestCaptureCrashesDecorator:
         yield db_path
         # Windows上需要等待文件释放
         import time
+
         time.sleep(0.1)
         try:
             Path(db_path).unlink(missing_ok=True)
@@ -437,7 +440,7 @@ class TestGlobalManager:
     def test_init_and_get_manager(self):
         """测试初始化和获取全局管理器。"""
         import time as time_module
-        
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 

@@ -558,10 +558,12 @@ class TestWebSocketMessageAck:
         await manager.connect(ws, ack_enabled=True)
 
         # 模拟消息确认
-        ack_message = json.dumps({
-            "type": "msg_ack",
-            "message_id": "test_msg_01",
-        })
+        ack_message = json.dumps(
+            {
+                "type": "msg_ack",
+                "message_id": "test_msg_01",
+            }
+        )
 
         # 添加未确认消息
         info = manager.get_connection_info(ws)
@@ -764,8 +766,7 @@ class TestWebSocketPerformance:
 
         # 创建大消息
         data_points = [
-            {"channel": i % 8, "value": i * 0.1, "timestamp": time.time()}
-            for i in range(10000)
+            {"channel": i % 8, "value": i * 0.1, "timestamp": time.time()} for i in range(10000)
         ]
 
         message = create_waveform_message(
@@ -858,6 +859,7 @@ class TestWebSocketIntegrationWithFastAPI:
 
                 # 等待处理
                 import time
+
                 time.sleep(0.1)
 
                 # 验证心跳更新

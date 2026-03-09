@@ -118,7 +118,9 @@ class UploadRecord:
             "report_id": self.report_id,
             "status": self.status.value,
             "attempts": self.attempts,
-            "last_attempt_time": self.last_attempt_time.isoformat() if self.last_attempt_time else None,
+            "last_attempt_time": (
+                self.last_attempt_time.isoformat() if self.last_attempt_time else None
+            ),
             "last_error": self.last_error,
             "server_response": self.server_response,
             "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None,
@@ -220,10 +222,12 @@ class CrashReportUploader:
         self._upload_records[report_id] = record
 
         # 加入队列
-        await self._upload_queue.put({
-            "report_id": report_id,
-            "report_data": report_data,
-        })
+        await self._upload_queue.put(
+            {
+                "report_id": report_id,
+                "report_data": report_data,
+            }
+        )
 
         logger.info(f"[CrashUploader] Queued report: {report_id}")
         return True
@@ -237,10 +241,7 @@ class CrashReportUploader:
             try:
                 # 非阻塞获取队列项
                 try:
-                    item = await asyncio.wait_for(
-                        self._upload_queue.get(),
-                        timeout=1.0
-                    )
+                    item = await asyncio.wait_for(self._upload_queue.get(), timeout=1.0)
                 except asyncio.TimeoutError:
                     continue
 
@@ -366,9 +367,7 @@ class CrashReportUploader:
 
                 # 压缩数据（可选）
                 if self.config.compress:
-                    content = gzip.compress(
-                        json.dumps(data, ensure_ascii=False).encode("utf-8")
-                    )
+                    content = gzip.compress(json.dumps(data, ensure_ascii=False).encode("utf-8"))
                     headers["Content-Encoding"] = "gzip"
                 else:
                     content = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -391,9 +390,7 @@ class CrashReportUploader:
 
             except Exception as e:
                 last_error = e
-                logger.warning(
-                    f"[CrashUploader] Upload attempt {attempt + 1} failed: {e}"
-                )
+                logger.warning(f"[CrashUploader] Upload attempt {attempt + 1} failed: {e}")
 
                 # 延迟后重试
                 if attempt < self.config.max_retries - 1:

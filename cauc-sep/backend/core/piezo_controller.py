@@ -165,7 +165,9 @@ class PiezoController(AbstractDevice):
             displacement_resolution_nm=config.get(
                 "displacement_resolution_nm", self.DEFAULT_CONFIG.displacement_resolution_nm
             ),
-            default_mode=ControlMode(config.get("default_mode", self.DEFAULT_CONFIG.default_mode.value)),
+            default_mode=ControlMode(
+                config.get("default_mode", self.DEFAULT_CONFIG.default_mode.value)
+            ),
             hysteresis_compensation=config.get(
                 "hysteresis_compensation", self.DEFAULT_CONFIG.hysteresis_compensation
             ),
@@ -403,9 +405,7 @@ class PiezoController(AbstractDevice):
 
     # ==================== 校准功能 ====================
 
-    async def add_calibration_point(
-        self, voltage_v: float, displacement_um: float
-    ) -> bool:
+    async def add_calibration_point(self, voltage_v: float, displacement_um: float) -> bool:
         """添加校准点。
 
         Args:
@@ -527,11 +527,7 @@ class PiezoController(AbstractDevice):
         Returns:
             bool: 电压是否有效
         """
-        return (
-            self.piezo_config.min_voltage_v
-            <= voltage_v
-            <= self.piezo_config.max_voltage_v
-        )
+        return self.piezo_config.min_voltage_v <= voltage_v <= self.piezo_config.max_voltage_v
 
     def _is_displacement_valid(self, displacement_um: float) -> bool:
         """检查位移是否在有效范围内。
@@ -655,9 +651,7 @@ class PiezoController(AbstractDevice):
         ratio = displacement_um / self.piezo_config.max_displacement_um
         return ratio * self.piezo_config.max_voltage_v
 
-    def _piecewise_interpolate(
-        self, value: float, direction: str
-    ) -> float:
+    def _piecewise_interpolate(self, value: float, direction: str) -> float:
         """分段线性插值。
 
         Args:
@@ -707,7 +701,11 @@ class PiezoController(AbstractDevice):
         coeffs = self._calibration_data.coefficients
 
         # 初始猜测
-        voltage = displacement_um / self.piezo_config.max_displacement_um * self.piezo_config.max_voltage_v
+        voltage = (
+            displacement_um
+            / self.piezo_config.max_displacement_um
+            * self.piezo_config.max_voltage_v
+        )
 
         # 牛顿迭代
         for _ in range(50):

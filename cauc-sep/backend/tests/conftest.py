@@ -117,12 +117,12 @@ def sample_signal_data():
 def clean_device_registry():
     """自动清理设备注册表（每个测试前后）。"""
     from core.device_registry import DeviceRegistry
-    
+
     # 测试前清空注册表
     DeviceRegistry.clear()
-    
+
     yield
-    
+
     # 测试后清空注册表
     DeviceRegistry.clear()
 
@@ -133,7 +133,7 @@ def test_client(mock_dm2c):
     from core.device_registry import DeviceRegistry
 
     # 确保注册表为空（已在 clean_device_registry 中清理）
-    
+
     # 注意：不手动设置设备，让 lifespan 函数处理设备初始化
     # 这样可以避免重复注册问题
 
@@ -153,13 +153,14 @@ def temp_storage():
     yield storage
 
     # 确保关闭数据库连接
-    if hasattr(storage, 'engine'):
+    if hasattr(storage, "engine"):
         storage.engine.dispose()
-    
+
     # 尝试删除临时文件
     import gc
+
     gc.collect()
-    
+
     for _ in range(5):
         try:
             if os.path.exists(db_path):
@@ -167,6 +168,7 @@ def temp_storage():
             break
         except PermissionError:
             import time
+
             time.sleep(0.1)
             gc.collect()
 

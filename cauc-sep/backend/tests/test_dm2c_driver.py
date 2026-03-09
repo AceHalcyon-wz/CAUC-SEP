@@ -165,7 +165,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_no_alarm_zh(self):
         """测试无报警时的中文信息。"""
         result = get_alarm_info(0, language="zh")
-        
+
         assert result["code"] == 0
         assert result["name"] == "无报警"
         assert result["description"] == "设备运行正常"
@@ -176,7 +176,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_no_alarm_en(self):
         """测试无报警时的英文信息。"""
         result = get_alarm_info(0, language="en")
-        
+
         assert result["code"] == 0
         assert result["name"] == "No Alarm"
         assert result["description"] == "Device operating normally"
@@ -185,7 +185,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_over_current_zh(self):
         """测试过流报警中文信息。"""
         result = get_alarm_info(0x01, language="zh")
-        
+
         assert result["code"] == 0x01
         assert result["name"] == "过流保护"
         assert "电机电流超过额定值" in result["description"]
@@ -196,7 +196,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_over_current_en(self):
         """测试过流报警英文信息。"""
         result = get_alarm_info(0x01, language="en")
-        
+
         assert result["code"] == 0x01
         assert result["name"] == "Over Current Protection"
         assert "Motor current exceeds" in result["description"]
@@ -205,7 +205,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_over_voltage_zh(self):
         """测试过压报警中文信息。"""
         result = get_alarm_info(0x02, language="zh")
-        
+
         assert result["code"] == 0x02
         assert result["name"] == "过压保护"
         assert "直流母线电压超过安全阈值" in result["description"]
@@ -214,7 +214,7 @@ class TestGetAlarmInfo:
     def test_get_alarm_info_eeprom_fault_zh(self):
         """测试EEPROM故障中文信息。"""
         result = get_alarm_info(0x200, language="zh")
-        
+
         assert result["code"] == 0x200
         assert result["name"] == "EEPROM故障"
         assert "EEPROM读写异常" in result["description"]
@@ -224,7 +224,7 @@ class TestGetAlarmInfo:
         """测试未知报警中文信息。"""
         unknown_code = 0x9999
         result = get_alarm_info(unknown_code, language="zh")
-        
+
         assert result["code"] == unknown_code
         assert "未知报警" in result["name"]
         assert "未定义的报警代码" in result["description"]
@@ -235,7 +235,7 @@ class TestGetAlarmInfo:
         """测试未知报警英文信息。"""
         unknown_code = 0x9999
         result = get_alarm_info(unknown_code, language="en")
-        
+
         assert result["code"] == unknown_code
         assert "Unknown Alarm" in result["name"]
         assert "Undefined alarm code" in result["description"]
@@ -251,7 +251,7 @@ class TestAlarmLocalization:
             # 中文检查
             assert info.name_zh, f"Missing Chinese name for alarm 0x{code:04X}"
             assert info.description_zh, f"Missing Chinese description for alarm 0x{code:04X}"
-            
+
             # 英文检查
             assert info.name_en, f"Missing English name for alarm 0x{code:04X}"
             assert info.description_en, f"Missing English description for alarm 0x{code:04X}"
@@ -261,11 +261,11 @@ class TestAlarmLocalization:
         for code, info in ALARM_INFO_MAP.items():
             zh_result = get_alarm_info(code, language="zh")
             en_result = get_alarm_info(code, language="en")
-            
+
             # 代码和严重程度应该一致
             assert zh_result["code"] == en_result["code"]
             assert zh_result["severity"] == en_result["severity"]
-            
+
             # 名称和描述应该不同（不同语言）
             assert zh_result["name"] != en_result["name"]
             assert zh_result["description"] != en_result["description"]
@@ -292,13 +292,13 @@ class TestStatusBits:
 
     def test_status_bits_values(self):
         """测试状态字位值（基于DM2C-RS556用户手册V1.8）。"""
-        assert STATUS_FAULT_BIT == 0x01        # Bit0: 故障位
-        assert STATUS_ENABLE_BIT == 0x02       # Bit1: 使能位
-        assert STATUS_RUNNING_BIT == 0x04      # Bit2: 运行位
-        assert STATUS_INVALID_BIT == 0x08      # Bit3: 无效位
-        assert STATUS_CMD_COMPLETE_BIT == 0x10 # Bit4: 指令完成位
-        assert STATUS_PATH_COMPLETE_BIT == 0x20 # Bit5: 路径完成位
-        assert STATUS_HOME_COMPLETE_BIT == 0x40 # Bit6: 回零完成位
+        assert STATUS_FAULT_BIT == 0x01  # Bit0: 故障位
+        assert STATUS_ENABLE_BIT == 0x02  # Bit1: 使能位
+        assert STATUS_RUNNING_BIT == 0x04  # Bit2: 运行位
+        assert STATUS_INVALID_BIT == 0x08  # Bit3: 无效位
+        assert STATUS_CMD_COMPLETE_BIT == 0x10  # Bit4: 指令完成位
+        assert STATUS_PATH_COMPLETE_BIT == 0x20  # Bit5: 路径完成位
+        assert STATUS_HOME_COMPLETE_BIT == 0x40  # Bit6: 回零完成位
 
     def test_status_bits_no_overlap(self):
         """测试状态字位不重叠。"""
@@ -416,16 +416,17 @@ class TestLeadshineDM2CConnection:
             mock_modbus_class = MagicMock()
             mock_modbus_class.return_value = mock_modbus_client
             mock_modbus_client.connect.return_value = True
-            
+
             # 在模块中注入Mock类
             import core.dm2c_driver as driver_module
-            original_modbus = getattr(driver_module, 'ModbusSerialClient', None)
+
+            original_modbus = getattr(driver_module, "ModbusSerialClient", None)
             driver_module.ModbusSerialClient = mock_modbus_class
-            
+
             try:
                 driver = LeadshineDM2C(device_id="test_motor", config={"port": "COM_TEST"})
                 result = await driver.connect()
-                
+
                 assert result is True
                 assert driver.status == DeviceStatus.READY
                 mock_modbus_client.connect.assert_called_once()
@@ -433,8 +434,8 @@ class TestLeadshineDM2CConnection:
                 # 恢复原始状态
                 if original_modbus is not None:
                     driver_module.ModbusSerialClient = original_modbus
-                elif hasattr(driver_module, 'ModbusSerialClient'):
-                    delattr(driver_module, 'ModbusSerialClient')
+                elif hasattr(driver_module, "ModbusSerialClient"):
+                    delattr(driver_module, "ModbusSerialClient")
 
 
 class TestLeadshineDM2CMovement:
@@ -722,20 +723,17 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_with_mock(self, mock_modbus_client):
         """测试使用Mock读取状态字。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
-            driver = LeadshineDM2C(
-                device_id="test_motor",
-                config={}
-            )
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
+            driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
-            
+
             mock_result = MagicMock()
             mock_result.isError.return_value = False
             mock_result.registers = [0x72]
             mock_modbus_client.read_holding_registers.return_value = mock_result
-            
+
             result = await driver.read_status_word()
-            
+
             assert result["fault"] is False
             assert result["enabled"] is True
             assert result["running"] is False
@@ -748,7 +746,7 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_invalid_bit(self, mock_modbus_client):
         """测试状态字无效位(Bit3)解析。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
             driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
 
@@ -768,7 +766,7 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_all_bits(self, mock_modbus_client):
         """测试状态字所有位解析。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
             driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
 
@@ -791,7 +789,7 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_cmd_complete_bit(self, mock_modbus_client):
         """测试状态字指令完成位(Bit4)解析。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
             driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
 
@@ -810,7 +808,7 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_path_complete_bit(self, mock_modbus_client):
         """测试状态字路径完成位(Bit5)解析。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
             driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
 
@@ -829,7 +827,7 @@ class TestLeadshineDM2CStatus:
     @pytest.mark.asyncio
     async def test_read_status_word_home_complete_bit(self, mock_modbus_client):
         """测试状态字回零完成位(Bit6)解析。"""
-        with patch('core.dm2c_driver.PYMODBUS_AVAILABLE', True):
+        with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", True):
             driver = LeadshineDM2C(device_id="test_motor", config={})
             driver.client = mock_modbus_client
 
@@ -1347,9 +1345,7 @@ class TestConfigureHomeSpeed:
         with patch("core.dm2c_driver.PYMODBUS_AVAILABLE", False):
             driver = LeadshineDM2C(device_id="test_motor", config={})
 
-            result = await driver.configure_home_speed(
-                speed_high=5000, speed_low=500
-            )
+            result = await driver.configure_home_speed(speed_high=5000, speed_low=500)
 
             assert result is True
 
@@ -1402,9 +1398,7 @@ class TestConfigureHomeSpeed:
             mock_result.isError.return_value = False
             mock_modbus_client.write_register.return_value = mock_result
 
-            result = await driver.configure_home_speed(
-                speed_high=3000, speed_low=300
-            )
+            result = await driver.configure_home_speed(speed_high=3000, speed_low=300)
 
             assert result is True
             assert mock_modbus_client.write_register.call_count == 2
@@ -1535,9 +1529,7 @@ class TestHomeOperation:
             assert result is True
 
             # 2. 配置回零速度
-            result = await driver.configure_home_speed(
-                speed_high=5000, speed_low=500
-            )
+            result = await driver.configure_home_speed(speed_high=5000, speed_low=500)
             assert result is True
 
             # 3. 配置回零偏移
@@ -1977,9 +1969,9 @@ class TestConfigureAllDI:
             driver = LeadshineDM2C(device_id="test_motor", config={})
 
             config = {
-                1: 0x08,   # 有效
-                2: 0x99,   # 无效功能代码
-                3: 0x24,   # 有效
+                1: 0x08,  # 有效
+                2: 0x99,  # 无效功能代码
+                3: 0x24,  # 有效
             }
 
             results = await driver.configure_all_di(config)
@@ -2017,8 +2009,8 @@ class TestConfigureAllDO:
             driver = LeadshineDM2C(device_id="test_motor", config={})
 
             config = {
-                1: 0x25,   # 有效
-                2: 0x99,   # 无效功能代码
+                1: 0x25,  # 有效
+                2: 0x99,  # 无效功能代码
             }
 
             results = await driver.configure_all_do(config)

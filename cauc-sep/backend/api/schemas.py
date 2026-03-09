@@ -19,6 +19,7 @@ class ScanMode(str, Enum):
     REVERSE = "reverse"
     TRIANGULAR = "triangular"
 
+
 # ==================== 通用响应模型 ====================
 
 
@@ -62,10 +63,10 @@ class ErrorCode(str, Enum):
 class ErrorResponse(BaseModel):
     """
     通用错误响应模型。
-    
+
     提供统一的错误响应格式，包含错误码、详细信息和时间戳。
     """
-    
+
     error_code: str = Field(..., description="错误代码，如 'INVALID_PARAM', 'DEVICE_ERROR'")
     detail: str = Field(..., description="错误详情描述")
     timestamp: str | None = Field(None, description="错误发生时间戳")
@@ -76,7 +77,7 @@ class ValidationErrorDetail(BaseModel):
     """
     参数验证错误详情。
     """
-    
+
     field: str = Field(..., description="错误字段名")
     value: Any = Field(..., description="错误值")
     constraint: str = Field(..., description="约束条件")
@@ -87,7 +88,7 @@ class ValidationErrorResponse(BaseModel):
     """
     参数验证错误响应。
     """
-    
+
     error_code: str = Field("VALIDATION_ERROR", description="错误代码")
     detail: str = Field(..., description="错误概述")
     errors: list[ValidationErrorDetail] = Field(..., description="详细错误列表")
@@ -290,20 +291,20 @@ class HysteresisResponse(BaseModel):
 
 # 电磁铁技术规范常量（与驱动层保持一致）
 ELECTROMAGNET_MAX_CURRENT = 10.0  # 最大电流（A）
-ELECTROMAGNET_MAX_FIELD = 2.0     # 最大磁场（T）
+ELECTROMAGNET_MAX_FIELD = 2.0  # 最大磁场（T）
 ELECTROMAGNET_MIN_SCAN_RATE = 0.01  # 最小扫描速率（A/s）
-ELECTROMAGNET_MAX_SCAN_RATE = 1.0   # 最大扫描速率（A/s）
+ELECTROMAGNET_MAX_SCAN_RATE = 1.0  # 最大扫描速率（A/s）
 
 
 class ElectromagnetSetCurrentRequest(BaseModel):
     """
     电磁铁电流设置请求。
-    
+
     注意：电流范围验证在API层动态执行，
     实际最大电流限制由设备配置决定（max_current_limit）。
     Pydantic仅进行基础范围校验（0-10A）。
     """
-    
+
     current: float = Field(
         ...,
         description="目标电流值(A)，基础范围: 0-10A，实际限制由设备配置决定",
@@ -315,10 +316,10 @@ class ElectromagnetSetCurrentRequest(BaseModel):
 class CalibrationPoint(BaseModel):
     """
     校准点数据模型。
-    
+
     用于建立电流-磁场映射关系。
     """
-    
+
     current: float = Field(
         ...,
         description="电流值(A)",
@@ -336,16 +337,16 @@ class CalibrationPoint(BaseModel):
 class ElectromagnetScanRequest(BaseModel):
     """
     电磁铁扫描请求模型。
-    
+
     支持三种扫描模式：
     - forward: 正向扫描（电流从低到高）
     - reverse: 反向扫描（电流从高到低）
     - triangular: 三角波扫描（往返扫描）
-    
+
     注意：电流范围验证在API层动态执行，
     实际最大电流限制由设备配置决定。
     """
-    
+
     mode: ScanMode = Field(
         ...,
         description="扫描模式: forward(正向), reverse(反向), triangular(三角波)",
@@ -384,10 +385,10 @@ class ElectromagnetScanRequest(BaseModel):
 class ElectromagnetScanValidateRequest(BaseModel):
     """
     电磁铁扫描参数预验证请求。
-    
+
     用于前端在启动扫描前验证参数有效性。
     """
-    
+
     mode: ScanMode = Field(..., description="扫描模式")
     start_current: float = Field(..., description="起始电流(A)")
     end_current: float = Field(..., description="目标电流(A)")
@@ -399,7 +400,7 @@ class ElectromagnetScanValidateResponse(BaseModel):
     """
     电磁铁扫描参数验证响应。
     """
-    
+
     valid: bool = Field(..., description="参数是否有效")
     errors: list[str] = Field(default_factory=list, description="错误信息列表")
     warnings: list[str] = Field(default_factory=list, description="警告信息列表")
@@ -620,13 +621,13 @@ class AmmeterStatusResponse(BaseModel):
 # ==================== 温度控制模型 ====================
 
 # 温度范围常量（与技术设计文档一致）
-TEMP_MIN_K = 77.0   # 液氮温度
+TEMP_MIN_K = 77.0  # 液氮温度
 TEMP_MAX_K = 400.0  # 最高温度
 
 
 class TemperatureSetpointRequest(BaseModel):
     """温度设定点请求。
-    
+
     温度范围：77K-400K（液氮釜温控系统）
     """
 
@@ -640,7 +641,7 @@ class TemperatureSetpointRequest(BaseModel):
 
 class TemperatureProgramSegmentRequest(BaseModel):
     """温度程序段请求。
-    
+
     参数范围：
     - target_temperature: 77K-400K
     - ramp_rate: -10到10 K/min（正值升温，负值降温，0表示立即跳转）
@@ -678,7 +679,7 @@ class TemperatureProgramRequest(BaseModel):
 
 class PIDParametersRequest(BaseModel):
     """PID参数请求。
-    
+
     参数范围：
     - Kp: 0.1-100（比例系数）
     - Ki: 0.001-10（积分系数）
@@ -714,7 +715,7 @@ class PIDParametersRequest(BaseModel):
 
 class ProtectionConfigRequest(BaseModel):
     """温度保护配置请求。
-    
+
     保护阈值范围：
     - 高温保护: >450K 触发
     - 低温保护: <70K 触发
@@ -743,7 +744,7 @@ class ProtectionConfigRequest(BaseModel):
 
 class TemperatureStatusResponse(BaseModel):
     """温度控制器状态响应。
-    
+
     温度单位：开尔文(K)
     """
 
@@ -911,10 +912,10 @@ class ReportExportRequest(BaseModel):
 
 class HistoryQueryRequest(BaseModel):
     """历史数据查询请求。
-    
+
     支持按实验ID、设备、时间范围等条件查询历史数据。
     """
-    
+
     experiment_ids: list[int] | None = Field(
         None,
         description="实验ID列表，可选，不指定则查询所有实验",
@@ -950,7 +951,7 @@ class HistoryQueryRequest(BaseModel):
 
 class HistoryDataPoint(BaseModel):
     """历史数据点。"""
-    
+
     timestamp: str = Field(..., description="时间戳")
     experiment_id: int = Field(..., description="实验ID")
     device: str | None = Field(None, description="设备名称")
@@ -964,7 +965,7 @@ class HistoryDataPoint(BaseModel):
 
 class HistoryQueryResponse(BaseModel):
     """历史数据查询响应。"""
-    
+
     success: bool = Field(..., description="操作是否成功")
     message: str = Field(..., description="操作消息")
     total: int = Field(..., description="总数据点数")
@@ -980,7 +981,7 @@ class HistoryQueryResponse(BaseModel):
 
 class CompareDataset(BaseModel):
     """对比数据集。"""
-    
+
     experiment_id: int = Field(..., description="实验ID")
     name: str = Field(..., description="数据集名称")
     data_type: str = Field(
@@ -991,10 +992,10 @@ class CompareDataset(BaseModel):
 
 class CompareRequest(BaseModel):
     """数据对比请求。
-    
+
     用于对比多个实验或数据集的数据。
     """
-    
+
     datasets: list[CompareDataset] = Field(
         ...,
         description="要对比的数据集列表，至少2个",
@@ -1013,7 +1014,7 @@ class CompareRequest(BaseModel):
 
 class CompareDatasetResult(BaseModel):
     """对比数据集结果。"""
-    
+
     experiment_id: int = Field(..., description="实验ID")
     name: str = Field(..., description="数据集名称")
     data: list[dict[str, Any]] = Field(..., description="数据点列表")
@@ -1022,7 +1023,7 @@ class CompareDatasetResult(BaseModel):
 
 class CompareResponse(BaseModel):
     """数据对比响应。"""
-    
+
     success: bool = Field(..., description="操作是否成功")
     message: str = Field(..., description="操作消息")
     datasets: list[CompareDatasetResult] = Field(..., description="对比数据集结果")

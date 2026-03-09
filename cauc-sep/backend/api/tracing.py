@@ -63,7 +63,7 @@ async def list_traces(
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     traces = storage.query_traces(
         service_name=service_name,
         start_time=start_time,
@@ -71,7 +71,7 @@ async def list_traces(
         status=status,
         limit=limit,
     )
-    
+
     return TraceListResponse(
         total=len(traces),
         traces=traces,
@@ -101,22 +101,22 @@ async def get_trace_detail(trace_id: str):
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     # 验证trace_id格式
     if not trace_id or len(trace_id) != 32:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid trace_id format: {trace_id}. Expected 32-character hex string.",
         )
-    
+
     trace_detail = storage.get_trace_detail(trace_id)
-    
+
     if not trace_detail:
         raise HTTPException(
             status_code=404,
             detail=f"Trace not found: {trace_id}",
         )
-    
+
     return TraceDetailResponse(**trace_detail)
 
 
@@ -146,17 +146,17 @@ async def get_trace_statistics(
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     # 如果指定了hours参数，自动计算时间范围
     if hours:
         end_time = datetime.now()
         start_time = end_time - timedelta(hours=hours)
-    
+
     stats = storage.get_statistics(
         start_time=start_time,
         end_time=end_time,
     )
-    
+
     return TraceStatisticsResponse(**stats)
 
 
@@ -182,11 +182,11 @@ async def cleanup_old_traces(
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     deleted_count = storage.cleanup_old_traces(max_age_days=max_age_days)
-    
+
     logger.info(f"[Tracing] Cleaned up {deleted_count} old traces (max_age_days={max_age_days})")
-    
+
     return {
         "success": True,
         "deleted_count": deleted_count,
@@ -206,20 +206,20 @@ async def tracing_health_check():
         GET /api/v1/tracing/health
     """
     storage = get_trace_storage()
-    
+
     if not storage:
         return {
             "status": "unhealthy",
             "message": "Trace storage not initialized",
         }
-    
+
     try:
         # 尝试查询最近的追踪记录
         recent_traces = storage.query_traces(limit=1)
-        
+
         # 获取统计信息
         stats = storage.get_statistics()
-        
+
         return {
             "status": "healthy",
             "message": "Tracing system is operational",
@@ -257,14 +257,14 @@ async def get_span_detail(span_id: str):
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     # 验证span_id格式
     if not span_id or len(span_id) != 16:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid span_id format: {span_id}. Expected 16-character hex string.",
         )
-    
+
     # 查询Span（需要通过trace_id查询）
     # 注意：这里需要扩展TraceStorage来支持直接查询Span
     # 暂时返回提示信息
@@ -298,17 +298,18 @@ async def search_traces(
             status_code=503,
             detail="Trace storage not initialized",
         )
-    
+
     # 搜索功能（简化实现：在root_span_name中搜索）
     # 注意：完整实现需要使用数据库全文搜索或专门的搜索引擎
     all_traces = storage.query_traces(limit=1000)
-    
+
     # 过滤匹配的追踪记录
     matched_traces = [
-        trace for trace in all_traces
+        trace
+        for trace in all_traces
         if query.lower() in (trace.get("root_span_name") or "").lower()
     ][:limit]
-    
+
     return {
         "query": query,
         "total": len(matched_traces),

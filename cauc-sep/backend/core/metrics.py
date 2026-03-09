@@ -108,9 +108,7 @@ class Metric:
         if not all_labels:
             return ""
 
-        label_str = ",".join(
-            f'{k}="{v}"' for k, v in sorted(all_labels.items())
-        )
+        label_str = ",".join(f'{k}="{v}"' for k, v in sorted(all_labels.items()))
         return f"{{{label_str}}}"
 
     def export(self) -> str:
@@ -260,8 +258,23 @@ class Histogram(Metric):
     """
 
     DEFAULT_BUCKETS = (
-        0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0,
-        2.5, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0,
+        0.005,
+        0.01,
+        0.025,
+        0.05,
+        0.1,
+        0.25,
+        0.5,
+        1.0,
+        2.5,
+        5.0,
+        10.0,
+        25.0,
+        50.0,
+        100.0,
+        250.0,
+        500.0,
+        1000.0,
     )
 
     def __init__(
@@ -789,12 +802,13 @@ class BusinessMetricsCollector:
                 used_bytes = stat.st_size
 
                 # 获取磁盘信息
-                disk_stat = os.statvfs(os.path.dirname(db_path)) if hasattr(os, 'statvfs') else None
+                disk_stat = os.statvfs(os.path.dirname(db_path)) if hasattr(os, "statvfs") else None
                 if disk_stat:
                     total_bytes = disk_stat.f_blocks * disk_stat.f_frsize
                 else:
                     # Windows系统
                     import shutil
+
                     total, used, free = shutil.disk_usage(os.path.dirname(db_path) or ".")
                     total_bytes = total
 

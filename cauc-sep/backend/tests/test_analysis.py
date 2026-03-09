@@ -123,7 +123,7 @@ class TestSignalSmoothing:
         """测试Savitzky-Golay无效窗口长度（过小）。"""
         analyzer = PhysicsAnalyzer()
         y = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-        
+
         with pytest.raises(ValueError, match="window_length"):
             analyzer.smooth_signal(y, method="savgol", window_length=2)
 
@@ -187,16 +187,16 @@ class TestBackgroundSubtraction:
     def test_background_subtraction_linear(self):
         """测试线性背景扣除。"""
         analyzer = PhysicsAnalyzer()
-        
+
         x = np.linspace(-100, 100, 200)
         slope = 0.01
         intercept = 0.5
         background = slope * x + intercept
         signal = np.tanh(x / 30)
         y = signal + background
-        
+
         x_corr, y_corr, params = analyzer.subtract_background(x, y)
-        
+
         assert "coefficients" in params
         assert "r_squared" in params
         assert abs(params["coefficients"][0] - slope) < 0.02
@@ -421,34 +421,34 @@ class TestHysteresisLoopAnalysis:
 
 class TestLangevinFit:
     """测试Langevin函数拟合。"""
-    
+
     def test_langevin_fit_basic(self):
         """测试基本Langevin拟合。"""
         analyzer = PhysicsAnalyzer()
-        
+
         h_field = np.linspace(0, 1000, 100)
         ms_true = 1.0
-        
+
         moment = np.tanh(h_field / 200)
-        
+
         result, params = analyzer.fit_langevin(h_field, moment)
-        
+
         assert isinstance(result, lmfit.model.ModelResult)
         assert "Ms" in params
         assert "alpha" in params
         assert "chi2" in params
         assert "redchi" in params
-    
+
     def test_langevin_fit_returns_best_fit(self):
         """测试Langevin拟合返回最佳拟合曲线。"""
         analyzer = PhysicsAnalyzer()
-        
+
         h_field = np.linspace(0, 500, 50)
         moment = np.tanh(h_field / 100)
-        
+
         result, params = analyzer.fit_langevin(h_field, moment)
-        
-        assert hasattr(result, 'best_fit')
+
+        assert hasattr(result, "best_fit")
         assert len(result.best_fit) == len(h_field)
 
 
@@ -877,9 +877,7 @@ class TestAnalysisReport:
             y_predicted=b_data,
         )
 
-        report = generate_analysis_report(
-            h_data, b_data, [fit_result], experiment_id="test_exp"
-        )
+        report = generate_analysis_report(h_data, b_data, [fit_result], experiment_id="test_exp")
 
         assert report.experiment_id == "test_exp"
         assert report.best_model == "test_model"
@@ -1206,9 +1204,7 @@ class TestExportFormats:
 
         filepath = tmp_path / "test_export.json"
 
-        result = analyzer.export_data(
-            filepath, x, y, ExportFormat.JSON, metadata=metadata
-        )
+        result = analyzer.export_data(filepath, x, y, ExportFormat.JSON, metadata=metadata)
 
         assert result is True
 
@@ -1235,14 +1231,10 @@ class TestCoercivityDetailed:
         analyzer = PhysicsAnalyzer()
 
         # 创建对称磁滞回线
-        h_field = np.concatenate([
-            np.linspace(-100, 100, 50),
-            np.linspace(100, -100, 50)
-        ])
-        moment = np.concatenate([
-            np.tanh((h_field[:50] - 20) / 10),
-            np.tanh((h_field[50:] + 20) / 10)
-        ])
+        h_field = np.concatenate([np.linspace(-100, 100, 50), np.linspace(100, -100, 50)])
+        moment = np.concatenate(
+            [np.tanh((h_field[:50] - 20) / 10), np.tanh((h_field[50:] + 20) / 10)]
+        )
 
         result = analyzer._calculate_coercivity_detailed(h_field, moment)
 
@@ -1259,14 +1251,8 @@ class TestRemanenceDetailed:
         """测试正向和负向剩磁计算。"""
         analyzer = PhysicsAnalyzer()
 
-        h_field = np.concatenate([
-            np.linspace(-100, 100, 50),
-            np.linspace(100, -100, 50)
-        ])
-        moment = np.concatenate([
-            np.tanh(h_field[:50] / 20),
-            np.tanh(h_field[50:] / 20)
-        ])
+        h_field = np.concatenate([np.linspace(-100, 100, 50), np.linspace(100, -100, 50)])
+        moment = np.concatenate([np.tanh(h_field[:50] / 20), np.tanh(h_field[50:] / 20)])
 
         result = analyzer._calculate_remanence_detailed(h_field, moment)
 

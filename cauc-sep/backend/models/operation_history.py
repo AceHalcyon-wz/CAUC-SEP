@@ -102,6 +102,7 @@ class OperationHistory(Base):
             dict: 操作详情字典
         """
         import json
+
         if self.operation_detail:
             try:
                 return json.loads(self.operation_detail)
@@ -117,4 +118,5 @@ class OperationHistory(Base):
             detail: 操作详情字典
         """
         import json
+
         self.operation_detail = json.dumps(detail, ensure_ascii=False)

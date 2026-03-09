@@ -150,10 +150,10 @@ class TestProtocolNegotiation:
         """测试协议参数大小写不敏感。"""
         params1 = {"protocol": "MSGPACK"}
         params2 = {"protocol": "MsgPack"}
-        
+
         protocol1 = parse_protocol_from_query(params1)
         protocol2 = parse_protocol_from_query(params2)
-        
+
         assert protocol1 == ProtocolType.MSGPACK
         assert protocol2 == ProtocolType.MSGPACK
 
@@ -198,7 +198,7 @@ class TestDualProtocolSupport:
         # 验证连接信息中记录了正确的协议
         info_json = manager.get_connection_info(ws_json)
         info_msgpack = manager.get_connection_info(ws_msgpack)
-        
+
         assert info_json.protocol == ProtocolType.JSON
         assert info_msgpack.protocol == ProtocolType.MSGPACK
 
@@ -227,7 +227,7 @@ class TestDualProtocolSupport:
         # 创建两种协议的连接
         ws_json = MockWebSocket(ProtocolType.JSON)
         ws_msgpack = MockWebSocket(ProtocolType.MSGPACK)
-        
+
         await manager.connect(ws_json, protocol=ProtocolType.JSON)
         await manager.connect(ws_msgpack, protocol=ProtocolType.MSGPACK)
 
@@ -237,7 +237,7 @@ class TestDualProtocolSupport:
             device_type=DeviceType.STEPPER,
             status="ready",
         )
-        
+
         await manager.broadcast(message)
 
         # 等待消息发送任务处理队列中的消息
@@ -246,7 +246,7 @@ class TestDualProtocolSupport:
         # 验证JSON连接收到JSON格式
         assert len(ws_json.sent_messages) == 1
         assert isinstance(ws_json.sent_messages[0], str)
-        
+
         # 验证MessagePack连接收到二进制格式
         assert len(ws_msgpack.sent_messages) == 1
         assert isinstance(ws_msgpack.sent_messages[0], bytes)
@@ -287,11 +287,13 @@ class TestSerializeDeserialize:
 
     def test_deserialize_from_json(self):
         """测试从JSON反序列化。"""
-        data = json.dumps({
-            "type": "device_status",
-            "timestamp": "2026-03-07T12:00:00",
-            "data": {"device_id": "test_01"},
-        })
+        data = json.dumps(
+            {
+                "type": "device_status",
+                "timestamp": "2026-03-07T12:00:00",
+                "data": {"device_id": "test_01"},
+            }
+        )
 
         result = deserialize_message(data, ProtocolType.JSON)
 
@@ -341,7 +343,7 @@ class TestMessageCreationWithProtocol:
         # JSON序列化
         json_str = message.to_json()
         assert isinstance(json_str, str)
-        
+
         # MessagePack序列化
         msgpack_bytes = message.to_msgpack()
         assert isinstance(msgpack_bytes, bytes)
@@ -349,7 +351,7 @@ class TestMessageCreationWithProtocol:
         # 验证两种格式数据一致
         json_data = json.loads(json_str)
         msgpack_data = msgpack.unpackb(msgpack_bytes, raw=False)
-        
+
         assert json_data == msgpack_data
 
     def test_create_alarm_message_serialization(self):

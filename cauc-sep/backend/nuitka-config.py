@@ -9,7 +9,7 @@ Nuitka打包配置文件
 
 使用方法：
     python -m nuitka --project-dir=backend --project-config=backend/nuitka-config.py main.py
-    
+
 或者直接运行：
     scripts\build-nuitka.bat
 
@@ -23,10 +23,11 @@ from pathlib import Path
 
 project_dir = Path(__file__).parent
 
+
 def get_memory_optimized_jobs():
     """
     根据系统内存自动计算并行任务数
-    
+
     24GB内存配置：
     - 保留8GB给系统
     - 每个编译进程约2GB
@@ -34,6 +35,7 @@ def get_memory_optimized_jobs():
     """
     try:
         import psutil
+
         total_memory_gb = psutil.virtual_memory().total / (1024**3)
         reserved_gb = 8
         per_job_gb = 2
@@ -43,20 +45,22 @@ def get_memory_optimized_jobs():
     except ImportError:
         return 4
 
+
 nuitka_options = {
     "project-name": "CAUC-SEP-Backend",
     "project-description": "CAUC自旋电子器件实验平台后端服务",
     "project-version": "0.3.0",
     "project-copyright": "CAUC 2024-2026",
-    
     "output-dir": str(project_dir / "dist"),
     "output-filename": "CAUC-SEP-Backend",
-    
     "onefile": True,
     "standalone": True,
     "windows-console-mode": "disable",
-    "windows-icon-from-ico": str(project_dir / "assets" / "icon.ico") if (project_dir / "assets" / "icon.ico").exists() else None,
-    
+    "windows-icon-from-ico": (
+        str(project_dir / "assets" / "icon.ico")
+        if (project_dir / "assets" / "icon.ico").exists()
+        else None
+    ),
     "include-package": [
         "fastapi",
         "uvicorn",
@@ -75,7 +79,6 @@ nuitka_options = {
         "models",
         "drivers",
     ],
-    
     "include-module": [
         "uvicorn.logging",
         "uvicorn.loops",
@@ -119,7 +122,6 @@ nuitka_options = {
         "psutil",
         "psutil._pswindows",
     ],
-    
     "nofollow-import-to": [
         "tkinter",
         "unittest",
@@ -136,31 +138,22 @@ nuitka_options = {
         "matplotlib",
         "matplotlib.pyplot",
     ],
-    
     "prefer-source-code": [],
-    
     "enable-plugin": [
         "pydantic",
         "numpy",
         "scipy",
     ],
-    
     "include-data-files": [],
-    
     "include-data-dirs": [],
-    
     "assume-yes-for-downloads": True,
     "show-progress": True,
     "show-memory": True,
     "show-modules": False,
-    
     "lto": "yes",
     "python-flag": "no_site",
-    
     "jobs": get_memory_optimized_jobs(),
-    
     "zig": True,
-    
     "company-name": "CAUC",
     "product-name": "CAUC-SEP",
     "file-version": "0.3.0.0",
@@ -168,7 +161,6 @@ nuitka_options = {
     "file-description": "CAUC自旋电子器件实验平台后端服务",
     "legal-copyright": "Copyright (C) 2024-2026 CAUC",
     "legal-trademarks": "",
-    
     "windows-uac-admin": False,
     "windows-uac-uiaccess": False,
 }

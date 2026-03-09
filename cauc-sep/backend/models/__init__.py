@@ -100,14 +100,8 @@ class Device(Base):
 
     # 设备状态有效性约束
     __table_args__ = (
-        CheckConstraint(
-            f"status IN {VALID_DEVICE_STATUSES}",
-            name="ck_device_status_valid"
-        ),
-        CheckConstraint(
-            "LENGTH(device_id) >= 1",
-            name="ck_device_id_not_empty"
-        ),
+        CheckConstraint(f"status IN {VALID_DEVICE_STATUSES}", name="ck_device_status_valid"),
+        CheckConstraint("LENGTH(device_id) >= 1", name="ck_device_id_not_empty"),
         Index("ix_devices_type_status", "device_type", "status"),
     )
 
@@ -143,7 +137,9 @@ class Experiment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     exp_name = Column(String(100), nullable=False, index=True)
     exp_type = Column(String(50), nullable=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     sequence_config = Column(Text, nullable=True)
     status = Column(String(20), default="pending", nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False, index=True)
@@ -155,19 +151,17 @@ class Experiment(Base):
     # 实验状态有效性约束
     __table_args__ = (
         CheckConstraint(
-            f"status IN {VALID_EXPERIMENT_STATUSES}",
-            name="ck_experiment_status_valid"
+            f"status IN {VALID_EXPERIMENT_STATUSES}", name="ck_experiment_status_valid"
         ),
-        CheckConstraint(
-            "LENGTH(exp_name) >= 1",
-            name="ck_experiment_name_not_empty"
-        ),
+        CheckConstraint("LENGTH(exp_name) >= 1", name="ck_experiment_name_not_empty"),
         Index("ix_experiments_user_status", "user_id", "status"),
         Index("ix_experiments_created_desc", "created_at"),
     )
 
     user = relationship("User", back_populates="experiments")
-    data_records = relationship("DataRecord", back_populates="experiment", cascade="all, delete-orphan")
+    data_records = relationship(
+        "DataRecord", back_populates="experiment", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Experiment(id={self.id}, name='{self.exp_name}', status='{self.status}')>"
@@ -196,10 +190,7 @@ class DataRecord(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     experiment_id = Column(
-        Integer, 
-        ForeignKey("experiments.id", ondelete="CASCADE"), 
-        nullable=False, 
-        index=True
+        Integer, ForeignKey("experiments.id", ondelete="CASCADE"), nullable=False, index=True
     )
     timestamp = Column(DateTime, default=datetime.now, nullable=False, index=True)
     position_steps = Column(Integer, nullable=True)
@@ -210,9 +201,7 @@ class DataRecord(Base):
     extra_data = Column(Text, nullable=True)
 
     # 数据记录索引优化
-    __table_args__ = (
-        Index("ix_data_records_exp_timestamp", "experiment_id", "timestamp"),
-    )
+    __table_args__ = (Index("ix_data_records_exp_timestamp", "experiment_id", "timestamp"),)
 
     experiment = relationship("Experiment", back_populates="data_records")
 
@@ -247,10 +236,7 @@ class PRPath(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     device_id = Column(
-        String(50), 
-        ForeignKey("devices.device_id", ondelete="CASCADE"), 
-        nullable=False, 
-        index=True
+        String(50), ForeignKey("devices.device_id", ondelete="CASCADE"), nullable=False, index=True
     )
     path_number = Column(Integer, nullable=False)
     mode = Column(Integer, default=1, nullable=False)
@@ -266,22 +252,10 @@ class PRPath(Base):
 
     # PR路径约束：路径编号范围和唯一性
     __table_args__ = (
-        CheckConstraint(
-            "path_number >= 0 AND path_number <= 15",
-            name="ck_pr_path_number_range"
-        ),
-        CheckConstraint(
-            "velocity > 0",
-            name="ck_pr_path_velocity_positive"
-        ),
-        CheckConstraint(
-            "accel_time >= 0",
-            name="ck_pr_path_accel_time_valid"
-        ),
-        CheckConstraint(
-            "decel_time >= 0",
-            name="ck_pr_path_decel_time_valid"
-        ),
+        CheckConstraint("path_number >= 0 AND path_number <= 15", name="ck_pr_path_number_range"),
+        CheckConstraint("velocity > 0", name="ck_pr_path_velocity_positive"),
+        CheckConstraint("accel_time >= 0", name="ck_pr_path_accel_time_valid"),
+        CheckConstraint("decel_time >= 0", name="ck_pr_path_decel_time_valid"),
         UniqueConstraint("device_id", "path_number", name="_device_path_uc"),
         Index("ix_pr_paths_device_path", "device_id", "path_number"),
     )
@@ -312,10 +286,7 @@ class DeviceCalibration(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     device_id = Column(
-        String(50),
-        ForeignKey("devices.device_id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+        String(50), ForeignKey("devices.device_id", ondelete="CASCADE"), nullable=False, index=True
     )
     param_name = Column(String(100), nullable=False)
     param_value = Column(Text, nullable=True)
@@ -324,14 +295,8 @@ class DeviceCalibration(Base):
 
     # 校准参数约束
     __table_args__ = (
-        CheckConstraint(
-            "LENGTH(device_id) >= 1",
-            name="ck_calibration_device_id_not_empty"
-        ),
-        CheckConstraint(
-            "LENGTH(param_name) >= 1",
-            name="ck_calibration_param_name_not_empty"
-        ),
+        CheckConstraint("LENGTH(device_id) >= 1", name="ck_calibration_device_id_not_empty"),
+        CheckConstraint("LENGTH(param_name) >= 1", name="ck_calibration_param_name_not_empty"),
         UniqueConstraint("device_id", "param_name", name="_device_param_uc"),
         Index("ix_calibrations_device_param", "device_id", "param_name"),
     )
@@ -363,12 +328,11 @@ class OperationLog(Base):
     __tablename__ = "operation_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     device_id = Column(
-        String(50),
-        ForeignKey("devices.device_id", ondelete="SET NULL"),
-        nullable=True,
-        index=True
+        String(50), ForeignKey("devices.device_id", ondelete="SET NULL"), nullable=True, index=True
     )
     operation = Column(String(100), nullable=False, index=True)
     parameters = Column(Text, nullable=True)
@@ -380,7 +344,7 @@ class OperationLog(Base):
     __table_args__ = (
         CheckConstraint(
             "result IN ('success', 'failed', 'pending') OR result IS NULL",
-            name="ck_operation_log_result_valid"
+            name="ck_operation_log_result_valid",
         ),
         Index("ix_operation_logs_user_created", "user_id", "created_at"),
         Index("ix_operation_logs_device_created", "device_id", "created_at"),
@@ -420,14 +384,8 @@ class ExperimentConfig(Base):
 
     # 实验配置约束
     __table_args__ = (
-        CheckConstraint(
-            "LENGTH(name) >= 1",
-            name="ck_config_name_not_empty"
-        ),
-        CheckConstraint(
-            "LENGTH(config_json) >= 2",
-            name="ck_config_json_not_empty"
-        ),
+        CheckConstraint("LENGTH(name) >= 1", name="ck_config_name_not_empty"),
+        CheckConstraint("LENGTH(config_json) >= 2", name="ck_config_json_not_empty"),
     )
 
     def __repr__(self) -> str:
@@ -463,12 +421,11 @@ class AuditLog(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime, default=datetime.now, nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     device_id = Column(
-        String(50),
-        ForeignKey("devices.device_id", ondelete="SET NULL"),
-        nullable=True,
-        index=True
+        String(50), ForeignKey("devices.device_id", ondelete="SET NULL"), nullable=True, index=True
     )
     operation_type = Column(String(50), nullable=False, index=True)
     operation_category = Column(String(30), nullable=False, index=True)
@@ -486,19 +443,17 @@ class AuditLog(Base):
     __table_args__ = (
         CheckConstraint(
             f"operation_category IN {VALID_OPERATION_CATEGORIES}",
-            name="ck_audit_log_category_valid"
+            name="ck_audit_log_category_valid",
         ),
         CheckConstraint(
-            f"request_method IN {VALID_REQUEST_METHODS}",
-            name="ck_audit_log_method_valid"
+            f"request_method IN {VALID_REQUEST_METHODS}", name="ck_audit_log_method_valid"
         ),
         CheckConstraint(
             "response_status >= 100 AND response_status < 600 OR response_status IS NULL",
-            name="ck_audit_log_status_valid"
+            name="ck_audit_log_status_valid",
         ),
         CheckConstraint(
-            "duration_ms >= 0 OR duration_ms IS NULL",
-            name="ck_audit_log_duration_valid"
+            "duration_ms >= 0 OR duration_ms IS NULL", name="ck_audit_log_duration_valid"
         ),
         Index("ix_audit_logs_timestamp_desc", "timestamp"),
         Index("ix_audit_logs_user_timestamp", "user_id", "timestamp"),

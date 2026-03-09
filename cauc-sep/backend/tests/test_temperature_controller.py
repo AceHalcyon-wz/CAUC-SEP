@@ -468,9 +468,7 @@ class TestTemperatureReadAndSet:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         result = await controller.set_temperature(300.0)
@@ -850,9 +848,7 @@ class TestTemperatureProtection:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         # 温度回到安全范围
@@ -875,9 +871,7 @@ class TestTemperatureProtection:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         # 温度仍在危险范围
@@ -920,9 +914,7 @@ class TestTemperatureProtection:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         assert controller._pid_running is False
@@ -945,9 +937,7 @@ class TestTemperatureProtection:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         assert controller._program_running is False
@@ -1197,9 +1187,7 @@ class TestReadStatus:
 
         # 触发保护（需要提供current_temp和threshold参数）
         await controller._trigger_protection(
-            TemperatureProtectionType.HIGH_TEMP,
-            current_temp=460.0,
-            threshold=450.0
+            TemperatureProtectionType.HIGH_TEMP, current_temp=460.0, threshold=450.0
         )
 
         status = await controller.read_status()

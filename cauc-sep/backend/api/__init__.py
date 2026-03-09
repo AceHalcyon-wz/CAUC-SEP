@@ -13,6 +13,26 @@ API 路由模块
 - schemas: Pydantic 数据模型
 """
 
-from api import ammeter, analysis, device, electromagnet, experiment, motor, piezo, schemas, temperature
+from api import (
+    ammeter,
+    analysis,
+    device,
+    electromagnet,
+    experiment,
+    motor,
+    piezo,
+    schemas,
+    temperature,
+)
 
-__all__ = ["motor", "device", "experiment", "analysis", "temperature", "piezo", "ammeter", "electromagnet", "schemas"]
+__all__ = [
+    "motor",
+    "device",
+    "experiment",
+    "analysis",
+    "temperature",
+    "piezo",
+    "ammeter",
+    "electromagnet",
+    "schemas",
+]

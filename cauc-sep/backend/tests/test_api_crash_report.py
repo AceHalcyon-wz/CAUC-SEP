@@ -174,9 +174,7 @@ class TestCrashReportAPI:
         now = datetime.now()
         start_time = (now - timedelta(hours=3)).isoformat()
 
-        response = test_client.get(
-            f"/api/crash-reports/statistics?start_time={start_time}"
-        )
+        response = test_client.get(f"/api/crash-reports/statistics?start_time={start_time}")
 
         assert response.status_code == 200
         data = response.json()

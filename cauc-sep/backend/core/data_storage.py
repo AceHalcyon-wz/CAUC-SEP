@@ -919,9 +919,7 @@ class DataStorage:
         finally:
             session.close()
 
-    def get_device_calibration(
-        self, device_id: str, param_name: str
-    ) -> dict[str, Any] | None:
+    def get_device_calibration(self, device_id: str, param_name: str) -> dict[str, Any] | None:
         """
         获取设备校准参数
 
@@ -954,9 +952,7 @@ class DataStorage:
                         else None
                     ),
                     "valid_until": (
-                        calibration.valid_until.isoformat()
-                        if calibration.valid_until
-                        else None
+                        calibration.valid_until.isoformat() if calibration.valid_until else None
                     ),
                 }
             return None
@@ -995,9 +991,7 @@ class DataStorage:
         finally:
             session.close()
 
-    def update_device_calibration(
-        self, device_id: str, param_name: str, **kwargs
-    ) -> bool:
+    def update_device_calibration(self, device_id: str, param_name: str, **kwargs) -> bool:
         """
         更新设备校准参数
 
@@ -1165,9 +1159,7 @@ class DataStorage:
                     "id": config.id,
                     "name": config.name,
                     "description": config.description,
-                    "config_json": (
-                        json.loads(config.config_json) if config.config_json else None
-                    ),
+                    "config_json": (json.loads(config.config_json) if config.config_json else None),
                     "created_at": config.created_at.isoformat() if config.created_at else None,
                     "updated_at": config.updated_at.isoformat() if config.updated_at else None,
                 }
@@ -1206,9 +1198,7 @@ class DataStorage:
         finally:
             session.close()
 
-    def update_experiment_config(
-        self, config_id: int, **kwargs
-    ) -> bool:
+    def update_experiment_config(self, config_id: int, **kwargs) -> bool:
         """
         更新实验配置
 

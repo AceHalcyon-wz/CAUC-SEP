@@ -122,9 +122,7 @@ class QueryPerformanceMonitor:
         self._slow_queries: list[QueryMetric] = []
 
         # 查询统计（按查询模式分组）
-        self._query_stats: dict[str, QueryStatistics] = defaultdict(
-            QueryStatistics
-        )
+        self._query_stats: dict[str, QueryStatistics] = defaultdict(QueryStatistics)
 
         # 线程安全
         self._lock = RLock()
@@ -205,8 +203,7 @@ class QueryPerformanceMonitor:
         # 记录调试日志
         if self._enable_logging and not success:
             logger.error(
-                f"Query failed: {error_message} - "
-                f"{sql[:100]}{'...' if len(sql) > 100 else ''}"
+                f"Query failed: {error_message} - " f"{sql[:100]}{'...' if len(sql) > 100 else ''}"
             )
 
     def _update_statistics(self, metric: QueryMetric) -> None:
@@ -233,9 +230,7 @@ class QueryPerformanceMonitor:
         stats.min_duration_ms = min(stats.min_duration_ms, metric.duration_ms)
 
         # 计算平均值
-        stats.avg_duration_ms = (
-            stats.total_duration_ms / stats.total_queries
-        )
+        stats.avg_duration_ms = stats.total_duration_ms / stats.total_queries
 
     def _get_query_pattern(self, sql: str) -> str:
         """获取查询模式键。
@@ -313,9 +308,7 @@ class QueryPerformanceMonitor:
             except Exception as e:
                 logger.error(f"Error callback error: {e}")
 
-    def register_slow_query_callback(
-        self, callback: Callable[[QueryMetric], None]
-    ) -> None:
+    def register_slow_query_callback(self, callback: Callable[[QueryMetric], None]) -> None:
         """注册慢查询回调函数。
 
         Args:
@@ -323,9 +316,7 @@ class QueryPerformanceMonitor:
         """
         self._on_slow_query_callbacks.append(callback)
 
-    def register_error_callback(
-        self, callback: Callable[[QueryMetric], None]
-    ) -> None:
+    def register_error_callback(self, callback: Callable[[QueryMetric], None]) -> None:
         """注册错误回调函数。
 
         Args:
@@ -341,29 +332,17 @@ class QueryPerformanceMonitor:
         """
         with self._lock:
             # 计算总体统计
-            total_queries = sum(
-                stats.total_queries for stats in self._query_stats.values()
-            )
-            total_errors = sum(
-                stats.total_errors for stats in self._query_stats.values()
-            )
-            total_duration = sum(
-                stats.total_duration_ms for stats in self._query_stats.values()
-            )
-            slow_query_count = sum(
-                stats.slow_query_count for stats in self._query_stats.values()
-            )
+            total_queries = sum(stats.total_queries for stats in self._query_stats.values())
+            total_errors = sum(stats.total_errors for stats in self._query_stats.values())
+            total_duration = sum(stats.total_duration_ms for stats in self._query_stats.values())
+            slow_query_count = sum(stats.slow_query_count for stats in self._query_stats.values())
 
             return {
                 "total_queries": total_queries,
                 "total_errors": total_errors,
-                "error_rate": (
-                    total_errors / total_queries * 100 if total_queries > 0 else 0
-                ),
+                "error_rate": (total_errors / total_queries * 100 if total_queries > 0 else 0),
                 "total_duration_ms": total_duration,
-                "avg_duration_ms": (
-                    total_duration / total_queries if total_queries > 0 else 0
-                ),
+                "avg_duration_ms": (total_duration / total_queries if total_queries > 0 else 0),
                 "slow_query_count": slow_query_count,
                 "slow_query_threshold_ms": self._slow_query_threshold,
                 "query_patterns": len(self._query_stats),
@@ -380,9 +359,7 @@ class QueryPerformanceMonitor:
             慢查询列表
         """
         with self._lock:
-            sorted_queries = sorted(
-                self._slow_queries, key=lambda x: x.duration_ms, reverse=True
-            )
+            sorted_queries = sorted(self._slow_queries, key=lambda x: x.duration_ms, reverse=True)
             return [
                 {
                     "sql": q.sql,
@@ -493,9 +470,7 @@ def setup_query_monitoring(
     import traceback
 
     @event.listens_for(engine, "before_cursor_execute")
-    def before_cursor_execute(
-        conn, cursor, statement, parameters, context, executemany
-    ):
+    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         """查询执行前记录开始时间。"""
         context._query_start_time = time.perf_counter()
 
@@ -512,9 +487,7 @@ def setup_query_monitoring(
             context._query_caller = caller
 
     @event.listens_for(engine, "after_cursor_execute")
-    def after_cursor_execute(
-        conn, cursor, statement, parameters, context, executemany
-    ):
+    def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
         """查询执行后记录性能指标。"""
         duration_ms = (time.perf_counter() - context._query_start_time) * 1000
         rows_affected = cursor.rowcount if hasattr(cursor, "rowcount") else 0
@@ -538,9 +511,7 @@ def setup_query_monitoring(
         # 获取执行时间
         duration_ms = 0.0
         if hasattr(exception_context, "_query_start_time"):
-            duration_ms = (
-                time.perf_counter() - exception_context._query_start_time
-            ) * 1000
+            duration_ms = (time.perf_counter() - exception_context._query_start_time) * 1000
 
         # 记录错误查询
         monitor.record_query(
@@ -603,8 +574,7 @@ class QueryPerformanceTracker:
         self._duration_ms = (self._end_time - self._start_time) * 1000
 
         logger.debug(
-            f"[{self._name}] Duration: {self._duration_ms:.2f}ms, "
-            f"Queries: {self._query_count}"
+            f"[{self._name}] Duration: {self._duration_ms:.2f}ms, " f"Queries: {self._query_count}"
         )
 
 

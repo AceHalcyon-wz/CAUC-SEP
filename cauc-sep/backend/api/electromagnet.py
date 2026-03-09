@@ -66,10 +66,7 @@ def get_electromagnet() -> ElectromagnetDriver:
     try:
         return DeviceRegistry.get_device("electromagnet")
     except KeyError:
-        raise HTTPException(
-            status_code=503,
-            detail="Electromagnet not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Electromagnet not initialized")
 
 
 def set_electromagnet(instance: ElectromagnetDriver) -> None:
@@ -97,24 +94,20 @@ def _validate_current_range(driver: ElectromagnetDriver, current: float) -> None
         HTTPException: 电流超出范围时抛出 400 错误
     """
     max_limit = driver.max_current_limit
-    
+
     if current < 0:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Current {current}A is below minimum 0A"
-        )
-    
+        raise HTTPException(status_code=400, detail=f"Current {current}A is below minimum 0A")
+
     if current > max_limit:
         raise HTTPException(
-            status_code=400,
-            detail=f"Current {current}A exceeds device limit {max_limit}A"
+            status_code=400, detail=f"Current {current}A exceeds device limit {max_limit}A"
         )
-    
+
     # 过流保护阈值警告
     if current > OVERCURRENT_THRESHOLD:
         raise HTTPException(
             status_code=400,
-            detail=f"Current {current}A exceeds overcurrent threshold {OVERCURRENT_THRESHOLD}A"
+            detail=f"Current {current}A exceeds overcurrent threshold {OVERCURRENT_THRESHOLD}A",
         )
 
 
@@ -162,8 +155,7 @@ async def set_current(
     # 检查过流保护状态
     if driver.electromagnet_status == ElectromagnetStatus.OVERCURRENT:
         raise HTTPException(
-            status_code=400,
-            detail="Overcurrent protection triggered, please reset first"
+            status_code=400, detail="Overcurrent protection triggered, please reset first"
         )
 
     # 动态验证电流范围
@@ -173,7 +165,11 @@ async def set_current(
         result = await driver.set_current(request.current)
         return SuccessResponse(
             success=result,
-            message=f"Current set to {request.current}A (limit: {driver.max_current_limit}A)" if result else "Failed to set current",
+            message=(
+                f"Current set to {request.current}A (limit: {driver.max_current_limit}A)"
+                if result
+                else "Failed to set current"
+            ),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -209,8 +205,7 @@ async def start_scan(
     # 检查过流保护状态
     if driver.electromagnet_status == ElectromagnetStatus.OVERCURRENT:
         raise HTTPException(
-            status_code=400,
-            detail="Overcurrent protection triggered, please reset first"
+            status_code=400, detail="Overcurrent protection triggered, please reset first"
         )
 
     # 动态验证电流范围
@@ -237,10 +232,14 @@ async def start_scan(
         return SuccessResponse(
             success=result,
             message=(
-                f"Scan started: {request.mode.value} mode, "
-                f"{request.start_current}A -> {request.end_current}A "
-                f"(limit: {driver.max_current_limit}A)"
-            ) if result else "Failed to start scan",
+                (
+                    f"Scan started: {request.mode.value} mode, "
+                    f"{request.start_current}A -> {request.end_current}A "
+                    f"(limit: {driver.max_current_limit}A)"
+                )
+                if result
+                else "Failed to start scan"
+            ),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -271,7 +270,7 @@ async def validate_scan_params(
         ScanMode.TRIANGULAR: DriverScanMode.TRIANGULAR,
     }
     driver_mode = mode_map[request.mode]
-    
+
     # 使用驱动器的验证方法
     valid, errors = driver.validate_scan_params(
         mode=driver_mode,
@@ -280,7 +279,7 @@ async def validate_scan_params(
         scan_rate=request.scan_rate,
         cycles=request.cycles,
     )
-    
+
     # 计算预估时间
     estimated_duration = driver._estimate_scan_duration(
         mode=driver_mode,
@@ -289,18 +288,18 @@ async def validate_scan_params(
         scan_rate=request.scan_rate,
         cycles=request.cycles,
     )
-    
+
     # 生成警告信息
     warnings = []
     max_limit = driver.max_current_limit
-    
+
     if request.start_current > max_limit * 0.9:
         warnings.append(f"Start current {request.start_current}A is close to limit {max_limit}A")
     if request.end_current > max_limit * 0.9:
         warnings.append(f"End current {request.end_current}A is close to limit {max_limit}A")
     if estimated_duration > 3600:
         warnings.append(f"Long scan duration: {estimated_duration/60:.1f} minutes")
-    
+
     return ElectromagnetScanValidateResponse(
         valid=valid,
         errors=errors,
@@ -353,15 +352,16 @@ async def calibrate(
 
     try:
         calibration_points = [
-            {"current": point.current, "field": point.field}
-            for point in request.calibration_points
+            {"current": point.current, "field": point.field} for point in request.calibration_points
         ]
         result = await driver.calibrate(calibration_points)
         return SuccessResponse(
             success=result,
             message=(
-                f"Calibration completed with {len(request.calibration_points)} points"
-            ) if result else "Calibration failed",
+                (f"Calibration completed with {len(request.calibration_points)} points")
+                if result
+                else "Calibration failed"
+            ),
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -424,11 +424,11 @@ async def validate_calibration_data(
     """
     errors = []
     warnings = []
-    
+
     # 检查校准点数量
     if len(request.calibration_points) < 2:
         errors.append("At least 2 calibration points required")
-    
+
     # 检查每个校准点
     currents = []
     for i, point in enumerate(request.calibration_points):
@@ -436,16 +436,18 @@ async def validate_calibration_data(
         if point.current < 0:
             errors.append(f"Point {i+1}: Current {point.current}A is negative")
         elif point.current > driver.max_current_limit:
-            errors.append(f"Point {i+1}: Current {point.current}A exceeds limit {driver.max_current_limit}A")
-        
+            errors.append(
+                f"Point {i+1}: Current {point.current}A exceeds limit {driver.max_current_limit}A"
+            )
+
         # 磁场范围检查
         if point.field < 0:
             errors.append(f"Point {i+1}: Field {point.field}T is negative")
         elif point.field > 2.0:
             errors.append(f"Point {i+1}: Field {point.field}T exceeds maximum 2.0T")
-        
+
         currents.append(point.current)
-    
+
     # 检查电流分布
     if len(currents) >= 2:
         current_range = max(currents) - min(currents)
@@ -454,11 +456,11 @@ async def validate_calibration_data(
                 f"Calibration current range ({current_range:.2f}A) is narrow, "
                 "consider using a wider range for better accuracy"
             )
-        
+
         # 检查是否有重复的电流值
         if len(set(currents)) < len(currents):
             warnings.append("Duplicate current values detected in calibration points")
-    
+
     return ElectromagnetScanValidateResponse(
         valid=len(errors) == 0,
         errors=errors,

@@ -98,9 +98,7 @@ class TestRetryConfig:
 
     def test_should_retry_with_specific_exceptions(self):
         """测试特定异常重试判断。"""
-        config = RetryConfig(
-            retryable_exceptions=[ConnectionError, TimeoutError]
-        )
+        config = RetryConfig(retryable_exceptions=[ConnectionError, TimeoutError])
 
         assert config.should_retry(ConnectionError("test")) is True
         assert config.should_retry(TimeoutError("test")) is True

@@ -38,23 +38,23 @@ from core.tracing import (
 
 class TestTracingBasics:
     """追踪基础功能测试。"""
-    
+
     def test_generate_trace_id(self):
         """测试Trace ID生成。"""
         trace_id = generate_trace_id()
-        
+
         assert isinstance(trace_id, str)
         assert len(trace_id) == 32
         assert all(c in "0123456789abcdef" for c in trace_id)
-    
+
     def test_generate_span_id(self):
         """测试Span ID生成。"""
         span_id = generate_span_id()
-        
+
         assert isinstance(span_id, str)
         assert len(span_id) == 16
         assert all(c in "0123456789abcdef" for c in span_id)
-    
+
     def test_span_duration(self):
         """测试Span持续时间计算。"""
         span = Span(
@@ -62,15 +62,15 @@ class TestTracingBasics:
             trace_id="test_trace",
             name="test_span",
         )
-        
+
         # 未结束时持续时间为None
         assert span.duration_ms is None
-        
+
         # 结束后计算持续时间
         span.end()
         assert span.duration_ms is not None
         assert span.duration_ms >= 0
-    
+
     def test_span_attributes(self):
         """测试Span属性设置。"""
         span = Span(
@@ -78,13 +78,13 @@ class TestTracingBasics:
             trace_id="test_trace",
             name="test_span",
         )
-        
+
         span.set_attribute("key1", "value1")
         span.set_attribute("key2", 123)
-        
+
         assert span.attributes["key1"] == "value1"
         assert span.attributes["key2"] == 123
-    
+
     def test_span_events(self):
         """测试Span事件添加。"""
         span = Span(
@@ -92,13 +92,13 @@ class TestTracingBasics:
             trace_id="test_trace",
             name="test_span",
         )
-        
+
         span.add_event("test_event", {"detail": "test"})
-        
+
         assert len(span.events) == 1
         assert span.events[0].name == "test_event"
         assert span.events[0].attributes["detail"] == "test"
-    
+
     def test_span_status(self):
         """测试Span状态设置。"""
         span = Span(
@@ -106,10 +106,10 @@ class TestTracingBasics:
             trace_id="test_trace",
             name="test_span",
         )
-        
+
         span.set_status(SpanStatus.OK)
         assert span.status == SpanStatus.OK
-        
+
         span.set_status(SpanStatus.ERROR, "Test error")
         assert span.status == SpanStatus.ERROR
         assert span.attributes["status_description"] == "Test error"
@@ -117,109 +117,112 @@ class TestTracingBasics:
 
 class TestTraceContext:
     """追踪上下文测试。"""
-    
+
     def test_create_span(self):
         """测试创建Span。"""
         trace = TraceContext(trace_id=generate_trace_id())
-        
+
         span = trace.create_span(name="test_span", kind=SpanKind.INTERNAL)
-        
+
         assert span.name == "test_span"
         assert span.trace_id == trace.trace_id
         assert span in trace.spans
-    
+
     def test_baggage(self):
         """测试Baggage功能。"""
         trace = TraceContext(trace_id=generate_trace_id())
-        
+
         trace.set_baggage("key1", "value1")
-        
+
         assert trace.get_baggage("key1") == "value1"
         assert trace.get_baggage("nonexistent") is None
-    
+
     def test_to_dict(self):
         """测试转换为字典。"""
         trace = TraceContext(trace_id=generate_trace_id())
         trace.create_span(name="span1")
-        
+
         trace_dict = trace.to_dict()
-        
+
         assert trace_dict["trace_id"] == trace.trace_id
         assert len(trace_dict["spans"]) == 1
 
 
 class TestTracer:
     """追踪器测试。"""
-    
+
     def test_start_trace(self):
         """测试开始追踪。"""
         tracer = Tracer(service_name="test_service")
-        
+
         trace = tracer.start_trace(name="test_operation")
-        
+
         assert trace is not None
         assert trace.root_span is not None
         assert trace.root_span.name == "test_operation"
         assert get_current_trace() == trace
-    
+
     def test_end_trace(self):
         """测试结束追踪。"""
         tracer = Tracer(service_name="test_service")
-        
+
         trace = tracer.start_trace(name="test_operation")
         tracer.end_trace(trace)
-        
+
         assert get_current_trace() is None
-    
+
     def test_start_span(self):
         """测试创建Span。"""
         tracer = Tracer(service_name="test_service")
-        
+
         trace = tracer.start_trace(name="root")
         span = tracer.start_span(name="child_span")
-        
+
         assert span.name == "child_span"
         assert span.parent_span_id == trace.root_span.span_id
 
 
 class TestTracedDecorator:
     """追踪装饰器测试。"""
-    
+
     def test_sync_function(self):
         """测试同步函数追踪。"""
+
         @traced(name="test_function")
         def test_func(x, y):
             return x + y
-        
+
         result = test_func(1, 2)
-        
+
         assert result == 3
-    
+
     @pytest.mark.asyncio
     async def test_async_function(self):
         """测试异步函数追踪。"""
+
         @traced(name="async_test_function")
         async def async_func(x, y):
             await asyncio.sleep(0.01)
             return x + y
-        
+
         result = await async_func(1, 2)
-        
+
         assert result == 3
-    
+
     def test_exception_handling(self):
         """测试异常处理。"""
+
         @traced(name="error_function")
         def error_func():
             raise ValueError("Test error")
-        
+
         with pytest.raises(ValueError):
             error_func()
 
 
 class TestTraceStorage:
     """追踪数据存储测试。"""
-    
+
     @pytest.fixture
     def temp_db(self):
         """创建临时数据库。"""
@@ -232,66 +235,67 @@ class TestTraceStorage:
         # 清理
         import gc
         import time
+
         gc.collect()
         time.sleep(0.05)
         try:
             Path(db_path).unlink(missing_ok=True)
         except PermissionError:
             pass  # Windows文件锁问题，忽略
-    
+
     def test_save_and_query_trace(self, temp_db):
         """测试保存和查询追踪。"""
         storage = TraceStorage(db_path=temp_db)
-        
+
         # 创建追踪
         trace = TraceContext(trace_id=generate_trace_id())
         root_span = trace.create_span(name="root", kind=SpanKind.SERVER)
         trace.root_span = root_span
         root_span.set_attribute("service.name", "test_service")
         root_span.end()
-        
+
         # 保存追踪
         storage.save_trace(trace)
-        
+
         # 查询追踪
         traces = storage.query_traces(service_name="test_service")
-        
+
         assert len(traces) == 1
         assert traces[0]["trace_id"] == trace.trace_id
-    
+
     def test_get_trace_detail(self, temp_db):
         """测试获取追踪详情。"""
         storage = TraceStorage(db_path=temp_db)
-        
+
         # 创建追踪
         trace = TraceContext(trace_id=generate_trace_id())
         root_span = trace.create_span(name="root", kind=SpanKind.SERVER)
         trace.root_span = root_span
         root_span.set_attribute("service.name", "test_service")
-        
+
         child_span = trace.create_span(
             name="child",
             kind=SpanKind.INTERNAL,
             parent_span_id=root_span.span_id,
         )
-        
+
         root_span.end()
         child_span.end()
-        
+
         # 保存追踪
         storage.save_trace(trace)
-        
+
         # 获取详情
         detail = storage.get_trace_detail(trace.trace_id)
-        
+
         assert detail is not None
         assert detail["trace_id"] == trace.trace_id
         assert len(detail["spans"]) == 2
-    
+
     def test_get_statistics(self, temp_db):
         """测试获取统计信息。"""
         storage = TraceStorage(db_path=temp_db)
-        
+
         # 创建多个追踪
         for i in range(3):
             trace = TraceContext(trace_id=generate_trace_id())
@@ -300,87 +304,89 @@ class TestTraceStorage:
             root_span.set_attribute("service.name", "test_service")
             root_span.end()
             storage.save_trace(trace)
-        
+
         # 获取统计
         stats = storage.get_statistics()
-        
+
         assert stats["total_traces"] == 3
         assert stats["avg_duration_ms"] >= 0
-    
+
     def test_cleanup_old_traces(self, temp_db):
         """测试清理过期追踪。"""
         storage = TraceStorage(db_path=temp_db)
-        
+
         # 创建追踪
         trace = TraceContext(trace_id=generate_trace_id())
         root_span = trace.create_span(name="root", kind=SpanKind.SERVER)
         trace.root_span = root_span
         root_span.set_attribute("service.name", "test_service")
         root_span.end()
-        
+
         storage.save_trace(trace)
-        
+
         # 清理（保留1天，刚创建的不应该被删除）
         deleted_count = storage.cleanup_old_traces(max_age_days=1)
-        
+
         # 由于刚创建，不应该被删除
         assert deleted_count == 0
 
 
 class TestIntegration:
     """集成测试。"""
-    
+
     @pytest.fixture
     def temp_db(self):
         """创建临时数据库。"""
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
-        
+
         yield db_path
-        
+
         # 清理
         import gc
         import time
+
         gc.collect()
         time.sleep(0.05)
         try:
             Path(db_path).unlink(missing_ok=True)
         except PermissionError:
             pass  # Windows文件锁问题，忽略
-    
+
     def test_full_workflow(self, temp_db):
         """测试完整工作流程。"""
         # 初始化追踪系统
         tracer = init_tracing(db_path=temp_db)
-        
+
         # 开始追踪
         trace = tracer.start_trace(
             name="test_workflow",
             kind=SpanKind.SERVER,
             attributes={"user_id": "test_user"},
         )
-        
+
         # 创建子Span
         span1 = tracer.start_span(name="operation1")
         span1.set_attribute("step", 1)
         span1.end()
-        
+
         span2 = tracer.start_span(name="operation2")
         span2.set_attribute("step", 2)
         span2.add_event("important_event", {"detail": "test"})
         span2.end()
-        
+
         # 结束追踪
         tracer.end_trace(trace)
-        
+
         # 验证存储
         storage = get_current_trace().__class__.__bases__[0]  # 获取TraceStorage
         from core.tracing import get_trace_storage
+
         storage = get_trace_storage()
-        
+
         traces = storage.query_traces(service_name="cauc-sep")
         assert len(traces) == 1
-        
+
         detail = storage.get_trace_detail(trace.trace_id)
         assert detail is not None
         assert len(detail["spans"]) == 3  # root + 2 children
@@ -392,6 +398,7 @@ class TestTracingMiddleware:
     @pytest.fixture
     def mock_app(self):
         """创建Mock应用。"""
+
         async def app(scope, receive, send):
             if scope["type"] == "http":
                 await send({"type": "http.response.start", "status": 200})
@@ -662,6 +669,7 @@ class TestTracerAdvanced:
             # 等待文件释放
             import time
             import gc
+
             gc.collect()
             time.sleep(0.1)
             try:
@@ -707,6 +715,7 @@ class TestTracedDecoratorAdvanced:
 
     def test_decorator_with_attributes(self):
         """测试带属性的装饰器。"""
+
         @traced(
             name="custom_name",
             kind=SpanKind.CLIENT,
@@ -722,6 +731,7 @@ class TestTracedDecoratorAdvanced:
     @pytest.mark.asyncio
     async def test_decorator_async_exception(self):
         """测试异步函数异常追踪。"""
+
         @traced(name="async_error")
         async def async_error_func():
             raise RuntimeError("Async error")
@@ -760,6 +770,7 @@ class TestTraceStorageAdvanced:
         # 清理
         import gc
         import time
+
         gc.collect()
         time.sleep(0.05)
         try:

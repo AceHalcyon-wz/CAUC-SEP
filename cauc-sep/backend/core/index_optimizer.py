@@ -186,9 +186,7 @@ class QueryPerformanceMonitor:
             # 记录慢查询
             if duration_ms > self._slow_query_threshold:
                 self._slow_queries.append(metrics)
-                logger.warning(
-                    f"Slow query detected: {duration_ms:.2f}ms - {sql[:100]}..."
-                )
+                logger.warning(f"Slow query detected: {duration_ms:.2f}ms - {sql[:100]}...")
 
             # 更新查询模式分析
             self._update_query_pattern(sql, duration_ms)
@@ -251,7 +249,7 @@ class QueryPerformanceMonitor:
             parts = sql_lower.split("from")
             if len(parts) > 1:
                 table_part = parts[1].split()[0].strip()
-                table_name = table_part.rstrip(";").strip("`\"")
+                table_name = table_part.rstrip(";").strip('`"')
 
         # 提取WHERE列
         where_columns = []
@@ -289,18 +287,14 @@ class QueryPerformanceMonitor:
         """
         with self._lock:
             avg_duration = (
-                self._total_duration_ms / self._total_queries
-                if self._total_queries > 0
-                else 0
+                self._total_duration_ms / self._total_queries if self._total_queries > 0 else 0
             )
 
             return {
                 "total_queries": self._total_queries,
                 "total_errors": self._total_errors,
                 "error_rate": (
-                    self._total_errors / self._total_queries * 100
-                    if self._total_queries > 0
-                    else 0
+                    self._total_errors / self._total_queries * 100 if self._total_queries > 0 else 0
                 ),
                 "avg_duration_ms": avg_duration,
                 "slow_query_count": len(self._slow_queries),
@@ -319,9 +313,7 @@ class QueryPerformanceMonitor:
             慢查询列表
         """
         with self._lock:
-            sorted_queries = sorted(
-                self._slow_queries, key=lambda x: x.duration_ms, reverse=True
-            )
+            sorted_queries = sorted(self._slow_queries, key=lambda x: x.duration_ms, reverse=True)
             return [
                 {
                     "query_id": q.query_id,
@@ -357,9 +349,7 @@ class QueryPerformanceMonitor:
                     "execution_count": p.execution_count,
                     "avg_duration_ms": p.avg_duration_ms,
                     "max_duration_ms": p.max_duration_ms,
-                    "last_executed": (
-                        p.last_executed.isoformat() if p.last_executed else None
-                    ),
+                    "last_executed": (p.last_executed.isoformat() if p.last_executed else None),
                 }
                 for p in sorted_patterns[:limit]
             ]
@@ -470,7 +460,10 @@ class IndexOptimizer:
         unique_recommendations = {}
         for rec in recommendations:
             key = f"{rec.table_name}:{','.join(rec.columns)}"
-            if key not in unique_recommendations or rec.priority > unique_recommendations[key].priority:
+            if (
+                key not in unique_recommendations
+                or rec.priority > unique_recommendations[key].priority
+            ):
                 unique_recommendations[key] = rec
 
         return sorted(unique_recommendations.values(), key=lambda x: x.priority, reverse=True)
@@ -584,9 +577,7 @@ class IndexOptimizer:
 
         return stats
 
-    def create_index(
-        self, table_name: str, index_name: str, columns: list[str]
-    ) -> bool:
+    def create_index(self, table_name: str, index_name: str, columns: list[str]) -> bool:
         """创建索引。
 
         Args:
@@ -646,14 +637,12 @@ class IndexOptimizer:
             cursor = conn.cursor()
 
             # 获取所有索引
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT m.name AS table_name, il.name AS index_name
                 FROM sqlite_master m, pragma_index_list(m.name) il
                 WHERE m.type = 'table' AND m.name NOT LIKE 'sqlite_%'
                 ORDER BY m.name, il.name
-                """
-            )
+                """)
 
             for row in cursor.fetchall():
                 table_name, index_name = row

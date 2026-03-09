@@ -129,9 +129,7 @@ class RetryConfig:
             # 如果未指定可重试异常，默认重试所有异常
             return True
 
-        return any(
-            isinstance(exception, exc_type) for exc_type in self.retryable_exceptions
-        )
+        return any(isinstance(exception, exc_type) for exc_type in self.retryable_exceptions)
 
 
 @dataclass
@@ -210,9 +208,7 @@ class RetryExecutor:
 
             except Exception as e:
                 last_exception = e
-                logger.warning(
-                    f"执行失败 (尝试 {attempt}/{self.config.max_retries}): {e}"
-                )
+                logger.warning(f"执行失败 (尝试 {attempt}/{self.config.max_retries}): {e}")
 
                 # 检查是否应该重试
                 if not self.config.should_retry(e):
@@ -416,7 +412,11 @@ class DeviceConnectionRecovery:
         else:
             state.connected = False
             state.last_error = str(result.last_exception)
-            state.state = RecoveryState.FAILED if result.attempts < config.max_retries else RecoveryState.EXHAUSTED
+            state.state = (
+                RecoveryState.FAILED
+                if result.attempts < config.max_retries
+                else RecoveryState.EXHAUSTED
+            )
             logger.error(f"设备 '{device_id}' 连接失败: {state.last_error}")
             return False
 
@@ -465,9 +465,7 @@ class DeviceConnectionRecovery:
             logger.warning(f"设备 '{device_id}' 恢复任务已在运行")
             return
 
-        self._recovery_tasks[device_id] = asyncio.create_task(
-            self._recovery_loop(device_id)
-        )
+        self._recovery_tasks[device_id] = asyncio.create_task(self._recovery_loop(device_id))
         logger.info(f"设备 '{device_id}' 恢复任务已启动")
 
     async def stop_recovery(self, device_id: str) -> None:
@@ -510,7 +508,11 @@ class DeviceConnectionRecovery:
                 health_check = self._health_check_funcs.get(device_id)
                 if health_check:
                     try:
-                        is_healthy = await health_check() if asyncio.iscoroutinefunction(health_check) else health_check()
+                        is_healthy = (
+                            await health_check()
+                            if asyncio.iscoroutinefunction(health_check)
+                            else health_check()
+                        )
                         if not is_healthy:
                             logger.warning(f"设备 '{device_id}' 健康检查失败")
                             state.connected = False
@@ -550,17 +552,13 @@ class DeviceConnectionRecovery:
         Returns:
             Dict[str, Dict[str, Any]]: 所有设备状态
         """
-        return {
-            device_id: state.to_dict()
-            for device_id, state in self._device_states.items()
-        }
+        return {device_id: state.to_dict() for device_id, state in self._device_states.items()}
 
     def _save_states(self) -> None:
         """保存状态到文件。"""
         try:
             states_data = {
-                device_id: state.to_dict()
-                for device_id, state in self._device_states.items()
+                device_id: state.to_dict() for device_id, state in self._device_states.items()
             }
             with open(self.state_file, "w", encoding="utf-8") as f:
                 json.dump(states_data, f, ensure_ascii=False, indent=2)
@@ -810,7 +808,11 @@ class WebSocketReconnectionManager:
         else:
             state.connected = False
             state.last_error = str(result.last_exception)
-            state.state = RecoveryState.FAILED if result.attempts < config.max_retries else RecoveryState.EXHAUSTED
+            state.state = (
+                RecoveryState.FAILED
+                if result.attempts < config.max_retries
+                else RecoveryState.EXHAUSTED
+            )
             logger.error(f"WebSocket连接 '{connection_id}' 连接失败: {state.last_error}")
             return False
 
@@ -897,10 +899,7 @@ class WebSocketReconnectionManager:
 
                 # 检查心跳超时
                 if time.time() - last_pong_time > self.heartbeat_timeout:
-                    logger.warning(
-                        f"WebSocket连接 '{connection_id}' 心跳超时，"
-                        f"准备重连..."
-                    )
+                    logger.warning(f"WebSocket连接 '{connection_id}' 心跳超时，" f"准备重连...")
                     state.connected = False
                     state.last_error = "心跳超时"
 
@@ -1186,7 +1185,9 @@ class ExperimentStateRecovery:
             return
 
         checkpoint.current_step = current_step
-        checkpoint.progress = current_step / checkpoint.total_steps if checkpoint.total_steps > 0 else 0.0
+        checkpoint.progress = (
+            current_step / checkpoint.total_steps if checkpoint.total_steps > 0 else 0.0
+        )
 
         if status:
             checkpoint.status = status
@@ -1388,8 +1389,7 @@ class ExperimentStateRecovery:
             Dict[int, Dict[str, Any]]: 所有实验状态
         """
         return {
-            exp_id: checkpoint.to_dict()
-            for exp_id, checkpoint in self._active_experiments.items()
+            exp_id: checkpoint.to_dict() for exp_id, checkpoint in self._active_experiments.items()
         }
 
 

@@ -79,12 +79,13 @@ def steps_to_mm(steps: int, steps_per_mm: int = DEFAULT_STEPS_PER_MM) -> float:
 class AlarmSeverity(Enum):
     """
     报警严重程度枚举。
-    
+
     Attributes:
         CRITICAL: 严重报警，需要立即处理
         WARNING: 警告，需要关注
         INFO: 信息提示
     """
+
     CRITICAL = "critical"
     WARNING = "warning"
     INFO = "info"
@@ -94,7 +95,7 @@ class AlarmSeverity(Enum):
 class AlarmInfo:
     """
     报警信息数据类。
-    
+
     Attributes:
         code: 报警代码
         name_zh: 中文名称
@@ -105,6 +106,7 @@ class AlarmInfo:
         possible_causes: 可能原因列表
         solutions: 解决方案列表
     """
+
     code: int
     name_zh: str
     name_en: str
@@ -303,8 +305,16 @@ def get_alarm_info(alarm_code: int, language: str = "zh") -> dict[str, Any]:
     if info is None:
         return {
             "code": alarm_code,
-            "name": f"未知报警(0x{alarm_code:04X})" if language == "zh" else f"Unknown Alarm(0x{alarm_code:04X})",
-            "description": "未定义的报警代码，请参考驱动器手册" if language == "zh" else "Undefined alarm code, please refer to driver manual",
+            "name": (
+                f"未知报警(0x{alarm_code:04X})"
+                if language == "zh"
+                else f"Unknown Alarm(0x{alarm_code:04X})"
+            ),
+            "description": (
+                "未定义的报警代码，请参考驱动器手册"
+                if language == "zh"
+                else "Undefined alarm code, please refer to driver manual"
+            ),
             "severity": AlarmSeverity.WARNING.value,
             "possible_causes": [],
             "solutions": ["联系技术支持" if language == "zh" else "Contact technical support"],
@@ -321,39 +331,39 @@ def get_alarm_info(alarm_code: int, language: str = "zh") -> dict[str, Any]:
 
 
 # 状态字位定义（基于DM2C-RS556用户手册V1.8，地址0x1003）
-STATUS_FAULT_BIT = 0x01          # Bit0: 故障位（1=故障）
-STATUS_ENABLE_BIT = 0x02         # Bit1: 使能状态（1=使能）
-STATUS_RUNNING_BIT = 0x04        # Bit2: 运行状态（1=运行中）
-STATUS_INVALID_BIT = 0x08        # Bit3: 无效位（1=无效状态）
-STATUS_CMD_COMPLETE_BIT = 0x10   # Bit4: 命令完成（1=完成）
+STATUS_FAULT_BIT = 0x01  # Bit0: 故障位（1=故障）
+STATUS_ENABLE_BIT = 0x02  # Bit1: 使能状态（1=使能）
+STATUS_RUNNING_BIT = 0x04  # Bit2: 运行状态（1=运行中）
+STATUS_INVALID_BIT = 0x08  # Bit3: 无效位（1=无效状态）
+STATUS_CMD_COMPLETE_BIT = 0x10  # Bit4: 命令完成（1=完成）
 STATUS_PATH_COMPLETE_BIT = 0x20  # Bit5: 路径完成（1=完成）
 STATUS_HOME_COMPLETE_BIT = 0x40  # Bit6: 回零完成（1=完成）
 
 
 # 控制字命令（地址0x1801）
 # 根据DM2C-RS556用户手册V1.8定义
-CMD_JOG_POS = 0x4001             # 正向JOG（需50ms间隔连续发送）
-CMD_JOG_NEG = 0x4002             # 负向JOG（需50ms间隔连续发送）
-CMD_JOG_STOP = 0x4000            # JOG停止
-CMD_CLEAR_ALARM = 0x0001         # 清除报警（别名）
-CMD_RESET_ALARM = 0x1111         # 复位当前报警
-CMD_RESET_HISTORY_ALARM = 0x1122 # 复位历史报警
-CMD_SAVE_PARAM = 0x2211          # 保存参数到EEPROM
-CMD_PARAM_INIT = 0x2222          # 参数初始化（不含电机参数）
-CMD_FACTORY_RESET = 0x2233       # 恢复出厂设置
-CMD_SAVE_MAPPING = 0x2244        # 保存映射参数到EEPROM
+CMD_JOG_POS = 0x4001  # 正向JOG（需50ms间隔连续发送）
+CMD_JOG_NEG = 0x4002  # 负向JOG（需50ms间隔连续发送）
+CMD_JOG_STOP = 0x4000  # JOG停止
+CMD_CLEAR_ALARM = 0x0001  # 清除报警（别名）
+CMD_RESET_ALARM = 0x1111  # 复位当前报警
+CMD_RESET_HISTORY_ALARM = 0x1122  # 复位历史报警
+CMD_SAVE_PARAM = 0x2211  # 保存参数到EEPROM
+CMD_PARAM_INIT = 0x2222  # 参数初始化（不含电机参数）
+CMD_FACTORY_RESET = 0x2233  # 恢复出厂设置
+CMD_SAVE_MAPPING = 0x2244  # 保存映射参数到EEPROM
 
 
 # 触发寄存器命令（地址0x6002，Pr8.02）
 # 根据DM2C-RS556用户手册V1.8定义
-TRIGGER_PATH_BASE = 0x0100      # 路径触发基址：0x01P (P为路径号0~15)
-TRIGGER_HOME = 0x020            # 回零触发（边沿触发）
-TRIGGER_SET_ZERO = 0x021        # 当前位置手动设零
+TRIGGER_PATH_BASE = 0x0100  # 路径触发基址：0x01P (P为路径号0~15)
+TRIGGER_HOME = 0x020  # 回零触发（边沿触发）
+TRIGGER_SET_ZERO = 0x021  # 当前位置手动设零
 TRIGGER_EMERGENCY_STOP = 0x040  # 急停触发
 
 # 触发寄存器读值定义
-TRIGGER_STATUS_IDLE = 0x0000    # 定位完成，可接收新数据
-TRIGGER_STATUS_RUNNING = 0x1000 # 路径运行中（0x10P，P为路径号）
+TRIGGER_STATUS_IDLE = 0x0000  # 定位完成，可接收新数据
+TRIGGER_STATUS_RUNNING = 0x1000  # 路径运行中（0x10P，P为路径号）
 TRIGGER_STATUS_WAITING = 0x200  # 指令完成等待定位
 
 
@@ -370,30 +380,30 @@ PR_PATH_ENTRY_SIZE = 8  # 每个路径占8个寄存器
 # Bit6: POS - 位置模式 (0=绝对位置, 1=相对位置)
 # Bit8-13: JUMP_ADDR - 跳转目标路径号(0-15)
 # Bit14: JUMP - 跳转使能 (0=不跳转, 1=跳转)
-PR_MODE_TYPE_MASK = 0x000F       # Bit0-3: 运动类型掩码
-PR_MODE_INS_MASK = 0x0010        # Bit4: 插断控制掩码
-PR_MODE_OVLP_MASK = 0x0020       # Bit5: 重叠功能掩码
-PR_MODE_POS_MASK = 0x0040        # Bit6: 位置模式掩码
+PR_MODE_TYPE_MASK = 0x000F  # Bit0-3: 运动类型掩码
+PR_MODE_INS_MASK = 0x0010  # Bit4: 插断控制掩码
+PR_MODE_OVLP_MASK = 0x0020  # Bit5: 重叠功能掩码
+PR_MODE_POS_MASK = 0x0040  # Bit6: 位置模式掩码
 PR_MODE_JUMP_ADDR_MASK = 0x3F00  # Bit8-13: 跳转地址掩码
-PR_MODE_JUMP_MASK = 0x4000       # Bit14: 跳转使能掩码
+PR_MODE_JUMP_MASK = 0x4000  # Bit14: 跳转使能掩码
 
 # 运动类型常量
-PR_TYPE_NO_ACTION = 0    # 无动作
-PR_TYPE_POSITION = 1     # 位置定位
-PR_TYPE_VELOCITY = 2     # 速度运行
-PR_TYPE_HOME = 3         # 回零
+PR_TYPE_NO_ACTION = 0  # 无动作
+PR_TYPE_POSITION = 1  # 位置定位
+PR_TYPE_VELOCITY = 2  # 速度运行
+PR_TYPE_HOME = 3  # 回零
 
 # 插断控制常量
-PR_INS_INTERRUPTIBLE = 0      # 可插断（默认）
+PR_INS_INTERRUPTIBLE = 0  # 可插断（默认）
 PR_INS_NON_INTERRUPTIBLE = 1  # 屏蔽插断
 
 # 重叠功能常量
 PR_OVLP_DISABLE = 0  # 不重叠
-PR_OVLP_ENABLE = 1   # 重叠
+PR_OVLP_ENABLE = 1  # 重叠
 
 # 位置模式常量
-PR_POS_ABSOLUTE = 0   # 绝对位置
-PR_POS_RELATIVE = 1   # 相对位置
+PR_POS_ABSOLUTE = 0  # 绝对位置
+PR_POS_RELATIVE = 1  # 相对位置
 
 
 # 数字输入配置寄存器地址（Pr4.02-Pr4.08）
@@ -458,24 +468,24 @@ REG_DO_STATUS = 0x017B  # DO状态（Pr4.29）
 
 
 # 回零参数寄存器地址（Pr8组）
-REG_HOME_MODE = 0x0280          # Pr8.00: 回零模式
-REG_HOME_SPEED_HIGH = 0x0281    # Pr8.01: 回零速度（高速）
-REG_HOME_SPEED_LOW = 0x0282     # Pr8.02: 回零速度（低速）
-REG_HOME_OFFSET = 0x0283        # Pr8.03: 回零偏移
-REG_HOME_DIRECTION = 0x0284     # Pr8.04: 回零方向
+REG_HOME_MODE = 0x0280  # Pr8.00: 回零模式
+REG_HOME_SPEED_HIGH = 0x0281  # Pr8.01: 回零速度（高速）
+REG_HOME_SPEED_LOW = 0x0282  # Pr8.02: 回零速度（低速）
+REG_HOME_OFFSET = 0x0283  # Pr8.03: 回零偏移
+REG_HOME_DIRECTION = 0x0284  # Pr8.04: 回零方向
 
 # 回零模式定义
-HOME_MODE_SINGLE_LIMIT = 0      # 单边限位回零
-HOME_MODE_DOUBLE_LIMIT = 1      # 双边限位回零
-HOME_MODE_EXTERNAL_SIGNAL = 2   # 外部回零信号
-HOME_MODE_ENCODER_Z = 3         # 编码器Z信号
+HOME_MODE_SINGLE_LIMIT = 0  # 单边限位回零
+HOME_MODE_DOUBLE_LIMIT = 1  # 双边限位回零
+HOME_MODE_EXTERNAL_SIGNAL = 2  # 外部回零信号
+HOME_MODE_ENCODER_Z = 3  # 编码器Z信号
 
 # 回零方向定义
-HOME_DIRECTION_POSITIVE = 0     # 正向回零
-HOME_DIRECTION_NEGATIVE = 1     # 负向回零
+HOME_DIRECTION_POSITIVE = 0  # 正向回零
+HOME_DIRECTION_NEGATIVE = 1  # 负向回零
 
 # 回零触发控制字
-CMD_TRIGGER_HOME = 0x0008       # 回零触发命令
+CMD_TRIGGER_HOME = 0x0008  # 回零触发命令
 
 
 class LeadshineDM2C(AbstractStepper):
@@ -505,9 +515,9 @@ class LeadshineDM2C(AbstractStepper):
     REG_ACT_POSITION_H = 0x602C
     REG_ACT_POSITION_L = 0x602D
     REG_ALARM_CODE = 0x2203
-    
+
     # JOG相关寄存器地址（基于DM2C手册V1.8）
-    REG_JOG_SPEED = 0x01E1      # Pr6.00: JOG速度
+    REG_JOG_SPEED = 0x01E1  # Pr6.00: JOG速度
     REG_JOG_ACCEL_TIME = 0x01E7  # Pr6.03: JOG加速时间
     REG_JOG_DECEL_TIME = 0x01E8  # Pr6.04: JOG减速时间
 
@@ -689,14 +699,14 @@ class LeadshineDM2C(AbstractStepper):
     async def jog(self, direction: int, speed: float) -> bool:
         """
         JOG点动模式
-        
+
         Args:
             direction: 运动方向，1为正方向，-1为负方向
             speed: 运动速度（单位：毫米/秒）
-        
+
         Returns:
             bool: 点动是否成功启动
-        
+
         Note:
             JOG控制字（写入0x1801）：
             - 正向JOG: 0x4001
@@ -715,7 +725,7 @@ class LeadshineDM2C(AbstractStepper):
             if not await self._write_register(self.REG_JOG_SPEED, speed_steps):
                 logger.error("Failed to set JOG speed")
                 return False
-            
+
             # 选择控制字
             cmd = CMD_JOG_POS if direction > 0 else CMD_JOG_NEG
             result = await self._write_register(self.REG_CONTROL_WORD, cmd)
@@ -734,21 +744,21 @@ class LeadshineDM2C(AbstractStepper):
             logger.error(f"JOG error: {e}")
             self._last_error = str(e)
             return False
-    
+
     async def jog_stop(self) -> bool:
         """
         停止JOG运动
-        
+
         Returns:
             bool: 是否成功停止
         """
         if not PYMODBUS_AVAILABLE:
             logger.info("[SIMULATION] JOG stopped")
             return True
-        
+
         try:
             result = await self._write_register(self.REG_CONTROL_WORD, CMD_JOG_STOP)
-            
+
             if result:
                 logger.info("JOG stopped")
                 return True
@@ -759,28 +769,28 @@ class LeadshineDM2C(AbstractStepper):
             logger.error(f"JOG stop error: {e}")
             self._last_error = str(e)
             return False
-    
+
     async def set_jog_speed(self, speed: float) -> bool:
         """
         设置JOG速度
-        
+
         Args:
             speed: JOG速度（单位：毫米/秒）
-        
+
         Returns:
             bool: 是否成功设置
-        
+
         Note:
             写入寄存器Pr6.00 (地址0x01E1)，单位：步/秒
         """
         if not PYMODBUS_AVAILABLE:
             logger.info(f"[SIMULATION] JOG speed set to {speed}mm/s")
             return True
-        
+
         try:
             speed_steps = int(speed * self.steps_per_mm)
             result = await self._write_register(self.REG_JOG_SPEED, speed_steps)
-            
+
             if result:
                 logger.info(f"JOG speed set: {speed}mm/s ({speed_steps} steps/s)")
                 return True
@@ -791,45 +801,42 @@ class LeadshineDM2C(AbstractStepper):
             logger.error(f"Set JOG speed error: {e}")
             self._last_error = str(e)
             return False
-    
+
     async def set_jog_acceleration(self, accel_time: int, decel_time: int) -> bool:
         """
         设置JOG加减速时间
-        
+
         Args:
             accel_time: 加速时间（单位：毫秒）
             decel_time: 减速时间（单位：毫秒）
-        
+
         Returns:
             bool: 是否成功设置
-        
+
         Note:
             加速时间写入Pr6.03 (地址0x01E7)
             减速时间写入Pr6.04 (地址0x01E8)
         """
         if not PYMODBUS_AVAILABLE:
             logger.info(
-                f"[SIMULATION] JOG acceleration set: "
-                f"accel={accel_time}ms, decel={decel_time}ms"
+                f"[SIMULATION] JOG acceleration set: " f"accel={accel_time}ms, decel={decel_time}ms"
             )
             return True
-        
+
         try:
             # 设置加速时间
             result1 = await self._write_register(self.REG_JOG_ACCEL_TIME, accel_time)
             if not result1:
                 logger.error("Failed to set JOG acceleration time")
                 return False
-            
+
             # 设置减速时间
             result2 = await self._write_register(self.REG_JOG_DECEL_TIME, decel_time)
             if not result2:
                 logger.error("Failed to set JOG deceleration time")
                 return False
-            
-            logger.info(
-                f"JOG acceleration set: accel={accel_time}ms, decel={decel_time}ms"
-            )
+
+            logger.info(f"JOG acceleration set: accel={accel_time}ms, decel={decel_time}ms")
             return True
         except Exception as e:
             logger.error(f"Set JOG acceleration error: {e}")
@@ -853,8 +860,12 @@ class LeadshineDM2C(AbstractStepper):
         Raises:
             ValueError: 模式值无效
         """
-        if mode not in [HOME_MODE_SINGLE_LIMIT, HOME_MODE_DOUBLE_LIMIT,
-                        HOME_MODE_EXTERNAL_SIGNAL, HOME_MODE_ENCODER_Z]:
+        if mode not in [
+            HOME_MODE_SINGLE_LIMIT,
+            HOME_MODE_DOUBLE_LIMIT,
+            HOME_MODE_EXTERNAL_SIGNAL,
+            HOME_MODE_ENCODER_Z,
+        ]:
             logger.error(f"Invalid home mode: {mode}, must be 0-3")
             raise ValueError(f"Invalid home mode: {mode}, must be 0-3")
 
@@ -902,8 +913,7 @@ class LeadshineDM2C(AbstractStepper):
 
         if not PYMODBUS_AVAILABLE:
             logger.info(
-                f"[SIMULATION] Home speed configured: "
-                f"high={speed_high}, low={speed_low}"
+                f"[SIMULATION] Home speed configured: " f"high={speed_high}, low={speed_low}"
             )
             return True
 
@@ -912,9 +922,7 @@ class LeadshineDM2C(AbstractStepper):
             result2 = await self._write_register(REG_HOME_SPEED_LOW, speed_low)
 
             if result1 and result2:
-                logger.info(
-                    f"Home speed configured: high={speed_high}, low={speed_low}"
-                )
+                logger.info(f"Home speed configured: high={speed_high}, low={speed_low}")
                 return True
             else:
                 logger.error("Failed to configure home speed")
@@ -1292,7 +1300,7 @@ class LeadshineDM2C(AbstractStepper):
     async def read_status_word(self) -> dict[str, Any]:
         """
         读取状态字(0x1003)
-        
+
         状态字位定义（DM2C-RS556用户手册V1.8）：
         - Bit0: 故障位（1=故障）
         - Bit1: 使能位（1=使能）
@@ -1683,8 +1691,7 @@ class LeadshineDM2C(AbstractStepper):
 
             if result:
                 logger.info(
-                    f"PR path {path_number} triggered "
-                    f"(wrote 0x{trigger_value:03X} to 0x6002)"
+                    f"PR path {path_number} triggered " f"(wrote 0x{trigger_value:03X} to 0x6002)"
                 )
                 return True
             else:
@@ -1781,9 +1788,7 @@ class LeadshineDM2C(AbstractStepper):
         if not PYMODBUS_AVAILABLE:
             func_name = DI_FUNCTIONS.get(base_function, "Unknown")
             polarity = "常闭" if function & 0x80 else "常开"
-            logger.info(
-                f"[SIMULATION] DI{di_number} configured: {func_name} ({polarity})"
-            )
+            logger.info(f"[SIMULATION] DI{di_number} configured: {func_name} ({polarity})")
             return True
 
         try:
@@ -1848,9 +1853,7 @@ class LeadshineDM2C(AbstractStepper):
         if not PYMODBUS_AVAILABLE:
             func_name = DO_FUNCTIONS.get(base_function, "Unknown")
             polarity = "常闭" if function & 0x80 else "常开"
-            logger.info(
-                f"[SIMULATION] DO{do_number} configured: {func_name} ({polarity})"
-            )
+            logger.info(f"[SIMULATION] DO{do_number} configured: {func_name} ({polarity})")
             return True
 
         try:
@@ -2011,9 +2014,7 @@ class LeadshineDM2C(AbstractStepper):
                     "active": [],
                 }
 
-            result = self.client.read_holding_registers(
-                REG_DI_STATUS, 1, slave=self.slave_id
-            )
+            result = self.client.read_holding_registers(REG_DI_STATUS, 1, slave=self.slave_id)
 
             if result and not result.isError():
                 raw_value = result.registers[0]
@@ -2031,9 +2032,7 @@ class LeadshineDM2C(AbstractStepper):
                 }
 
                 # 统计激活的DI
-                status["active"] = [
-                    f"DI{i}" for i in range(1, 8) if status[f"di{i}"]
-                ]
+                status["active"] = [f"DI{i}" for i in range(1, 8) if status[f"di{i}"]]
 
                 logger.debug(f"DI status: {status['active']}")
                 return status
@@ -2103,9 +2102,7 @@ class LeadshineDM2C(AbstractStepper):
                     "active": [],
                 }
 
-            result = self.client.read_holding_registers(
-                REG_DO_STATUS, 1, slave=self.slave_id
-            )
+            result = self.client.read_holding_registers(REG_DO_STATUS, 1, slave=self.slave_id)
 
             if result and not result.isError():
                 raw_value = result.registers[0]
@@ -2119,9 +2116,7 @@ class LeadshineDM2C(AbstractStepper):
                 }
 
                 # 统计激活的DO
-                status["active"] = [
-                    f"DO{i}" for i in range(1, 4) if status[f"do{i}"]
-                ]
+                status["active"] = [f"DO{i}" for i in range(1, 4) if status[f"do{i}"]]
 
                 logger.debug(f"DO status: {status['active']}")
                 return status
