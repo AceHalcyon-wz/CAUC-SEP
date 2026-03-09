@@ -33,8 +33,9 @@ from api.schemas import (
 )
 from core.device_registry import DeviceRegistry
 from core.device_utils import DeviceValidationError, validate_device_state
-from core.piezo_controller import CalibrationType, PiezoController
+from core.piezo_controller import CalibrationType
 from core.piezo_controller import ControlMode as PiezoControlMode
+from core.piezo_controller import PiezoController
 
 logger = logging.getLogger(__name__)
 
