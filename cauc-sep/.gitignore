@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+env/
+.venv-nuitka/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.cache
+logs/
+
+# Database
+*.db
+*.sqlite3
+crash_reports.db
+experiments.db
+traces.db
+
+# Secrets
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+backend/dist/
+backend/build/
+backend/*.build/
+backend/*.dist/
+nuitka-*.xml
+
+# Trae IDE
+.trae/

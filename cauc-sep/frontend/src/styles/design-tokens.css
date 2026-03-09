@@ -1,0 +1,390 @@
+/**
+ * @file design-tokens.css
+ * @path src/styles/
+ * @description CAUC-SEP 自旋电子实验平台设计令牌系统 - 科技蓝色系
+ * @author Agent
+ * @date 2026-03-08
+ * @version 2.0.0
+ */
+
+:root {
+  /* ==================== 颜色系统 ==================== */
+  
+  /* 主色 - 科技蓝色系（实验平台专业感） */
+  --color-primary-50: #e6f7ff;
+  --color-primary-100: #bae7ff;
+  --color-primary-200: #91d5ff;
+  --color-primary-300: #69c0ff;
+  --color-primary-400: #40a9ff;
+  --color-primary-500: #1890ff;
+  --color-primary-600: #096dd9;
+  --color-primary-700: #0050b3;
+  --color-primary-800: #003a8c;
+  --color-primary-900: #002766;
+
+  /* 辅助色 - 青色系（与主色协调） */
+  --color-secondary-50: #f0fdfa;
+  --color-secondary-100: #ccfbf1;
+  --color-secondary-200: #99f6e4;
+  --color-secondary-300: #5eead4;
+  --color-secondary-400: #2dd4bf;
+  --color-secondary-500: #14b8a6;
+  --color-secondary-600: #0d9488;
+  --color-secondary-700: #0f766e;
+  --color-secondary-800: #115e59;
+  --color-secondary-900: #134e4a;
+
+  /* 强调色 - 青色系（科技感，兼容旧变量名） */
+  --color-accent-50: var(--color-secondary-50);
+  --color-accent-100: var(--color-secondary-100);
+  --color-accent-200: var(--color-secondary-200);
+  --color-accent-300: var(--color-secondary-300);
+  --color-accent-400: var(--color-secondary-400);
+  --color-accent-500: var(--color-secondary-500);
+  --color-accent-600: var(--color-secondary-600);
+  --color-accent-700: var(--color-secondary-700);
+  --color-accent-800: var(--color-secondary-800);
+  --color-accent-900: var(--color-secondary-900);
+
+  /* 数据色 - 用于图表和可视化 */
+  --color-data-blue: #3182ce;
+  --color-data-cyan: #06b6d4;
+  --color-data-green: #10b981;
+  --color-data-yellow: #f59e0b;
+  --color-data-orange: #f97316;
+  --color-data-red: #ef4444;
+  --color-data-purple: #8b5cf6;
+  --color-data-pink: #ec4899;
+
+  /* 功能色 - 成功/警告/错误/信息 */
+  
+  /* 成功色 - 绿色系 */
+  --color-success-light: #f6ffed;
+  --color-success-lighter: #b7eb8f;
+  --color-success: #52c41a;
+  --color-success-dark: #389e0d;
+  --color-success-darker: #237804;
+  
+  /* 警告色 - 黄色系 */
+  --color-warning-light: #fffbe6;
+  --color-warning-lighter: #fff1b8;
+  --color-warning: #faad14;
+  --color-warning-dark: #d48806;
+  --color-warning-darker: #ad6800;
+  
+  /* 错误色 - 红色系 */
+  --color-error-light: #fff1f0;
+  --color-error-lighter: #ffa39e;
+  --color-error: #ff4d4f;
+  --color-error-dark: #cf1322;
+  --color-error-darker: #a8071a;
+  
+  /* 信息色 - 蓝色系（与主色一致） */
+  --color-info-light: var(--color-primary-50);
+  --color-info: var(--color-primary-500);
+  --color-info-dark: var(--color-primary-700);
+
+  /* 中性色 - 文字/边框/背景层级 */
+  
+  /* 中性色板 */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #f0f0f0;
+  --color-neutral-300: #d9d9d9;
+  --color-neutral-400: #bfbfbf;
+  --color-neutral-500: #8c8c8c;
+  --color-neutral-600: #595959;
+  --color-neutral-700: #434343;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #1f1f1f;
+
+  /* ==================== 亮色主题 ==================== */
+  
+  /* 背景色层级 */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #fafafa;
+  --color-bg-tertiary: #f5f5f5;
+  --color-bg-quaternary: #f0f0f0;
+  --color-bg-overlay: rgba(0, 0, 0, 0.45);
+  
+  /* 表面色（卡片、面板） */
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #fafafa;
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: #ffffff;
+  
+  /* 文字颜色层级 */
+  --color-text-primary: rgba(0, 0, 0, 0.85);
+  --color-text-secondary: rgba(0, 0, 0, 0.65);
+  --color-text-tertiary: rgba(0, 0, 0, 0.45);
+  --color-text-quaternary: rgba(0, 0, 0, 0.25);
+  --color-text-disabled: rgba(0, 0, 0, 0.25);
+  --color-text-placeholder: rgba(0, 0, 0, 0.45);
+  --color-text-inverse: #ffffff;
+  
+  /* 边框颜色层级 */
+  --color-border-primary: #d9d9d9;
+  --color-border-secondary: #f0f0f0;
+  --color-border-tertiary: #f5f5f5;
+  --color-border-focus: #1890ff;
+  --color-border-error: #ff4d4f;
+  --color-border-success: #52c41a;
+  --color-border-warning: #faad14;
+  
+  /* 交互状态 */
+  --color-interactive-hover: rgba(24, 144, 255, 0.08);
+  --color-interactive-active: rgba(24, 144, 255, 0.15);
+  --color-interactive-selected: rgba(24, 144, 255, 0.12);
+  --color-interactive-disabled: rgba(0, 0, 0, 0.04);
+
+  /* ==================== 间距系统（基于 4px） ==================== */
+  
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* ==================== 阴影层级 ==================== */
+  
+  /* 基础阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 
+               0 1px 6px -1px rgba(0, 0, 0, 0.02),
+               0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 
+               0 6px 16px 0 rgba(0, 0, 0, 0.08),
+               0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 6px 16px -8px rgba(0, 0, 0, 0.08), 
+               0 9px 28px 0 rgba(0, 0, 0, 0.05),
+               0 12px 48px 16px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 16px 32px -8px rgba(0, 0, 0, 0.12), 
+               0 24px 48px 0 rgba(0, 0, 0, 0.08),
+               0 32px 64px 12px rgba(0, 0, 0, 0.05);
+  
+  /* 特殊阴影 */
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+                 0 1px 6px -1px rgba(0, 0, 0, 0.02),
+                 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --shadow-dropdown: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 
+                     0 6px 16px 0 rgba(0, 0, 0, 0.08),
+                     0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  --shadow-modal: 0 6px 16px -8px rgba(0, 0, 0, 0.08), 
+                  0 9px 28px 0 rgba(0, 0, 0, 0.05),
+                  0 12px 48px 16px rgba(0, 0, 0, 0.03);
+  
+  /* 发光效果（用于强调） */
+  --shadow-glow-primary: 0 0 12px rgba(24, 144, 255, 0.3);
+  --shadow-glow-secondary: 0 0 12px rgba(20, 184, 166, 0.3);
+  --shadow-glow-accent: 0 0 12px rgba(20, 184, 166, 0.3);
+  --shadow-glow-success: 0 0 12px rgba(82, 196, 26, 0.3);
+  --shadow-glow-warning: 0 0 12px rgba(250, 173, 20, 0.3);
+  --shadow-glow-error: 0 0 12px rgba(255, 77, 79, 0.3);
+  --shadow-glow-info: 0 0 12px rgba(24, 144, 255, 0.3);
+
+  /* ==================== 字体系统 ==================== */
+  
+  /* 字体族 */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 
+                      'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 
+                      Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-family-chinese: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', 
+                         'STHeiti', 'SimHei', sans-serif;
+  --font-family-english: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 
+                         'Segoe UI', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 
+                      'Courier', 'SF Mono', monospace;
+  
+  /* 字体大小 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+  
+  /* 行高 */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-loose: 2;
+  
+  /* 字重 */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 字间距 */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* ==================== 过渡动画 ==================== */
+  
+  /* 动画时长 */
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+  --transition-slower: 500ms;
+  
+  /* 缓动函数 */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* 组合过渡 */
+  --transition-colors: color 200ms var(--ease-in-out), 
+                       background-color 200ms var(--ease-in-out), 
+                       border-color 200ms var(--ease-in-out);
+  --transition-transform: transform 200ms var(--ease-in-out);
+  --transition-opacity: opacity 200ms var(--ease-in-out);
+  --transition-shadow: box-shadow 200ms var(--ease-in-out);
+  --transition-all: all 200ms var(--ease-in-out);
+
+  /* ==================== 圆角 ==================== */
+  
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ==================== Z-Index 层级 ==================== */
+  
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+
+  /* ==================== 布局尺寸 ==================== */
+  
+  /* 侧边栏 */
+  --sidebar-width-collapsed: 64px;
+  --sidebar-width-expanded: 240px;
+  
+  /* 顶部栏 */
+  --topbar-height: 48px;
+  
+  /* 状态栏 */
+  --statusbar-height: 32px;
+  
+  /* 页面头部 */
+  --header-height: 64px;
+  
+  /* 内容区域 */
+  --content-max-width: 1440px;
+  --content-padding: var(--spacing-6);
+}
+
+/* ==================== 特殊用途变量 ==================== */
+
+/* 数据展示专用 */
+:root {
+  --color-data-positive: var(--color-success);
+  --color-data-negative: var(--color-error);
+  --color-data-neutral: var(--color-neutral-500);
+  
+  /* 仪器状态色 */
+  --color-status-online: #52c41a;
+  --color-status-offline: #8c8c8c;
+  --color-status-warning: #faad14;
+  --color-status-error: #ff4d4f;
+  --color-status-measuring: #1890ff;
+  --color-status-standby: #722ed1;
+  --color-status-disconnected: #bfbfbf;
+  
+  /* 信号强度 */
+  --color-signal-excellent: #52c41a;
+  --color-signal-good: #73d13d;
+  --color-signal-fair: #faad14;
+  --color-signal-weak: #ff4d4f;
+  --color-signal-none: #d9d9d9;
+}
+
+/* ==================== 响应式断点 ==================== */
+
+:root {
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+}
+
+/* ==================== Element Plus 兼容变量 ==================== */
+
+:root {
+  /* Element Plus 主色覆盖 */
+  --el-color-primary: var(--color-primary-500);
+  --el-color-primary-light-3: var(--color-primary-300);
+  --el-color-primary-light-5: var(--color-primary-200);
+  --el-color-primary-light-7: var(--color-primary-100);
+  --el-color-primary-light-8: var(--color-primary-50);
+  --el-color-primary-light-9: var(--color-primary-50);
+  --el-color-primary-dark-2: var(--color-primary-700);
+  
+  /* Element Plus 功能色覆盖 */
+  --el-color-success: var(--color-success);
+  --el-color-warning: var(--color-warning);
+  --el-color-danger: var(--color-error);
+  --el-color-error: var(--color-error);
+  --el-color-info: var(--color-info);
+  
+  /* Element Plus 文字色覆盖 */
+  --el-text-color-primary: var(--color-text-primary);
+  --el-text-color-regular: var(--color-text-secondary);
+  --el-text-color-secondary: var(--color-text-tertiary);
+  --el-text-color-placeholder: var(--color-text-placeholder);
+  --el-text-color-disabled: var(--color-text-disabled);
+  
+  /* Element Plus 边框色覆盖 */
+  --el-border-color: var(--color-border-primary);
+  --el-border-color-light: var(--color-border-secondary);
+  --el-border-color-lighter: var(--color-border-tertiary);
+  --el-border-color-extra-light: var(--color-bg-quaternary);
+  --el-border-color-dark: var(--color-neutral-600);
+  
+  /* Element Plus 背景色覆盖 */
+  --el-bg-color: var(--color-bg-primary);
+  --el-bg-color-page: var(--color-bg-secondary);
+  --el-bg-color-overlay: var(--color-bg-overlay);
+  
+  /* Element Plus 填充色覆盖 */
+  --el-fill-color: var(--color-interactive-hover);
+  --el-fill-color-light: var(--color-bg-tertiary);
+  --el-fill-color-lighter: var(--color-bg-secondary);
+  --el-fill-color-extra-light: var(--color-bg-primary);
+  --el-fill-color-dark: var(--color-neutral-300);
+  --el-fill-color-blank: var(--color-bg-primary);
+  
+  /* Element Plus 圆角覆盖 */
+  --el-border-radius-base: var(--radius-base);
+  --el-border-radius-small: var(--radius-sm);
+  --el-border-radius-round: var(--radius-full);
+  
+  /* Element Plus 阴影覆盖 */
+  --el-box-shadow: var(--shadow-md);
+  --el-box-shadow-light: var(--shadow-sm);
+  --el-box-shadow-lighter: var(--shadow-sm);
+  --el-box-shadow-dark: var(--shadow-lg);
+}

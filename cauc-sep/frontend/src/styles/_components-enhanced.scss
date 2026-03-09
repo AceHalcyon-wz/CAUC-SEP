@@ -1,0 +1,463 @@
+/**
+ * @file _components-enhanced.scss
+ * @path src/styles/
+ * @description CAUC-SEP 通用组件增强样式 (SCSS版本)
+ * @author UI/UX Designer Agent
+ * @date 2026-03-08
+ * @version 1.0.0
+ */
+
+// ==================== 卡片组件增强 ====================
+
+@mixin card-enhanced {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-base) var(--ease-in-out);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    border-color: var(--color-primary-200);
+  }
+}
+
+@mixin card-interactive {
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-6px);
+  }
+
+  &:active {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+@mixin card-highlight {
+  border-color: var(--color-primary-400);
+  box-shadow: var(--shadow-glow-primary);
+
+  &:hover {
+    box-shadow: 0 0 20px rgba(24, 144, 255, 0.4),
+                var(--shadow-lg);
+  }
+}
+
+// ==================== 按钮组件增强 ====================
+
+@mixin button-enhanced {
+  border-radius: var(--radius-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast) var(--ease-in-out);
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--shadow-sm);
+  }
+
+  // 涟漪效果
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+
+  &:active::after {
+    width: 200%;
+    height: 200%;
+  }
+}
+
+@mixin button-gradient($color-light, $color-dark) {
+  background: linear-gradient(135deg, $color-light 0%, $color-dark 100%);
+  border-color: $color-light;
+
+  &:hover {
+    background: linear-gradient(135deg, 
+      lighten($color-light, 5%) 0%, 
+      $color-light 100%);
+  }
+
+  &:active {
+    background: darken($color-dark, 5%);
+    border-color: darken($color-dark, 5%);
+  }
+}
+
+// ==================== 表单组件增强 ====================
+
+@mixin input-enhanced {
+  border-radius: var(--radius-base);
+  background-color: var(--color-surface-primary);
+  box-shadow: 0 0 0 1px var(--color-border-primary) inset;
+  transition: all var(--transition-fast) var(--ease-in-out);
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--color-primary-300) inset;
+    background-color: var(--color-bg-primary);
+  }
+
+  &:focus,
+  &.is-focus {
+    box-shadow: 0 0 0 2px var(--color-primary-500) inset,
+                var(--shadow-glow-primary);
+    background-color: var(--color-bg-primary);
+  }
+}
+
+@mixin input-success {
+  box-shadow: 0 0 0 1px var(--color-success) inset;
+
+  &:hover {
+    box-shadow: 0 0 0 2px var(--color-success) inset;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px var(--color-success) inset,
+                var(--shadow-glow-success);
+  }
+}
+
+@mixin input-error {
+  box-shadow: 0 0 0 1px var(--color-error) inset;
+  animation: shake 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 0 0 2px var(--color-error) inset;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px var(--color-error) inset,
+                var(--shadow-glow-error);
+  }
+}
+
+// ==================== 表格组件增强 ====================
+
+@mixin table-enhanced {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border-primary);
+
+  th.el-table__cell {
+    background: linear-gradient(180deg,
+      var(--color-bg-tertiary) 0%,
+      var(--color-bg-secondary) 100%);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-4);
+    border-bottom: 2px solid var(--color-border-primary);
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background: var(--color-bg-tertiary);
+    }
+  }
+
+  td.el-table__cell {
+    padding: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-secondary);
+    transition: background-color var(--transition-fast);
+  }
+
+  .el-table__row {
+    transition: all var(--transition-fast);
+
+    &:hover td {
+      background-color: var(--color-interactive-hover) !important;
+    }
+  }
+}
+
+// ==================== 开关组件增强 ====================
+
+@mixin switch-enhanced {
+  height: 22px;
+
+  .el-switch__core {
+    border-radius: var(--radius-full);
+    height: 22px;
+    min-width: 44px;
+    border: 2px solid var(--color-border-primary);
+    background-color: var(--color-neutral-300);
+    transition: all var(--transition-base) var(--ease-in-out);
+  }
+
+  &.is-checked .el-switch__core {
+    border-color: var(--color-primary-500);
+    background-color: var(--color-primary-500);
+  }
+
+  .el-switch__action {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base) var(--ease-bounce);
+  }
+
+  &.is-checked .el-switch__action {
+    transform: translateX(22px);
+  }
+
+  &:hover .el-switch__core {
+    border-color: var(--color-primary-400);
+  }
+
+  &.is-checked:hover .el-switch__core {
+    background-color: var(--color-primary-400);
+    border-color: var(--color-primary-400);
+  }
+}
+
+// ==================== 标签组件增强 ====================
+
+@mixin tag-enhanced {
+  border-radius: var(--radius-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+@mixin tag-variant($bg-color, $border-color, $text-color) {
+  background-color: $bg-color;
+  border-color: $border-color;
+  color: $text-color;
+
+  &:hover {
+    background-color: darken($bg-color, 5%);
+    border-color: darken($border-color, 10%);
+  }
+}
+
+// ==================== 进度条组件增强 ====================
+
+@mixin progress-enhanced {
+  .el-progress-bar__outer {
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-tertiary);
+    overflow: hidden;
+  }
+
+  .el-progress-bar__inner {
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg,
+      var(--color-primary-400) 0%,
+      var(--color-primary-500) 100%);
+    transition: width var(--transition-slow) var(--ease-out);
+  }
+}
+
+// ==================== 滑块组件增强 ====================
+
+@mixin slider-enhanced {
+  .el-slider__runway {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-tertiary);
+    transition: background-color var(--transition-fast);
+
+    &:hover {
+      background-color: var(--color-neutral-300);
+    }
+  }
+
+  .el-slider__bar {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg,
+      var(--color-primary-400) 0%,
+      var(--color-primary-500) 100%);
+    transition: all var(--transition-fast);
+  }
+
+  .el-slider__button-wrapper {
+    width: 20px;
+    height: 20px;
+    top: -7px;
+    transition: transform var(--transition-fast);
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  .el-slider__button {
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--color-primary-500);
+    background-color: var(--color-bg-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+
+    &:hover {
+      border-color: var(--color-primary-400);
+      box-shadow: var(--shadow-glow-primary);
+    }
+  }
+}
+
+// ==================== 对话框组件增强 ====================
+
+@mixin dialog-enhanced {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+  animation: dialogFadeIn 0.3s var(--ease-out);
+
+  .el-dialog__header {
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--color-border-primary);
+  }
+
+  .el-dialog__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .el-dialog__body {
+    padding: var(--spacing-6);
+  }
+
+  .el-dialog__footer {
+    padding: var(--spacing-4) var(--spacing-6);
+    border-top: 1px solid var(--color-border-primary);
+  }
+}
+
+// ==================== 消息提示增强 ====================
+
+@mixin message-enhanced {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-4) var(--spacing-5);
+  animation: messageSlideIn 0.3s var(--ease-out);
+}
+
+@mixin message-variant($bg-color, $border-color) {
+  background-color: $bg-color;
+  border-color: $border-color;
+}
+
+// ==================== 动画关键帧 ====================
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ==================== 响应式优化 ====================
+
+@mixin mobile-enhancements {
+  .el-card {
+    margin-bottom: var(--spacing-3);
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .el-button {
+    min-height: 44px;
+    padding: var(--spacing-3) var(--spacing-4);
+  }
+
+  .el-form-item__label {
+    padding-bottom: var(--spacing-2);
+  }
+
+  .el-table th.el-table__cell,
+  .el-table td.el-table__cell {
+    padding: var(--spacing-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+// ==================== 打印样式优化 ====================
+
+@mixin print-enhancements {
+  .el-card {
+    box-shadow: none;
+    border: 1px solid var(--color-border-primary);
+    page-break-inside: avoid;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .el-button {
+    box-shadow: none;
+  }
+
+  .el-table {
+    box-shadow: none;
+    border: 1px solid var(--color-border-primary);
+  }
+}

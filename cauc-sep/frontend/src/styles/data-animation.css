@@ -1,0 +1,563 @@
+/**
+ * @file data-animation.css
+ * @path src/styles/
+ * @description 数据更新动画样式，提供数据变化时的视觉反馈效果
+ * @author Agent
+ * @date 2024-03-07
+ */
+
+/* ==================== 基础动画变量 ==================== */
+
+:root {
+  /* 动画持续时间 */
+  --data-animation-duration: 500ms;
+  
+  /* 动画颜色 */
+  --data-animation-color: var(--color-accent-500);
+  --data-animation-success-color: var(--color-success);
+  --data-animation-warning-color: var(--color-warning);
+  --data-animation-error-color: var(--color-error);
+  
+  /* 动画强度 */
+  --data-animation-subtle-opacity: 0.3;
+  --data-animation-normal-opacity: 0.5;
+  --data-animation-strong-opacity: 0.8;
+}
+
+/* ==================== 数据更新动画基础类 ==================== */
+
+.data-animation {
+  position: relative;
+  transition: var(--transition-all);
+}
+
+/* ==================== 闪烁动画 (Flash) ==================== */
+
+.data-animation--flash {
+  animation: data-flash var(--data-animation-duration) ease-out;
+}
+
+.data-animation--flash.data-animation--subtle {
+  animation: data-flash-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--flash.data-animation--strong {
+  animation: data-flash-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-flash {
+  0% {
+    background-color: var(--data-animation-color);
+    opacity: 1;
+  }
+  100% {
+    background-color: transparent;
+    opacity: 1;
+  }
+}
+
+@keyframes data-flash-subtle {
+  0% {
+    background-color: rgba(20, 184, 166, var(--data-animation-subtle-opacity));
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes data-flash-strong {
+  0%, 20% {
+    background-color: var(--data-animation-color);
+    box-shadow: 0 0 20px var(--data-animation-color);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* ==================== 高亮动画 (Highlight) ==================== */
+
+.data-animation--highlight {
+  animation: data-highlight var(--data-animation-duration) ease-out;
+}
+
+.data-animation--highlight.data-animation--subtle {
+  animation: data-highlight-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--highlight.data-animation--strong {
+  animation: data-highlight-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-highlight {
+  0% {
+    background-color: var(--data-animation-color);
+    transform: scale(1.02);
+  }
+  50% {
+    background-color: rgba(20, 184, 166, 0.3);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+@keyframes data-highlight-subtle {
+  0% {
+    background-color: rgba(20, 184, 166, var(--data-animation-subtle-opacity));
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes data-highlight-strong {
+  0% {
+    background-color: var(--data-animation-color);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px var(--data-animation-color);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+/* ==================== 脉冲动画 (Pulse) ==================== */
+
+.data-animation--pulse {
+  animation: data-pulse var(--data-animation-duration) ease-out;
+}
+
+.data-animation--pulse.data-animation--subtle {
+  animation: data-pulse-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--pulse.data-animation--strong {
+  animation: data-pulse-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(20, 184, 166, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
+  }
+}
+
+@keyframes data-pulse-subtle {
+  0% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(20, 184, 166, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
+  }
+}
+
+@keyframes data-pulse-strong {
+  0% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.9);
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(20, 184, 166, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
+    transform: scale(1);
+  }
+}
+
+/* ==================== 弹跳动画 (Bounce) ==================== */
+
+.data-animation--bounce {
+  animation: data-bounce var(--data-animation-duration) ease-out;
+}
+
+.data-animation--bounce.data-animation--subtle {
+  animation: data-bounce-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--bounce.data-animation--strong {
+  animation: data-bounce-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  75% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes data-bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes data-bounce-strong {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-8px);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+  80% {
+    transform: translateY(-2px);
+  }
+}
+
+/* ==================== 淡入淡出动画 (Fade) ==================== */
+
+.data-animation--fade {
+  animation: data-fade var(--data-animation-duration) ease-out;
+}
+
+.data-animation--fade.data-animation--subtle {
+  animation: data-fade-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--fade.data-animation--strong {
+  animation: data-fade-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes data-fade-subtle {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes data-fade-strong {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==================== 滑动动画 (Slide) ==================== */
+
+.data-animation--slide {
+  animation: data-slide var(--data-animation-duration) ease-out;
+}
+
+.data-animation--slide.data-animation--subtle {
+  animation: data-slide-subtle var(--data-animation-duration) ease-out;
+}
+
+.data-animation--slide.data-animation--strong {
+  animation: data-slide-strong var(--data-animation-duration) ease-out;
+}
+
+@keyframes data-slide {
+  0% {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes data-slide-subtle {
+  0% {
+    transform: translateX(-5px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes data-slide-strong {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ==================== 数据变化指示器 ==================== */
+
+.data-change--increase {
+  color: var(--color-success);
+}
+
+.data-change--increase::before {
+  content: '↑';
+  margin-right: var(--spacing-1);
+  font-weight: var(--font-weight-bold);
+}
+
+.data-change--decrease {
+  color: var(--color-error);
+}
+
+.data-change--decrease::before {
+  content: '↓';
+  margin-right: var(--spacing-1);
+  font-weight: var(--font-weight-bold);
+}
+
+.data-change--neutral {
+  color: var(--color-text-primary);
+}
+
+/* ==================== 数据新鲜度样式 ==================== */
+
+.data-freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  transition: var(--transition-all);
+}
+
+.data-freshness--fresh {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.data-freshness--normal {
+  background: rgba(44, 82, 130, 0.1);
+  color: var(--color-primary-600);
+}
+
+.data-freshness--stale {
+  background: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.data-freshness--expired {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+  animation: freshness-warning 2s ease-in-out infinite;
+}
+
+@keyframes freshness-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.data-freshness__indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+.data-freshness--fresh .data-freshness__indicator {
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.data-freshness--expired .data-freshness__indicator {
+  animation: indicator-blink 1s ease-in-out infinite;
+}
+
+@keyframes indicator-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ==================== 数据值显示样式 ==================== */
+
+.data-value {
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-colors);
+}
+
+.data-value--updating {
+  animation: value-update 300ms ease-out;
+}
+
+@keyframes value-update {
+  0% {
+    color: var(--color-accent-500);
+  }
+  100% {
+    color: inherit;
+  }
+}
+
+.data-value--increasing {
+  color: var(--color-success);
+}
+
+.data-value--decreasing {
+  color: var(--color-error);
+}
+
+/* ==================== 推送频率控制样式 ==================== */
+
+.push-frequency-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+}
+
+.push-frequency-control__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.push-frequency-control__modes {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.push-frequency-control__mode {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: var(--transition-all);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-surface-primary);
+  color: var(--color-text-secondary);
+}
+
+.push-frequency-control__mode:hover {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-600);
+}
+
+.push-frequency-control__mode--active {
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  color: var(--color-text-inverse);
+}
+
+.push-frequency-control__slider {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.push-frequency-control__value {
+  min-width: 60px;
+  text-align: right;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+/* ==================== 响应式调整 ==================== */
+
+@media (max-width: 768px) {
+  .push-frequency-control {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .push-frequency-control__modes {
+    justify-content: center;
+  }
+  
+  .push-frequency-control__slider {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .push-frequency-control__value {
+    text-align: center;
+  }
+}
+
+/* ==================== 暗色主题适配 ==================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --data-animation-color: var(--color-accent-400);
+  }
+  
+  .data-freshness--fresh {
+    background: rgba(16, 185, 129, 0.2);
+  }
+  
+  .data-freshness--normal {
+    background: rgba(44, 82, 130, 0.2);
+  }
+  
+  .data-freshness--stale {
+    background: rgba(237, 137, 54, 0.2);
+  }
+  
+  .data-freshness--expired {
+    background: rgba(229, 62, 62, 0.2);
+  }
+}

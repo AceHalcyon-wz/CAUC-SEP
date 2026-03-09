@@ -1,0 +1,102 @@
+[tool.mypy]
+python_version = "3.11"
+explicit_package_bases = true
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pymodbus.*",
+    "scipy.*",
+    "lmfit.*",
+    "numpy.*",
+    "pytest.*",
+    "sqlalchemy.*",
+    "fastapi.*",
+    "pydantic.*",
+    "uvicorn.*",
+    "models",
+    "core.data_storage",
+    "tests.*",
+]
+ignore_missing_imports = true
+ignore_errors = true
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+ignore = [
+    "B008",  # FastAPI Depends in argument defaults is standard practice
+    "B904",  # raise ... from is not always necessary
+    "B028",  # stacklevel in warnings.warn is optional
+    "N803",  # Argument name should be lowercase (Ms is standard in physics)
+    "N806",  # Variable in function should be lowercase (L is standard in physics)
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+    "ignore::RuntimeWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "windows: marks tests that only run on Windows",
+]
+
+[tool.coverage.run]
+source = ["core", "api"]
+omit = [
+    "tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "*/migrations/*",
+    "*/examples/*",
+]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "if sys.platform",
+]
+fail_under = 70
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "CAUC-SEP Backend Coverage Report"
+
+[tool.coverage.xml]
+output = "coverage.xml"

@@ -1,0 +1,476 @@
+/**
+ * @file page-layout.scss
+ * @path src/styles/
+ * @description 自旋电子实验平台统一页面布局样式规范
+ * @author Frontend Engineer Agent
+ * @date 2026-03-08
+ * @usage 所有页面组件导入此文件以获取统一的布局样式
+ */
+
+// ==================== 页面基础结构 ====================
+
+.page-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+}
+
+// ==================== 页面头部 ====================
+
+.page-header {
+  background-color: var(--color-surface-primary);
+  border-bottom: 1px solid var(--color-border-primary);
+  padding: var(--spacing-6);
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+  }
+  
+  .header-icon {
+    font-size: 32px;
+    color: var(--color-primary-500);
+    padding: var(--spacing-3);
+    background-color: var(--color-primary-50);
+    border-radius: var(--radius-lg);
+  }
+  
+  .header-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  
+  .page-title {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+  }
+  
+  .page-subtitle {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+  
+  .header-right {
+    display: flex;
+    gap: var(--spacing-3);
+  }
+  
+  .action-btn {
+    transition: var(--transition-all);
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+}
+
+// ==================== 主内容区域 ====================
+
+.main-content {
+  flex: 1;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--spacing-6);
+}
+
+// ==================== 卡片组件样式 ====================
+
+.page-card {
+  border-radius: var(--radius-lg);
+  border: none;
+  margin-bottom: var(--spacing-4);
+  transition: var(--transition-all);
+  
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
+  
+  :deep(.el-card__header) {
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-primary);
+    padding: var(--spacing-4) var(--spacing-6);
+  }
+  
+  :deep(.el-card__body) {
+    padding: var(--spacing-6);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+// ==================== 状态指示器 ====================
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  
+  &.status-online {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+  }
+  
+  &.status-offline {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: var(--color-neutral-500);
+  }
+  
+  &.status-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+  }
+  
+  &.status-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+  }
+  
+  &.status-measuring {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-data-blue);
+  }
+}
+
+// ==================== 数据网格 ====================
+
+.data-grid {
+  display: grid;
+  gap: var(--spacing-4);
+  
+  &.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  &.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  &.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.data-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  transition: var(--transition-all);
+  
+  &:hover {
+    background-color: var(--color-interactive-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.data-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.data-value {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  
+  &.highlight {
+    color: var(--color-primary-500);
+  }
+  
+  &.success {
+    color: var(--color-success);
+  }
+  
+  &.warning {
+    color: var(--color-warning);
+  }
+  
+  &.error {
+    color: var(--color-error);
+  }
+}
+
+// ==================== 表单样式 ====================
+
+.page-form {
+  padding: var(--spacing-2);
+  
+  :deep(.el-form-item) {
+    margin-bottom: var(--spacing-5);
+  }
+  
+  :deep(.el-form-item__label) {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+}
+
+.form-unit {
+  margin-left: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+// ==================== 按钮组 ====================
+
+.button-group {
+  display: grid;
+  gap: var(--spacing-3);
+  
+  &.horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+  }
+}
+
+.action-button {
+  height: 48px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-all);
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// ==================== 状态标签组 ====================
+
+.status-group {
+  display: grid;
+  gap: var(--spacing-3);
+  
+  .status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2);
+    background-color: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+  }
+  
+  .status-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+// ==================== 图表容器 ====================
+
+.chart-container {
+  width: 100%;
+  min-height: 300px;
+  
+  &.chart-medium {
+    min-height: 400px;
+  }
+  
+  &.chart-large {
+    min-height: 500px;
+  }
+}
+
+// ==================== 表格容器 ====================
+
+.table-container {
+  width: 100%;
+  
+  :deep(.el-table) {
+    font-size: var(--font-size-sm);
+  }
+  
+  :deep(.el-table th) {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+// ==================== 空状态 ====================
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  text-align: center;
+  
+  .empty-icon {
+    font-size: 64px;
+    color: var(--color-text-placeholder);
+    margin-bottom: var(--spacing-4);
+  }
+  
+  .empty-text {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+  }
+}
+
+// ==================== 加载状态 ====================
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+// ==================== 响应式设计 ====================
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: 640px) { @content; }
+  } @else if $breakpoint == 'md' {
+    @media (max-width: 768px) { @content; }
+  } @else if $breakpoint == 'lg' {
+    @media (max-width: 1024px) { @content; }
+  } @else if $breakpoint == 'xl' {
+    @media (max-width: 1280px) { @content; }
+  } @else if $breakpoint == '2xl' {
+    @media (max-width: 1536px) { @content; }
+  }
+}
+
+// 移动端适配
+@include respond-to('md') {
+  .page-header {
+    padding: var(--spacing-4);
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-4);
+    }
+    
+    .header-right {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+  
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .main-content {
+    padding: var(--spacing-4);
+  }
+  
+  .data-grid {
+    &.grid-2,
+    &.grid-3,
+    &.grid-4 {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .button-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+// 平板适配
+@include respond-to('lg') {
+  .main-content {
+    padding: var(--spacing-5);
+  }
+  
+  .data-grid {
+    &.grid-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// 桌面端适配
+@include respond-to('xl') {
+  .main-content {
+    padding: var(--spacing-6);
+  }
+}
+
+// ==================== 工具类 ====================
+
+// 间距工具
+.mt-4 { margin-top: var(--spacing-4); }
+.mt-6 { margin-top: var(--spacing-6); }
+.mt-8 { margin-top: var(--spacing-8); }
+
+.mb-4 { margin-bottom: var(--spacing-4); }
+.mb-6 { margin-bottom: var(--spacing-6); }
+.mb-8 { margin-bottom: var(--spacing-8); }
+
+// 对齐工具
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// 显示工具
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+
+// 圆角工具
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-base { border-radius: var(--radius-base); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-full); }
+
+// 阴影工具
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }

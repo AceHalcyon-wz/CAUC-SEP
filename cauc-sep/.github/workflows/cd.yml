@@ -1,0 +1,298 @@
+# CAUC-SEP CD工作流配置
+# 触发条件：main分支推送，手动触发
+# 功能：Docker镜像构建推送、部署、回滚机制
+
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: '部署版本 (留空则使用最新commit)'
+        required: false
+        type: string
+      rollback:
+        description: '是否为回滚操作'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ==================== 构建并推送Docker镜像 ====================
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      backend_tag: ${{ steps.meta-backend.outputs.tags }}
+      frontend_tag: ${{ steps.meta-frontend.outputs.tags }}
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 获取版本信息
+        id: version
+        run: |
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ $GITHUB_REF == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "v0.0.0-$(git rev-parse --short HEAD)")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "构建版本: $VERSION"
+
+      - name: 设置Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 后端镜像
+      - name: 后端镜像元数据
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+            type=raw,value=${{ steps.version.outputs.version }}
+
+      - name: 构建并推送后端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+
+      # 前端镜像
+      - name: 前端镜像元数据
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-
+            type=raw,value=${{ steps.version.outputs.version }}
+
+      - name: 构建并推送前端镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+
+      - name: 输出镜像信息
+        run: |
+          echo "## 构建完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**版本**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**后端镜像**:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta-backend.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**前端镜像**:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta-frontend.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # ==================== 部署到Staging环境 ====================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.cauc-sep.example.com
+
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v4
+
+      - name: 部署到Staging
+        run: |
+          echo "部署版本: ${{ needs.build-and-push.outputs.version }}"
+          echo "部署环境: staging"
+          # TODO: 添加实际部署脚本
+          # 例如: kubectl apply -f k8s/staging/ 或 ssh部署脚本
+
+      - name: 健康检查
+        run: |
+          echo "执行健康检查..."
+          # TODO: 添加健康检查脚本
+          # curl -f https://staging.cauc-sep.example.com/api/health || exit 1
+
+      - name: 部署通知
+        if: always()
+        run: |
+          echo "## Staging部署完成" >> $GITHUB_STEP_SUMMARY
+          echo "**版本**: ${{ needs.build-and-push.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**状态**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==================== 部署到Production环境 ====================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: |
+      startsWith(github.ref, 'refs/tags/v') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://cauc-sep.example.com
+
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v4
+
+      - name: 部署前备份
+        run: |
+          echo "创建部署前备份..."
+          # TODO: 添加备份脚本
+
+      - name: 部署到Production
+        run: |
+          echo "部署版本: ${{ needs.build-and-push.outputs.version }}"
+          echo "部署环境: production"
+          # TODO: 添加实际部署脚本
+
+      - name: 健康检查
+        run: |
+          echo "执行健康检查..."
+          # TODO: 添加健康检查脚本
+
+      - name: 部署通知
+        if: always()
+        run: |
+          echo "## Production部署完成" >> $GITHUB_STEP_SUMMARY
+          echo "**版本**: ${{ needs.build-and-push.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**状态**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==================== 回滚机制 ====================
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      github.event.inputs.rollback == 'true'
+    environment:
+      name: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v4
+
+      - name: 获取历史版本
+        id: history
+        run: |
+          echo "获取部署历史..."
+          # TODO: 从部署记录中获取历史版本
+
+      - name: 执行回滚
+        run: |
+          echo "回滚到版本: ${{ github.event.inputs.version }}"
+          echo "回滚环境: ${{ github.event.inputs.environment }}"
+          # TODO: 添加回滚脚本
+
+      - name: 回滚通知
+        if: always()
+        run: |
+          echo "## 回滚完成" >> $GITHUB_STEP_SUMMARY
+          echo "**目标版本**: ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**环境**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**状态**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==================== 创建GitHub Release ====================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-production]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 生成变更日志
+        id: changelog
+        run: |
+          # 获取上一个tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            echo "## 变更内容" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" >> CHANGELOG.md
+          else
+            echo "## 首次发布" > CHANGELOG.md
+          fi
+
+      - name: 创建Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+          generate_release_notes: true
+
+      - name: Release通知
+        run: |
+          echo "## Release创建完成" >> $GITHUB_STEP_SUMMARY
+          echo "**版本**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

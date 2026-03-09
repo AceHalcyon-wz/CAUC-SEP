@@ -1,0 +1,137 @@
+# ============================================================================
+# CAUC-SEP Docker Ignore Configuration
+# 优化构建上下文，排除不必要的文件
+# ============================================================================
+
+# ==================== 版本控制 ====================
+.git
+.gitignore
+.gitattributes
+
+# ==================== 依赖目录 ====================
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.tox
+**/.nox
+**/dist
+**/build
+**/*.egg-info
+**/.eggs
+
+# ==================== IDE和编辑器 ====================
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings
+*.sublime-workspace
+*.sublime-project
+
+# ==================== 测试和覆盖率 ====================
+**/coverage
+**/.coverage
+**/.nyc_output
+**/htmlcov
+**/.pytest_cache
+**/test-results
+**/playwright-report
+**/playwright/.cache
+
+# ==================== 文档 ====================
+**/*.md
+!README.md
+docs/
+*.pdf
+LICENSE
+CHANGELOG*
+CONTRIBUTING*
+
+# ==================== 日志和临时文件 ====================
+**/*.log
+**/logs/
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.backup
+**/exports/
+
+# ==================== 数据库和缓存 ====================
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.h5
+**/*.hdf5
+**/experiments.db*
+**/traces.db
+**/crash_reports.db
+
+# ==================== 环境配置 ====================
+.env
+.env.*
+!.env.example
+**/.venv
+**/venv
+**/env
+**/ENV
+
+# ==================== 操作系统 ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ==================== 构建产物 ====================
+**/*.pyc
+**/*.pyo
+**/*.class
+**/*.o
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.exe
+
+# ==================== 前端特定 ====================
+frontend/dist
+frontend/.vite
+frontend/.cache
+frontend/coverage
+frontend/.nuxt
+frontend/.output
+frontend/.nuxt
+
+# ==================== 后端特定 ====================
+backend/exports
+backend/device_states.json
+
+# ==================== Docker相关 ====================
+Dockerfile*
+docker-compose*.yml
+.docker
+.dockerignore
+
+# ==================== CI/CD ====================
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+.azure-pipelines
+
+# ==================== 其他 ====================
+*.bak
+*.orig
+*.pid
+*.seed
+*.pid.lock
+.lock-wscript
+.eslintcache
+.stylelintcache
