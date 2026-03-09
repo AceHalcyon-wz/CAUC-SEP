@@ -186,8 +186,7 @@ jobs:
           context: ./cauc-sep/backend
           push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
       - name: Build frontend image
         uses: docker/build-push-action@v5
@@ -195,8 +194,7 @@ jobs:
           context: ./cauc-sep/frontend
           push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
   test-summary:
     name: Test Summary
