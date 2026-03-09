@@ -21,7 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci && \
+RUN npm install && \
     npm cache clean --force
 
 # 复制源代码

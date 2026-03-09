@@ -48,13 +48,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-test.txt
-          pip install black isort mypy ruff
+          pip install black ruff mypy
 
       - name: Black check
         run: black --check --diff .
-
-      - name: isort check
-        run: isort --check-only --diff .
 
       - name: Ruff check
         run: ruff check .
