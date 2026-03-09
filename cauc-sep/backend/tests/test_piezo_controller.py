@@ -12,7 +12,6 @@
 - 边界条件处理
 """
 
-
 import pytest
 
 from core.abstract import DeviceStatus

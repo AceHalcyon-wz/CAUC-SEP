@@ -14,7 +14,6 @@
 创建日期：2026-03-07
 """
 
-
 import pytest
 
 from core.abstract import DeviceStatus

@@ -8,7 +8,6 @@
 - AbstractStepper抽象类
 """
 
-
 import pytest
 
 from core.abstract import AbstractDevice, AbstractStepper, DeviceStatus, SoftwareLimitConfig
