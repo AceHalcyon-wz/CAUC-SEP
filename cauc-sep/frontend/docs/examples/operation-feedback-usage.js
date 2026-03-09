@@ -7,13 +7,13 @@
  */
 
 import { useOperationFeedback, createStepProgress, delay } from '../composables/useOperationFeedback'
-import { OPERATION_TYPE, ERROR_TYPE } from '../stores/operation'
+import { OPERATION_TYPE } from '../stores/operation'
 
 /**
  * 示例1: 基本操作执行
  */
 export async function exampleBasicOperation() {
-  const { execute, showSuccess, showError } = useOperationFeedback()
+  const { execute } = useOperationFeedback()
 
   const result = await execute({
     type: OPERATION_TYPE.DEVICE_CONNECT,
@@ -82,7 +82,7 @@ export async function exampleBatchOperation() {
   const result = await executeBatch({
     title: '批量连接设备',
     items: devices,
-    processItem: async (device, index) => {
+    processItem: async (device, _index) => {
       await delay(500)
       console.log(`连接设备 ${device.name}...`)
       return { connected: true, deviceId: device.id }
@@ -90,10 +90,10 @@ export async function exampleBatchOperation() {
     onProgress: (completed, total, percentage) => {
       console.log(`进度: ${completed}/${total} (${percentage}%)`)
     },
-    onItemComplete: (device, result, index) => {
+    onItemComplete: (device, _result, _index) => {
       console.log(`设备 ${device.name} 连接成功`)
     },
-    onItemError: (device, error, index) => {
+    onItemError: (device, error, _index) => {
       console.error(`设备 ${device.name} 连接失败:`, error)
     },
     continueOnError: true

@@ -567,13 +567,12 @@
                 </div>
                 <div class="alarms-list">
                   <div
-                    v-for="(alarm, channel) in snrAlarms"
-                    v-if="alarm.active"
-                    :key="channel"
+                    v-for="alarm in activeSnrAlarms"
+                    :key="alarm.channel"
                     class="alarm-item"
                     :class="`alarm-${alarm.level}`"
                   >
-                    <span class="alarm-channel">通道 {{ channel }}</span>
+                    <span class="alarm-channel">通道 {{ alarm.channel }}</span>
                     <span class="alarm-message">{{ alarm.message }}</span>
                   </div>
                 </div>
@@ -774,6 +773,13 @@ const collectionTemplates = computed(() => ammeterStore.collectionTemplates)
 const activeTemplateId = computed(() => ammeterStore.activeTemplateId)
 const snrThresholds = computed(() => ammeterStore.snrThresholds)
 const snrAlarms = computed(() => ammeterStore.snrAlarms)
+const activeSnrAlarms = computed(() => {
+  const alarms = ammeterStore.snrAlarms
+  if (!alarms) return []
+  return Object.entries(alarms)
+    .filter(([_, alarm]) => alarm.active)
+    .map(([channel, alarm]) => ({ channel, ...alarm }))
+})
 const hasSNRAlarm = computed(() => ammeterStore.hasSNRAlarm)
 const bufferConfig = computed(() => ammeterStore.bufferConfig)
 

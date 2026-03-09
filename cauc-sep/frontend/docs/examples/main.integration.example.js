@@ -139,7 +139,7 @@ app.mount('#app')
  * 初始化布局Store
  * 确保在应用挂载后初始化，避免SSR问题
  */
-const layoutStore = useLayoutStore()
+const _layoutStore = useLayoutStore()
 
 // ==================== 新增：将错误处理器挂载到全局 ====================
 /**

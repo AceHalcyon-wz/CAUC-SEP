@@ -322,9 +322,16 @@ watch(() => queryConditions.timeRange.type, (newType) => {
 <template>
   <div class="history-query">
     <!-- 查询条件表单 -->
-    <el-form :model="queryConditions" label-width="100px" class="query-form">
+    <el-form
+      :model="queryConditions"
+      label-width="100px"
+      class="query-form"
+    >
       <!-- 时间范围选择 -->
-      <el-card class="query-section" shadow="never">
+      <el-card
+        class="query-section"
+        shadow="never"
+      >
         <template #header>
           <div class="section-header">
             <el-icon><Timer /></el-icon>
@@ -335,13 +342,20 @@ watch(() => queryConditions.timeRange.type, (newType) => {
         <!-- 时间类型选择 -->
         <el-form-item label="时间类型">
           <el-radio-group v-model="queryConditions.timeRange.type">
-            <el-radio-button label="absolute">绝对时间</el-radio-button>
-            <el-radio-button label="relative">相对时间</el-radio-button>
+            <el-radio-button label="absolute">
+              绝对时间
+            </el-radio-button>
+            <el-radio-button label="relative">
+              相对时间
+            </el-radio-button>
           </el-radio-group>
         </el-form-item>
 
         <!-- 绝对时间选择 -->
-        <el-form-item v-if="queryConditions.timeRange.type === 'absolute'" label="时间范围">
+        <el-form-item
+          v-if="queryConditions.timeRange.type === 'absolute'"
+          label="时间范围"
+        >
           <el-date-picker
             v-model="queryConditions.timeRange.start"
             type="datetime"
@@ -360,7 +374,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
         </el-form-item>
 
         <!-- 相对时间选择 -->
-        <el-form-item v-else label="时间范围">
+        <el-form-item
+          v-else
+          label="时间范围"
+        >
           <div class="relative-time-picker">
             <span>最近</span>
             <el-input-number
@@ -369,7 +386,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
               :max="999"
               style="width: 120px; margin: 0 var(--spacing-2)"
             />
-            <el-select v-model="queryConditions.relativeTime.unit" style="width: 100px">
+            <el-select
+              v-model="queryConditions.relativeTime.unit"
+              style="width: 100px"
+            >
               <el-option
                 v-for="opt in timeUnitOptions"
                 :key="opt.value"
@@ -396,7 +416,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
       </el-card>
 
       <!-- 设备和实验选择 -->
-      <el-card class="query-section" shadow="never">
+      <el-card
+        class="query-section"
+        shadow="never"
+      >
         <template #header>
           <div class="section-header">
             <el-icon><Cpu /></el-icon>
@@ -448,7 +471,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
       </el-card>
 
       <!-- 数据类型选择 -->
-      <el-card class="query-section" shadow="never">
+      <el-card
+        class="query-section"
+        shadow="never"
+      >
         <template #header>
           <div class="section-header">
             <el-icon><DataAnalysis /></el-icon>
@@ -471,7 +497,11 @@ watch(() => queryConditions.timeRange.type, (newType) => {
 
       <!-- 高级选项 -->
       <el-collapse-transition>
-        <el-card v-show="isAdvancedExpanded" class="query-section advanced-section" shadow="never">
+        <el-card
+          v-show="isAdvancedExpanded"
+          class="query-section advanced-section"
+          shadow="never"
+        >
           <template #header>
             <div class="section-header">
               <el-icon><MoreFilled /></el-icon>
@@ -538,7 +568,12 @@ watch(() => queryConditions.timeRange.type, (newType) => {
                       style="width: 100%"
                     />
                   </el-col>
-                  <el-col :span="2" style="text-align: center">-</el-col>
+                  <el-col
+                    :span="2"
+                    style="text-align: center"
+                  >
+                    -
+                  </el-col>
                   <el-col :span="11">
                     <el-input-number
                       v-model="queryConditions.advanced.valueRange[1]"
@@ -574,16 +609,25 @@ watch(() => queryConditions.timeRange.type, (newType) => {
           >
             {{ isAdvancedExpanded ? '收起' : '展开' }}高级选项
           </el-button>
-          <el-button :icon="Star" @click="openSaveTemplateDialog">
+          <el-button
+            :icon="Star"
+            @click="openSaveTemplateDialog"
+          >
             保存为模板
           </el-button>
-          <el-button :icon="Clock" @click="showHistoryDialog = true">
+          <el-button
+            :icon="Clock"
+            @click="showHistoryDialog = true"
+          >
             查询历史
           </el-button>
         </div>
 
         <div class="right-actions">
-          <el-button :icon="Refresh" @click="handleReset">
+          <el-button
+            :icon="Refresh"
+            @click="handleReset"
+          >
             重置
           </el-button>
           <el-button
@@ -600,7 +644,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
       </div>
 
       <!-- 已保存的模板 -->
-      <div v-if="templates.length > 0" class="saved-templates">
+      <div
+        v-if="templates.length > 0"
+        class="saved-templates"
+      >
         <div class="templates-header">
           <el-icon><StarFilled /></el-icon>
           <span>已保存的模板</span>
@@ -628,7 +675,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
       width="500px"
     >
       <el-form label-width="80px">
-        <el-form-item label="模板名称" required>
+        <el-form-item
+          label="模板名称"
+          required
+        >
           <el-input
             v-model="newTemplateName"
             placeholder="请输入模板名称"
@@ -649,8 +699,15 @@ watch(() => queryConditions.timeRange.type, (newType) => {
       </el-form>
 
       <template #footer>
-        <el-button @click="showTemplateDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmSaveTemplate">保存</el-button>
+        <el-button @click="showTemplateDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmSaveTemplate"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
 
@@ -678,38 +735,66 @@ watch(() => queryConditions.timeRange.type, (newType) => {
         max-height="400"
         style="width: 100%"
       >
-        <el-table-column label="查询时间" width="180">
+        <el-table-column
+          label="查询时间"
+          width="180"
+        >
           <template #default="{ row }">
             {{ formatTimestamp(row.timestamp) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="查询条件" min-width="300">
+        <el-table-column
+          label="查询条件"
+          min-width="300"
+        >
           <template #default="{ row }">
             <div class="history-conditions">
-              <el-tag v-if="row.conditions.timeRange.type === 'relative'" size="small">
+              <el-tag
+                v-if="row.conditions.timeRange.type === 'relative'"
+                size="small"
+              >
                 最近 {{ formatRelativeTime(row.conditions.relativeTime.value, row.conditions.relativeTime.unit) }}
               </el-tag>
-              <el-tag v-else size="small">
+              <el-tag
+                v-else
+                size="small"
+              >
                 {{ row.conditions.timeRange.start }} ~ {{ row.conditions.timeRange.end }}
               </el-tag>
-              <el-tag v-if="row.conditions.devices.length > 0" size="small" type="info">
+              <el-tag
+                v-if="row.conditions.devices.length > 0"
+                size="small"
+                type="info"
+              >
                 {{ row.conditions.devices.length }} 个设备
               </el-tag>
-              <el-tag v-if="row.conditions.experiments.length > 0" size="small" type="success">
+              <el-tag
+                v-if="row.conditions.experiments.length > 0"
+                size="small"
+                type="success"
+              >
                 {{ row.conditions.experiments.length }} 个实验
               </el-tag>
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column label="结果数" width="100" align="center">
+        <el-table-column
+          label="结果数"
+          width="100"
+          align="center"
+        >
           <template #default="{ row }">
             {{ row.resultCount }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="150" align="center">
+        <el-table-column
+          label="操作"
+          width="150"
+          align="center"
+        >
           <template #default="{ row }">
             <el-button
               type="primary"
@@ -731,7 +816,10 @@ watch(() => queryConditions.timeRange.type, (newType) => {
         </el-table-column>
       </el-table>
 
-      <el-empty v-if="history.length === 0" description="暂无查询历史" />
+      <el-empty
+        v-if="history.length === 0"
+        description="暂无查询历史"
+      />
     </el-dialog>
   </div>
 </template>

@@ -1147,6 +1147,16 @@ function updateChartWithData(data) {
 }
 
 /**
+ * 停止缓冲区刷新定时器
+ */
+function stopBufferFlushTimer() {
+  if (bufferFlushTimer) {
+    clearInterval(bufferFlushTimer)
+    bufferFlushTimer = null
+  }
+}
+
+/**
  * 定期刷新缓冲区到图表
  */
 function startBufferFlushTimer() {

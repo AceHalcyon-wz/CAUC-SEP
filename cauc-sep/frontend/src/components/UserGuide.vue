@@ -556,7 +556,10 @@ defineExpose({
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div v-if="isVisible" class="user-guide-overlay">
+      <div
+        v-if="isVisible"
+        class="user-guide-overlay"
+      >
         <!-- 遮罩层 -->
         <div class="guide-mask">
           <!-- 高亮区域遮罩 -->
@@ -579,14 +582,22 @@ defineExpose({
           :style="tooltipStyle"
         >
           <!-- 进度条 -->
-          <div v-if="showProgress" class="progress-bar">
-            <div class="progress-fill" :style="{ width: `${progressPercent}%` }" />
+          <div
+            v-if="showProgress"
+            class="progress-bar"
+          >
+            <div
+              class="progress-fill"
+              :style="{ width: `${progressPercent}%` }"
+            />
           </div>
 
           <!-- 内容区域 -->
           <div class="tooltip-content">
             <!-- 标题 -->
-            <h3 class="tooltip-title">{{ currentStep?.title }}</h3>
+            <h3 class="tooltip-title">
+              {{ currentStep?.title }}
+            </h3>
 
             <!-- 图片 -->
             <img
@@ -594,10 +605,12 @@ defineExpose({
               :src="currentStep.image"
               class="tooltip-image"
               alt="引导图片"
-            />
+            >
 
             <!-- 描述 -->
-            <p class="tooltip-description">{{ currentStep?.content }}</p>
+            <p class="tooltip-description">
+              {{ currentStep?.content }}
+            </p>
           </div>
 
           <!-- 步骤指示器 -->
@@ -645,7 +658,10 @@ defineExpose({
 
         <!-- 热点提示 -->
         <Transition name="fade">
-          <div v-if="showHotspots" class="hotspots-container">
+          <div
+            v-if="showHotspots"
+            class="hotspots-container"
+          >
             <div
               v-for="hotspot in hotspots"
               :key="hotspot.id"

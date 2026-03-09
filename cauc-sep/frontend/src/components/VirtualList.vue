@@ -247,7 +247,10 @@ defineExpose({
     @scroll="handleScroll"
   >
     <!-- 总高度占位容器 -->
-    <div class="virtual-list__content" :style="{ height: `${totalHeight}px` }">
+    <div
+      class="virtual-list__content"
+      :style="{ height: `${totalHeight}px` }"
+    >
       <!-- 可见项容器 -->
       <div
         class="virtual-list__visible"
@@ -260,7 +263,10 @@ defineExpose({
           :style="{ height: `${itemHeight}px` }"
           @click="handleItemClick(item, index)"
         >
-          <slot :item="item" :index="index">
+          <slot
+            :item="item"
+            :index="index"
+          >
             <!-- 默认插槽内容 -->
             <div class="virtual-list__item-default">
               <span class="virtual-list__item-index">{{ index + 1 }}</span>
@@ -272,13 +278,21 @@ defineExpose({
     </div>
 
     <!-- 加载指示器 -->
-    <div v-if="isLoading" class="virtual-list__loading">
-      <el-icon class="is-loading"><Loading /></el-icon>
+    <div
+      v-if="isLoading"
+      class="virtual-list__loading"
+    >
+      <el-icon class="is-loading">
+        <Loading />
+      </el-icon>
       <span>加载中...</span>
     </div>
 
     <!-- 空状态 -->
-    <div v-if="items.length === 0" class="virtual-list__empty">
+    <div
+      v-if="items.length === 0"
+      class="virtual-list__empty"
+    >
       <slot name="empty">
         <el-empty description="暂无数据" />
       </slot>

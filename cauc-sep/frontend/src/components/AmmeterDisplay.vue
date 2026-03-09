@@ -3,10 +3,16 @@
     <template #header>
       <div class="card-header">
         <div class="header-title">
-          <el-icon class="header-icon"><Aim /></el-icon>
+          <el-icon class="header-icon">
+            <Aim />
+          </el-icon>
           <span>微电流采集显示</span>
         </div>
-        <el-tag :type="connectionStatus" size="small" class="status-tag">
+        <el-tag
+          :type="connectionStatus"
+          size="small"
+          class="status-tag"
+        >
           {{ connectionText }}
         </el-tag>
       </div>
@@ -17,55 +23,122 @@
       :title="errorMessage"
       type="error"
       :closable="true"
-      @close="clearError()"
       class="error-alert"
+      @close="clearError()"
     />
 
-    <el-tabs v-model="activeTab" type="border-card" class="data-tabs">
+    <el-tabs
+      v-model="activeTab"
+      type="border-card"
+      class="data-tabs"
+    >
       <!-- 多通道电流显示 -->
-      <el-tab-pane label="实时数据" name="realtime">
+      <el-tab-pane
+        label="实时数据"
+        name="realtime"
+      >
         <el-row :gutter="24">
           <!-- 通道配置 -->
           <el-col :span="6">
-            <el-card shadow="hover" class="config-card">
+            <el-card
+              shadow="hover"
+              class="config-card"
+            >
               <template #header>
                 <div class="config-header">
                   <el-icon><Setting /></el-icon>
                   <span>采集配置</span>
                 </div>
               </template>
-              <el-form label-width="80px" size="small" class="config-form">
-                <el-form-item label="采样率" class="form-item">
-                  <el-select v-model="config.sampleRate" placeholder="选择采样率" class="form-select">
-                    <el-option label="10 Hz" :value="10" />
-                    <el-option label="100 Hz" :value="100" />
-                    <el-option label="1 kHz" :value="1000" />
-                    <el-option label="10 kHz" :value="10000" />
+              <el-form
+                label-width="80px"
+                size="small"
+                class="config-form"
+              >
+                <el-form-item
+                  label="采样率"
+                  class="form-item"
+                >
+                  <el-select
+                    v-model="config.sampleRate"
+                    placeholder="选择采样率"
+                    class="form-select"
+                  >
+                    <el-option
+                      label="10 Hz"
+                      :value="10"
+                    />
+                    <el-option
+                      label="100 Hz"
+                      :value="100"
+                    />
+                    <el-option
+                      label="1 kHz"
+                      :value="1000"
+                    />
+                    <el-option
+                      label="10 kHz"
+                      :value="10000"
+                    />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="通道数" class="form-item">
-                  <el-input-number v-model="config.channelCount" :min="1" :max="8" style="width: 100%" />
+                <el-form-item
+                  label="通道数"
+                  class="form-item"
+                >
+                  <el-input-number
+                    v-model="config.channelCount"
+                    :min="1"
+                    :max="8"
+                    style="width: 100%"
+                  />
                 </el-form-item>
-                <el-form-item label="量程" class="form-item">
-                  <el-select v-model="config.range" placeholder="选择量程" class="form-select">
-                    <el-option label="±10 nA" value="10nA" />
-                    <el-option label="±100 nA" value="100nA" />
-                    <el-option label="±1 μA" value="1uA" />
-                    <el-option label="±10 μA" value="10uA" />
+                <el-form-item
+                  label="量程"
+                  class="form-item"
+                >
+                  <el-select
+                    v-model="config.range"
+                    placeholder="选择量程"
+                    class="form-select"
+                  >
+                    <el-option
+                      label="±10 nA"
+                      value="10nA"
+                    />
+                    <el-option
+                      label="±100 nA"
+                      value="100nA"
+                    />
+                    <el-option
+                      label="±1 μA"
+                      value="1uA"
+                    />
+                    <el-option
+                      label="±10 μA"
+                      value="10uA"
+                    />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="滤波" class="form-item">
+                <el-form-item
+                  label="滤波"
+                  class="form-item"
+                >
                   <el-switch v-model="config.filterEnabled" />
                 </el-form-item>
                 <el-form-item class="action-item">
                   <el-button
                     type="primary"
                     :loading="isCollecting"
-                    @click="toggleCollection"
                     class="collect-btn"
+                    @click="toggleCollection"
                   >
-                    <el-icon v-if="!isCollecting"><VideoPlay /></el-icon>
-                    <el-icon v-else><VideoPause /></el-icon>
+                    <el-icon v-if="!isCollecting">
+                      <VideoPlay />
+                    </el-icon>
+                    <el-icon v-else>
+                      <VideoPause />
+                    </el-icon>
                     {{ isCollecting ? '停止采集' : '开始采集' }}
                   </el-button>
                 </el-form-item>
@@ -82,15 +155,26 @@
                 :span="12"
                 class="channel-col"
               >
-                <el-card shadow="hover" class="channel-card" :class="{ 'channel-active': isCollecting }">
+                <el-card
+                  shadow="hover"
+                  class="channel-card"
+                  :class="{ 'channel-active': isCollecting }"
+                >
                   <div class="channel-header">
                     <span class="channel-name">{{ channel.name }}</span>
-                    <el-tag :type="channel.status === 'normal' ? 'success' : 'warning'" size="small" class="channel-status">
+                    <el-tag
+                      :type="channel.status === 'normal' ? 'success' : 'warning'"
+                      size="small"
+                      class="channel-status"
+                    >
                       {{ channel.status === 'normal' ? '正常' : '异常' }}
                     </el-tag>
                   </div>
                   <div class="channel-value">
-                    <span class="value" :class="{ 'value-changing': isCollecting }">{{ formatCurrent(channel.current) }}</span>
+                    <span
+                      class="value"
+                      :class="{ 'value-changing': isCollecting }"
+                    >{{ formatCurrent(channel.current) }}</span>
                     <span class="unit">{{ channel.unit }}</span>
                   </div>
                   <div class="channel-stats">
@@ -115,29 +199,67 @@
       </el-tab-pane>
 
       <!-- 实时波形显示 -->
-      <el-tab-pane label="波形显示" name="waveform">
+      <el-tab-pane
+        label="波形显示"
+        name="waveform"
+      >
         <el-row :gutter="24">
           <!-- 波形控制 -->
           <el-col :span="4">
-            <el-card shadow="hover" class="control-card">
+            <el-card
+              shadow="hover"
+              class="control-card"
+            >
               <template #header>
                 <div class="control-header">
                   <el-icon><DataLine /></el-icon>
                   <span>波形控制</span>
                 </div>
               </template>
-              <el-form label-width="70px" size="small" class="control-form">
-                <el-form-item label="时间窗" class="form-item">
-                  <el-select v-model="waveformConfig.timeWindow" placeholder="选择时间窗" class="form-select">
-                    <el-option label="1秒" :value="1" />
-                    <el-option label="5秒" :value="5" />
-                    <el-option label="10秒" :value="10" />
-                    <el-option label="30秒" :value="30" />
-                    <el-option label="60秒" :value="60" />
+              <el-form
+                label-width="70px"
+                size="small"
+                class="control-form"
+              >
+                <el-form-item
+                  label="时间窗"
+                  class="form-item"
+                >
+                  <el-select
+                    v-model="waveformConfig.timeWindow"
+                    placeholder="选择时间窗"
+                    class="form-select"
+                  >
+                    <el-option
+                      label="1秒"
+                      :value="1"
+                    />
+                    <el-option
+                      label="5秒"
+                      :value="5"
+                    />
+                    <el-option
+                      label="10秒"
+                      :value="10"
+                    />
+                    <el-option
+                      label="30秒"
+                      :value="30"
+                    />
+                    <el-option
+                      label="60秒"
+                      :value="60"
+                    />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="显示通道" class="form-item">
-                  <el-checkbox-group v-model="waveformConfig.visibleChannels" class="channel-checkbox-group">
+                <el-form-item
+                  label="显示通道"
+                  class="form-item"
+                >
+                  <el-checkbox-group
+                    v-model="waveformConfig.visibleChannels"
+                    class="channel-checkbox-group"
+                  >
                     <el-checkbox
                       v-for="ch in displayChannels"
                       :key="ch.id"
@@ -148,24 +270,46 @@
                     </el-checkbox>
                   </el-checkbox-group>
                 </el-form-item>
-                <el-form-item label="Y轴缩放" class="form-item">
-                  <el-radio-group v-model="waveformConfig.yAxisMode" class="radio-group">
-                    <el-radio label="auto">自动</el-radio>
-                    <el-radio label="fixed">固定</el-radio>
+                <el-form-item
+                  label="Y轴缩放"
+                  class="form-item"
+                >
+                  <el-radio-group
+                    v-model="waveformConfig.yAxisMode"
+                    class="radio-group"
+                  >
+                    <el-radio label="auto">
+                      自动
+                    </el-radio>
+                    <el-radio label="fixed">
+                      固定
+                    </el-radio>
                   </el-radio-group>
                 </el-form-item>
-                <el-form-item v-if="waveformConfig.yAxisMode === 'fixed'" label="Y轴范围" class="form-item">
+                <el-form-item
+                  v-if="waveformConfig.yAxisMode === 'fixed'"
+                  label="Y轴范围"
+                  class="form-item"
+                >
                   <div class="y-axis-range">
-                    <el-input-number v-model="waveformConfig.yMin" placeholder="最小值" size="small" />
-                    <el-input-number v-model="waveformConfig.yMax" placeholder="最大值" size="small" />
+                    <el-input-number
+                      v-model="waveformConfig.yMin"
+                      placeholder="最小值"
+                      size="small"
+                    />
+                    <el-input-number
+                      v-model="waveformConfig.yMax"
+                      placeholder="最大值"
+                      size="small"
+                    />
                   </div>
                 </el-form-item>
                 <el-form-item class="action-item">
                   <el-button
                     type="primary"
                     :disabled="!isCollecting"
-                    @click="clearWaveform"
                     class="clear-btn"
+                    @click="clearWaveform"
                   >
                     <el-icon><Delete /></el-icon>
                     清除波形
@@ -177,34 +321,69 @@
 
           <!-- 波形图表 -->
           <el-col :span="20">
-            <el-card shadow="hover" class="chart-card">
-              <div ref="waveformChartRef" class="waveform-chart"></div>
+            <el-card
+              shadow="hover"
+              class="chart-card"
+            >
+              <div
+                ref="waveformChartRef"
+                class="waveform-chart"
+              />
             </el-card>
           </el-col>
         </el-row>
       </el-tab-pane>
 
       <!-- 数据导出 -->
-      <el-tab-pane label="数据导出" name="export">
+      <el-tab-pane
+        label="数据导出"
+        name="export"
+      >
         <el-row :gutter="24">
           <!-- 导出配置 -->
           <el-col :span="6">
-            <el-card shadow="hover" class="export-config-card">
+            <el-card
+              shadow="hover"
+              class="export-config-card"
+            >
               <template #header>
                 <div class="export-header">
                   <el-icon><Download /></el-icon>
                   <span>导出配置</span>
                 </div>
               </template>
-              <el-form label-width="80px" size="small" class="export-form">
-                <el-form-item label="导出格式" class="form-item">
-                  <el-select v-model="exportConfig.format" placeholder="选择格式" class="form-select">
-                    <el-option label="CSV" value="csv" />
-                    <el-option label="JSON" value="json" />
-                    <el-option label="Excel" value="xlsx" />
+              <el-form
+                label-width="80px"
+                size="small"
+                class="export-form"
+              >
+                <el-form-item
+                  label="导出格式"
+                  class="form-item"
+                >
+                  <el-select
+                    v-model="exportConfig.format"
+                    placeholder="选择格式"
+                    class="form-select"
+                  >
+                    <el-option
+                      label="CSV"
+                      value="csv"
+                    />
+                    <el-option
+                      label="JSON"
+                      value="json"
+                    />
+                    <el-option
+                      label="Excel"
+                      value="xlsx"
+                    />
                   </el-select>
                 </el-form-item>
-                <el-form-item label="时间范围" class="form-item">
+                <el-form-item
+                  label="时间范围"
+                  class="form-item"
+                >
                   <el-date-picker
                     v-model="exportConfig.timeRange"
                     type="datetimerange"
@@ -214,8 +393,14 @@
                     style="width: 100%"
                   />
                 </el-form-item>
-                <el-form-item label="导出通道" class="form-item">
-                  <el-checkbox-group v-model="exportConfig.channels" class="channel-checkbox-group">
+                <el-form-item
+                  label="导出通道"
+                  class="form-item"
+                >
+                  <el-checkbox-group
+                    v-model="exportConfig.channels"
+                    class="channel-checkbox-group"
+                  >
                     <el-checkbox
                       v-for="ch in displayChannels"
                       :key="ch.id"
@@ -226,7 +411,10 @@
                     </el-checkbox>
                   </el-checkbox-group>
                 </el-form-item>
-                <el-form-item label="包含统计" class="form-item">
+                <el-form-item
+                  label="包含统计"
+                  class="form-item"
+                >
                   <el-switch v-model="exportConfig.includeStats" />
                 </el-form-item>
                 <el-form-item class="action-item">
@@ -234,8 +422,8 @@
                     type="primary"
                     :loading="isExporting"
                     :disabled="!hasDataToExport"
-                    @click="exportData"
                     class="export-btn"
+                    @click="exportData"
                   >
                     <el-icon><Download /></el-icon>
                     导出数据
@@ -247,14 +435,20 @@
 
           <!-- 数据预览 -->
           <el-col :span="18">
-            <el-card shadow="hover" class="preview-card">
+            <el-card
+              shadow="hover"
+              class="preview-card"
+            >
               <template #header>
                 <div class="preview-header">
                   <div class="header-title">
                     <el-icon><Document /></el-icon>
                     <span>数据预览</span>
                   </div>
-                  <el-tag size="small" class="record-count">
+                  <el-tag
+                    size="small"
+                    class="record-count"
+                  >
                     {{ dataPreview.length }} 条记录
                   </el-tag>
                 </div>
@@ -265,7 +459,11 @@
                 class="preview-table"
                 max-height="500"
               >
-                <el-table-column prop="timestamp" label="时间戳" width="180">
+                <el-table-column
+                  prop="timestamp"
+                  label="时间戳"
+                  width="180"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.timestamp }}</span>
                   </template>
@@ -378,7 +576,7 @@ const errorMessage = ref<string>('')
 const waveformChartRef = ref<HTMLElement | null>(null)
 
 let waveformChart: echarts.ECharts | null = null
-let collectionTimer: NodeJS.Timeout | null = null
+let collectionTimer: ReturnType<typeof setInterval> | null = null
 let ws: WebSocket | null = null
 
 // 采集配置

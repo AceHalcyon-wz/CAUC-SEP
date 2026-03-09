@@ -2,19 +2,24 @@
   <div class="pr-path-editor">
     <el-row :gutter="24">
       <!-- 左侧：路径点列表 -->
-      <el-col :xs="24" :lg="8">
+      <el-col
+        :xs="24"
+        :lg="8"
+      >
         <el-card class="path-list-card">
           <template #header>
             <div class="card-header">
               <div class="header-title">
-                <el-icon class="header-icon"><List /></el-icon>
+                <el-icon class="header-icon">
+                  <List />
+                </el-icon>
                 <span>路径点列表</span>
               </div>
               <el-button 
                 type="primary" 
                 :icon="Plus"
-                @click="addPathPoint"
                 size="small"
+                @click="addPathPoint"
               >
                 添加点
               </el-button>
@@ -38,7 +43,9 @@
                   }"
                   @click="selectPoint(index)"
                 >
-                  <el-icon class="drag-handle"><Rank /></el-icon>
+                  <el-icon class="drag-handle">
+                    <Rank />
+                  </el-icon>
                   <div class="point-info">
                     <div class="point-header">
                       <span class="point-number">点 {{ index + 1 }}</span>
@@ -86,12 +93,17 @@
       </el-col>
 
       <!-- 中间：可视化预览 -->
-      <el-col :xs="24" :lg="10">
+      <el-col
+        :xs="24"
+        :lg="10"
+      >
         <el-card class="preview-card">
           <template #header>
             <div class="card-header">
               <div class="header-title">
-                <el-icon class="header-icon"><TrendCharts /></el-icon>
+                <el-icon class="header-icon">
+                  <TrendCharts />
+                </el-icon>
                 <span>路径可视化</span>
               </div>
               <div class="preview-controls">
@@ -99,15 +111,15 @@
                   type="primary" 
                   :icon="VideoPlay"
                   :disabled="pathPoints.length === 0"
-                  @click="startPreview"
                   size="small"
+                  @click="startPreview"
                 >
                   预览
                 </el-button>
                 <el-button 
                   :icon="RefreshRight"
-                  @click="resetPreview"
                   size="small"
+                  @click="resetPreview"
                 >
                   重置
                 </el-button>
@@ -116,7 +128,7 @@
           </template>
 
           <div class="chart-container">
-            <v-chart 
+            <VChart 
               ref="chartRef"
               :option="chartOption"
               :autoresize="true"
@@ -125,7 +137,10 @@
             />
           </div>
 
-          <div class="preview-status" v-if="isPreviewing">
+          <div
+            v-if="isPreviewing"
+            class="preview-status"
+          >
             <el-progress 
               :percentage="previewProgress" 
               :format="formatProgress"
@@ -140,18 +155,26 @@
       </el-col>
 
       <!-- 右侧：参数编辑面板 -->
-      <el-col :xs="24" :lg="6">
+      <el-col
+        :xs="24"
+        :lg="6"
+      >
         <el-card class="editor-card">
           <template #header>
             <div class="card-header">
               <div class="header-title">
-                <el-icon class="header-icon"><Edit /></el-icon>
+                <el-icon class="header-icon">
+                  <Edit />
+                </el-icon>
                 <span>参数编辑</span>
               </div>
             </div>
           </template>
 
-          <div v-if="selectedPointIndex !== null" class="editor-form">
+          <div
+            v-if="selectedPointIndex !== null"
+            class="editor-form"
+          >
             <el-form 
               :model="selectedPoint"
               label-width="100px"
@@ -159,8 +182,12 @@
             >
               <el-form-item label="运行模式">
                 <el-radio-group v-model="selectedPoint.mode">
-                  <el-radio :label="0">绝对位置</el-radio>
-                  <el-radio :label="1">增量位置</el-radio>
+                  <el-radio :label="0">
+                    绝对位置
+                  </el-radio>
+                  <el-radio :label="1">
+                    增量位置
+                  </el-radio>
                 </el-radio-group>
               </el-form-item>
 
@@ -236,8 +263,8 @@
               <el-button 
                 type="success" 
                 :icon="Check"
-                @click="applyChanges"
                 style="width: 100%"
+                @click="applyChanges"
               >
                 应用更改
               </el-button>
@@ -254,20 +281,28 @@
     </el-row>
 
     <!-- 底部：冲突检测和模拟运行 -->
-    <el-row :gutter="24" class="bottom-section">
-      <el-col :xs="24" :lg="12">
+    <el-row
+      :gutter="24"
+      class="bottom-section"
+    >
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="conflict-card">
           <template #header>
             <div class="card-header">
               <div class="header-title">
-                <el-icon class="header-icon"><Warning /></el-icon>
+                <el-icon class="header-icon">
+                  <Warning />
+                </el-icon>
                 <span>路径冲突检测</span>
               </div>
               <el-button 
                 type="primary" 
                 :icon="Search"
-                @click="detectConflicts"
                 size="small"
+                @click="detectConflicts"
               >
                 检测冲突
               </el-button>
@@ -282,7 +317,10 @@
               :closable="false"
               show-icon
             />
-            <div v-else class="conflict-list">
+            <div
+              v-else
+              class="conflict-list"
+            >
               <el-alert
                 v-for="(conflict, index) in conflicts"
                 :key="index"
@@ -304,20 +342,25 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="simulation-card">
           <template #header>
             <div class="card-header">
               <div class="header-title">
-                <el-icon class="header-icon"><Timer /></el-icon>
+                <el-icon class="header-icon">
+                  <Timer />
+                </el-icon>
                 <span>模拟运行</span>
               </div>
               <el-button 
                 type="primary" 
                 :icon="VideoPlay"
                 :disabled="pathPoints.length === 0"
-                @click="startSimulation"
                 size="small"
+                @click="startSimulation"
               >
                 开始模拟
               </el-button>
@@ -325,7 +368,10 @@
           </template>
 
           <div class="simulation-info">
-            <el-descriptions :column="2" border>
+            <el-descriptions
+              :column="2"
+              border
+            >
               <el-descriptions-item label="总路径长度">
                 {{ totalDistance.toFixed(2) }} mm
               </el-descriptions-item>

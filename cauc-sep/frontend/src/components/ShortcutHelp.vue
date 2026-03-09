@@ -198,29 +198,56 @@ onUnmounted(() => {
         <div class="shortcut-help-panel">
           <!-- 头部 -->
           <header class="panel-header">
-            <h2 class="panel-title">{{ title }}</h2>
-            <button class="close-btn" @click="close" aria-label="关闭">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+            <h2 class="panel-title">
+              {{ title }}
+            </h2>
+            <button
+              class="close-btn"
+              aria-label="关闭"
+              @click="close"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+              >
+                <path
+                  fill="currentColor"
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                />
               </svg>
             </button>
           </header>
 
           <!-- 搜索和过滤 -->
           <div class="panel-toolbar">
-            <div v-if="showSearch" class="search-box">
-              <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18">
-                <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            <div
+              v-if="showSearch"
+              class="search-box"
+            >
+              <svg
+                class="search-icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+              >
+                <path
+                  fill="currentColor"
+                  d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                />
               </svg>
               <input
                 v-model="searchKeyword"
                 type="text"
                 placeholder="搜索快捷键..."
                 class="search-input"
-              />
+              >
             </div>
 
-            <div v-if="showCategories" class="category-tabs">
+            <div
+              v-if="showCategories"
+              class="category-tabs"
+            >
               <button
                 v-for="cat in categories"
                 :key="cat.key"
@@ -234,12 +261,25 @@ onUnmounted(() => {
           </div>
 
           <!-- 冲突提示 -->
-          <div v-if="hasConflicts && showConflicts" class="conflicts-warning">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+          <div
+            v-if="hasConflicts && showConflicts"
+            class="conflicts-warning"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+            >
+              <path
+                fill="currentColor"
+                d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+              />
             </svg>
             <span>检测到 {{ conflicts.length }} 个快捷键冲突</span>
-            <button class="view-conflicts-btn" @click="showConflicts = !showConflicts">
+            <button
+              class="view-conflicts-btn"
+              @click="showConflicts = !showConflicts"
+            >
               查看详情
             </button>
           </div>
@@ -251,7 +291,10 @@ onUnmounted(() => {
               :key="category"
               class="shortcut-group"
             >
-              <h3 v-if="selectedCategory === 'all'" class="group-title">
+              <h3
+                v-if="selectedCategory === 'all'"
+                class="group-title"
+              >
                 {{ getCategoryLabel(category) }}
               </h3>
 
@@ -280,9 +323,19 @@ onUnmounted(() => {
             </div>
 
             <!-- 空状态 -->
-            <div v-if="filteredShortcuts.length === 0" class="empty-state">
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            <div
+              v-if="filteredShortcuts.length === 0"
+              class="empty-state"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="48"
+                height="48"
+              >
+                <path
+                  fill="currentColor"
+                  d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                />
               </svg>
               <p>未找到匹配的快捷键</p>
             </div>
@@ -293,7 +346,9 @@ onUnmounted(() => {
             <p class="tip">
               <kbd class="key small">Esc</kbd> 关闭此面板
             </p>
-            <p class="tip">点击快捷键可执行对应操作</p>
+            <p class="tip">
+              点击快捷键可执行对应操作
+            </p>
           </footer>
         </div>
       </div>

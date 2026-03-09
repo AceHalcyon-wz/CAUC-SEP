@@ -242,81 +242,108 @@ function handleClearAnnotations(): void {
     <!-- 图表类型选择 -->
     <div class="toolbar-section">
       <span class="section-label">图表类型</span>
-      <el-button-group>
-        <el-tooltip
+      <ElButtonGroup>
+        <ElTooltip
           v-for="type in chartTypes"
           :key="type.value"
           :content="type.label"
           placement="bottom"
         >
-          <el-button
+          <ElButton
             :type="currentChartType === type.value ? 'primary' : 'default'"
             :icon="type.icon"
             @click="handleChartTypeChange(type.value)"
           />
-        </el-tooltip>
-      </el-button-group>
+        </ElTooltip>
+      </ElButtonGroup>
     </div>
 
-    <el-divider direction="vertical" />
+    <ElDivider direction="vertical" />
 
     <!-- 缩放控制 -->
     <div class="toolbar-section">
       <span class="section-label">缩放控制</span>
-      <el-button-group>
-        <el-tooltip content="放大" placement="bottom">
-          <el-button :icon="ZoomIn" @click="handleZoomIn" />
-        </el-tooltip>
-        <el-tooltip content="缩小" placement="bottom">
-          <el-button :icon="ZoomOut" @click="handleZoomOut" />
-        </el-tooltip>
-        <el-tooltip content="重置视图" placement="bottom">
-          <el-button :icon="RefreshRight" @click="handleResetView" />
-        </el-tooltip>
-      </el-button-group>
+      <ElButtonGroup>
+        <ElTooltip
+          content="放大"
+          placement="bottom"
+        >
+          <ElButton
+            :icon="ZoomIn"
+            @click="handleZoomIn"
+          />
+        </ElTooltip>
+        <ElTooltip
+          content="缩小"
+          placement="bottom"
+        >
+          <ElButton
+            :icon="ZoomOut"
+            @click="handleZoomOut"
+          />
+        </ElTooltip>
+        <ElTooltip
+          content="重置视图"
+          placement="bottom"
+        >
+          <ElButton
+            :icon="RefreshRight"
+            @click="handleResetView"
+          />
+        </ElTooltip>
+      </ElButtonGroup>
       <div class="zoom-level">
         <span>{{ currentZoomLevel }}%</span>
       </div>
     </div>
 
-    <el-divider direction="vertical" />
+    <ElDivider direction="vertical" />
 
     <!-- 标注工具 -->
     <div class="toolbar-section">
       <span class="section-label">标注工具</span>
-      <el-button-group>
-        <el-tooltip
+      <ElButtonGroup>
+        <ElTooltip
           v-for="annotation in annotationTypes"
           :key="annotation.value"
           :content="annotation.label"
           placement="bottom"
         >
-          <el-button
+          <ElButton
             :type="currentAnnotationMode === annotation.value ? 'primary' : 'default'"
             :icon="annotation.icon"
             @click="handleAnnotationModeChange(annotation.value)"
           />
-        </el-tooltip>
-        <el-tooltip content="清除标注" placement="bottom">
-          <el-button :icon="RefreshRight" @click="handleClearAnnotations" />
-        </el-tooltip>
-      </el-button-group>
+        </ElTooltip>
+        <ElTooltip
+          content="清除标注"
+          placement="bottom"
+        >
+          <ElButton
+            :icon="RefreshRight"
+            @click="handleClearAnnotations"
+          />
+        </ElTooltip>
+      </ElButtonGroup>
     </div>
 
-    <el-divider direction="vertical" />
+    <ElDivider direction="vertical" />
 
     <!-- 显示设置 -->
     <div class="toolbar-section">
       <span class="section-label">显示设置</span>
       <div class="setting-item">
-        <el-icon><Grid /></el-icon>
+        <ElIcon><Grid /></ElIcon>
         <span>网格</span>
-        <el-switch v-model="gridVisible" size="small" />
+        <ElSwitch
+          v-model="gridVisible"
+          size="small"
+        />
       </div>
       <div class="setting-item">
-        <el-icon><FullScreen /></el-icon>
+        <ElIcon><FullScreen /></ElIcon>
         <span>全屏</span>
-        <el-button
+        <ElButton
           :icon="FullScreen"
           size="small"
           @click="handleToggleFullscreen"
@@ -324,54 +351,64 @@ function handleClearAnnotations(): void {
       </div>
     </div>
 
-    <el-divider direction="vertical" />
+    <ElDivider direction="vertical" />
 
     <!-- 导出功能 -->
     <div class="toolbar-section">
       <span class="section-label">导出</span>
-      <el-dropdown @command="handleExportImage">
-        <el-button type="primary" :icon="Download">
-          导出图片 <el-icon class="el-icon--right"><PictureFilled /></el-icon>
-        </el-button>
+      <ElDropdown @command="handleExportImage">
+        <ElButton
+          type="primary"
+          :icon="Download"
+        >
+          导出图片 <ElIcon class="el-icon--right">
+            <PictureFilled />
+          </ElIcon>
+        </ElButton>
         <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="png">
-              <el-icon><PictureFilled /></el-icon>
+          <ElDropdownMenu>
+            <ElDropdownItem command="png">
+              <ElIcon><PictureFilled /></ElIcon>
               PNG 格式
-            </el-dropdown-item>
-            <el-dropdown-item command="jpeg">
-              <el-icon><PictureFilled /></el-icon>
+            </ElDropdownItem>
+            <ElDropdownItem command="jpeg">
+              <ElIcon><PictureFilled /></ElIcon>
               JPEG 格式
-            </el-dropdown-item>
-            <el-dropdown-item command="svg">
-              <el-icon><PictureFilled /></el-icon>
+            </ElDropdownItem>
+            <ElDropdownItem command="svg">
+              <ElIcon><PictureFilled /></ElIcon>
               SVG 格式
-            </el-dropdown-item>
-          </el-dropdown-menu>
+            </ElDropdownItem>
+          </ElDropdownMenu>
         </template>
-      </el-dropdown>
+      </ElDropdown>
 
-      <el-dropdown>
-        <el-button :icon="Setting">
-          配置管理 <el-icon class="el-icon--right"><Setting /></el-icon>
-        </el-button>
+      <ElDropdown>
+        <ElButton :icon="Setting">
+          配置管理 <ElIcon class="el-icon--right">
+            <Setting />
+          </ElIcon>
+        </ElButton>
         <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="handleExportConfig">
-              <el-icon><Download /></el-icon>
+          <ElDropdownMenu>
+            <ElDropdownItem @click="handleExportConfig">
+              <ElIcon><Download /></ElIcon>
               导出配置
-            </el-dropdown-item>
-            <el-dropdown-item @click="handleImportConfig">
-              <el-icon><Upload /></el-icon>
+            </ElDropdownItem>
+            <ElDropdownItem @click="handleImportConfig">
+              <ElIcon><Upload /></ElIcon>
               导入配置
-            </el-dropdown-item>
-            <el-dropdown-item divided @click="handleSaveTemplate">
-              <el-icon><Document /></el-icon>
+            </ElDropdownItem>
+            <ElDropdownItem
+              divided
+              @click="handleSaveTemplate"
+            >
+              <ElIcon><Document /></ElIcon>
               保存为模板
-            </el-dropdown-item>
-          </el-dropdown-menu>
+            </ElDropdownItem>
+          </ElDropdownMenu>
         </template>
-      </el-dropdown>
+      </ElDropdown>
     </div>
   </div>
 </template>

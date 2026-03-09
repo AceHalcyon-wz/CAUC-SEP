@@ -1119,7 +1119,10 @@ defineExpose({
 </script>
 
 <template>
-  <div class="chart-analysis" :class="{ fullscreen: isFullscreen }">
+  <div
+    class="chart-analysis"
+    :class="{ fullscreen: isFullscreen }"
+  >
     <!-- 工具栏 -->
     <ChartToolbar
       v-if="showToolbar"
@@ -1145,18 +1148,28 @@ defineExpose({
         ref="chartContainerRef"
         class="chart-container"
         :style="{ height: height }"
-      ></div>
+      />
 
       <!-- 空状态 -->
-      <div v-if="!data || data.length === 0" class="empty-state">
-        <el-icon :size="64"><i class="el-icon-pie-chart" /></el-icon>
+      <div
+        v-if="!data || data.length === 0"
+        class="empty-state"
+      >
+        <el-icon :size="64">
+          <i class="el-icon-pie-chart" />
+        </el-icon>
         <p>暂无图表数据</p>
-        <p class="hint">请添加数据后查看图表</p>
+        <p class="hint">
+          请添加数据后查看图表
+        </p>
       </div>
     </div>
 
     <!-- 标注列表 -->
-    <div v-if="annotations.length > 0" class="annotations-panel">
+    <div
+      v-if="annotations.length > 0"
+      class="annotations-panel"
+    >
       <div class="panel-header">
         <span>标注列表</span>
         <el-button

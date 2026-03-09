@@ -31,12 +31,7 @@ module.exports = {
     'vue/component-definition-name-casing': ['error', 'PascalCase'],
     'vue/component-name-in-template-casing': ['error', 'PascalCase'],
     'vue/block-lang': [
-      'error',
-      {
-        script: {
-          lang: 'js',
-        },
-      },
+      'off',
     ],
 
     // JS 规则
@@ -57,6 +52,15 @@ module.exports = {
     'tests/e2e/',
   ],
   overrides: [
+    {
+      files: ['**/*.vue'],
+      parser: 'vue-eslint-parser',
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
     {
       files: ['**/__tests__/**/*.{j,t}s?(x)', '**/*.test.{j,t}s?(x)'],
       env: {

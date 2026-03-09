@@ -2,21 +2,47 @@
   <div class="audit-log-filter">
     <!-- 快捷时间选择 -->
     <div class="quick-time-selector">
-      <el-radio-group v-model="quickTimeRange" size="small" @change="handleQuickTimeChange">
-        <el-radio-button label="today">今天</el-radio-button>
-        <el-radio-button label="yesterday">昨天</el-radio-button>
-        <el-radio-button label="week">本周</el-radio-button>
-        <el-radio-button label="month">本月</el-radio-button>
-        <el-radio-button label="custom">自定义</el-radio-button>
+      <el-radio-group
+        v-model="quickTimeRange"
+        size="small"
+        @change="handleQuickTimeChange"
+      >
+        <el-radio-button label="today">
+          今天
+        </el-radio-button>
+        <el-radio-button label="yesterday">
+          昨天
+        </el-radio-button>
+        <el-radio-button label="week">
+          本周
+        </el-radio-button>
+        <el-radio-button label="month">
+          本月
+        </el-radio-button>
+        <el-radio-button label="custom">
+          自定义
+        </el-radio-button>
       </el-radio-group>
     </div>
 
     <!-- 筛选表单 -->
-    <el-form :model="filterForm" label-width="100px" class="filter-form">
+    <el-form
+      :model="filterForm"
+      label-width="100px"
+      class="filter-form"
+    >
       <el-row :gutter="24">
         <!-- 时间范围 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="时间范围" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="时间范围"
+            class="form-item"
+          >
             <el-date-picker
               v-model="filterForm.timeRange"
               type="datetimerange"
@@ -33,8 +59,16 @@
         </el-col>
 
         <!-- 用户筛选 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="用户" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="用户"
+            class="form-item"
+          >
             <el-select
               v-model="filterForm.user_id"
               placeholder="全部用户"
@@ -54,8 +88,16 @@
         </el-col>
 
         <!-- 设备筛选 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="设备" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="设备"
+            class="form-item"
+          >
             <el-select
               v-model="filterForm.device_id"
               placeholder="全部设备"
@@ -74,8 +116,16 @@
         </el-col>
 
         <!-- 操作分类 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="操作分类" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="操作分类"
+            class="form-item"
+          >
             <el-select
               v-model="filterForm.category"
               placeholder="全部分类"
@@ -94,8 +144,16 @@
         </el-col>
 
         <!-- 操作类型 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="操作类型" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="操作类型"
+            class="form-item"
+          >
             <el-select
               v-model="filterForm.operation_type"
               placeholder="全部类型"
@@ -115,8 +173,16 @@
         </el-col>
 
         <!-- 响应状态 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="响应状态" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="响应状态"
+            class="form-item"
+          >
             <el-select
               v-model="filterForm.status"
               placeholder="全部状态"
@@ -124,17 +190,37 @@
               class="form-select"
               @change="handleFilterChange"
             >
-              <el-option label="成功 (2xx)" :value="200" />
-              <el-option label="重定向 (3xx)" :value="300" />
-              <el-option label="客户端错误 (4xx)" :value="400" />
-              <el-option label="服务器错误 (5xx)" :value="500" />
+              <el-option
+                label="成功 (2xx)"
+                :value="200"
+              />
+              <el-option
+                label="重定向 (3xx)"
+                :value="300"
+              />
+              <el-option
+                label="客户端错误 (4xx)"
+                :value="400"
+              />
+              <el-option
+                label="服务器错误 (5xx)"
+                :value="500"
+              />
             </el-select>
           </el-form-item>
         </el-col>
 
         <!-- 状态码范围 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="状态码范围" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="状态码范围"
+            class="form-item"
+          >
             <div class="range-input-group">
               <el-input-number
                 v-model="filterForm.response_status_min"
@@ -160,8 +246,16 @@
         </el-col>
 
         <!-- 耗时范围 -->
-        <el-col :xs="24" :sm="12" :md="8" :lg="6">
-          <el-form-item label="耗时范围(ms)" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-form-item
+            label="耗时范围(ms)"
+            class="form-item"
+          >
             <div class="range-input-group">
               <el-input-number
                 v-model="filterForm.duration_min"
@@ -185,8 +279,16 @@
         </el-col>
 
         <!-- 关键词搜索 -->
-        <el-col :xs="24" :sm="24" :md="16" :lg="12">
-          <el-form-item label="关键词搜索" class="form-item">
+        <el-col
+          :xs="24"
+          :sm="24"
+          :md="16"
+          :lg="12"
+        >
+          <el-form-item
+            label="关键词搜索"
+            class="form-item"
+          >
             <el-input
               v-model="filterForm.keyword"
               placeholder="搜索路径、参数、消息等..."
@@ -209,10 +311,16 @@
       </el-row>
 
       <!-- 操作按钮 -->
-      <el-row :gutter="24" class="action-row">
+      <el-row
+        :gutter="24"
+        class="action-row"
+      >
         <el-col :span="24">
           <div class="action-buttons">
-            <el-button type="primary" @click="handleApplyFilter">
+            <el-button
+              type="primary"
+              @click="handleApplyFilter"
+            >
               <el-icon><Search /></el-icon>
               应用筛选
             </el-button>
@@ -220,15 +328,23 @@
               <el-icon><RefreshLeft /></el-icon>
               重置
             </el-button>
-            <el-button @click="handleSaveFilter" :disabled="!hasActiveFilters">
+            <el-button
+              :disabled="!hasActiveFilters"
+              @click="handleSaveFilter"
+            >
               <el-icon><CollectionTag /></el-icon>
               保存条件
             </el-button>
-            <el-dropdown @command="handleLoadSavedFilter" v-if="savedFilters.length > 0">
+            <el-dropdown
+              v-if="savedFilters.length > 0"
+              @command="handleLoadSavedFilter"
+            >
               <el-button>
                 <el-icon><FolderOpened /></el-icon>
                 加载条件
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -248,77 +364,80 @@
     </el-form>
 
     <!-- 活动筛选标签 -->
-    <div class="active-filters" v-if="hasActiveFilters">
+    <div
+      v-if="hasActiveFilters"
+      class="active-filters"
+    >
       <span class="filter-label">当前筛选：</span>
       <el-tag
         v-if="filterForm.timeRange && filterForm.timeRange.length === 2"
         closable
-        @close="removeFilter('timeRange')"
         class="filter-tag"
+        @close="removeFilter('timeRange')"
       >
         时间: {{ formatTimeRange(filterForm.timeRange) }}
       </el-tag>
       <el-tag
         v-if="filterForm.user_id"
         closable
-        @close="removeFilter('user_id')"
         class="filter-tag"
+        @close="removeFilter('user_id')"
       >
         用户: {{ getUserName(filterForm.user_id) }}
       </el-tag>
       <el-tag
         v-if="filterForm.device_id"
         closable
-        @close="removeFilter('device_id')"
         class="filter-tag"
+        @close="removeFilter('device_id')"
       >
         设备: {{ getDeviceName(filterForm.device_id) }}
       </el-tag>
       <el-tag
         v-if="filterForm.category"
         closable
-        @close="removeFilter('category')"
         class="filter-tag"
+        @close="removeFilter('category')"
       >
         分类: {{ getCategoryName(filterForm.category) }}
       </el-tag>
       <el-tag
         v-if="filterForm.operation_type"
         closable
-        @close="removeFilter('operation_type')"
         class="filter-tag"
+        @close="removeFilter('operation_type')"
       >
         类型: {{ getOperationName(filterForm.operation_type) }}
       </el-tag>
       <el-tag
         v-if="filterForm.status"
         closable
-        @close="removeFilter('status')"
         class="filter-tag"
+        @close="removeFilter('status')"
       >
         状态: {{ getStatusName(filterForm.status) }}
       </el-tag>
       <el-tag
         v-if="filterForm.keyword"
         closable
-        @close="removeFilter('keyword')"
         class="filter-tag"
+        @close="removeFilter('keyword')"
       >
         关键词: {{ filterForm.keyword }}
       </el-tag>
       <el-tag
         v-if="filterForm.response_status_min || filterForm.response_status_max"
         closable
-        @close="removeFilter('statusRange')"
         class="filter-tag"
+        @close="removeFilter('statusRange')"
       >
         状态码: {{ filterForm.response_status_min || '100' }} - {{ filterForm.response_status_max || '599' }}
       </el-tag>
       <el-tag
         v-if="filterForm.duration_min || filterForm.duration_max"
         closable
-        @close="removeFilter('durationRange')"
         class="filter-tag"
+        @close="removeFilter('durationRange')"
       >
         耗时: {{ filterForm.duration_min || '0' }}ms - {{ filterForm.duration_max || '∞' }}ms
       </el-tag>
@@ -331,9 +450,15 @@
       width="400px"
       class="save-filter-dialog"
     >
-      <el-form :model="saveFilterForm" label-width="80px">
+      <el-form
+        :model="saveFilterForm"
+        label-width="80px"
+      >
         <el-form-item label="名称">
-          <el-input v-model="saveFilterForm.name" placeholder="请输入筛选条件名称" />
+          <el-input
+            v-model="saveFilterForm.name"
+            placeholder="请输入筛选条件名称"
+          />
         </el-form-item>
         <el-form-item label="描述">
           <el-input
@@ -345,8 +470,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="saveFilterDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmSaveFilter">保存</el-button>
+        <el-button @click="saveFilterDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmSaveFilter"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
   </div>

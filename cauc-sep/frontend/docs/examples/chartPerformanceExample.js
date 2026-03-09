@@ -39,18 +39,18 @@ export function exampleSmartSampling() {
  */
 export function exampleAdaptiveSampling() {
   const stableData = {
-    x: Array.from({ length: 50000 }, (_, i) => i),
-    y: Array.from({ length: 50000 }, (_, i) => 100 + Math.random() * 2),
+    x: Array.from({ length: 50000 }, (_v, i) => i),
+    y: Array.from({ length: 50000 }, (_v, i) => 100 + Math.random() * 2),
   };
   
   const periodicData = {
-    x: Array.from({ length: 50000 }, (_, i) => i),
-    y: Array.from({ length: 50000 }, (_, i) => Math.sin(i / 100) * 50),
+    x: Array.from({ length: 50000 }, (_v, i) => i),
+    y: Array.from({ length: 50000 }, (_v, i) => Math.sin(i / 100) * 50),
   };
   
   const volatileData = {
-    x: Array.from({ length: 50000 }, (_, i) => i),
-    y: Array.from({ length: 50000 }, (_, i) => Math.random() * 100),
+    x: Array.from({ length: 50000 }, (_v, i) => i),
+    y: Array.from({ length: 50000 }, (_v, i) => Math.random() * 100),
   };
   
   console.log('平稳数据特征:', detectDataCharacteristics(stableData.y));
@@ -104,7 +104,7 @@ export function exampleLargeDataChartConfig() {
 export function examplePerformanceMonitoring(chartInstance) {
   const fpsMonitor = new FPSMonitor();
   
-  fpsMonitor.addListener((fps, history) => {
+  fpsMonitor.addListener((fps, _history) => {
     console.log(`当前FPS: ${fps}`);
     console.log(`平均FPS: ${fpsMonitor.getAverageFPS()}`);
     console.log(`性能评级: ${fpsMonitor.getPerformanceRating()}`);
@@ -143,7 +143,7 @@ export async function exampleBatchDataProcessing() {
   
   const result = await processor.process(
     largeDataset,
-    (batch, startIndex) => {
+    (batch, _startIndex) => {
       return batch.map(item => ({
         ...item,
         processed: true,
