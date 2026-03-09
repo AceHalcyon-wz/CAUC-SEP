@@ -8,12 +8,14 @@
 """
 
 import time
+
 import numpy as np
+
 from core.data_pipeline import (
-    RingBuffer,
-    StreamProcessor,
     DataPipeline,
     OverflowStrategy,
+    RingBuffer,
+    StreamProcessor,
     TriggerType,
 )
 

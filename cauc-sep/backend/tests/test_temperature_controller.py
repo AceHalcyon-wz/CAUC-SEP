@@ -25,9 +25,9 @@ from core.temperature_controller import (
     TemperatureController,
     TemperatureControllerMode,
     TemperatureDataPoint,
+    TemperatureProgramSegment,
     TemperatureProtectionConfig,
     TemperatureProtectionType,
-    TemperatureProgramSegment,
 )
 
 

@@ -11,6 +11,9 @@
 
 import json
 import os
+
+# 添加项目根目录到系统路径
+import sys
 import tempfile
 import time
 from datetime import datetime, timedelta
@@ -19,9 +22,6 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-# 添加项目根目录到系统路径
-import sys
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.index_optimizer import (
@@ -29,7 +29,7 @@ from core.index_optimizer import (
     IndexOptimizer,
     QueryPerformanceMonitor,
 )
-from models import Base, DataRecord, Experiment, User, AuditLog
+from models import AuditLog, Base, DataRecord, Experiment, User
 
 
 class TestQueryPerformance:

@@ -56,7 +56,7 @@ class TestWinMMWrapper:
 
     def test_uninitialized_operations(self):
         """测试未初始化时的操作。"""
-        from core.rt_scheduler import WinMMWrapper, WindowsAPIError
+        from core.rt_scheduler import WindowsAPIError, WinMMWrapper
 
         wrapper = WinMMWrapper.__new__(WinMMWrapper)
         wrapper._initialized = False
@@ -224,13 +224,12 @@ class TestWindowsRTScheduler:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows only")
     def test_set_thread_priority(self):
         """测试线程优先级设置。"""
+        # 直接测试优先级管理器
         from core.rt_scheduler import (
             THREAD_PRIORITY_HIGHEST,
+            ThreadPriorityManager,
             WindowsRTScheduler,
         )
-
-        # 直接测试优先级管理器
-        from core.rt_scheduler import ThreadPriorityManager
 
         manager = ThreadPriorityManager()
         result = manager.set_thread_priority(THREAD_PRIORITY_HIGHEST)

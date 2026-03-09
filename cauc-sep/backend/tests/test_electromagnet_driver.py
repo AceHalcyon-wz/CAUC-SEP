@@ -18,16 +18,16 @@ import pytest_asyncio
 
 from core.abstract import DeviceStatus
 from core.electromagnet_driver import (
+    MAX_CURRENT,
+    MAX_FIELD,
+    MAX_SCAN_RATE,
+    MIN_SCAN_RATE,
+    OVERCURRENT_THRESHOLD,
     CalibrationPoint,
     ElectromagnetDriver,
     ElectromagnetStatus,
     ScanMode,
     ScanParameters,
-    MAX_CURRENT,
-    MAX_FIELD,
-    MIN_SCAN_RATE,
-    MAX_SCAN_RATE,
-    OVERCURRENT_THRESHOLD,
 )
 
 # ==================== Fixtures ====================

@@ -30,6 +30,7 @@ ws://localhost:8000/ws/motor?protocol=MsgPack
 # ============================================================================
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+
 from api.websocket import (
     ConnectionManager,
     DeviceType,

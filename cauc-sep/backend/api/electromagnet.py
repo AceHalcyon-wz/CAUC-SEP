@@ -34,15 +34,15 @@ from api.schemas import (
     SuccessResponse,
 )
 from core.abstract import DeviceStatus
-from core.device_utils import validate_device_state, DeviceValidationError
 from core.device_registry import DeviceRegistry
+from core.device_utils import DeviceValidationError, validate_device_state
 from core.electromagnet_driver import (
-    ElectromagnetDriver,
-    ElectromagnetStatus,
-    ScanMode as DriverScanMode,
     MAX_CURRENT,
     OVERCURRENT_THRESHOLD,
+    ElectromagnetDriver,
+    ElectromagnetStatus,
 )
+from core.electromagnet_driver import ScanMode as DriverScanMode
 
 logger = logging.getLogger(__name__)
 

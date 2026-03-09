@@ -116,8 +116,9 @@ class TestJWTToken:
 
     def test_token_blacklist(self):
         """测试令牌黑名单。"""
-        from api.user import _token_blacklist
         from fastapi import HTTPException
+
+        from api.user import _token_blacklist
 
         data = {"sub": 1}
         token = create_access_token(data)

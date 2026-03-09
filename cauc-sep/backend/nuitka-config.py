@@ -17,8 +17,8 @@ Nuitka打包配置文件
 日期：2026-03-09
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 project_dir = Path(__file__).parent

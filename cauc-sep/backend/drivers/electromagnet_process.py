@@ -11,9 +11,10 @@ import logging
 import time
 from typing import Any, Dict
 
-from .base import DriverProcessBase, IPCMessage, IPCMessageType
-from core.electromagnet_driver import ElectromagnetDriver, ScanMode, ElectromagnetStatus
 from core.abstract import DeviceStatus
+from core.electromagnet_driver import ElectromagnetDriver, ElectromagnetStatus, ScanMode
+
+from .base import DriverProcessBase, IPCMessage, IPCMessageType
 
 logger = logging.getLogger(__name__)
 

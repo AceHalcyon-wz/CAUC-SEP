@@ -19,10 +19,10 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     DateTime,
+    Index,
     Integer,
     String,
     Text,
-    Index,
 )
 from sqlalchemy.orm import relationship
 

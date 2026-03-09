@@ -11,15 +11,16 @@
 创建日期: 2024-03-07
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from core.analysis import (
+    FitModelType,
+    MultiModelFitter,
+    PhysicsAnalyzer,
     braunbeck_function,
     calculate_goodness_of_fit,
-    MultiModelFitter,
     generate_analysis_report,
-    PhysicsAnalyzer,
-    FitModelType,
 )
 
 

@@ -11,14 +11,15 @@ import logging
 import time
 from typing import Any, Dict, List
 
-from .base import DriverProcessBase
+from core.abstract import DeviceStatus
 from core.temperature_controller import (
     TemperatureController,
     TemperatureControllerMode,
-    TemperatureProtectionType,
     TemperatureProgramSegment,
+    TemperatureProtectionType,
 )
-from core.abstract import DeviceStatus
+
+from .base import DriverProcessBase
 
 logger = logging.getLogger(__name__)
 

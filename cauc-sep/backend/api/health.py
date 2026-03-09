@@ -29,7 +29,7 @@ from pydantic import BaseModel, Field
 from core.abstract import DeviceStatus
 from core.dm2c_driver import LeadshineDM2C
 from core.electromagnet_driver import ElectromagnetDriver
-from core.metrics import get_business_metrics, BusinessMetricsCollector
+from core.metrics import BusinessMetricsCollector, get_business_metrics
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
 from core.temperature_controller import TemperatureController

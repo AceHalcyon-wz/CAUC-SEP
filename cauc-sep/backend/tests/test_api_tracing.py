@@ -22,10 +22,10 @@ from fastapi.testclient import TestClient
 
 from api.tracing import router
 from core.tracing import (
-    TraceStorage,
+    Span,
     TraceContext,
     Tracer,
-    Span,
+    TraceStorage,
     get_trace_storage,
     set_trace_storage,
 )

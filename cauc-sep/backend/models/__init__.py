@@ -31,9 +31,10 @@ from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
+from models.operation_history import VALID_OPERATION_TYPES, OperationHistory
+
 # 导出用户相关模型
-from models.user import User, VALID_USER_ROLES, DEFAULT_PREFERENCES
-from models.operation_history import OperationHistory, VALID_OPERATION_TYPES
+from models.user import DEFAULT_PREFERENCES, VALID_USER_ROLES, User
 
 __all__ = [
     "Base",

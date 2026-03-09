@@ -11,9 +11,10 @@ import logging
 import time
 from typing import Any, Dict
 
-from .base import DriverProcessBase, IPCMessage, IPCMessageType
-from core.dm2c_driver import LeadshineDM2C
 from core.abstract import DeviceStatus
+from core.dm2c_driver import LeadshineDM2C
+
+from .base import DriverProcessBase, IPCMessage, IPCMessageType
 
 logger = logging.getLogger(__name__)
 

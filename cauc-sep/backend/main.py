@@ -45,21 +45,21 @@ from pydantic import BaseModel, Field
 from api import (
     ammeter,
     analysis,
+    cache_api,
+    crash_report,
     device,
     electromagnet,
     experiment,
     health,
     logs,
     motor,
+    performance,
     piezo,
     temperature,
-    user,
     tracing,
-    crash_report,
     update,
-    performance,
+    user,
 )
-from api import cache_api
 from api.websocket import (
     AlarmLevel,
     ConnectionManager,
@@ -71,30 +71,30 @@ from api.websocket import (
     manager,
 )
 from core.abstract import DeviceStatus
+from core.crash_report import get_crash_report_storage, init_crash_report_manager
 from core.data_storage import DataStorage
 from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
 from core.electromagnet_driver import ElectromagnetDriver, ElectromagnetStatus
-from core.logging_config import setup_logging, cleanup_old_logs, get_log_stats
+from core.logging_config import cleanup_old_logs, get_log_stats, setup_logging
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
-from core.startup_config import optimize_startup, get_system_info, check_dependencies
+from core.startup_config import check_dependencies, get_system_info, optimize_startup
 from core.temperature_controller import TemperatureController
-from core.tracing import init_tracing, TracingMiddleware, tracer
-from core.crash_report import init_crash_report_manager, get_crash_report_storage
+from core.tracing import TracingMiddleware, init_tracing, tracer
 from middleware.audit import AuditMiddleware, audit_logger
-from middleware.security import (
-    SecurityHeadersMiddleware,
-    validate_device_id,
-    validate_experiment_id,
-    validate_array_length,
-)
-from middleware.rate_limit import RateLimitMiddleware, get_rate_limiter
 from middleware.cors_config import (
+    CORSEnvironment,
     get_cors_config,
+    log_cors_config,
     setup_cors,
     validate_cors_security,
-    log_cors_config,
-    CORSEnvironment,
+)
+from middleware.rate_limit import RateLimitMiddleware, get_rate_limiter
+from middleware.security import (
+    SecurityHeadersMiddleware,
+    validate_array_length,
+    validate_device_id,
+    validate_experiment_id,
 )
 
 # ============================================================================
@@ -202,7 +202,7 @@ async def lifespan(app: FastAPI):
     storage = DataStorage("experiments.db")
 
     # 初始化缓存系统
-    from core.cache import init_cache_manager, RedisConfig
+    from core.cache import RedisConfig, init_cache_manager
     from core.local_cache import start_all_cache_cleanup_tasks
 
     cache_manager = init_cache_manager(
@@ -333,8 +333,8 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down...")
 
     # 停止缓存系统
-    from core.local_cache import stop_all_cache_cleanup_tasks
     from core.cache import get_cache_manager
+    from core.local_cache import stop_all_cache_cleanup_tasks
 
     await stop_all_cache_cleanup_tasks()
     logger.info("Local cache cleanup tasks stopped")

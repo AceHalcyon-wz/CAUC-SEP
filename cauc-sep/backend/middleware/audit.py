@@ -31,7 +31,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from core.data_storage import DataStorage
-from middleware.security import sanitize_dict, sanitize_string, SENSITIVE_FIELDS
+from middleware.security import SENSITIVE_FIELDS, sanitize_dict, sanitize_string
 
 logger = logging.getLogger(__name__)
 

@@ -719,10 +719,11 @@ class TestQueryOptimizer:
     def optimizer_env(self):
         """创建优化器环境。"""
         with tempfile.TemporaryDirectory() as temp_dir:
+            from collections import defaultdict
+            from threading import Lock
+
             from sqlalchemy import create_engine
             from sqlalchemy.orm import sessionmaker
-            from threading import Lock
-            from collections import defaultdict
 
             db_path = os.path.join(temp_dir, "test.db")
             engine = create_engine(f"sqlite:///{db_path}")

@@ -28,7 +28,7 @@ from collections.abc import Callable, Generator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
-from threading import Lock, RLock, Event
+from threading import Event, Lock, RLock
 from typing import Any
 
 import numpy as np

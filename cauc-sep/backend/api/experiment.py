@@ -21,7 +21,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.schemas import ExperimentRequest, SuccessResponse
 from core.data_storage import DataStorage
-from core.tracing import traced, SpanKind, get_current_span
+from core.tracing import SpanKind, get_current_span, traced
 from middleware.security import validate_experiment_id
 
 logger = logging.getLogger(__name__)

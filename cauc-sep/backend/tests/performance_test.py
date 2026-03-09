@@ -9,6 +9,7 @@
 
 import sys
 import time
+
 import numpy as np
 
 # 添加项目路径
@@ -151,7 +152,7 @@ def test_rt_scheduler_stability():
         print("\n跳过 WindowsRTScheduler 测试（非 Windows 平台）")
         return
 
-    from core.rt_scheduler import WindowsRTScheduler, THREAD_PRIORITY_ABOVE_NORMAL
+    from core.rt_scheduler import THREAD_PRIORITY_ABOVE_NORMAL, WindowsRTScheduler
 
     print("\n" + "=" * 60)
     print("WindowsRTScheduler 稳定性测试")

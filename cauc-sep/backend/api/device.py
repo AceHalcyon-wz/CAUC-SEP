@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 
 from core.abstract import DeviceStatus
 from core.data_storage import DataStorage
-from core.dm2c_driver import LeadshineDM2C, DI_FUNCTIONS, DO_FUNCTIONS
+from core.dm2c_driver import DI_FUNCTIONS, DO_FUNCTIONS, LeadshineDM2C
 from core.electromagnet_driver import ElectromagnetDriver
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController

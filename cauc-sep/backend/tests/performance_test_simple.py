@@ -4,6 +4,7 @@
 
 import sys
 import time
+
 import numpy as np
 
 sys.path.insert(0, r"c:\Users\15272\Downloads\kimiOKC\cauc-sep\backend")
@@ -63,7 +64,7 @@ def test_rt_scheduler():
         print("\n跳过 WindowsRTScheduler 测试（非 Windows 平台）")
         return
 
-    from core.rt_scheduler import WindowsRTScheduler, THREAD_PRIORITY_ABOVE_NORMAL
+    from core.rt_scheduler import THREAD_PRIORITY_ABOVE_NORMAL, WindowsRTScheduler
 
     print("\n" + "=" * 60)
     print("WindowsRTScheduler 稳定性测试")

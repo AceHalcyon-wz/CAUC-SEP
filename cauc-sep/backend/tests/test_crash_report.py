@@ -22,8 +22,8 @@ from core.crash_report import (
     CrashStatus,
     SystemInfo,
     capture_crashes,
-    init_crash_report_manager,
     get_crash_report_manager,
+    init_crash_report_manager,
 )
 
 

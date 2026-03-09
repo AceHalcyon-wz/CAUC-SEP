@@ -23,8 +23,8 @@ from core.tracing import (
     SpanKind,
     SpanStatus,
     TraceContext,
-    TraceStorage,
     Tracer,
+    TraceStorage,
     generate_span_id,
     generate_trace_id,
     get_current_span,
@@ -667,8 +667,8 @@ class TestTracerAdvanced:
 
         finally:
             # 等待文件释放
-            import time
             import gc
+            import time
 
             gc.collect()
             time.sleep(0.1)
