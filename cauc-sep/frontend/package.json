@@ -22,6 +22,7 @@
     "test:all": "npm run test:run && npm run test:e2e"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.0",
     "axios": "^1.6.0",
     "echarts": "^5.4.0",
     "element-plus": "^2.5.0",
