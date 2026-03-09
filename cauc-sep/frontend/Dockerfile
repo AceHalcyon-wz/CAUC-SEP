@@ -4,7 +4,7 @@
 # ============================================================================
 
 # ==================== 构建阶段 ====================
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 LABEL maintainer="CAUC-SEP Team"
 LABEL description="CAUC-SEP Frontend - Vue3 Application"
