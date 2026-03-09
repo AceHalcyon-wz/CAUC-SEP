@@ -9,9 +9,8 @@ FROM node:20-alpine AS builder
 LABEL maintainer="CAUC-SEP Team"
 LABEL description="CAUC-SEP Frontend - Vue3 Application"
 
-# 设置环境变量
-ENV NODE_ENV=production \
-    VITE_API_BASE_URL=/api \
+# 设置环境变量 (构建阶段不设置 NODE_ENV=production 以确保 devDependencies 被安装)
+ENV VITE_API_BASE_URL=/api \
     VITE_WS_BASE_URL=/ws
 
 # 设置工作目录
