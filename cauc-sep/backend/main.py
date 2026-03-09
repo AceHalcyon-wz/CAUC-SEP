@@ -26,7 +26,7 @@ CAUC-SEP 自旋电子实验平台 - FastAPI后端
 - 微电流计 (ammeter)
 
 作者：Backend Engineer Agent
-更新日期：2026-03-07
+更新日期：2026-03-09
 """
 
 import asyncio
