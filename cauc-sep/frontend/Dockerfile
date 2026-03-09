@@ -20,8 +20,8 @@ WORKDIR /app
 # 复制package文件
 COPY package*.json ./
 
-# 安装依赖（包含 devDependencies 用于构建）
-RUN npm ci --ignore-scripts && \
+# Install dependencies
+RUN npm ci && \
     npm cache clean --force
 
 # 复制源代码

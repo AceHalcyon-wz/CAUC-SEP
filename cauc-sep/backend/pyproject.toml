@@ -42,6 +42,7 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
 ignore = [
+    "I001",  # Import block is un-sorted (conflicts with isort)
     "B008",  # FastAPI Depends in argument defaults is standard practice
     "B904",  # raise ... from is not always necessary
     "B028",  # stacklevel in warnings.warn is optional
