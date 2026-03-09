@@ -11,12 +11,7 @@ import time
 
 import numpy as np
 
-from core.data_pipeline import (
-    OverflowStrategy,
-    RingBuffer,
-    StreamProcessor,
-    TriggerType,
-)
+from core.data_pipeline import OverflowStrategy, RingBuffer, StreamProcessor, TriggerType
 
 
 def test_ring_buffer_performance():

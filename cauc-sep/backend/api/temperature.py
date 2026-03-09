@@ -30,10 +30,7 @@ from api.schemas import (
 )
 from core.device_registry import DeviceRegistry
 from core.device_utils import DeviceValidationError, validate_device_state
-from core.temperature_controller import (
-    TemperatureController,
-    TemperatureProgramSegment,
-)
+from core.temperature_controller import TemperatureController, TemperatureProgramSegment
 
 logger = logging.getLogger(__name__)
 

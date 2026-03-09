@@ -20,13 +20,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.tracing import router
-from core.tracing import (
-    Span,
-    TraceContext,
-    Tracer,
-    TraceStorage,
-    set_trace_storage,
-)
+from core.tracing import Span, TraceContext, Tracer, TraceStorage, set_trace_storage
 
 
 class TestTracingAPI:

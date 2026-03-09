@@ -14,16 +14,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (
-    Boolean,
-    CheckConstraint,
-    Column,
-    DateTime,
-    Index,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from models import Base

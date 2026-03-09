@@ -59,12 +59,7 @@ from api import (
     tracing,
     user,
 )
-from api.websocket import (
-    DeviceType,
-    create_device_status_message,
-    create_waveform_message,
-    manager,
-)
+from api.websocket import DeviceType, create_device_status_message, create_waveform_message, manager
 from core.abstract import DeviceStatus
 from core.crash_report import get_crash_report_storage, init_crash_report_manager
 from core.data_storage import DataStorage
@@ -77,15 +72,9 @@ from core.startup_config import check_dependencies, get_system_info, optimize_st
 from core.temperature_controller import TemperatureController
 from core.tracing import TracingMiddleware, init_tracing, tracer
 from middleware.audit import AuditMiddleware, audit_logger
-from middleware.cors_config import (
-    get_cors_config,
-    log_cors_config,
-    validate_cors_security,
-)
+from middleware.cors_config import get_cors_config, log_cors_config, validate_cors_security
 from middleware.rate_limit import RateLimitMiddleware
-from middleware.security import (
-    SecurityHeadersMiddleware,
-)
+from middleware.security import SecurityHeadersMiddleware
 
 # ============================================================================
 # 启动优化配置

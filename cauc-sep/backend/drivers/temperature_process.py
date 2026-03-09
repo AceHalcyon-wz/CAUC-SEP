@@ -12,10 +12,7 @@ import time
 from typing import Any
 
 from core.abstract import DeviceStatus
-from core.temperature_controller import (
-    TemperatureController,
-    TemperatureProgramSegment,
-)
+from core.temperature_controller import TemperatureController, TemperatureProgramSegment
 
 from .base import DriverProcessBase
 

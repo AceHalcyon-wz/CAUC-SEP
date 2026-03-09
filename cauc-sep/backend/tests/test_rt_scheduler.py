@@ -69,10 +69,7 @@ class TestThreadPriorityManager:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows only")
     def test_set_thread_priority(self):
         """测试线程优先级设置。"""
-        from core.rt_scheduler import (
-            THREAD_PRIORITY_ABOVE_NORMAL,
-            ThreadPriorityManager,
-        )
+        from core.rt_scheduler import THREAD_PRIORITY_ABOVE_NORMAL, ThreadPriorityManager
 
         manager = ThreadPriorityManager()
 
@@ -223,10 +220,7 @@ class TestWindowsRTScheduler:
     def test_set_thread_priority(self):
         """测试线程优先级设置。"""
         # 直接测试优先级管理器
-        from core.rt_scheduler import (
-            THREAD_PRIORITY_HIGHEST,
-            ThreadPriorityManager,
-        )
+        from core.rt_scheduler import THREAD_PRIORITY_HIGHEST, ThreadPriorityManager
 
         manager = ThreadPriorityManager()
         result = manager.set_thread_priority(THREAD_PRIORITY_HIGHEST)
@@ -345,10 +339,7 @@ class TestRealtimeContext:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows only")
     def test_context_manager_custom_priority(self):
         """测试自定义优先级实时上下文。"""
-        from core.rt_scheduler import (
-            THREAD_PRIORITY_HIGHEST,
-            RealtimeContext,
-        )
+        from core.rt_scheduler import THREAD_PRIORITY_HIGHEST, RealtimeContext
 
         with RealtimeContext(priority=THREAD_PRIORITY_HIGHEST):
             pass

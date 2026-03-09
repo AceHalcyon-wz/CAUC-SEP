@@ -14,13 +14,7 @@
 """
 
 # 审计模块
-from .audit import (
-    AuditLogger,
-    AuditMiddleware,
-    audit_logger,
-    log_alarm_event,
-    log_device_event,
-)
+from .audit import AuditLogger, AuditMiddleware, audit_logger, log_alarm_event, log_device_event
 
 # CORS配置模块
 from .cors_config import (
@@ -39,8 +33,8 @@ from .cors_config import (
 )
 
 # JWT认证模块
-from .jwt_auth import (  # 令牌管理; 权限控制; 黑名单; 可选认证; 令牌负载; 日志; 配置
-    ACCESS_TOKEN_EXPIRE_HOURS,
+from .jwt_auth import (
+    ACCESS_TOKEN_EXPIRE_HOURS,  # 令牌管理; 权限控制; 黑名单; 可选认证; 令牌负载; 日志; 配置
     ALGORITHM,
     REFRESH_TOKEN_EXPIRE_DAYS,
     ROLE_PERMISSIONS,
@@ -96,8 +90,8 @@ from .security import log_security_event as _log_security_event
 from .security import sanitize_filename as _sanitize_filename
 
 # 验证模块
-from .validation import (  # XSS过滤; SQL注入防护; 路径安全; 敏感数据; 综合验证; 安全日志; Pydantic验证器
-    ValidationResult,
+from .validation import (
+    ValidationResult,  # XSS过滤; SQL注入防护; 路径安全; 敏感数据; 综合验证; 安全日志; Pydantic验证器
     create_pydantic_validator,
     detect_sensitive_data,
     detect_sql_injection,

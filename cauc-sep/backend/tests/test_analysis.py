@@ -856,10 +856,7 @@ class TestAnalysisReport:
 
     def test_generate_report(self):
         """测试报告生成。"""
-        from core.analysis import (
-            FitResult,
-            generate_analysis_report,
-        )
+        from core.analysis import FitResult, generate_analysis_report
 
         h_data = np.linspace(-1000, 1000, 100)
         b_data = np.tanh(h_data / 200)
@@ -927,10 +924,7 @@ class TestAnalysisReport:
 
     def test_recommendations(self):
         """测试建议生成。"""
-        from core.analysis import (
-            FitResult,
-            _generate_recommendations,
-        )
+        from core.analysis import FitResult, _generate_recommendations
 
         hysteresis_params = {
             "Hc": 100.0,
@@ -966,10 +960,7 @@ class TestAnalysisReport:
 
     def test_recommendations_low_r_squared(self):
         """测试低R²时的建议。"""
-        from core.analysis import (
-            FitResult,
-            _generate_recommendations,
-        )
+        from core.analysis import FitResult, _generate_recommendations
 
         fit_result = FitResult(
             model_name="test",

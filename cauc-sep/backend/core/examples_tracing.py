@@ -18,13 +18,7 @@ from pathlib import Path
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from tracing import (
-    SpanKind,
-    SpanStatus,
-    get_current_span,
-    init_tracing,
-    traced,
-)
+from tracing import SpanKind, SpanStatus, get_current_span, init_tracing, traced
 
 
 def example_basic_tracing():

@@ -26,10 +26,7 @@ from sqlalchemy import create_engine, text
 # 添加项目根目录到系统路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.index_optimizer import (
-    DatabaseIndexMigration,
-    IndexOptimizer,
-)
+from core.index_optimizer import DatabaseIndexMigration, IndexOptimizer
 
 # 配置日志
 logging.basicConfig(

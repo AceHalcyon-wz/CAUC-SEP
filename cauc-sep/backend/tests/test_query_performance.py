@@ -24,11 +24,7 @@ from sqlalchemy.orm import sessionmaker
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.index_optimizer import (
-    DatabaseIndexMigration,
-    IndexOptimizer,
-    QueryPerformanceMonitor,
-)
+from core.index_optimizer import DatabaseIndexMigration, IndexOptimizer, QueryPerformanceMonitor
 from models import AuditLog, Base, DataRecord, Experiment, User
 
 
