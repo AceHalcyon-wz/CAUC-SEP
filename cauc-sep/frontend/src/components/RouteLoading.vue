@@ -136,26 +136,43 @@ defineExpose({
 
 <template>
   <Transition name="fade">
-    <div v-if="isLoading" class="route-loading">
+    <div
+      v-if="isLoading"
+      class="route-loading"
+    >
       <!-- 顶部进度条 -->
-      <div v-if="showProgress" class="progress-bar">
-        <div class="progress-fill" :style="{ width: `${progress}%` }"></div>
+      <div
+        v-if="showProgress"
+        class="progress-bar"
+      >
+        <div
+          class="progress-fill"
+          :style="{ width: `${progress}%` }"
+        />
       </div>
 
       <!-- 中央加载动画 -->
       <div class="loading-content">
         <div class="loading-spinner">
-          <svg viewBox="0 0 50 50" class="circular">
+          <svg
+            viewBox="0 0 50 50"
+            class="circular"
+          >
             <circle
               cx="25"
               cy="25"
               r="20"
               fill="none"
               class="path"
-            ></circle>
+            />
           </svg>
         </div>
-        <p v-if="showText" class="loading-text">{{ loadingText }}</p>
+        <p
+          v-if="showText"
+          class="loading-text"
+        >
+          {{ loadingText }}
+        </p>
       </div>
     </div>
   </Transition>

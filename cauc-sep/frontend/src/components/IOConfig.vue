@@ -2,27 +2,55 @@
   <el-card class="io-config-card">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Setting /></el-icon>
+        <el-icon class="header-icon">
+          <Setting />
+        </el-icon>
         <span class="header-title">IO端口配置</span>
-        <el-tag size="small" type="info">DM2C-RS556</el-tag>
+        <el-tag
+          size="small"
+          type="info"
+        >
+          DM2C-RS556
+        </el-tag>
       </div>
     </template>
 
     <div class="io-config-content">
-      <el-tabs v-model="activeTab" class="io-tabs">
-        <el-tab-pane label="数字输入(DI)" name="di">
+      <el-tabs
+        v-model="activeTab"
+        class="io-tabs"
+      >
+        <el-tab-pane
+          label="数字输入(DI)"
+          name="di"
+        >
           <div class="io-section">
             <div class="section-header">
               <span class="section-title">DI端口配置 (1-7)</span>
-              <el-button size="small" @click="refreshDIStatus" :loading="loadingDI">
+              <el-button
+                size="small"
+                :loading="loadingDI"
+                @click="refreshDIStatus"
+              >
                 <el-icon><Refresh /></el-icon>
                 刷新状态
               </el-button>
             </div>
 
-            <el-table :data="diPorts" stripe class="io-table">
-              <el-table-column prop="port" label="端口" width="80" />
-              <el-table-column label="功能配置" min-width="200">
+            <el-table
+              :data="diPorts"
+              stripe
+              class="io-table"
+            >
+              <el-table-column
+                prop="port"
+                label="端口"
+                width="80"
+              />
+              <el-table-column
+                label="功能配置"
+                min-width="200"
+              >
                 <template #default="{ row }">
                   <el-select
                     v-model="row.function"
@@ -49,7 +77,10 @@
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="当前状态" width="100">
+              <el-table-column
+                label="当前状态"
+                width="100"
+              >
                 <template #default="{ row }">
                   <el-tag
                     :type="diStatus[`di${row.port}`] ? 'success' : 'info'"
@@ -59,7 +90,10 @@
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="100">
+              <el-table-column
+                label="操作"
+                width="100"
+              >
                 <template #default="{ row }">
                   <el-button
                     type="primary"
@@ -75,19 +109,37 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="数字输出(DO)" name="do">
+        <el-tab-pane
+          label="数字输出(DO)"
+          name="do"
+        >
           <div class="io-section">
             <div class="section-header">
               <span class="section-title">DO端口配置 (1-3)</span>
-              <el-button size="small" @click="refreshDOStatus" :loading="loadingDO">
+              <el-button
+                size="small"
+                :loading="loadingDO"
+                @click="refreshDOStatus"
+              >
                 <el-icon><Refresh /></el-icon>
                 刷新状态
               </el-button>
             </div>
 
-            <el-table :data="doPorts" stripe class="io-table">
-              <el-table-column prop="port" label="端口" width="80" />
-              <el-table-column label="功能配置" min-width="200">
+            <el-table
+              :data="doPorts"
+              stripe
+              class="io-table"
+            >
+              <el-table-column
+                prop="port"
+                label="端口"
+                width="80"
+              />
+              <el-table-column
+                label="功能配置"
+                min-width="200"
+              >
                 <template #default="{ row }">
                   <el-select
                     v-model="row.function"
@@ -114,7 +166,10 @@
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="当前状态" width="100">
+              <el-table-column
+                label="当前状态"
+                width="100"
+              >
                 <template #default="{ row }">
                   <el-tag
                     :type="doStatus[`do${row.port}`] ? 'success' : 'info'"
@@ -124,7 +179,10 @@
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="100">
+              <el-table-column
+                label="操作"
+                width="100"
+              >
                 <template #default="{ row }">
                   <el-button
                     type="primary"

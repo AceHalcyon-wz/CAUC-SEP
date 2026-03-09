@@ -14,18 +14,31 @@
       <el-col :span="24">
         <div class="header-content">
           <div class="header-left">
-            <el-icon class="header-icon"><UserFilled /></el-icon>
+            <el-icon class="header-icon">
+              <UserFilled />
+            </el-icon>
             <div class="header-text">
-              <h1 class="page-title">用户管理</h1>
-              <p class="page-subtitle">管理系统用户账户与权限设置</p>
+              <h1 class="page-title">
+                用户管理
+              </h1>
+              <p class="page-subtitle">
+                管理系统用户账户与权限设置
+              </p>
             </div>
           </div>
           <div class="header-right">
-            <el-button type="primary" @click="handleAddUser" class="action-btn">
+            <el-button
+              type="primary"
+              class="action-btn"
+              @click="handleAddUser"
+            >
               <el-icon><Plus /></el-icon>
               添加用户
             </el-button>
-            <el-button @click="handleRefresh" class="action-btn">
+            <el-button
+              class="action-btn"
+              @click="handleRefresh"
+            >
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
@@ -37,8 +50,15 @@
     <!-- 主内容区域 -->
     <div class="management-content">
       <!-- 搜索和筛选区域 -->
-      <el-card class="filter-card" shadow="hover">
-        <el-form :inline="true" :model="filterForm" class="filter-form">
+      <el-card
+        class="filter-card"
+        shadow="hover"
+      >
+        <el-form
+          :inline="true"
+          :model="filterForm"
+          class="filter-form"
+        >
           <el-form-item label="用户名">
             <el-input
               v-model="filterForm.username"
@@ -48,20 +68,46 @@
             />
           </el-form-item>
           <el-form-item label="角色">
-            <el-select v-model="filterForm.role" placeholder="全部角色" clearable>
-              <el-option label="管理员" value="admin" />
-              <el-option label="操作员" value="operator" />
-              <el-option label="观察者" value="viewer" />
+            <el-select
+              v-model="filterForm.role"
+              placeholder="全部角色"
+              clearable
+            >
+              <el-option
+                label="管理员"
+                value="admin"
+              />
+              <el-option
+                label="操作员"
+                value="operator"
+              />
+              <el-option
+                label="观察者"
+                value="viewer"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select v-model="filterForm.status" placeholder="全部状态" clearable>
-              <el-option label="启用" value="active" />
-              <el-option label="禁用" value="inactive" />
+            <el-select
+              v-model="filterForm.status"
+              placeholder="全部状态"
+              clearable
+            >
+              <el-option
+                label="启用"
+                value="active"
+              />
+              <el-option
+                label="禁用"
+                value="inactive"
+              />
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">
+            <el-button
+              type="primary"
+              @click="handleSearch"
+            >
               <el-icon><Search /></el-icon>
               搜索
             </el-button>
@@ -74,12 +120,20 @@
       </el-card>
 
       <!-- 用户列表 -->
-      <el-card class="user-list-card" shadow="hover">
+      <el-card
+        class="user-list-card"
+        shadow="hover"
+      >
         <template #header>
           <div class="card-header">
             <div class="header-title">
               <span>用户列表</span>
-              <el-tag type="info" size="small">共 {{ pagination.total }} 个用户</el-tag>
+              <el-tag
+                type="info"
+                size="small"
+              >
+                共 {{ pagination.total }} 个用户
+              </el-tag>
             </div>
             <div class="header-actions">
               <el-button
@@ -97,17 +151,27 @@
 
         <el-table
           ref="userTableRef"
-          :data="userList"
           v-loading="loading"
+          :data="userList"
           stripe
           @selection-change="handleSelectionChange"
         >
-          <el-table-column type="selection" width="55" />
+          <el-table-column
+            type="selection"
+            width="55"
+          />
 
-          <el-table-column prop="username" label="用户名" min-width="120">
+          <el-table-column
+            prop="username"
+            label="用户名"
+            min-width="120"
+          >
             <template #default="{ row }">
               <div class="user-info">
-                <el-avatar :size="32" class="user-avatar">
+                <el-avatar
+                  :size="32"
+                  class="user-avatar"
+                >
                   {{ getAvatarText(row.username) }}
                 </el-avatar>
                 <div class="user-detail">
@@ -118,21 +182,36 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="email" label="邮箱" min-width="180">
+          <el-table-column
+            prop="email"
+            label="邮箱"
+            min-width="180"
+          >
             <template #default="{ row }">
               <span class="email-text">{{ row.email || '-' }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="role" label="角色" width="120">
+          <el-table-column
+            prop="role"
+            label="角色"
+            width="120"
+          >
             <template #default="{ row }">
-              <el-tag :type="getRoleTagType(row.role)" size="small">
+              <el-tag
+                :type="getRoleTagType(row.role)"
+                size="small"
+              >
                 {{ getRoleLabel(row.role) }}
               </el-tag>
             </template>
           </el-table-column>
 
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column
+            prop="status"
+            label="状态"
+            width="100"
+          >
             <template #default="{ row }">
               <el-switch
                 v-model="row.status"
@@ -143,32 +222,54 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="lastLogin" label="最后登录" width="160">
+          <el-table-column
+            prop="lastLogin"
+            label="最后登录"
+            width="160"
+          >
             <template #default="{ row }">
               <span class="time-text">{{ formatDateTime(row.lastLogin) }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column prop="createdAt" label="创建时间" width="160">
+          <el-table-column
+            prop="createdAt"
+            label="创建时间"
+            width="160"
+          >
             <template #default="{ row }">
               <span class="time-text">{{ formatDateTime(row.createdAt) }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column
+            label="操作"
+            width="180"
+            fixed="right"
+          >
             <template #default="{ row }">
-              <el-button type="primary" link size="small" @click="handleEditUser(row)">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click="handleEditUser(row)"
+              >
                 编辑
               </el-button>
-              <el-button type="primary" link size="small" @click="handleEditPermissions(row)">
+              <el-button
+                type="primary"
+                link
+                size="small"
+                @click="handleEditPermissions(row)"
+              >
                 权限
               </el-button>
               <el-button
                 type="danger"
                 link
                 size="small"
-                @click="handleDeleteUser(row)"
                 :disabled="row.role === 'admin'"
+                @click="handleDeleteUser(row)"
               >
                 删除
               </el-button>
@@ -206,7 +307,10 @@
         label-width="100px"
         class="user-form"
       >
-        <el-form-item label="用户名" prop="username">
+        <el-form-item
+          label="用户名"
+          prop="username"
+        >
           <el-input
             v-model="userForm.username"
             placeholder="请输入用户名"
@@ -214,11 +318,21 @@
           />
         </el-form-item>
 
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="userForm.email" placeholder="请输入邮箱" />
+        <el-form-item
+          label="邮箱"
+          prop="email"
+        >
+          <el-input
+            v-model="userForm.email"
+            placeholder="请输入邮箱"
+          />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password" v-if="!isEditing">
+        <el-form-item
+          v-if="!isEditing"
+          label="密码"
+          prop="password"
+        >
           <el-input
             v-model="userForm.password"
             type="password"
@@ -227,7 +341,11 @@
           />
         </el-form-item>
 
-        <el-form-item label="确认密码" prop="confirmPassword" v-if="!isEditing">
+        <el-form-item
+          v-if="!isEditing"
+          label="确认密码"
+          prop="confirmPassword"
+        >
           <el-input
             v-model="userForm.confirmPassword"
             type="password"
@@ -236,18 +354,40 @@
           />
         </el-form-item>
 
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" placeholder="请选择角色">
-            <el-option label="管理员" value="admin" />
-            <el-option label="操作员" value="operator" />
-            <el-option label="观察者" value="viewer" />
+        <el-form-item
+          label="角色"
+          prop="role"
+        >
+          <el-select
+            v-model="userForm.role"
+            placeholder="请选择角色"
+          >
+            <el-option
+              label="管理员"
+              value="admin"
+            />
+            <el-option
+              label="操作员"
+              value="operator"
+            />
+            <el-option
+              label="观察者"
+              value="viewer"
+            />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="状态" prop="status">
+        <el-form-item
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="userForm.status">
-            <el-radio value="active">启用</el-radio>
-            <el-radio value="inactive">禁用</el-radio>
+            <el-radio value="active">
+              启用
+            </el-radio>
+            <el-radio value="inactive">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -262,8 +402,14 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="userDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveUser" :loading="saving">
+        <el-button @click="userDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saving"
+          @click="handleSaveUser"
+        >
           保存
         </el-button>
       </template>
@@ -279,7 +425,10 @@
     >
       <div class="permission-header">
         <span class="user-name">用户: {{ currentUser?.username }}</span>
-        <el-tag :type="getRoleTagType(currentUser?.role)" size="small">
+        <el-tag
+          :type="getRoleTagType(currentUser?.role)"
+          size="small"
+        >
           {{ getRoleLabel(currentUser?.role) }}
         </el-tag>
       </div>
@@ -287,8 +436,14 @@
       <el-divider />
 
       <div class="permission-content">
-        <div class="permission-group" v-for="group in permissionGroups" :key="group.key">
-          <h4 class="group-title">{{ group.label }}</h4>
+        <div
+          v-for="group in permissionGroups"
+          :key="group.key"
+          class="permission-group"
+        >
+          <h4 class="group-title">
+            {{ group.label }}
+          </h4>
           <div class="permission-list">
             <el-checkbox
               v-for="permission in group.permissions"
@@ -304,8 +459,14 @@
       </div>
 
       <template #footer>
-        <el-button @click="permissionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSavePermissions" :loading="savingPermissions">
+        <el-button @click="permissionDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="savingPermissions"
+          @click="handleSavePermissions"
+        >
           保存权限
         </el-button>
       </template>

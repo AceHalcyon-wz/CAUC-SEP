@@ -3,12 +3,19 @@
     <!-- 解决方案标题 -->
     <div class="solution-header">
       <div class="solution-title-row">
-        <el-icon class="solution-icon" :style="{ color: severityColor }">
+        <el-icon
+          class="solution-icon"
+          :style="{ color: severityColor }"
+        >
           <component :is="solutionIcon" />
         </el-icon>
         <div class="solution-title-content">
-          <h3 class="solution-title">{{ solution?.title || '解决方案' }}</h3>
-          <p class="solution-description">{{ solution?.description }}</p>
+          <h3 class="solution-title">
+            {{ solution?.title || '解决方案' }}
+          </h3>
+          <p class="solution-description">
+            {{ solution?.description }}
+          </p>
         </div>
       </div>
 
@@ -33,7 +40,10 @@
     </div>
 
     <!-- 解决方案搜索 -->
-    <div v-if="solution?.solutions?.length > 3" class="solution-search">
+    <div
+      v-if="solution?.solutions?.length > 3"
+      class="solution-search"
+    >
       <el-input
         v-model="searchKeyword"
         placeholder="搜索解决步骤..."
@@ -47,7 +57,10 @@
     </div>
 
     <!-- 解决步骤 -->
-    <div v-if="filteredSteps.length" class="solution-steps">
+    <div
+      v-if="filteredSteps.length"
+      class="solution-steps"
+    >
       <div class="steps-header">
         <h4 class="steps-title">
           <el-icon><List /></el-icon>
@@ -73,14 +86,19 @@
           :color="getStepColor(step.step)"
           :class="{ 'step-completed': isStepCompleted(step.step) }"
         >
-          <div class="step-card" @click="toggleStepCompletion(step.step)">
+          <div
+            class="step-card"
+            @click="toggleStepCompletion(step.step)"
+          >
             <div class="step-header">
               <el-checkbox
                 :model-value="isStepCompleted(step.step)"
                 @click.stop
                 @change="toggleStepCompletion(step.step)"
               />
-              <el-icon class="step-icon"><component :is="step.icon" /></el-icon>
+              <el-icon class="step-icon">
+                <component :is="step.icon" />
+              </el-icon>
               <span class="step-action">{{ step.action }}</span>
               <el-tag
                 v-if="isStepCompleted(step.step)"
@@ -91,7 +109,9 @@
                 已完成
               </el-tag>
             </div>
-            <p class="step-description">{{ step.description }}</p>
+            <p class="step-description">
+              {{ step.description }}
+            </p>
           </div>
         </el-timeline-item>
       </el-timeline>
@@ -105,7 +125,10 @@
     />
 
     <!-- 自动操作按钮 -->
-    <div v-if="solution?.autoActions?.length" class="auto-actions">
+    <div
+      v-if="solution?.autoActions?.length"
+      class="auto-actions"
+    >
       <h4 class="actions-title">
         <el-icon><MagicStick /></el-icon>
         <span>快捷操作</span>
@@ -125,7 +148,10 @@
     </div>
 
     <!-- 相关文档 -->
-    <div v-if="solution?.relatedDocs?.length" class="related-docs">
+    <div
+      v-if="solution?.relatedDocs?.length"
+      class="related-docs"
+    >
       <h4 class="docs-title">
         <el-icon><Document /></el-icon>
         <span>相关文档</span>
@@ -147,7 +173,10 @@
     </div>
 
     <!-- 匹配信息 -->
-    <div v-if="solution?.matchedPattern" class="match-info">
+    <div
+      v-if="solution?.matchedPattern"
+      class="match-info"
+    >
       <el-icon><InfoFilled /></el-icon>
       <span>匹配规则: {{ solution.matchedPattern }}</span>
     </div>

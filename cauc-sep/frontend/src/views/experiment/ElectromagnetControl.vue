@@ -3,14 +3,25 @@
     <!-- 页面标题 - 状态指示器位于顶部 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><Opportunity /></el-icon>
+        <el-icon class="header-icon">
+          <Opportunity />
+        </el-icon>
         <div class="header-text">
-          <h1 class="page-title">电磁铁控制</h1>
-          <p class="page-description">磁场强度控制与扫描测量</p>
+          <h1 class="page-title">
+            电磁铁控制
+          </h1>
+          <p class="page-description">
+            磁场强度控制与扫描测量
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <el-tag type="warning" effect="dark" size="large" class="status-indicator">
+        <el-tag
+          type="warning"
+          effect="dark"
+          size="large"
+          class="status-indicator"
+        >
           <el-icon><Opportunity /></el-icon>
           高功率设备
         </el-tag>
@@ -18,44 +29,88 @@
     </div>
 
     <!-- 主内容区域 - 左右分栏布局 -->
-    <el-row :gutter="24" class="content-row">
+    <el-row
+      :gutter="24"
+      class="content-row"
+    >
       <!-- 左侧：控制面板 -->
-      <el-col :xs="24" :lg="12" class="control-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="control-col"
+      >
         <ElectromagnetControl class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
-      <el-col :xs="24" :lg="12" class="info-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="info-col"
+      >
         <!-- 实时状态卡片 - 可折叠 -->
         <el-card class="status-card">
           <template #header>
-            <div class="card-header" @click="toggleStatusPanel">
+            <div
+              class="card-header"
+              @click="toggleStatusPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><Aim /></el-icon>
+                <el-icon class="header-icon">
+                  <Aim />
+                </el-icon>
                 <span class="header-title">实时状态</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': statusCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': statusCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
-            <div v-show="!statusCollapsed" class="status-grid">
+            <div
+              v-show="!statusCollapsed"
+              class="status-grid"
+            >
               <div class="status-item">
-                <div class="status-label">当前电流</div>
-                <div class="status-value mono">{{ currentCurrent.toFixed(2) }} A</div>
+                <div class="status-label">
+                  当前电流
+                </div>
+                <div class="status-value mono">
+                  {{ currentCurrent.toFixed(2) }} A
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">磁场强度</div>
-                <div class="status-value mono highlight">{{ currentField.toFixed(3) }} T</div>
+                <div class="status-label">
+                  磁场强度
+                </div>
+                <div class="status-value mono highlight">
+                  {{ currentField.toFixed(3) }} T
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">工作模式</div>
-                <el-tag :type="workModeType" size="small">{{ workModeText }}</el-tag>
+                <div class="status-label">
+                  工作模式
+                </div>
+                <el-tag
+                  :type="workModeType"
+                  size="small"
+                >
+                  {{ workModeText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">线圈温度</div>
-                <div class="status-value mono" :class="{ 'warning': coilTemp > 50 }">{{ coilTemp.toFixed(1) }} C</div>
+                <div class="status-label">
+                  线圈温度
+                </div>
+                <div
+                  class="status-value mono"
+                  :class="{ 'warning': coilTemp > 50 }"
+                >
+                  {{ coilTemp.toFixed(1) }} C
+                </div>
               </div>
             </div>
           </el-collapse-transition>
@@ -64,12 +119,20 @@
         <!-- 安全警告卡片 - 可折叠 -->
         <el-card class="warning-card">
           <template #header>
-            <div class="card-header" @click="toggleWarningPanel">
+            <div
+              class="card-header"
+              @click="toggleWarningPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon warning-icon"><Warning /></el-icon>
+                <el-icon class="header-icon warning-icon">
+                  <Warning />
+                </el-icon>
                 <span class="header-title">安全警告</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': warningCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': warningCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
@@ -93,12 +156,20 @@
         <!-- 操作提示卡片 - 可折叠 -->
         <el-card class="tips-card">
           <template #header>
-            <div class="card-header" @click="toggleTipsPanel">
+            <div
+              class="card-header"
+              @click="toggleTipsPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">操作提示</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': tipsCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': tipsCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>

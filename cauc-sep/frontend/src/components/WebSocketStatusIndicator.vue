@@ -18,11 +18,17 @@
           <component :is="statusIcon" />
         </el-icon>
         
-        <span v-if="showText" class="status-text">
+        <span
+          v-if="showText"
+          class="status-text"
+        >
           {{ statusText }}
         </span>
         
-        <span v-if="showReconnectProgress" class="reconnect-progress">
+        <span
+          v-if="showReconnectProgress"
+          class="reconnect-progress"
+        >
           ({{ reconnectProgressText }})
         </span>
         
@@ -51,11 +57,17 @@
         <component :is="statusIcon" />
       </el-icon>
       
-      <span v-if="showText" class="status-text">
+      <span
+        v-if="showText"
+        class="status-text"
+      >
         {{ statusText }}
       </span>
       
-      <span v-if="showReconnectProgress" class="reconnect-progress">
+      <span
+        v-if="showReconnectProgress"
+        class="reconnect-progress"
+      >
         ({{ reconnectProgressText }})
       </span>
       
@@ -72,10 +84,10 @@
     <!-- 详细信息弹窗 -->
     <el-popover
       v-if="showDetails"
+      v-model:visible="detailsVisible"
       placement="bottom"
       :width="400"
       trigger="click"
-      v-model:visible="detailsVisible"
     >
       <template #reference>
         <el-button
@@ -87,20 +99,28 @@
       </template>
 
       <div class="status-details">
-        <h4 class="details-title">连接详情</h4>
+        <h4 class="details-title">
+          连接详情
+        </h4>
         
         <!-- 连接状态 -->
         <div class="detail-section">
           <div class="detail-row">
             <span class="detail-label">连接状态</span>
-            <el-tag :type="statusTagType" size="small">
+            <el-tag
+              :type="statusTagType"
+              size="small"
+            >
               {{ connectionState }}
             </el-tag>
           </div>
           
           <div class="detail-row">
             <span class="detail-label">协议类型</span>
-            <el-tag type="info" size="small">
+            <el-tag
+              type="info"
+              size="small"
+            >
               {{ currentProtocol }}
             </el-tag>
           </div>
@@ -120,7 +140,9 @@
 
         <!-- 性能指标 -->
         <div class="detail-section">
-          <h5 class="section-title">性能指标</h5>
+          <h5 class="section-title">
+            性能指标
+          </h5>
           
           <div class="detail-row">
             <span class="detail-label">消息频率</span>
@@ -129,7 +151,10 @@
           
           <div class="detail-row">
             <span class="detail-label">数据延迟</span>
-            <span class="detail-value" :class="{ 'is-warning': dataLatency > 500 }">
+            <span
+              class="detail-value"
+              :class="{ 'is-warning': dataLatency > 500 }"
+            >
               {{ dataLatency }}ms
             </span>
           </div>
@@ -141,8 +166,13 @@
         </div>
 
         <!-- 重连信息 -->
-        <div v-if="reconnectAttempts > 0" class="detail-section">
-          <h5 class="section-title">重连信息</h5>
+        <div
+          v-if="reconnectAttempts > 0"
+          class="detail-section"
+        >
+          <h5 class="section-title">
+            重连信息
+          </h5>
           
           <div class="detail-row">
             <span class="detail-label">重连次数</span>
@@ -158,15 +188,25 @@
         </div>
 
         <!-- 错误信息 -->
-        <div v-if="lastError" class="detail-section error-section">
-          <h5 class="section-title">最近错误</h5>
+        <div
+          v-if="lastError"
+          class="detail-section error-section"
+        >
+          <h5 class="section-title">
+            最近错误
+          </h5>
           
           <div class="error-message">
-            <el-icon class="error-icon"><WarningFilled /></el-icon>
+            <el-icon class="error-icon">
+              <WarningFilled />
+            </el-icon>
             <span>{{ lastError.userMessage }}</span>
           </div>
           
-          <div v-if="lastError.suggestion" class="error-suggestion">
+          <div
+            v-if="lastError.suggestion"
+            class="error-suggestion"
+          >
             <el-icon><InfoFilled /></el-icon>
             <span>{{ lastError.suggestion }}</span>
           </div>

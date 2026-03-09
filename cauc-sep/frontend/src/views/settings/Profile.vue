@@ -5,10 +5,16 @@
       <el-col :span="24">
         <div class="header-content">
           <div class="header-left">
-            <el-icon class="header-icon"><User /></el-icon>
+            <el-icon class="header-icon">
+              <User />
+            </el-icon>
             <div class="header-text">
-              <h1 class="page-title">个人中心</h1>
-              <p class="page-subtitle">管理您的账户信息、偏好设置与操作历史</p>
+              <h1 class="page-title">
+                个人中心
+              </h1>
+              <p class="page-subtitle">
+                管理您的账户信息、偏好设置与操作历史
+              </p>
             </div>
           </div>
         </div>
@@ -17,12 +23,22 @@
 
     <!-- 标签页内容 -->
     <div class="profile-content">
-      <el-tabs v-model="activeTab" class="profile-tabs" @tab-change="handleTabChange">
+      <el-tabs
+        v-model="activeTab"
+        class="profile-tabs"
+        @tab-change="handleTabChange"
+      >
         <!-- 个人信息标签页 -->
-        <el-tab-pane label="个人信息" name="profile">
+        <el-tab-pane
+          label="个人信息"
+          name="profile"
+        >
           <div class="tab-content">
             <!-- 用户头像卡片 -->
-            <el-card class="profile-card avatar-card" shadow="hover">
+            <el-card
+              class="profile-card avatar-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>头像设置</span>
@@ -30,11 +46,16 @@
               </template>
               <div class="avatar-section">
                 <div class="avatar-display">
-                  <el-avatar :size="100" class="user-avatar">
+                  <el-avatar
+                    :size="100"
+                    class="user-avatar"
+                  >
                     {{ userStore.avatarText }}
                   </el-avatar>
                   <div class="avatar-info">
-                    <p class="avatar-tip">支持 JPG、PNG 格式，大小不超过 2MB</p>
+                    <p class="avatar-tip">
+                      支持 JPG、PNG 格式，大小不超过 2MB
+                    </p>
                     <el-upload
                       ref="avatarUploadRef"
                       class="avatar-upload"
@@ -44,7 +65,10 @@
                       :on-change="handleAvatarChange"
                       accept="image/jpeg,image/png"
                     >
-                      <el-button type="primary" size="small">
+                      <el-button
+                        type="primary"
+                        size="small"
+                      >
                         <el-icon><Upload /></el-icon>
                         上传头像
                       </el-button>
@@ -55,7 +79,10 @@
             </el-card>
 
             <!-- 基本信息 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>基本信息</span>
@@ -69,8 +96,18 @@
                     编辑
                   </el-button>
                   <template v-else>
-                    <el-button text @click="cancelEditProfile">取消</el-button>
-                    <el-button type="primary" @click="saveProfile">保存</el-button>
+                    <el-button
+                      text
+                      @click="cancelEditProfile"
+                    >
+                      取消
+                    </el-button>
+                    <el-button
+                      type="primary"
+                      @click="saveProfile"
+                    >
+                      保存
+                    </el-button>
                   </template>
                 </div>
               </template>
@@ -81,11 +118,23 @@
                 label-width="100px"
                 :disabled="!isEditingProfile"
               >
-                <el-form-item label="用户名" prop="username">
-                  <el-input v-model="profileForm.username" placeholder="请输入用户名" />
+                <el-form-item
+                  label="用户名"
+                  prop="username"
+                >
+                  <el-input
+                    v-model="profileForm.username"
+                    placeholder="请输入用户名"
+                  />
                 </el-form-item>
-                <el-form-item label="邮箱" prop="email">
-                  <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+                <el-form-item
+                  label="邮箱"
+                  prop="email"
+                >
+                  <el-input
+                    v-model="profileForm.email"
+                    placeholder="请输入邮箱"
+                  />
                 </el-form-item>
                 <el-form-item label="角色">
                   <el-tag :type="getRoleTagType(userStore.currentUser?.role)">
@@ -99,7 +148,10 @@
             </el-card>
 
             <!-- 密码修改 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>密码修改</span>
@@ -111,7 +163,10 @@
                 :rules="passwordRules"
                 label-width="100px"
               >
-                <el-form-item label="当前密码" prop="oldPassword">
+                <el-form-item
+                  label="当前密码"
+                  prop="oldPassword"
+                >
                   <el-input
                     v-model="passwordForm.oldPassword"
                     type="password"
@@ -119,7 +174,10 @@
                     show-password
                   />
                 </el-form-item>
-                <el-form-item label="新密码" prop="newPassword">
+                <el-form-item
+                  label="新密码"
+                  prop="newPassword"
+                >
                   <el-input
                     v-model="passwordForm.newPassword"
                     type="password"
@@ -127,7 +185,10 @@
                     show-password
                   />
                 </el-form-item>
-                <el-form-item label="确认密码" prop="confirmPassword">
+                <el-form-item
+                  label="确认密码"
+                  prop="confirmPassword"
+                >
                   <el-input
                     v-model="passwordForm.confirmPassword"
                     type="password"
@@ -150,10 +211,16 @@
         </el-tab-pane>
 
         <!-- 偏好设置标签页 -->
-        <el-tab-pane label="偏好设置" name="preferences">
+        <el-tab-pane
+          label="偏好设置"
+          name="preferences"
+        >
           <div class="tab-content">
             <!-- 通知设置 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>通知设置</span>
@@ -191,7 +258,10 @@
             </el-card>
 
             <!-- 显示选项 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>显示选项</span>
@@ -204,10 +274,22 @@
                     placeholder="请选择刷新频率"
                     @change="handlePreferencesChange"
                   >
-                    <el-option label="500ms" :value="500" />
-                    <el-option label="1秒" :value="1000" />
-                    <el-option label="2秒" :value="2000" />
-                    <el-option label="5秒" :value="5000" />
+                    <el-option
+                      label="500ms"
+                      :value="500"
+                    />
+                    <el-option
+                      label="1秒"
+                      :value="1000"
+                    />
+                    <el-option
+                      label="2秒"
+                      :value="2000"
+                    />
+                    <el-option
+                      label="5秒"
+                      :value="5000"
+                    />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="图表默认类型">
@@ -216,10 +298,22 @@
                     placeholder="请选择图表类型"
                     @change="handlePreferencesChange"
                   >
-                    <el-option label="折线图" value="line" />
-                    <el-option label="柱状图" value="bar" />
-                    <el-option label="散点图" value="scatter" />
-                    <el-option label="面积图" value="area" />
+                    <el-option
+                      label="折线图"
+                      value="line"
+                    />
+                    <el-option
+                      label="柱状图"
+                      value="bar"
+                    />
+                    <el-option
+                      label="散点图"
+                      value="scatter"
+                    />
+                    <el-option
+                      label="面积图"
+                      value="area"
+                    />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="图表动画">
@@ -240,7 +334,10 @@
             </el-card>
 
             <!-- 语言设置 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>语言设置</span>
@@ -253,8 +350,14 @@
                     placeholder="请选择语言"
                     @change="handlePreferencesChange"
                   >
-                    <el-option label="简体中文" value="zh-CN" />
-                    <el-option label="English" value="en-US" />
+                    <el-option
+                      label="简体中文"
+                      value="zh-CN"
+                    />
+                    <el-option
+                      label="English"
+                      value="en-US"
+                    />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="主题">
@@ -262,8 +365,12 @@
                     v-model="preferencesForm.theme"
                     @change="handlePreferencesChange"
                   >
-                    <el-radio value="light">浅色</el-radio>
-                    <el-radio value="dark">深色</el-radio>
+                    <el-radio value="light">
+                      浅色
+                    </el-radio>
+                    <el-radio value="dark">
+                      深色
+                    </el-radio>
                   </el-radio-group>
                 </el-form-item>
               </el-form>
@@ -272,11 +379,20 @@
         </el-tab-pane>
 
         <!-- 操作历史标签页 -->
-        <el-tab-pane label="操作历史" name="history">
+        <el-tab-pane
+          label="操作历史"
+          name="history"
+        >
           <div class="tab-content">
             <!-- 筛选区域 -->
-            <el-card class="profile-card filter-card" shadow="hover">
-              <el-form :inline="true" :model="historyFilter">
+            <el-card
+              class="profile-card filter-card"
+              shadow="hover"
+            >
+              <el-form
+                :inline="true"
+                :model="historyFilter"
+              >
                 <el-form-item label="时间范围">
                   <el-date-picker
                     v-model="historyFilter.dateRange"
@@ -295,18 +411,45 @@
                     clearable
                     @change="handleHistoryFilter"
                   >
-                    <el-option label="登录" value="login" />
-                    <el-option label="登出" value="logout" />
-                    <el-option label="更新信息" value="update_profile" />
-                    <el-option label="修改密码" value="change_password" />
-                    <el-option label="更新设置" value="update_preferences" />
-                    <el-option label="设备操作" value="device_operation" />
-                    <el-option label="数据导出" value="data_export" />
-                    <el-option label="配置变更" value="config_change" />
+                    <el-option
+                      label="登录"
+                      value="login"
+                    />
+                    <el-option
+                      label="登出"
+                      value="logout"
+                    />
+                    <el-option
+                      label="更新信息"
+                      value="update_profile"
+                    />
+                    <el-option
+                      label="修改密码"
+                      value="change_password"
+                    />
+                    <el-option
+                      label="更新设置"
+                      value="update_preferences"
+                    />
+                    <el-option
+                      label="设备操作"
+                      value="device_operation"
+                    />
+                    <el-option
+                      label="数据导出"
+                      value="data_export"
+                    />
+                    <el-option
+                      label="配置变更"
+                      value="config_change"
+                    />
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="handleHistoryFilter">
+                  <el-button
+                    type="primary"
+                    @click="handleHistoryFilter"
+                  >
                     <el-icon><Search /></el-icon>
                     查询
                   </el-button>
@@ -319,7 +462,10 @@
             </el-card>
 
             <!-- 操作历史列表 -->
-            <el-card class="profile-card" shadow="hover">
+            <el-card
+              class="profile-card"
+              shadow="hover"
+            >
               <template #header>
                 <div class="card-header">
                   <span>操作记录</span>
@@ -339,20 +485,39 @@
                 stripe
                 style="width: 100%"
               >
-                <el-table-column prop="timestamp" label="时间" width="180">
+                <el-table-column
+                  prop="timestamp"
+                  label="时间"
+                  width="180"
+                >
                   <template #default="{ row }">
                     {{ formatDateTime(row.timestamp) }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="type" label="操作类型" width="120">
+                <el-table-column
+                  prop="type"
+                  label="操作类型"
+                  width="120"
+                >
                   <template #default="{ row }">
-                    <el-tag :type="getOperationTagType(row.type)" size="small">
+                    <el-tag
+                      :type="getOperationTagType(row.type)"
+                      size="small"
+                    >
                       {{ getOperationTypeLabel(row.type) }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="description" label="操作描述" min-width="200" />
-                <el-table-column prop="metadata" label="详情" width="100">
+                <el-table-column
+                  prop="description"
+                  label="操作描述"
+                  min-width="200"
+                />
+                <el-table-column
+                  prop="metadata"
+                  label="详情"
+                  width="100"
+                >
                   <template #default="{ row }">
                     <el-button
                       v-if="row.metadata && Object.keys(row.metadata).length > 0"
@@ -363,7 +528,10 @@
                     >
                       查看详情
                     </el-button>
-                    <span v-else class="text-muted">-</span>
+                    <span
+                      v-else
+                      class="text-muted"
+                    >-</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -392,7 +560,10 @@
       title="操作详情"
       width="500px"
     >
-      <el-descriptions :column="1" border>
+      <el-descriptions
+        :column="1"
+        border
+      >
         <el-descriptions-item
           v-for="(value, key) in currentOperationDetail"
           :key="key"

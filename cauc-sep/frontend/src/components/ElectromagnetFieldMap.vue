@@ -3,7 +3,9 @@
     <template #header>
       <div class="card-header">
         <div class="header-title">
-          <el-icon class="header-icon"><TrendCharts /></el-icon>
+          <el-icon class="header-icon">
+            <TrendCharts />
+          </el-icon>
           <span>电流-磁场映射曲线</span>
         </div>
         <div class="header-actions">
@@ -11,8 +13,8 @@
             type="primary"
             size="small"
             :icon="Download"
-            @click="handleExportMap"
             :disabled="mapData.length === 0"
+            @click="handleExportMap"
           >
             导出映射
           </el-button>
@@ -34,21 +36,34 @@
         <el-row :gutter="16">
           <el-col :span="6">
             <div class="info-item">
-              <div class="info-label">当前电流</div>
-              <div class="info-value mono">{{ currentCurrent.toFixed(3) }} A</div>
+              <div class="info-label">
+                当前电流
+              </div>
+              <div class="info-value mono">
+                {{ currentCurrent.toFixed(3) }} A
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
             <div class="info-item">
-              <div class="info-label">当前磁场</div>
-              <div class="info-value mono">{{ currentField.toFixed(2) }} mT</div>
+              <div class="info-label">
+                当前磁场
+              </div>
+              <div class="info-value mono">
+                {{ currentField.toFixed(2) }} mT
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
             <div class="info-item">
-              <div class="info-label">工作点标记</div>
+              <div class="info-label">
+                工作点标记
+              </div>
               <div class="info-value">
-                <el-tag :type="isWorkingPointValid ? 'success' : 'warning'" size="small">
+                <el-tag
+                  :type="isWorkingPointValid ? 'success' : 'warning'"
+                  size="small"
+                >
                   {{ isWorkingPointValid ? '有效' : '偏离' }}
                 </el-tag>
               </div>
@@ -56,8 +71,12 @@
           </el-col>
           <el-col :span="6">
             <div class="info-item">
-              <div class="info-label">数据点数</div>
-              <div class="info-value mono">{{ mapData.length }}</div>
+              <div class="info-label">
+                数据点数
+              </div>
+              <div class="info-value mono">
+                {{ mapData.length }}
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -65,42 +84,68 @@
 
       <!-- 图表控制 -->
       <div class="chart-controls">
-        <el-checkbox v-model="chartConfig.showCalibration">显示校准曲线</el-checkbox>
-        <el-checkbox v-model="chartConfig.showWorkingPoint">显示工作点</el-checkbox>
-        <el-checkbox v-model="chartConfig.showGrid">显示网格</el-checkbox>
-        <el-checkbox v-model="chartConfig.autoUpdate">实时更新</el-checkbox>
+        <el-checkbox v-model="chartConfig.showCalibration">
+          显示校准曲线
+        </el-checkbox>
+        <el-checkbox v-model="chartConfig.showWorkingPoint">
+          显示工作点
+        </el-checkbox>
+        <el-checkbox v-model="chartConfig.showGrid">
+          显示网格
+        </el-checkbox>
+        <el-checkbox v-model="chartConfig.autoUpdate">
+          实时更新
+        </el-checkbox>
         <el-button
           size="small"
           :icon="Delete"
-          @click="handleClearData"
           :disabled="mapData.length === 0"
+          @click="handleClearData"
         >
           清除数据
         </el-button>
       </div>
 
       <!-- 映射图表 -->
-      <div ref="chartRef" class="field-chart"></div>
+      <div
+        ref="chartRef"
+        class="field-chart"
+      />
 
       <!-- 图表统计信息 -->
-      <div v-if="mapData.length > 0" class="chart-stats">
+      <div
+        v-if="mapData.length > 0"
+        class="chart-stats"
+      >
         <el-row :gutter="16">
           <el-col :span="8">
             <div class="stat-item">
-              <div class="stat-label">电流范围</div>
-              <div class="stat-value mono">{{ currentRange }}</div>
+              <div class="stat-label">
+                电流范围
+              </div>
+              <div class="stat-value mono">
+                {{ currentRange }}
+              </div>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="stat-item">
-              <div class="stat-label">磁场范围</div>
-              <div class="stat-value mono">{{ fieldRange }}</div>
+              <div class="stat-label">
+                磁场范围
+              </div>
+              <div class="stat-value mono">
+                {{ fieldRange }}
+              </div>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="stat-item">
-              <div class="stat-label">平均磁场/电流比</div>
-              <div class="stat-value mono">{{ avgFieldCurrentRatio }}</div>
+              <div class="stat-label">
+                平均磁场/电流比
+              </div>
+              <div class="stat-value mono">
+                {{ avgFieldCurrentRatio }}
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -336,7 +381,7 @@ function updateChart() {
   const mapDataPoints = mapData.value.map(d => [d.current, d.field])
 
   // 校准曲线数据
-  let calibrationData = []
+  const calibrationData = []
   if (chartConfig.showCalibration && electromagnetStore.calibrationCurve.coefficients) {
     const min = electromagnetStore.currentLimits.min
     const max = electromagnetStore.currentLimits.max

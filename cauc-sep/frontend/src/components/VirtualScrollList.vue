@@ -102,7 +102,7 @@ let scrollTimer = null
 let lastScrollTime = 0
 
 /** 上次滚动位置 */
-let lastScrollTop = 0
+const lastScrollTop = 0
 
 /** ResizeObserver实例 */
 let resizeObserver = null
@@ -566,7 +566,10 @@ provide('virtualScrollList', {
     @scroll="handleScroll"
   >
     <!-- 总高度占位容器 -->
-    <div class="scroll-content" :style="{ height: `${totalHeight}px` }">
+    <div
+      class="scroll-content"
+      :style="{ height: `${totalHeight}px` }"
+    >
       <!-- 可见项容器 -->
       <div
         class="visible-items"
@@ -580,7 +583,10 @@ provide('virtualScrollList', {
           :style="dynamicHeight ? {} : { height: `${itemHeight}px` }"
           @click="handleItemClick(item, index)"
         >
-          <slot :item="item" :index="index">
+          <slot
+            :item="item"
+            :index="index"
+          >
             <!-- 默认插槽内容 -->
             <div class="default-item">
               <span class="item-index">{{ index + 1 }}</span>
@@ -592,8 +598,13 @@ provide('virtualScrollList', {
     </div>
 
     <!-- 加载指示器 -->
-    <div v-if="isLoading" class="loading-indicator">
-      <el-icon class="is-loading"><Loading /></el-icon>
+    <div
+      v-if="isLoading"
+      class="loading-indicator"
+    >
+      <el-icon class="is-loading">
+        <Loading />
+      </el-icon>
       <span>加载中...</span>
     </div>
     
@@ -602,8 +613,8 @@ provide('virtualScrollList', {
       <button
         v-if="scrollTop > height"
         class="scroll-to-top"
-        @click="scrollToTop"
         title="回到顶部"
+        @click="scrollToTop"
       >
         <el-icon><ArrowUp /></el-icon>
       </button>

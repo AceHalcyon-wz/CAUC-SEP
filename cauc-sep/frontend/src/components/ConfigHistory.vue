@@ -16,15 +16,19 @@
           <el-icon><Clock /></el-icon>
           变更历史
         </h3>
-        <el-tag v-if="settingsStore.hasHistory" type="info" effect="plain">
+        <el-tag
+          v-if="settingsStore.hasHistory"
+          type="info"
+          effect="plain"
+        >
           共 {{ settingsStore.configHistory.length }} 条记录
         </el-tag>
       </div>
       <div class="header-right">
         <el-button
           text
-          @click="handleClearHistory"
           :disabled="!settingsStore.hasHistory"
+          @click="handleClearHistory"
         >
           <el-icon><Delete /></el-icon>
           清除历史
@@ -71,7 +75,10 @@
     </div>
 
     <!-- 历史记录列表 -->
-    <div class="history-list" v-loading="settingsStore.loading">
+    <div
+      v-loading="settingsStore.loading"
+      class="history-list"
+    >
       <template v-if="filteredHistory.length > 0">
         <div
           v-for="record in filteredHistory"
@@ -101,7 +108,9 @@
               <span class="change-label">旧值:</span>
               <code class="change-value old">{{ formatValue(record.oldValue) }}</code>
             </div>
-            <el-icon class="change-arrow"><Right /></el-icon>
+            <el-icon class="change-arrow">
+              <Right />
+            </el-icon>
             <div class="change-item">
               <span class="change-label">新值:</span>
               <code class="change-value new">{{ formatValue(record.newValue) }}</code>
@@ -136,7 +145,9 @@
         :image-size="120"
       >
         <template #image>
-          <el-icon class="empty-icon"><DocumentRemove /></el-icon>
+          <el-icon class="empty-icon">
+            <DocumentRemove />
+          </el-icon>
         </template>
       </el-empty>
     </div>
@@ -148,8 +159,14 @@
       width="600px"
       class="detail-dialog"
     >
-      <div v-if="selectedRecord" class="detail-content">
-        <el-descriptions :column="1" border>
+      <div
+        v-if="selectedRecord"
+        class="detail-content"
+      >
+        <el-descriptions
+          :column="1"
+          border
+        >
           <el-descriptions-item label="变更时间">
             {{ formatTimestamp(selectedRecord.timestamp, true) }}
           </el-descriptions-item>
@@ -183,11 +200,13 @@
       </div>
 
       <template #footer>
-        <el-button @click="showDetailDialog = false">关闭</el-button>
+        <el-button @click="showDetailDialog = false">
+          关闭
+        </el-button>
         <el-button
           type="primary"
-          @click="handleRollback(selectedRecord)"
           :disabled="!selectedRecord"
+          @click="handleRollback(selectedRecord)"
         >
           <el-icon><RefreshLeft /></el-icon>
           回滚到此版本
@@ -202,7 +221,10 @@
       width="800px"
       class="compare-dialog"
     >
-      <div v-if="compareData" class="compare-content">
+      <div
+        v-if="compareData"
+        class="compare-content"
+      >
         <div class="compare-header">
           <div class="compare-side">
             <h4>当前配置</h4>
@@ -243,7 +265,9 @@
       </div>
 
       <template #footer>
-        <el-button @click="showCompareDialog = false">关闭</el-button>
+        <el-button @click="showCompareDialog = false">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
   </div>

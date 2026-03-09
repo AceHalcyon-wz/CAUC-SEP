@@ -4,7 +4,9 @@
       <template #header>
         <div class="card-header">
           <div class="header-title">
-            <el-icon class="header-icon"><Monitor /></el-icon>
+            <el-icon class="header-icon">
+              <Monitor />
+            </el-icon>
             <span>设备状态监控</span>
           </div>
           <el-button 
@@ -22,13 +24,20 @@
 
       <!-- 报警提示 -->
       <Transition name="slide-fade">
-        <div v-if="motorStore.alarmMessage" class="alarm-banner">
+        <div
+          v-if="motorStore.alarmMessage"
+          class="alarm-banner"
+        >
           <div class="alarm-icon">
             <el-icon><WarningFilled /></el-icon>
           </div>
           <div class="alarm-content">
-            <div class="alarm-title">设备报警</div>
-            <div class="alarm-message">{{ motorStore.alarmMessage }}</div>
+            <div class="alarm-title">
+              设备报警
+            </div>
+            <div class="alarm-message">
+              {{ motorStore.alarmMessage }}
+            </div>
           </div>
           <el-button 
             type="text" 
@@ -45,8 +54,11 @@
         <div class="status-card glass-card">
           <div class="card-header-inner">
             <span class="card-title">基本状态</span>
-            <div class="status-badge" :class="connectionBadgeClass">
-              <span class="badge-dot"></span>
+            <div
+              class="status-badge"
+              :class="connectionBadgeClass"
+            >
+              <span class="badge-dot" />
               {{ motorStore.isConnected ? '在线' : '离线' }}
             </div>
           </div>
@@ -54,14 +66,20 @@
           <div class="status-content">
             <div class="status-row">
               <span class="status-label">连接状态</span>
-              <el-tag :type="motorStore.isConnected ? 'success' : 'danger'" size="small">
+              <el-tag
+                :type="motorStore.isConnected ? 'success' : 'danger'"
+                size="small"
+              >
                 {{ motorStore.isConnected ? '已连接' : '未连接' }}
               </el-tag>
             </div>
             
             <div class="status-row">
               <span class="status-label">运行状态</span>
-              <el-tag :type="statusType" size="small">
+              <el-tag
+                :type="statusType"
+                size="small"
+              >
                 {{ statusText }}
               </el-tag>
             </div>
@@ -77,15 +95,21 @@
             
             <div class="status-row">
               <span class="status-label">限位状态</span>
-              <el-tag :type="motorStore.limitStatusType" size="small">
+              <el-tag
+                :type="motorStore.limitStatusType"
+                size="small"
+              >
                 {{ motorStore.limitStatus }}
               </el-tag>
             </div>
             
             <div class="status-row">
               <span class="status-label">WebSocket</span>
-              <div class="ws-status" :class="motorStore.wsConnected ? 'ws-status--connected' : 'ws-status--disconnected'">
-                <span class="ws-dot"></span>
+              <div
+                class="ws-status"
+                :class="motorStore.wsConnected ? 'ws-status--connected' : 'ws-status--disconnected'"
+              >
+                <span class="ws-dot" />
                 {{ motorStore.wsConnected ? '已连接' : '未连接' }}
               </div>
             </div>
@@ -106,58 +130,87 @@
             </el-button>
           </div>
           
-          <div v-if="motorStore.statusWord" class="status-word-content">
+          <div
+            v-if="motorStore.statusWord"
+            class="status-word-content"
+          >
             <div class="status-word-display">
               <span class="status-word-value mono">0x{{ formatStatusWord(motorStore.statusWord.raw) }}</span>
             </div>
             
             <div class="status-flags">
-              <div class="flag-item" :class="{ 'flag-item--active': motorStore.statusWord.ready_to_switch_on }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--active': motorStore.statusWord.ready_to_switch_on }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">准备就绪</span>
                 <span class="flag-value">{{ motorStore.statusWord.ready_to_switch_on ? '是' : '否' }}</span>
               </div>
               
-              <div class="flag-item" :class="{ 'flag-item--active': motorStore.statusWord.switched_on }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--active': motorStore.statusWord.switched_on }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">开关使能</span>
                 <span class="flag-value">{{ motorStore.statusWord.switched_on ? '是' : '否' }}</span>
               </div>
               
-              <div class="flag-item" :class="{ 'flag-item--active': motorStore.statusWord.operation_enabled }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--active': motorStore.statusWord.operation_enabled }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">运行使能</span>
                 <span class="flag-value">{{ motorStore.statusWord.operation_enabled ? '是' : '否' }}</span>
               </div>
               
-              <div class="flag-item" :class="{ 'flag-item--error': motorStore.statusWord.fault }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--error': motorStore.statusWord.fault }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">故障</span>
                 <span class="flag-value">{{ motorStore.statusWord.fault ? '是' : '否' }}</span>
               </div>
               
-              <div class="flag-item" :class="{ 'flag-item--warning': motorStore.statusWord.motion }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--warning': motorStore.statusWord.motion }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">运动中</span>
                 <span class="flag-value">{{ motorStore.statusWord.motion ? '是' : '否' }}</span>
               </div>
               
-              <div class="flag-item" :class="{ 'flag-item--active': motorStore.statusWord.target_reached }">
-                <span class="flag-dot"></span>
+              <div
+                class="flag-item"
+                :class="{ 'flag-item--active': motorStore.statusWord.target_reached }"
+              >
+                <span class="flag-dot" />
                 <span class="flag-label">到达目标</span>
                 <span class="flag-value">{{ motorStore.statusWord.target_reached ? '是' : '否' }}</span>
               </div>
             </div>
           </div>
           
-          <div v-else class="empty-state">
-            <el-icon class="empty-icon"><Document /></el-icon>
+          <div
+            v-else
+            class="empty-state"
+          >
+            <el-icon class="empty-icon">
+              <Document />
+            </el-icon>
             <span>点击刷新获取状态字</span>
           </div>
         </div>
 
         <!-- 报警信息卡片 -->
-        <div class="status-card glass-card" :class="{ 'status-card--alarm': motorStore.alarmCode !== null && motorStore.alarmCode !== 0 }">
+        <div
+          class="status-card glass-card"
+          :class="{ 'status-card--alarm': motorStore.alarmCode !== null && motorStore.alarmCode !== 0 }"
+        >
           <div class="card-header-inner">
             <span class="card-title">报警信息</span>
             <el-button 
@@ -170,14 +223,19 @@
             </el-button>
           </div>
           
-          <div v-if="motorStore.alarmCode !== null" class="alarm-content-inner">
+          <div
+            v-if="motorStore.alarmCode !== null"
+            class="alarm-content-inner"
+          >
             <div class="alarm-code-display">
               <span class="alarm-label">报警代码</span>
               <span class="alarm-code mono">{{ motorStore.alarmCode }}</span>
             </div>
             
             <div class="alarm-description">
-              <el-icon class="alarm-desc-icon"><InfoFilled /></el-icon>
+              <el-icon class="alarm-desc-icon">
+                <InfoFilled />
+              </el-icon>
               <span>{{ alarmDescription }}</span>
             </div>
             
@@ -192,8 +250,13 @@
             </el-button>
           </div>
           
-          <div v-else class="empty-state">
-            <el-icon class="empty-icon"><Document /></el-icon>
+          <div
+            v-else
+            class="empty-state"
+          >
+            <el-icon class="empty-icon">
+              <Document />
+            </el-icon>
             <span>点击刷新获取报警信息</span>
           </div>
         </div>

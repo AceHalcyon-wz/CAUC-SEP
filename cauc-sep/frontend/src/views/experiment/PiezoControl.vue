@@ -3,14 +3,25 @@
     <!-- 页面标题 - 状态指示器位于顶部 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><Cpu /></el-icon>
+        <el-icon class="header-icon">
+          <Cpu />
+        </el-icon>
         <div class="header-text">
-          <h1 class="page-title">压电陶瓷控制</h1>
-          <p class="page-description">纳米级精密位移控制与校准</p>
+          <h1 class="page-title">
+            压电陶瓷控制
+          </h1>
+          <p class="page-description">
+            纳米级精密位移控制与校准
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <el-tag type="info" effect="dark" size="large" class="status-indicator">
+        <el-tag
+          type="info"
+          effect="dark"
+          size="large"
+          class="status-indicator"
+        >
           <el-icon><Cpu /></el-icon>
           精密控制
         </el-tag>
@@ -18,44 +29,85 @@
     </div>
 
     <!-- 主内容区域 - 左右分栏布局 -->
-    <el-row :gutter="24" class="content-row">
+    <el-row
+      :gutter="24"
+      class="content-row"
+    >
       <!-- 左侧：控制面板 -->
-      <el-col :xs="24" :lg="12" class="control-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="control-col"
+      >
         <PiezoControl class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
-      <el-col :xs="24" :lg="12" class="info-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="info-col"
+      >
         <!-- 实时状态卡片 - 可折叠 -->
         <el-card class="status-card">
           <template #header>
-            <div class="card-header" @click="toggleStatusPanel">
+            <div
+              class="card-header"
+              @click="toggleStatusPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><DataLine /></el-icon>
+                <el-icon class="header-icon">
+                  <DataLine />
+                </el-icon>
                 <span class="header-title">实时状态</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': statusCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': statusCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
-            <div v-show="!statusCollapsed" class="status-grid">
+            <div
+              v-show="!statusCollapsed"
+              class="status-grid"
+            >
               <div class="status-item">
-                <div class="status-label">当前电压</div>
-                <div class="status-value mono">{{ currentVoltage.toFixed(2) }} V</div>
+                <div class="status-label">
+                  当前电压
+                </div>
+                <div class="status-value mono">
+                  {{ currentVoltage.toFixed(2) }} V
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">当前位移</div>
-                <div class="status-value mono highlight">{{ currentDisplacement.toFixed(3) }} nm</div>
+                <div class="status-label">
+                  当前位移
+                </div>
+                <div class="status-value mono highlight">
+                  {{ currentDisplacement.toFixed(3) }} nm
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">工作模式</div>
-                <el-tag :type="workModeType" size="small">{{ workModeText }}</el-tag>
+                <div class="status-label">
+                  工作模式
+                </div>
+                <el-tag
+                  :type="workModeType"
+                  size="small"
+                >
+                  {{ workModeText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">温度</div>
-                <div class="status-value mono">{{ currentTemp.toFixed(1) }} C</div>
+                <div class="status-label">
+                  温度
+                </div>
+                <div class="status-value mono">
+                  {{ currentTemp.toFixed(1) }} C
+                </div>
               </div>
             </div>
           </el-collapse-transition>
@@ -64,30 +116,52 @@
         <!-- 校准信息卡片 - 可折叠 -->
         <el-card class="calibration-card">
           <template #header>
-            <div class="card-header" @click="toggleCalibrationPanel">
+            <div
+              class="card-header"
+              @click="toggleCalibrationPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><SetUp /></el-icon>
+                <el-icon class="header-icon">
+                  <SetUp />
+                </el-icon>
                 <span class="header-title">校准信息</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': calibrationCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': calibrationCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
             <div v-show="!calibrationCollapsed">
-              <el-descriptions :column="1" border size="small">
+              <el-descriptions
+                :column="1"
+                border
+                size="small"
+              >
                 <el-descriptions-item label="校准系数">
                   <span class="mono">{{ calibrationFactor.toFixed(4) }} nm/V</span>
                 </el-descriptions-item>
                 <el-descriptions-item label="线性度">
-                  <el-tag :type="linearityType" size="small">{{ linearityPercent }}%</el-tag>
+                  <el-tag
+                    :type="linearityType"
+                    size="small"
+                  >
+                    {{ linearityPercent }}%
+                  </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="上次校准">
                   {{ lastCalibrationDate }}
                 </el-descriptions-item>
                 <el-descriptions-item label="校准状态">
-                  <el-tag :type="calibrationStatusType" size="small">{{ calibrationStatusText }}</el-tag>
+                  <el-tag
+                    :type="calibrationStatusType"
+                    size="small"
+                  >
+                    {{ calibrationStatusText }}
+                  </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
             </div>
@@ -97,12 +171,20 @@
         <!-- 操作提示卡片 - 可折叠 -->
         <el-card class="tips-card">
           <template #header>
-            <div class="card-header" @click="toggleTipsPanel">
+            <div
+              class="card-header"
+              @click="toggleTipsPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">操作提示</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': tipsCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': tipsCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>

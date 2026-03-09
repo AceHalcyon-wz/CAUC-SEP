@@ -3,10 +3,16 @@
     <template #header>
       <div class="card-header">
         <div class="header-title">
-          <el-icon class="header-icon"><Opportunity /></el-icon>
+          <el-icon class="header-icon">
+            <Opportunity />
+          </el-icon>
           <span>电磁铁控制</span>
         </div>
-        <el-tag :type="statusTagType" size="small" class="status-tag">
+        <el-tag
+          :type="statusTagType"
+          size="small"
+          class="status-tag"
+        >
           {{ statusText }}
         </el-tag>
       </div>
@@ -19,8 +25,8 @@
         :title="electromagnetStore.alarmMessage"
         type="error"
         :closable="true"
-        @close="electromagnetStore.clearAlarm"
         class="alarm-alert"
+        @close="electromagnetStore.clearAlarm"
       />
 
       <!-- 实时数据显示 -->
@@ -32,7 +38,9 @@
                 <el-icon><Lightning /></el-icon>
               </div>
               <div class="display-content">
-                <div class="label">当前电流</div>
+                <div class="label">
+                  当前电流
+                </div>
                 <div class="value-row">
                   <span class="value mono">{{ electromagnetStore.formattedCurrent }}</span>
                   <span class="unit">A</span>
@@ -46,7 +54,9 @@
                 <el-icon><Magnet /></el-icon>
               </div>
               <div class="display-content">
-                <div class="label">磁场强度</div>
+                <div class="label">
+                  磁场强度
+                </div>
                 <div class="value-row">
                   <span class="value mono">{{ electromagnetStore.formattedField }}</span>
                   <span class="unit">mT</span>
@@ -58,10 +68,20 @@
       </div>
 
       <!-- 电流设置 -->
-      <el-divider class="section-divider">电流设置</el-divider>
+      <el-divider class="section-divider">
+        电流设置
+      </el-divider>
 
-      <el-form :model="currentForm" label-width="100px" class="current-form">
-        <el-form-item label="目标电流" :class="{ 'is-error': currentValidation.error }" class="form-item">
+      <el-form
+        :model="currentForm"
+        label-width="100px"
+        class="current-form"
+      >
+        <el-form-item
+          label="目标电流"
+          :class="{ 'is-error': currentValidation.error }"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="currentForm.targetCurrent"
@@ -73,16 +93,27 @@
               @change="validateCurrentInput"
             />
             <span class="unit-label">A</span>
-            <el-tag v-if="currentValidation.warning" type="warning" size="small" class="validation-tag">
+            <el-tag
+              v-if="currentValidation.warning"
+              type="warning"
+              size="small"
+              class="validation-tag"
+            >
               {{ currentValidation.warning }}
             </el-tag>
           </div>
-          <div v-if="currentValidation.error" class="error-message">
+          <div
+            v-if="currentValidation.error"
+            class="error-message"
+          >
             {{ currentValidation.error }}
           </div>
         </el-form-item>
 
-        <el-form-item label="目标磁场" class="form-item">
+        <el-form-item
+          label="目标磁场"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="currentForm.targetField"
@@ -103,8 +134,8 @@
               type="primary"
               :disabled="!electromagnetStore.canControl || currentValidation.error"
               :loading="electromagnetStore.loading.setCurrent"
-              @click="handleSetCurrent"
               class="set-btn"
+              @click="handleSetCurrent"
             >
               设置电流
             </el-button>
@@ -112,8 +143,8 @@
               type="success"
               :disabled="!electromagnetStore.canControl"
               :loading="electromagnetStore.loading.setField"
-              @click="handleSetField"
               class="set-btn"
+              @click="handleSetField"
             >
               设置磁场
             </el-button>
@@ -130,24 +161,46 @@
           :step="0.01"
           :marks="currentMarks"
           :disabled="!electromagnetStore.canControl"
-          @change="handleSliderChange"
           class="slider-control"
+          @change="handleSliderChange"
         />
       </div>
 
       <!-- 扫描模式配置 -->
-      <el-divider class="section-divider">扫描模式</el-divider>
+      <el-divider class="section-divider">
+        扫描模式
+      </el-divider>
 
-      <el-form :model="scanForm" label-width="100px" class="scan-form">
-        <el-form-item label="扫描模式" class="form-item">
-          <el-radio-group v-model="scanForm.mode" class="mode-radio-group">
-            <el-radio label="linear">线性扫描</el-radio>
-            <el-radio label="step">步进扫描</el-radio>
-            <el-radio label="custom">自定义</el-radio>
+      <el-form
+        :model="scanForm"
+        label-width="100px"
+        class="scan-form"
+      >
+        <el-form-item
+          label="扫描模式"
+          class="form-item"
+        >
+          <el-radio-group
+            v-model="scanForm.mode"
+            class="mode-radio-group"
+          >
+            <el-radio label="linear">
+              线性扫描
+            </el-radio>
+            <el-radio label="step">
+              步进扫描
+            </el-radio>
+            <el-radio label="custom">
+              自定义
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="起始电流" :class="{ 'is-error': scanValidation.startError }" class="form-item">
+        <el-form-item
+          label="起始电流"
+          :class="{ 'is-error': scanValidation.startError }"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="scanForm.startCurrent"
@@ -160,12 +213,19 @@
             />
             <span class="unit-label">A</span>
           </div>
-          <div v-if="scanValidation.startError" class="error-message">
+          <div
+            v-if="scanValidation.startError"
+            class="error-message"
+          >
             {{ scanValidation.startError }}
           </div>
         </el-form-item>
 
-        <el-form-item label="终止电流" :class="{ 'is-error': scanValidation.endError }" class="form-item">
+        <el-form-item
+          label="终止电流"
+          :class="{ 'is-error': scanValidation.endError }"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="scanForm.endCurrent"
@@ -178,12 +238,20 @@
             />
             <span class="unit-label">A</span>
           </div>
-          <div v-if="scanValidation.endError" class="error-message">
+          <div
+            v-if="scanValidation.endError"
+            class="error-message"
+          >
             {{ scanValidation.endError }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="scanForm.mode === 'linear'" label="扫描速率" :class="{ 'is-error': scanValidation.rateError }" class="form-item">
+        <el-form-item
+          v-if="scanForm.mode === 'linear'"
+          label="扫描速率"
+          :class="{ 'is-error': scanValidation.rateError }"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="scanForm.scanRate"
@@ -196,12 +264,19 @@
             />
             <span class="unit-label">A/s</span>
           </div>
-          <div v-if="scanValidation.rateError" class="error-message">
+          <div
+            v-if="scanValidation.rateError"
+            class="error-message"
+          >
             {{ scanValidation.rateError }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="scanForm.mode === 'step'" label="步进大小" class="form-item">
+        <el-form-item
+          v-if="scanForm.mode === 'step'"
+          label="步进大小"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="scanForm.stepSize"
@@ -216,7 +291,12 @@
           </div>
         </el-form-item>
 
-        <el-form-item v-if="scanForm.mode === 'step'" label="步数" :class="{ 'is-error': scanValidation.stepError }" class="form-item">
+        <el-form-item
+          v-if="scanForm.mode === 'step'"
+          label="步数"
+          :class="{ 'is-error': scanValidation.stepError }"
+          class="form-item"
+        >
           <el-input-number
             v-model="scanForm.stepCount"
             :min="2"
@@ -225,12 +305,20 @@
             class="form-number small"
             @change="validateScanParams"
           />
-          <div v-if="scanValidation.stepError" class="error-message">
+          <div
+            v-if="scanValidation.stepError"
+            class="error-message"
+          >
             {{ scanValidation.stepError }}
           </div>
         </el-form-item>
 
-        <el-form-item v-if="scanForm.mode === 'step'" label="步间延时" :class="{ 'is-error': scanValidation.delayError }" class="form-item">
+        <el-form-item
+          v-if="scanForm.mode === 'step'"
+          label="步间延时"
+          :class="{ 'is-error': scanValidation.delayError }"
+          class="form-item"
+        >
           <div class="input-group">
             <el-input-number
               v-model="scanForm.stepDelay"
@@ -243,14 +331,24 @@
             />
             <span class="unit-label">s</span>
           </div>
-          <div v-if="scanValidation.delayError" class="error-message">
+          <div
+            v-if="scanValidation.delayError"
+            class="error-message"
+          >
             {{ scanValidation.delayError }}
           </div>
         </el-form-item>
 
         <!-- 扫描参数预览 -->
-        <el-form-item v-if="scanPreview.isValid" label="扫描预览" class="form-item">
-          <el-card class="scan-preview-card" shadow="never">
+        <el-form-item
+          v-if="scanPreview.isValid"
+          label="扫描预览"
+          class="form-item"
+        >
+          <el-card
+            class="scan-preview-card"
+            shadow="never"
+          >
             <div class="preview-item">
               <span class="preview-label">总步数:</span>
               <span class="preview-value mono">{{ scanPreview.totalSteps }}</span>
@@ -263,7 +361,10 @@
               <span class="preview-label">电流范围:</span>
               <span class="preview-value mono">{{ scanPreview.currentRange }}</span>
             </div>
-            <div v-if="scanForm.mode === 'linear'" class="preview-item">
+            <div
+              v-if="scanForm.mode === 'linear'"
+              class="preview-item"
+            >
               <span class="preview-label">扫描方向:</span>
               <span class="preview-value">{{ scanPreview.direction }}</span>
             </div>
@@ -276,8 +377,8 @@
               type="primary"
               :disabled="!electromagnetStore.canControl || !scanValidation.isValid"
               :loading="electromagnetStore.loading.configScan"
-              @click="handleConfigScan"
               class="config-btn"
+              @click="handleConfigScan"
             >
               配置扫描
             </el-button>
@@ -285,8 +386,8 @@
               type="info"
               :disabled="!scanValidation.isValid"
               :loading="electromagnetStore.loading.validateScanConfig"
-              @click="handleValidateScanConfig"
               class="config-btn"
+              @click="handleValidateScanConfig"
             >
               验证参数
             </el-button>
@@ -300,8 +401,8 @@
           type="success"
           :disabled="!electromagnetStore.canControl || electromagnetStore.isScanning"
           :loading="electromagnetStore.loading.startScan"
-          @click="handleStartScan"
           class="control-btn start-btn"
+          @click="handleStartScan"
         >
           <el-icon><VideoPlay /></el-icon>
           开始扫描
@@ -310,8 +411,8 @@
         <el-button
           type="warning"
           :disabled="!electromagnetStore.isScanning"
-          @click="handlePauseScan"
           class="control-btn pause-btn"
+          @click="handlePauseScan"
         >
           <el-icon><VideoPause /></el-icon>
           暂停
@@ -321,8 +422,8 @@
           type="danger"
           :disabled="!electromagnetStore.isScanning"
           :loading="electromagnetStore.loading.stopScan"
-          @click="handleStopScan"
           class="control-btn stop-btn"
+          @click="handleStopScan"
         >
           <el-icon><Close /></el-icon>
           停止扫描
@@ -330,10 +431,16 @@
       </div>
 
       <!-- 扫描进度 -->
-      <div v-if="electromagnetStore.isScanning || electromagnetStore.isPaused" class="scan-progress">
+      <div
+        v-if="electromagnetStore.isScanning || electromagnetStore.isPaused"
+        class="scan-progress"
+      >
         <div class="progress-header">
           <span class="progress-title">扫描进度</span>
-          <el-tag :type="electromagnetStore.isPaused ? 'warning' : 'success'" size="small">
+          <el-tag
+            :type="electromagnetStore.isPaused ? 'warning' : 'success'"
+            size="small"
+          >
             {{ electromagnetStore.isPaused ? '已暂停' : '扫描中' }}
           </el-tag>
         </div>
@@ -349,7 +456,9 @@
           <el-row :gutter="16">
             <el-col :span="6">
               <div class="detail-item">
-                <div class="detail-label">当前步数</div>
+                <div class="detail-label">
+                  当前步数
+                </div>
                 <div class="detail-value mono">
                   {{ electromagnetStore.scanStatus.currentStep }} / {{ electromagnetStore.scanStatus.totalSteps }}
                 </div>
@@ -357,20 +466,32 @@
             </el-col>
             <el-col :span="6">
               <div class="detail-item">
-                <div class="detail-label">当前电流</div>
-                <div class="detail-value mono">{{ electromagnetStore.scanStatus.currentCurrent.toFixed(3) }} A</div>
+                <div class="detail-label">
+                  当前电流
+                </div>
+                <div class="detail-value mono">
+                  {{ electromagnetStore.scanStatus.currentCurrent.toFixed(3) }} A
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="detail-item">
-                <div class="detail-label">当前磁场</div>
-                <div class="detail-value mono">{{ electromagnetStore.scanStatus.currentField.toFixed(2) }} mT</div>
+                <div class="detail-label">
+                  当前磁场
+                </div>
+                <div class="detail-value mono">
+                  {{ electromagnetStore.scanStatus.currentField.toFixed(2) }} mT
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="detail-item">
-                <div class="detail-label">剩余时间</div>
-                <div class="detail-value">{{ formatRemainingTime(electromagnetStore.estimatedRemainingTime) }}</div>
+                <div class="detail-label">
+                  剩余时间
+                </div>
+                <div class="detail-value">
+                  {{ formatRemainingTime(electromagnetStore.estimatedRemainingTime) }}
+                </div>
               </div>
             </el-col>
           </el-row>
@@ -386,7 +507,10 @@
       </div>
 
       <!-- 扫描数据实时绘图 -->
-      <div v-if="electromagnetStore.isScanning || electromagnetStore.scanData.current.length > 0" class="scan-data-plot">
+      <div
+        v-if="electromagnetStore.isScanning || electromagnetStore.scanData.current.length > 0"
+        class="scan-data-plot"
+      >
         <div class="plot-header">
           <span class="plot-title">实时扫描数据</span>
           <div class="plot-actions">
@@ -395,8 +519,8 @@
               size="small"
               text
               :icon="Download"
-              @click="handleExportScanData"
               :disabled="electromagnetStore.scanData.current.length === 0"
+              @click="handleExportScanData"
             >
               导出数据
             </el-button>
@@ -405,35 +529,53 @@
               size="small"
               text
               :icon="Delete"
-              @click="handleClearScanData"
               :disabled="electromagnetStore.scanData.current.length === 0"
+              @click="handleClearScanData"
             >
               清除数据
             </el-button>
           </div>
         </div>
 
-        <div ref="scanChartRef" class="scan-chart"></div>
+        <div
+          ref="scanChartRef"
+          class="scan-chart"
+        />
 
         <!-- 数据统计 -->
-        <div v-if="electromagnetStore.scanData.current.length > 0" class="scan-stats">
+        <div
+          v-if="electromagnetStore.scanData.current.length > 0"
+          class="scan-stats"
+        >
           <el-row :gutter="16">
             <el-col :span="8">
               <div class="stat-item">
-                <div class="stat-label">数据点数</div>
-                <div class="stat-value mono">{{ electromagnetStore.scanData.current.length }}</div>
+                <div class="stat-label">
+                  数据点数
+                </div>
+                <div class="stat-value mono">
+                  {{ electromagnetStore.scanData.current.length }}
+                </div>
               </div>
             </el-col>
             <el-col :span="8">
               <div class="stat-item">
-                <div class="stat-label">电流范围</div>
-                <div class="stat-value mono">{{ scanDataStats.currentRange }}</div>
+                <div class="stat-label">
+                  电流范围
+                </div>
+                <div class="stat-value mono">
+                  {{ scanDataStats.currentRange }}
+                </div>
               </div>
             </el-col>
             <el-col :span="8">
               <div class="stat-item">
-                <div class="stat-label">磁场范围</div>
-                <div class="stat-value mono">{{ scanDataStats.fieldRange }}</div>
+                <div class="stat-label">
+                  磁场范围
+                </div>
+                <div class="stat-value mono">
+                  {{ scanDataStats.fieldRange }}
+                </div>
               </div>
             </el-col>
           </el-row>
@@ -441,7 +583,9 @@
       </div>
 
       <!-- 校准曲线配置 -->
-      <el-divider class="section-divider">校准曲线</el-divider>
+      <el-divider class="section-divider">
+        校准曲线
+      </el-divider>
 
       <div class="calibration-section">
         <div class="calibration-header">
@@ -451,8 +595,8 @@
               type="primary"
               size="small"
               :loading="electromagnetStore.loading.fetchCalibration"
-              @click="handleFetchCalibration"
               class="action-btn"
+              @click="handleFetchCalibration"
             >
               刷新校准
             </el-button>
@@ -460,8 +604,8 @@
               v-if="calibrationPoints.length > 0"
               type="info"
               size="small"
-              @click="handleExportCalibration"
               class="action-btn"
+              @click="handleExportCalibration"
             >
               导出数据
             </el-button>
@@ -469,56 +613,91 @@
         </div>
 
         <!-- 校准质量指标 -->
-        <div v-if="calibrationQuality.isValid" class="calibration-quality">
+        <div
+          v-if="calibrationQuality.isValid"
+          class="calibration-quality"
+        >
           <el-row :gutter="16">
             <el-col :span="6">
               <div class="quality-item">
-                <div class="quality-label">拟合优度 R²</div>
-                <div class="quality-value mono" :class="getQualityClass('r2')">
+                <div class="quality-label">
+                  拟合优度 R²
+                </div>
+                <div
+                  class="quality-value mono"
+                  :class="getQualityClass('r2')"
+                >
                   {{ calibrationQuality.r2.toFixed(4) }}
                 </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="quality-item">
-                <div class="quality-label">均方根误差</div>
-                <div class="quality-value mono">{{ calibrationQuality.rmse.toFixed(2) }} mT</div>
+                <div class="quality-label">
+                  均方根误差
+                </div>
+                <div class="quality-value mono">
+                  {{ calibrationQuality.rmse.toFixed(2) }} mT
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="quality-item">
-                <div class="quality-label">最大偏差</div>
-                <div class="quality-value mono">{{ calibrationQuality.maxError.toFixed(2) }} mT</div>
+                <div class="quality-label">
+                  最大偏差
+                </div>
+                <div class="quality-value mono">
+                  {{ calibrationQuality.maxError.toFixed(2) }} mT
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="quality-item">
-                <div class="quality-label">校准点数</div>
-                <div class="quality-value mono">{{ calibrationPoints.length }}</div>
+                <div class="quality-label">
+                  校准点数
+                </div>
+                <div class="quality-value mono">
+                  {{ calibrationPoints.length }}
+                </div>
               </div>
             </el-col>
           </el-row>
         </div>
 
         <!-- 校准曲线图表 -->
-        <div ref="calibrationChartRef" class="calibration-chart"></div>
+        <div
+          ref="calibrationChartRef"
+          class="calibration-chart"
+        />
 
         <!-- 图表控制 -->
         <div class="chart-controls">
-          <el-checkbox v-model="chartOptions.showFitCurve" @change="updateCalibrationChart">
+          <el-checkbox
+            v-model="chartOptions.showFitCurve"
+            @change="updateCalibrationChart"
+          >
             显示拟合曲线
           </el-checkbox>
-          <el-checkbox v-model="chartOptions.showGrid" @change="updateCalibrationChart">
+          <el-checkbox
+            v-model="chartOptions.showGrid"
+            @change="updateCalibrationChart"
+          >
             显示网格
           </el-checkbox>
-          <el-checkbox v-model="chartOptions.showRealtime" @change="updateCalibrationChart">
+          <el-checkbox
+            v-model="chartOptions.showRealtime"
+            @change="updateCalibrationChart"
+          >
             显示实时数据点
           </el-checkbox>
         </div>
 
         <!-- 添加校准点 -->
         <div class="add-calibration-point">
-          <el-form :inline="true" size="small">
+          <el-form
+            :inline="true"
+            size="small"
+          >
             <el-form-item label="电流">
               <el-input-number
                 v-model="newCalibrationPoint.current"
@@ -547,8 +726,8 @@
               <el-button
                 type="primary"
                 :disabled="!electromagnetStore.canControl"
-                @click="handleAddCalibrationPoint"
                 class="add-point-btn"
+                @click="handleAddCalibrationPoint"
               >
                 添加校准点
               </el-button>
@@ -557,26 +736,45 @@
         </div>
 
         <!-- 校准点列表 -->
-        <div v-if="calibrationPoints.length > 0" class="calibration-points-list">
-          <el-table :data="calibrationPoints" size="small" max-height="200" class="points-table">
-            <el-table-column prop="current" label="电流 (A)" width="120">
+        <div
+          v-if="calibrationPoints.length > 0"
+          class="calibration-points-list"
+        >
+          <el-table
+            :data="calibrationPoints"
+            size="small"
+            max-height="200"
+            class="points-table"
+          >
+            <el-table-column
+              prop="current"
+              label="电流 (A)"
+              width="120"
+            >
               <template #default="{ row }">
                 <span class="mono">{{ row.current.toFixed(3) }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="field" label="磁场 (mT)" width="120">
+            <el-table-column
+              prop="field"
+              label="磁场 (mT)"
+              width="120"
+            >
               <template #default="{ row }">
                 <span class="mono">{{ row.field.toFixed(2) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="80">
+            <el-table-column
+              label="操作"
+              width="80"
+            >
               <template #default="{ $index }">
                 <el-button
                   type="danger"
                   size="small"
                   link
-                  @click="handleRemoveCalibrationPoint($index)"
                   class="delete-btn"
+                  @click="handleRemoveCalibrationPoint($index)"
                 >
                   删除
                 </el-button>
@@ -591,8 +789,8 @@
             type="info"
             :disabled="calibrationPoints.length < 2"
             :loading="electromagnetStore.loading.validateCalibration"
-            @click="handleValidateCalibration"
             class="calibration-btn"
+            @click="handleValidateCalibration"
           >
             验证数据
           </el-button>
@@ -601,8 +799,8 @@
             type="success"
             :disabled="calibrationPoints.length < 2"
             :loading="electromagnetStore.loading.uploadCalibration"
-            @click="handleUploadCalibration"
             class="calibration-btn"
+            @click="handleUploadCalibration"
           >
             上传校准曲线
           </el-button>
@@ -611,8 +809,8 @@
             type="primary"
             :disabled="calibrationPoints.length < 3"
             :loading="electromagnetStore.loading.performCalibration"
-            @click="handlePerformCalibration"
             class="calibration-btn"
+            @click="handlePerformCalibration"
           >
             执行校准
           </el-button>
@@ -620,8 +818,8 @@
           <el-button
             type="danger"
             :disabled="calibrationPoints.length === 0"
-            @click="handleClearCalibrationPoints"
             class="calibration-btn"
+            @click="handleClearCalibrationPoints"
           >
             清除所有点
           </el-button>
@@ -629,8 +827,8 @@
           <el-button
             type="danger"
             :loading="electromagnetStore.loading.clearCalibration"
-            @click="handleClearCalibration"
             class="calibration-btn"
+            @click="handleClearCalibration"
           >
             清除校准数据
           </el-button>
@@ -638,7 +836,9 @@
       </div>
 
       <!-- 急停按钮 -->
-      <el-divider class="section-divider">安全控制</el-divider>
+      <el-divider class="section-divider">
+        安全控制
+      </el-divider>
 
       <div class="safety-controls">
         <el-button
@@ -646,8 +846,8 @@
           type="danger"
           size="large"
           :disabled="!electromagnetStore.isConnected"
-          @click="handleEmergencyStop"
           class="emergency-btn"
+          @click="handleEmergencyStop"
         >
           <el-icon><Warning /></el-icon>
           急停
@@ -657,8 +857,8 @@
           v-else
           type="warning"
           size="large"
-          @click="handleResetEmergency"
           class="reset-btn"
+          @click="handleResetEmergency"
         >
           <el-icon><RefreshRight /></el-icon>
           复位急停
@@ -669,8 +869,8 @@
           size="large"
           :disabled="!electromagnetStore.isConnected"
           :loading="electromagnetStore.loading.resetOvercurrent"
-          @click="handleResetOvercurrent"
           class="reset-btn"
+          @click="handleResetOvercurrent"
         >
           <el-icon><RefreshRight /></el-icon>
           过流保护复位
@@ -1696,7 +1896,7 @@ function updateCalibrationChart() {
   const pointsData = calibrationPoints.value.map(p => [p.current, p.field])
 
   // 拟合曲线数据
-  let fitData = []
+  const fitData = []
   if (chartOptions.showFitCurve && electromagnetStore.calibrationCurve.coefficients) {
     const min = electromagnetStore.currentLimits.min
     const max = electromagnetStore.currentLimits.max

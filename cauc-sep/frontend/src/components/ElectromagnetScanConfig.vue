@@ -3,7 +3,9 @@
     <template #header>
       <div class="card-header">
         <div class="header-title">
-          <el-icon class="header-icon"><Setting /></el-icon>
+          <el-icon class="header-icon">
+            <Setting />
+          </el-icon>
           <span>扫描模式配置</span>
         </div>
         <div class="header-actions">
@@ -30,8 +32,13 @@
     <div class="scan-config-content">
       <!-- 扫描模式选择 -->
       <div class="mode-selector">
-        <div class="mode-label">扫描模式</div>
-        <el-radio-group v-model="scanConfig.mode" class="mode-group">
+        <div class="mode-label">
+          扫描模式
+        </div>
+        <el-radio-group
+          v-model="scanConfig.mode"
+          class="mode-group"
+        >
           <el-radio-button label="linear">
             <el-icon><TrendCharts /></el-icon>
             <span>线性扫描</span>
@@ -48,13 +55,22 @@
       </div>
 
       <!-- 参数配置面板 -->
-      <el-form :model="scanConfig" label-width="120px" class="config-form">
+      <el-form
+        :model="scanConfig"
+        label-width="120px"
+        class="config-form"
+      >
         <!-- 基本参数 -->
-        <el-divider class="form-divider">基本参数</el-divider>
+        <el-divider class="form-divider">
+          基本参数
+        </el-divider>
 
         <el-row :gutter="24">
           <el-col :span="12">
-            <el-form-item label="起始电流" :error="errors.startCurrent">
+            <el-form-item
+              label="起始电流"
+              :error="errors.startCurrent"
+            >
               <el-input-number
                 v-model="scanConfig.startCurrent"
                 :min="currentLimits.min"
@@ -69,7 +85,10 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="终止电流" :error="errors.endCurrent">
+            <el-form-item
+              label="终止电流"
+              :error="errors.endCurrent"
+            >
               <el-input-number
                 v-model="scanConfig.endCurrent"
                 :min="currentLimits.min"
@@ -86,9 +105,14 @@
 
         <!-- 线性扫描参数 -->
         <template v-if="scanConfig.mode === 'linear'">
-          <el-divider class="form-divider">线性扫描参数</el-divider>
+          <el-divider class="form-divider">
+            线性扫描参数
+          </el-divider>
 
-          <el-form-item label="扫描速率" :error="errors.scanRate">
+          <el-form-item
+            label="扫描速率"
+            :error="errors.scanRate"
+          >
             <el-input-number
               v-model="scanConfig.scanRate"
               :min="0.01"
@@ -104,11 +128,16 @@
 
         <!-- 步进扫描参数 -->
         <template v-if="scanConfig.mode === 'step'">
-          <el-divider class="form-divider">步进扫描参数</el-divider>
+          <el-divider class="form-divider">
+            步进扫描参数
+          </el-divider>
 
           <el-row :gutter="24">
             <el-col :span="12">
-              <el-form-item label="步进大小" :error="errors.stepSize">
+              <el-form-item
+                label="步进大小"
+                :error="errors.stepSize"
+              >
                 <el-input-number
                   v-model="scanConfig.stepSize"
                   :min="0.001"
@@ -123,7 +152,10 @@
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="步数" :error="errors.stepCount">
+              <el-form-item
+                label="步数"
+                :error="errors.stepCount"
+              >
                 <el-input-number
                   v-model="scanConfig.stepCount"
                   :min="2"
@@ -136,7 +168,10 @@
             </el-col>
           </el-row>
 
-          <el-form-item label="步间延时" :error="errors.stepDelay">
+          <el-form-item
+            label="步间延时"
+            :error="errors.stepDelay"
+          >
             <el-input-number
               v-model="scanConfig.stepDelay"
               :min="0.1"
@@ -152,11 +187,16 @@
 
         <!-- 自定义扫描参数 -->
         <template v-if="scanConfig.mode === 'custom'">
-          <el-divider class="form-divider">自定义扫描参数</el-divider>
+          <el-divider class="form-divider">
+            自定义扫描参数
+          </el-divider>
 
           <el-row :gutter="24">
             <el-col :span="12">
-              <el-form-item label="扫描速率" :error="errors.scanRate">
+              <el-form-item
+                label="扫描速率"
+                :error="errors.scanRate"
+              >
                 <el-input-number
                   v-model="scanConfig.scanRate"
                   :min="0.01"
@@ -171,7 +211,10 @@
             </el-col>
 
             <el-col :span="12">
-              <el-form-item label="循环次数" :error="errors.cycles">
+              <el-form-item
+                label="循环次数"
+                :error="errors.cycles"
+              >
                 <el-input-number
                   v-model="scanConfig.cycles"
                   :min="1"
@@ -185,10 +228,23 @@
           </el-row>
 
           <el-form-item label="扫描类型">
-            <el-select v-model="scanConfig.customType" class="form-input" @change="handleConfigChange">
-              <el-option label="磁滞回线" value="hysteresis" />
-              <el-option label="三角波" value="triangle" />
-              <el-option label="正弦波" value="sine" />
+            <el-select
+              v-model="scanConfig.customType"
+              class="form-input"
+              @change="handleConfigChange"
+            >
+              <el-option
+                label="磁滞回线"
+                value="hysteresis"
+              />
+              <el-option
+                label="三角波"
+                value="triangle"
+              />
+              <el-option
+                label="正弦波"
+                value="sine"
+              />
             </el-select>
           </el-form-item>
         </template>
@@ -208,35 +264,59 @@
             刷新路径
           </el-button>
         </div>
-        <div ref="pathChartRef" class="path-chart"></div>
+        <div
+          ref="pathChartRef"
+          class="path-chart"
+        />
       </div>
 
       <!-- 扫描参数预览 -->
-      <div v-if="scanPreview.isValid" class="scan-preview">
-        <div class="preview-header">扫描参数预览</div>
+      <div
+        v-if="scanPreview.isValid"
+        class="scan-preview"
+      >
+        <div class="preview-header">
+          扫描参数预览
+        </div>
         <el-row :gutter="16">
           <el-col :span="6">
             <div class="preview-item">
-              <div class="preview-label">总步数</div>
-              <div class="preview-value mono">{{ scanPreview.totalSteps }}</div>
+              <div class="preview-label">
+                总步数
+              </div>
+              <div class="preview-value mono">
+                {{ scanPreview.totalSteps }}
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
             <div class="preview-item">
-              <div class="preview-label">预计时长</div>
-              <div class="preview-value">{{ scanPreview.estimatedTime }}</div>
+              <div class="preview-label">
+                预计时长
+              </div>
+              <div class="preview-value">
+                {{ scanPreview.estimatedTime }}
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
             <div class="preview-item">
-              <div class="preview-label">电流范围</div>
-              <div class="preview-value mono">{{ scanPreview.currentRange }}</div>
+              <div class="preview-label">
+                电流范围
+              </div>
+              <div class="preview-value mono">
+                {{ scanPreview.currentRange }}
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
             <div class="preview-item">
-              <div class="preview-label">扫描方向</div>
-              <div class="preview-value">{{ scanPreview.direction }}</div>
+              <div class="preview-label">
+                扫描方向
+              </div>
+              <div class="preview-value">
+                {{ scanPreview.direction }}
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -248,8 +328,8 @@
           type="primary"
           :disabled="!isConfigValid"
           :loading="loading.configScan"
-          @click="handleApplyConfig"
           class="action-btn"
+          @click="handleApplyConfig"
         >
           应用配置
         </el-button>
@@ -257,15 +337,15 @@
           type="info"
           :disabled="!isConfigValid"
           :loading="loading.validateScanConfig"
-          @click="handleValidateConfig"
           class="action-btn"
+          @click="handleValidateConfig"
         >
           验证参数
         </el-button>
         <el-button
           type="warning"
-          @click="handleResetConfig"
           class="action-btn"
+          @click="handleResetConfig"
         >
           重置
         </el-button>
@@ -279,8 +359,14 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="presetForm" label-width="100px">
-        <el-form-item label="预设名称" required>
+      <el-form
+        :model="presetForm"
+        label-width="100px"
+      >
+        <el-form-item
+          label="预设名称"
+          required
+        >
           <el-input
             v-model="presetForm.name"
             placeholder="请输入预设名称"
@@ -298,8 +384,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showPresetDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleSavePreset">保存</el-button>
+        <el-button @click="showPresetDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSavePreset"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
 
@@ -309,15 +402,34 @@
       title="扫描预设列表"
       width="700px"
     >
-      <el-table :data="allPresets" style="width: 100%">
-        <el-table-column prop="name" label="预设名称" width="150" />
-        <el-table-column prop="description" label="描述" />
-        <el-table-column prop="config.mode" label="模式" width="100">
+      <el-table
+        :data="allPresets"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="name"
+          label="预设名称"
+          width="150"
+        />
+        <el-table-column
+          prop="description"
+          label="描述"
+        />
+        <el-table-column
+          prop="config.mode"
+          label="模式"
+          width="100"
+        >
           <template #default="{ row }">
-            <el-tag size="small">{{ getModeLabel(row.config.mode) }}</el-tag>
+            <el-tag size="small">
+              {{ getModeLabel(row.config.mode) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180">
+        <el-table-column
+          label="操作"
+          width="180"
+        >
           <template #default="{ row }">
             <el-button
               type="primary"

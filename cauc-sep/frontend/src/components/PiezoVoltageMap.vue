@@ -3,10 +3,15 @@
     <!-- 标题和工具栏 -->
     <div class="map-header">
       <div class="header-left">
-        <h3 class="map-title">电压-位移实时映射</h3>
+        <h3 class="map-title">
+          电压-位移实时映射
+        </h3>
         <div class="status-indicators">
           <span class="indicator">
-            <span class="indicator-dot" :class="isCollecting ? 'active' : ''"></span>
+            <span
+              class="indicator-dot"
+              :class="isCollecting ? 'active' : ''"
+            />
             <span class="indicator-label">{{ isCollecting ? '采集中' : '已停止' }}</span>
           </span>
           <span class="indicator">
@@ -19,8 +24,8 @@
           class="tool-btn"
           :class="{ 'tool-btn--active': isCollecting }"
           :disabled="!piezoStore.isConnected"
-          @click="toggleCollection"
           title="开始/停止采集"
+          @click="toggleCollection"
         >
           <el-icon><VideoCamera /></el-icon>
           <span>{{ isCollecting ? '停止' : '采集' }}</span>
@@ -28,8 +33,8 @@
         <button
           class="tool-btn"
           :disabled="mapData.length === 0"
-          @click="exportMapData"
           title="导出映射数据"
+          @click="exportMapData"
         >
           <el-icon><Download /></el-icon>
           <span>导出</span>
@@ -37,8 +42,8 @@
         <button
           class="tool-btn"
           :disabled="mapData.length === 0"
-          @click="clearMapData"
           title="清空数据"
+          @click="clearMapData"
         >
           <el-icon><Delete /></el-icon>
           <span>清空</span>
@@ -48,11 +53,19 @@
 
     <!-- 图表区域 -->
     <div class="chart-wrapper">
-      <div ref="chartContainer" class="chart-container"></div>
+      <div
+        ref="chartContainer"
+        class="chart-container"
+      />
 
       <!-- 当前工作点指示器 -->
-      <div class="working-point" v-if="showWorkingPoint">
-        <div class="point-label">当前工作点</div>
+      <div
+        v-if="showWorkingPoint"
+        class="working-point"
+      >
+        <div class="point-label">
+          当前工作点
+        </div>
         <div class="point-info">
           <div class="info-item">
             <span class="info-label">电压:</span>
@@ -67,14 +80,21 @@
     </div>
 
     <!-- 映射统计信息 -->
-    <div class="map-statistics" v-if="mapData.length > 0">
+    <div
+      v-if="mapData.length > 0"
+      class="map-statistics"
+    >
       <div class="stat-card">
         <div class="stat-icon">
           <el-icon><TrendCharts /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-label">平均位移</div>
-          <div class="stat-value">{{ averageDisplacement.toFixed(3) }} μm</div>
+          <div class="stat-label">
+            平均位移
+          </div>
+          <div class="stat-value">
+            {{ averageDisplacement.toFixed(3) }} μm
+          </div>
         </div>
       </div>
       <div class="stat-card">
@@ -82,8 +102,12 @@
           <el-icon><Top /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-label">最大位移</div>
-          <div class="stat-value">{{ maxDisplacement.toFixed(3) }} μm</div>
+          <div class="stat-label">
+            最大位移
+          </div>
+          <div class="stat-value">
+            {{ maxDisplacement.toFixed(3) }} μm
+          </div>
         </div>
       </div>
       <div class="stat-card">
@@ -91,8 +115,12 @@
           <el-icon><Bottom /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-label">最小位移</div>
-          <div class="stat-value">{{ minDisplacement.toFixed(3) }} μm</div>
+          <div class="stat-label">
+            最小位移
+          </div>
+          <div class="stat-value">
+            {{ minDisplacement.toFixed(3) }} μm
+          </div>
         </div>
       </div>
       <div class="stat-card">
@@ -100,8 +128,12 @@
           <el-icon><DataAnalysis /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-label">线性度</div>
-          <div class="stat-value">{{ linearity.toFixed(2) }}%</div>
+          <div class="stat-label">
+            线性度
+          </div>
+          <div class="stat-value">
+            {{ linearity.toFixed(2) }}%
+          </div>
         </div>
       </div>
     </div>
@@ -113,20 +145,37 @@
       width="400px"
       :close-on-click-modal="false"
     >
-      <el-form :model="exportForm" label-width="100px">
+      <el-form
+        :model="exportForm"
+        label-width="100px"
+      >
         <el-form-item label="导出格式">
           <el-radio-group v-model="exportForm.format">
-            <el-radio label="csv">CSV</el-radio>
-            <el-radio label="json">JSON</el-radio>
+            <el-radio label="csv">
+              CSV
+            </el-radio>
+            <el-radio label="json">
+              JSON
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="文件名">
-          <el-input v-model="exportForm.filename" placeholder="请输入文件名" />
+          <el-input
+            v-model="exportForm.filename"
+            placeholder="请输入文件名"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmExport">确认导出</el-button>
+        <el-button @click="showExportDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmExport"
+        >
+          确认导出
+        </el-button>
       </template>
     </el-dialog>
   </div>

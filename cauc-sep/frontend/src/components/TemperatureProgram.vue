@@ -3,15 +3,31 @@
     <!-- 程序编辑器头部 -->
     <div class="program-header">
       <div class="header-left">
-        <h3 class="program-title">程序升温配置</h3>
-        <el-tag v-if="isEditing" type="warning" size="small">编辑中</el-tag>
+        <h3 class="program-title">
+          程序升温配置
+        </h3>
+        <el-tag
+          v-if="isEditing"
+          type="warning"
+          size="small"
+        >
+          编辑中
+        </el-tag>
       </div>
       <div class="header-right">
-        <el-button size="small" @click="handleLoadProgram">
+        <el-button
+          size="small"
+          @click="handleLoadProgram"
+        >
           <el-icon><FolderOpened /></el-icon>
           加载程序
         </el-button>
-        <el-button size="small" type="primary" @click="handleSaveProgram" :disabled="!canSave">
+        <el-button
+          size="small"
+          type="primary"
+          :disabled="!canSave"
+          @click="handleSaveProgram"
+        >
           <el-icon><DocumentChecked /></el-icon>
           保存程序
         </el-button>
@@ -23,8 +39,14 @@
       <!-- 左侧：程序步骤列表 -->
       <div class="steps-panel">
         <div class="panel-header">
-          <h4 class="panel-title">升温步骤</h4>
-          <el-button size="small" type="primary" @click="handleAddStep">
+          <h4 class="panel-title">
+            升温步骤
+          </h4>
+          <el-button
+            size="small"
+            type="primary"
+            @click="handleAddStep"
+          >
             <el-icon><Plus /></el-icon>
             添加步骤
           </el-button>
@@ -51,7 +73,10 @@
                 <div class="step-content">
                   <div class="step-header">
                     <span class="step-number">步骤 {{ index + 1 }}</span>
-                    <el-tag :type="getStepTypeTag(element.type)" size="small">
+                    <el-tag
+                      :type="getStepTypeTag(element.type)"
+                      size="small"
+                    >
                       {{ getStepTypeName(element.type) }}
                     </el-tag>
                   </div>
@@ -60,11 +85,17 @@
                       <el-icon><Aim /></el-icon>
                       {{ element.targetTemp }}K
                     </span>
-                    <span v-if="element.type === 'hold'" class="info-item">
+                    <span
+                      v-if="element.type === 'hold'"
+                      class="info-item"
+                    >
                       <el-icon><Timer /></el-icon>
                       {{ element.duration }}min
                     </span>
-                    <span v-else class="info-item">
+                    <span
+                      v-else
+                      class="info-item"
+                    >
                       <el-icon><TrendCharts /></el-icon>
                       {{ element.rate }}K/min
                     </span>
@@ -82,8 +113,8 @@
                     text
                     size="small"
                     type="danger"
-                    @click.stop="handleDeleteStep(index)"
                     :disabled="programSteps.length <= 1"
+                    @click.stop="handleDeleteStep(index)"
                   >
                     <el-icon><Delete /></el-icon>
                   </el-button>
@@ -112,14 +143,26 @@
 
       <!-- 右侧：步骤配置面板 -->
       <div class="config-panel">
-        <div v-if="selectedStepIndex >= 0 && programSteps[selectedStepIndex]" class="step-config">
+        <div
+          v-if="selectedStepIndex >= 0 && programSteps[selectedStepIndex]"
+          class="step-config"
+        >
           <div class="config-header">
-            <h4 class="config-title">步骤 {{ selectedStepIndex + 1 }} 配置</h4>
+            <h4 class="config-title">
+              步骤 {{ selectedStepIndex + 1 }} 配置
+            </h4>
           </div>
 
-          <el-form :model="selectedStep" label-width="100px" class="config-form">
+          <el-form
+            :model="selectedStep"
+            label-width="100px"
+            class="config-form"
+          >
             <el-form-item label="步骤类型">
-              <el-radio-group v-model="selectedStep.type" @change="handleStepTypeChange">
+              <el-radio-group
+                v-model="selectedStep.type"
+                @change="handleStepTypeChange"
+              >
                 <el-radio-button value="heat">
                   <el-icon><Top /></el-icon>
                   升温
@@ -150,7 +193,10 @@
               </div>
             </el-form-item>
 
-            <el-form-item v-if="selectedStep.type === 'hold'" label="持续时间">
+            <el-form-item
+              v-if="selectedStep.type === 'hold'"
+              label="持续时间"
+            >
               <div class="duration-input-group">
                 <el-input-number
                   v-model="selectedStep.duration"
@@ -164,7 +210,10 @@
               </div>
             </el-form-item>
 
-            <el-form-item v-else label="升温/降温速率">
+            <el-form-item
+              v-else
+              label="升温/降温速率"
+            >
               <div class="rate-input-group">
                 <el-slider
                   v-model="selectedStep.rate"
@@ -185,7 +234,9 @@
                 disabled
                 class="duration-display"
               >
-                <template #append>min</template>
+                <template #append>
+                  min
+                </template>
               </el-input>
             </el-form-item>
           </el-form>
@@ -194,7 +245,9 @@
         <!-- 程序预览图表 -->
         <div class="preview-section">
           <div class="preview-header">
-            <h4 class="preview-title">程序预览</h4>
+            <h4 class="preview-title">
+              程序预览
+            </h4>
             <el-button-group size="small">
               <el-button
                 :type="previewMode === 'chart' ? 'primary' : ''"
@@ -211,25 +264,48 @@
             </el-button-group>
           </div>
 
-          <div v-if="previewMode === 'chart'" class="preview-chart-container">
-            <v-chart
+          <div
+            v-if="previewMode === 'chart'"
+            class="preview-chart-container"
+          >
+            <VChart
               :option="previewChartOption"
               :autoresize="true"
               class="preview-chart"
             />
           </div>
 
-          <div v-else class="preview-table-container">
-            <el-table :data="programSteps" border stripe>
-              <el-table-column type="index" label="序号" width="60" />
-              <el-table-column label="类型" width="80">
+          <div
+            v-else
+            class="preview-table-container"
+          >
+            <el-table
+              :data="programSteps"
+              border
+              stripe
+            >
+              <el-table-column
+                type="index"
+                label="序号"
+                width="60"
+              />
+              <el-table-column
+                label="类型"
+                width="80"
+              >
                 <template #default="{ row }">
-                  <el-tag :type="getStepTypeTag(row.type)" size="small">
+                  <el-tag
+                    :type="getStepTypeTag(row.type)"
+                    size="small"
+                  >
                     {{ getStepTypeName(row.type) }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="目标温度 (K)" width="120">
+              <el-table-column
+                label="目标温度 (K)"
+                width="120"
+              >
                 <template #default="{ row }">
                   {{ row.targetTemp.toFixed(1) }}
                 </template>
@@ -258,9 +334,18 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="programInfo" label-width="100px">
-        <el-form-item label="程序名称" required>
-          <el-input v-model="programInfo.name" placeholder="请输入程序名称" />
+      <el-form
+        :model="programInfo"
+        label-width="100px"
+      >
+        <el-form-item
+          label="程序名称"
+          required
+        >
+          <el-input
+            v-model="programInfo.name"
+            placeholder="请输入程序名称"
+          />
         </el-form-item>
         <el-form-item label="程序描述">
           <el-input
@@ -272,8 +357,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showSaveDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmSave" :loading="saving">
+        <el-button @click="showSaveDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saving"
+          @click="handleConfirmSave"
+        >
           保存
         </el-button>
       </template>
@@ -288,22 +379,38 @@
       <el-table
         :data="savedPrograms"
         highlight-current-row
-        @current-change="handleProgramSelect"
         style="width: 100%"
+        @current-change="handleProgramSelect"
       >
-        <el-table-column prop="name" label="程序名称" width="200" />
-        <el-table-column prop="description" label="描述" />
-        <el-table-column label="步骤数" width="100">
+        <el-table-column
+          prop="name"
+          label="程序名称"
+          width="200"
+        />
+        <el-table-column
+          prop="description"
+          label="描述"
+        />
+        <el-table-column
+          label="步骤数"
+          width="100"
+        >
           <template #default="{ row }">
             {{ row.segments ? row.segments.length : 0 }}
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" width="180">
+        <el-table-column
+          label="创建时间"
+          width="180"
+        >
           <template #default="{ row }">
             {{ new Date(row.created_at).toLocaleString() }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column
+          label="操作"
+          width="120"
+        >
           <template #default="{ row }">
             <el-button
               type="danger"
@@ -316,11 +423,13 @@
         </el-table-column>
       </el-table>
       <template #footer>
-        <el-button @click="showLoadDialog = false">取消</el-button>
+        <el-button @click="showLoadDialog = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
-          @click="handleConfirmLoad"
           :disabled="!selectedProgramToLoad"
+          @click="handleConfirmLoad"
         >
           加载
         </el-button>

@@ -291,32 +291,32 @@ function clearNotifications() {
       <div class="test-buttons">
         <button 
           class="test-btn"
-          @click="testBasicOperation"
           :disabled="isOperating"
+          @click="testBasicOperation"
         >
           基本操作
         </button>
         
         <button 
           class="test-btn"
-          @click="testUndoableOperation"
           :disabled="isOperating"
+          @click="testUndoableOperation"
         >
           可撤销操作
         </button>
         
         <button 
           class="test-btn"
-          @click="testBatchOperation"
           :disabled="isOperating"
+          @click="testBatchOperation"
         >
           批量操作
         </button>
         
         <button 
           class="test-btn test-btn--danger"
-          @click="testErrorHandling"
           :disabled="isOperating"
+          @click="testErrorHandling"
         >
           错误处理
         </button>
@@ -330,16 +330,16 @@ function clearNotifications() {
         
         <button 
           class="test-btn"
-          @click="testLongOperation"
           :disabled="isOperating"
+          @click="testLongOperation"
         >
           长时间操作
         </button>
         
         <button 
           class="test-btn"
-          @click="testCancellableOperation"
           :disabled="isOperating"
+          @click="testCancellableOperation"
         >
           可取消操作
         </button>
@@ -352,7 +352,10 @@ function clearNotifications() {
       <div class="status-grid">
         <div class="status-item">
           <span class="status-label">操作状态:</span>
-          <span class="status-value" :class="{ 'status-active': isOperating }">
+          <span
+            class="status-value"
+            :class="{ 'status-active': isOperating }"
+          >
             {{ isOperating ? '执行中' : '空闲' }}
           </span>
         </div>
@@ -388,8 +391,18 @@ function clearNotifications() {
       <div class="section-header">
         <h2>测试结果</h2>
         <div class="section-actions">
-          <button class="action-btn" @click="clearResults">清空结果</button>
-          <button class="action-btn" @click="clearNotifications">清空通知</button>
+          <button
+            class="action-btn"
+            @click="clearResults"
+          >
+            清空结果
+          </button>
+          <button
+            class="action-btn"
+            @click="clearNotifications"
+          >
+            清空通知
+          </button>
         </div>
       </div>
       
@@ -402,11 +415,17 @@ function clearNotifications() {
         >
           <span class="result-icon">{{ result.success ? '✓' : '✕' }}</span>
           <span class="result-name">{{ result.name }}</span>
-          <span v-if="result.details" class="result-details">{{ result.details }}</span>
+          <span
+            v-if="result.details"
+            class="result-details"
+          >{{ result.details }}</span>
           <span class="result-time">{{ result.time }}</span>
         </div>
         
-        <div v-if="testResults.length === 0" class="empty-state">
+        <div
+          v-if="testResults.length === 0"
+          class="empty-state"
+        >
           暂无测试结果
         </div>
       </div>

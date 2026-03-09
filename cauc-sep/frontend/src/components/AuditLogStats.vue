@@ -1,168 +1,285 @@
 <template>
   <div class="audit-log-stats">
     <!-- 统计概览卡片 -->
-    <el-row :gutter="24" class="overview-cards">
-      <el-col :xs="12" :sm="6" :md="4">
+    <el-row
+      :gutter="24"
+      class="overview-cards"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card total">
           <div class="stat-icon">
             <el-icon><Document /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ formatNumber(statistics.total_logs) }}</div>
-            <div class="stat-label">总记录数</div>
+            <div class="stat-value">
+              {{ formatNumber(statistics.total_logs) }}
+            </div>
+            <div class="stat-label">
+              总记录数
+            </div>
           </div>
         </div>
       </el-col>
 
-      <el-col :xs="12" :sm="6" :md="4">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card today">
           <div class="stat-icon">
             <el-icon><Clock /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ formatNumber(statistics.today_logs) }}</div>
-            <div class="stat-label">今日记录</div>
+            <div class="stat-value">
+              {{ formatNumber(statistics.today_logs) }}
+            </div>
+            <div class="stat-label">
+              今日记录
+            </div>
           </div>
         </div>
       </el-col>
 
-      <el-col :xs="12" :sm="6" :md="4">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card success">
           <div class="stat-icon">
             <el-icon><CircleCheck /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ formatNumber(getSuccessCount()) }}</div>
-            <div class="stat-label">成功请求</div>
+            <div class="stat-value">
+              {{ formatNumber(getSuccessCount()) }}
+            </div>
+            <div class="stat-label">
+              成功请求
+            </div>
           </div>
         </div>
       </el-col>
 
-      <el-col :xs="12" :sm="6" :md="4">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card error">
           <div class="stat-icon">
             <el-icon><CircleClose /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ formatNumber(getErrorCount()) }}</div>
-            <div class="stat-label">错误请求</div>
+            <div class="stat-value">
+              {{ formatNumber(getErrorCount()) }}
+            </div>
+            <div class="stat-label">
+              错误请求
+            </div>
           </div>
         </div>
       </el-col>
 
-      <el-col :xs="12" :sm="6" :md="4">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card rate">
           <div class="stat-icon">
             <el-icon><TrendCharts /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ getSuccessRate() }}%</div>
-            <div class="stat-label">成功率</div>
+            <div class="stat-value">
+              {{ getSuccessRate() }}%
+            </div>
+            <div class="stat-label">
+              成功率
+            </div>
           </div>
         </div>
       </el-col>
 
-      <el-col :xs="12" :sm="6" :md="4">
+      <el-col
+        :xs="12"
+        :sm="6"
+        :md="4"
+      >
         <div class="stat-card avg-time">
           <div class="stat-icon">
             <el-icon><Timer /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ getAvgDuration() }}ms</div>
-            <div class="stat-label">平均耗时</div>
+            <div class="stat-value">
+              {{ getAvgDuration() }}ms
+            </div>
+            <div class="stat-label">
+              平均耗时
+            </div>
           </div>
         </div>
       </el-col>
     </el-row>
 
     <!-- 图表区域 -->
-    <el-row :gutter="24" class="charts-row">
+    <el-row
+      :gutter="24"
+      class="charts-row"
+    >
       <!-- 操作类型分布 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">操作类型分布</span>
-              <el-radio-group v-model="chartType.operation" size="small">
-                <el-radio-button label="pie">饼图</el-radio-button>
-                <el-radio-button label="bar">柱状图</el-radio-button>
+              <el-radio-group
+                v-model="chartType.operation"
+                size="small"
+              >
+                <el-radio-button label="pie">
+                  饼图
+                </el-radio-button>
+                <el-radio-button label="bar">
+                  柱状图
+                </el-radio-button>
               </el-radio-group>
             </div>
           </template>
-          <div class="chart-container" ref="operationChartRef"></div>
+          <div
+            ref="operationChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- 分类统计 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">操作分类统计</span>
-              <el-radio-group v-model="chartType.category" size="small">
-                <el-radio-button label="pie">饼图</el-radio-button>
-                <el-radio-button label="bar">柱状图</el-radio-button>
+              <el-radio-group
+                v-model="chartType.category"
+                size="small"
+              >
+                <el-radio-button label="pie">
+                  饼图
+                </el-radio-button>
+                <el-radio-button label="bar">
+                  柱状图
+                </el-radio-button>
               </el-radio-group>
             </div>
           </template>
-          <div class="chart-container" ref="categoryChartRef"></div>
+          <div
+            ref="categoryChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- 时间分布趋势 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">时间分布趋势</span>
-              <el-radio-group v-model="chartType.time" size="small" @change="handleTimeChartChange">
-                <el-radio-button label="hour">按小时</el-radio-button>
-                <el-radio-button label="day">按天</el-radio-button>
-                <el-radio-button label="week">按周</el-radio-button>
+              <el-radio-group
+                v-model="chartType.time"
+                size="small"
+                @change="handleTimeChartChange"
+              >
+                <el-radio-button label="hour">
+                  按小时
+                </el-radio-button>
+                <el-radio-button label="day">
+                  按天
+                </el-radio-button>
+                <el-radio-button label="week">
+                  按周
+                </el-radio-button>
               </el-radio-group>
             </div>
           </template>
-          <div class="chart-container" ref="timeChartRef"></div>
+          <div
+            ref="timeChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- 用户活动统计 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">用户活动统计 TOP 10</span>
-              <el-button size="small" @click="handleExportUserStats">
+              <el-button
+                size="small"
+                @click="handleExportUserStats"
+              >
                 <el-icon><Download /></el-icon>
                 导出
               </el-button>
             </div>
           </template>
-          <div class="chart-container" ref="userChartRef"></div>
+          <div
+            ref="userChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- 设备使用统计 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">设备使用统计</span>
             </div>
           </template>
-          <div class="chart-container" ref="deviceChartRef"></div>
+          <div
+            ref="deviceChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
       <!-- 响应状态分布 -->
-      <el-col :xs="24" :lg="12">
+      <el-col
+        :xs="24"
+        :lg="12"
+      >
         <el-card class="chart-card">
           <template #header>
             <div class="card-header">
               <span class="card-title">响应状态分布</span>
             </div>
           </template>
-          <div class="chart-container" ref="statusChartRef"></div>
+          <div
+            ref="statusChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
     </el-row>
@@ -175,21 +292,51 @@
         </div>
       </template>
       
-      <el-form :model="reportForm" label-width="100px" class="report-form">
+      <el-form
+        :model="reportForm"
+        label-width="100px"
+        class="report-form"
+      >
         <el-row :gutter="24">
-          <el-col :xs="24" :sm="12" :md="8">
+          <el-col
+            :xs="24"
+            :sm="12"
+            :md="8"
+          >
             <el-form-item label="报表类型">
-              <el-select v-model="reportForm.report_type" class="form-select">
-                <el-option label="汇总报表" value="summary" />
-                <el-option label="详细报表" value="detail" />
-                <el-option label="趋势分析" value="trend" />
-                <el-option label="用户活动" value="user_activity" />
-                <el-option label="设备使用" value="device_usage" />
+              <el-select
+                v-model="reportForm.report_type"
+                class="form-select"
+              >
+                <el-option
+                  label="汇总报表"
+                  value="summary"
+                />
+                <el-option
+                  label="详细报表"
+                  value="detail"
+                />
+                <el-option
+                  label="趋势分析"
+                  value="trend"
+                />
+                <el-option
+                  label="用户活动"
+                  value="user_activity"
+                />
+                <el-option
+                  label="设备使用"
+                  value="device_usage"
+                />
               </el-select>
             </el-form-item>
           </el-col>
 
-          <el-col :xs="24" :sm="12" :md="8">
+          <el-col
+            :xs="24"
+            :sm="12"
+            :md="8"
+          >
             <el-form-item label="时间范围">
               <el-date-picker
                 v-model="reportForm.timeRange"
@@ -204,32 +351,68 @@
             </el-form-item>
           </el-col>
 
-          <el-col :xs="24" :sm="12" :md="8">
+          <el-col
+            :xs="24"
+            :sm="12"
+            :md="8"
+          >
             <el-form-item label="输出格式">
-              <el-select v-model="reportForm.format" class="form-select">
-                <el-option label="PDF" value="pdf" />
-                <el-option label="Excel" value="excel" />
-                <el-option label="Word" value="word" />
+              <el-select
+                v-model="reportForm.format"
+                class="form-select"
+              >
+                <el-option
+                  label="PDF"
+                  value="pdf"
+                />
+                <el-option
+                  label="Excel"
+                  value="excel"
+                />
+                <el-option
+                  label="Word"
+                  value="word"
+                />
               </el-select>
             </el-form-item>
           </el-col>
 
-          <el-col :xs="24" :sm="24" :md="24">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="24"
+          >
             <el-form-item label="包含内容">
               <el-checkbox-group v-model="reportForm.includes">
-                <el-checkbox label="overview">统计概览</el-checkbox>
-                <el-checkbox label="operation">操作类型分析</el-checkbox>
-                <el-checkbox label="category">分类统计</el-checkbox>
-                <el-checkbox label="user">用户活动</el-checkbox>
-                <el-checkbox label="device">设备使用</el-checkbox>
-                <el-checkbox label="trend">趋势分析</el-checkbox>
+                <el-checkbox label="overview">
+                  统计概览
+                </el-checkbox>
+                <el-checkbox label="operation">
+                  操作类型分析
+                </el-checkbox>
+                <el-checkbox label="category">
+                  分类统计
+                </el-checkbox>
+                <el-checkbox label="user">
+                  用户活动
+                </el-checkbox>
+                <el-checkbox label="device">
+                  设备使用
+                </el-checkbox>
+                <el-checkbox label="trend">
+                  趋势分析
+                </el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
         </el-row>
 
         <el-form-item>
-          <el-button type="primary" @click="handleGenerateReport" :loading="generating">
+          <el-button
+            type="primary"
+            :loading="generating"
+            @click="handleGenerateReport"
+          >
             <el-icon><Document /></el-icon>
             生成报表
           </el-button>
@@ -250,14 +433,25 @@
       class="preview-dialog"
       destroy-on-close
     >
-      <div class="preview-content" v-html="previewContent"></div>
+      <div
+        class="preview-content"
+        v-html="previewContent"
+      />
       <template #footer>
-        <el-button @click="previewVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleDownloadReport">
+        <el-button @click="previewVisible = false">
+          关闭
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleDownloadReport"
+        >
           <el-icon><Download /></el-icon>
           下载
         </el-button>
-        <el-button type="success" @click="handlePrintReport">
+        <el-button
+          type="success"
+          @click="handlePrintReport"
+        >
           <el-icon><Printer /></el-icon>
           打印
         </el-button>

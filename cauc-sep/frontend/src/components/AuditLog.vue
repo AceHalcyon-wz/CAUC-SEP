@@ -1,9 +1,16 @@
 <template>
   <div class="audit-log-enhanced">
     <!-- 标签页切换 -->
-    <el-tabs v-model="activeTab" class="main-tabs" @tab-change="handleTabChange">
+    <el-tabs
+      v-model="activeTab"
+      class="main-tabs"
+      @tab-change="handleTabChange"
+    >
       <!-- 日志查询标签页 -->
-      <el-tab-pane label="日志查询" name="query">
+      <el-tab-pane
+        label="日志查询"
+        name="query"
+      >
         <!-- 筛选组件 -->
         <AuditLogFilter
           @filter="handleFilter"
@@ -13,7 +20,10 @@
         <!-- 操作工具栏 -->
         <div class="toolbar">
           <div class="toolbar-left">
-            <el-checkbox v-model="selectAll" @change="handleSelectAll">
+            <el-checkbox
+              v-model="selectAll"
+              @change="handleSelectAll"
+            >
               全选
             </el-checkbox>
             <el-button
@@ -26,31 +36,58 @@
             </el-button>
           </div>
           <div class="toolbar-right">
-            <el-button @click="handleRefresh" size="small">
+            <el-button
+              size="small"
+              @click="handleRefresh"
+            >
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
-            <el-button @click="showCleanupDialog = true" size="small">
+            <el-button
+              size="small"
+              @click="showCleanupDialog = true"
+            >
               <el-icon><Delete /></el-icon>
               清理策略
             </el-button>
             <el-dropdown @command="handleExportCommand">
-              <el-button type="primary" size="small">
+              <el-button
+                type="primary"
+                size="small"
+              >
                 <el-icon><Download /></el-icon>
                 导出
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="csv">导出为 CSV</el-dropdown-item>
-                  <el-dropdown-item command="excel">导出为 Excel</el-dropdown-item>
-                  <el-dropdown-item command="pdf">导出为 PDF</el-dropdown-item>
-                  <el-dropdown-item command="json">导出为 JSON</el-dropdown-item>
-                  <el-dropdown-item divided command="config">导出配置</el-dropdown-item>
+                  <el-dropdown-item command="csv">
+                    导出为 CSV
+                  </el-dropdown-item>
+                  <el-dropdown-item command="excel">
+                    导出为 Excel
+                  </el-dropdown-item>
+                  <el-dropdown-item command="pdf">
+                    导出为 PDF
+                  </el-dropdown-item>
+                  <el-dropdown-item command="json">
+                    导出为 JSON
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    command="config"
+                  >
+                    导出配置
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-button @click="handlePrint" size="small">
+            <el-button
+              size="small"
+              @click="handlePrint"
+            >
               <el-icon><Printer /></el-icon>
               打印
             </el-button>
@@ -65,8 +102,8 @@
             :title="auditStore.errorMessage"
             type="error"
             :closable="true"
-            @close="auditStore.clearError"
             class="error-alert"
+            @close="auditStore.clearError"
           />
 
           <!-- 空数据状态提示 -->
@@ -77,14 +114,22 @@
           >
             <template #description>
               <div class="empty-description">
-                <p class="empty-title">暂无审计日志数据</p>
-                <p class="empty-hint">可能的原因：</p>
+                <p class="empty-title">
+                  暂无审计日志数据
+                </p>
+                <p class="empty-hint">
+                  可能的原因：
+                </p>
                 <ul class="empty-reasons">
                   <li>系统尚未记录任何操作日志</li>
                   <li>当前筛选条件过滤掉了所有日志</li>
                   <li>日志已被清理策略自动清理</li>
                 </ul>
-                <el-button type="primary" @click="handleFilterReset" class="empty-action">
+                <el-button
+                  type="primary"
+                  class="empty-action"
+                  @click="handleFilterReset"
+                >
                   重置筛选条件
                 </el-button>
               </div>
@@ -95,90 +140,174 @@
           <el-table
             v-else
             ref="logTableRef"
-            :data="auditStore.logList"
             v-loading="auditStore.loading"
+            :data="auditStore.logList"
             stripe
             class="log-table"
             @selection-change="handleSelectionChange"
             @row-click="handleRowClick"
           >
-            <el-table-column type="selection" width="55" />
+            <el-table-column
+              type="selection"
+              width="55"
+            />
 
-            <el-table-column prop="timestamp" label="时间" width="180">
+            <el-table-column
+              prop="timestamp"
+              label="时间"
+              width="180"
+            >
               <template #default="{ row }">
                 <div class="timestamp-cell">
-                  <el-icon class="time-icon"><Clock /></el-icon>
+                  <el-icon class="time-icon">
+                    <Clock />
+                  </el-icon>
                   <span>{{ formatTime(row.timestamp) }}</span>
                 </div>
               </template>
             </el-table-column>
 
-            <el-table-column prop="user_id" label="用户" width="120">
+            <el-table-column
+              prop="user_id"
+              label="用户"
+              width="120"
+            >
               <template #default="{ row }">
-                <el-tag size="small" v-if="row.user_id" class="user-tag">
+                <el-tag
+                  v-if="row.user_id"
+                  size="small"
+                  class="user-tag"
+                >
                   {{ getUserName(row.user_id) }}
                 </el-tag>
-                <span v-else class="empty-cell">-</span>
+                <span
+                  v-else
+                  class="empty-cell"
+                >-</span>
               </template>
             </el-table-column>
 
-            <el-table-column prop="device_id" label="设备" width="120">
+            <el-table-column
+              prop="device_id"
+              label="设备"
+              width="120"
+            >
               <template #default="{ row }">
-                <el-tag size="small" v-if="row.device_id" class="device-tag">
+                <el-tag
+                  v-if="row.device_id"
+                  size="small"
+                  class="device-tag"
+                >
                   {{ getDeviceName(row.device_id) }}
                 </el-tag>
-                <span v-else class="empty-cell">-</span>
+                <span
+                  v-else
+                  class="empty-cell"
+                >-</span>
               </template>
             </el-table-column>
 
-            <el-table-column prop="operation_category" label="分类" width="100">
+            <el-table-column
+              prop="operation_category"
+              label="分类"
+              width="100"
+            >
               <template #default="{ row }">
-                <el-tag :type="getCategoryType(row.operation_category)" size="small" class="category-tag">
+                <el-tag
+                  :type="getCategoryType(row.operation_category)"
+                  size="small"
+                  class="category-tag"
+                >
                   {{ getCategoryName(row.operation_category) }}
                 </el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column prop="operation_type" label="操作类型" width="150">
+            <el-table-column
+              prop="operation_type"
+              label="操作类型"
+              width="150"
+            >
               <template #default="{ row }">
                 <span class="operation-text">{{ getOperationName(row.operation_type) }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column prop="request_method" label="方法" width="80">
+            <el-table-column
+              prop="request_method"
+              label="方法"
+              width="80"
+            >
               <template #default="{ row }">
-                <el-tag :type="getMethodType(row.request_method)" size="small" class="method-tag">
+                <el-tag
+                  :type="getMethodType(row.request_method)"
+                  size="small"
+                  class="method-tag"
+                >
                   {{ row.request_method }}
                 </el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column prop="request_path" label="路径" min-width="200" show-overflow-tooltip>
+            <el-table-column
+              prop="request_path"
+              label="路径"
+              min-width="200"
+              show-overflow-tooltip
+            >
               <template #default="{ row }">
                 <span class="path-text">{{ row.request_path }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column prop="response_status" label="状态" width="80">
+            <el-table-column
+              prop="response_status"
+              label="状态"
+              width="80"
+            >
               <template #default="{ row }">
-                <el-tag :type="getStatusType(row.response_status)" size="small" class="status-tag">
+                <el-tag
+                  :type="getStatusType(row.response_status)"
+                  size="small"
+                  class="status-tag"
+                >
                   {{ row.response_status || '-' }}
                 </el-tag>
               </template>
             </el-table-column>
 
-            <el-table-column prop="duration_ms" label="耗时" width="100">
+            <el-table-column
+              prop="duration_ms"
+              label="耗时"
+              width="100"
+            >
               <template #default="{ row }">
                 <span class="duration-text">{{ row.duration_ms ? `${row.duration_ms}ms` : '-' }}</span>
               </template>
             </el-table-column>
 
-            <el-table-column label="操作" width="120" fixed="right">
+            <el-table-column
+              label="操作"
+              width="120"
+              fixed="right"
+            >
               <template #default="{ row }">
-                <el-button type="primary" link size="small" @click.stop="handleViewDetail(row)" class="detail-btn">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  class="detail-btn"
+                  @click.stop="handleViewDetail(row)"
+                >
                   详情
                 </el-button>
-                <el-button type="danger" link size="small" @click.stop="handleDeleteLog(row)" class="delete-btn">
+                <el-button
+                  type="danger"
+                  link
+                  size="small"
+                  class="delete-btn"
+                  @click.stop="handleDeleteLog(row)"
+                >
                   删除
                 </el-button>
               </template>
@@ -201,7 +330,10 @@
       </el-tab-pane>
 
       <!-- 统计分析标签页 -->
-      <el-tab-pane label="统计分析" name="stats">
+      <el-tab-pane
+        label="统计分析"
+        name="stats"
+      >
         <AuditLogStats />
       </el-tab-pane>
     </el-tabs>
@@ -214,34 +346,78 @@
       destroy-on-close
       class="detail-dialog"
     >
-      <el-descriptions :column="2" border v-if="currentLog" class="detail-descriptions">
+      <el-descriptions
+        v-if="currentLog"
+        :column="2"
+        border
+        class="detail-descriptions"
+      >
         <el-descriptions-item label="日志ID">
           <span class="mono-text">{{ currentLog.id }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="时间">{{ formatTime(currentLog.timestamp) }}</el-descriptions-item>
-        <el-descriptions-item label="用户ID">{{ currentLog.user_id || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="设备ID">{{ currentLog.device_id || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="操作分类">{{ getCategoryName(currentLog.operation_category) }}</el-descriptions-item>
-        <el-descriptions-item label="操作类型">{{ getOperationName(currentLog.operation_type) }}</el-descriptions-item>
-        <el-descriptions-item label="请求方法">{{ currentLog.request_method }}</el-descriptions-item>
-        <el-descriptions-item label="响应状态">{{ currentLog.response_status || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="请求路径" :span="2">
+        <el-descriptions-item label="时间">
+          {{ formatTime(currentLog.timestamp) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="用户ID">
+          {{ currentLog.user_id || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="设备ID">
+          {{ currentLog.device_id || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="操作分类">
+          {{ getCategoryName(currentLog.operation_category) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="操作类型">
+          {{ getOperationName(currentLog.operation_type) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="请求方法">
+          {{ currentLog.request_method }}
+        </el-descriptions-item>
+        <el-descriptions-item label="响应状态">
+          {{ currentLog.response_status || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="请求路径"
+          :span="2"
+        >
           <span class="mono-text">{{ currentLog.request_path }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="IP地址">{{ currentLog.ip_address || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="处理耗时">{{ currentLog.duration_ms ? `${currentLog.duration_ms}ms` : '-' }}</el-descriptions-item>
-        <el-descriptions-item label="用户代理" :span="2">{{ currentLog.user_agent || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="响应消息" :span="2">{{ currentLog.response_message || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="IP地址">
+          {{ currentLog.ip_address || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="处理耗时">
+          {{ currentLog.duration_ms ? `${currentLog.duration_ms}ms` : '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="用户代理"
+          :span="2"
+        >
+          {{ currentLog.user_agent || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="响应消息"
+          :span="2"
+        >
+          {{ currentLog.response_message || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
 
-      <div class="params-section" v-if="currentLog?.request_params">
+      <div
+        v-if="currentLog?.request_params"
+        class="params-section"
+      >
         <h4>请求参数</h4>
         <pre class="params-content">{{ JSON.stringify(currentLog.request_params, null, 2) }}</pre>
       </div>
 
       <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button type="primary" @click="handleExportDetail">
+        <el-button @click="detailVisible = false">
+          关闭
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleExportDetail"
+        >
           <el-icon><Download /></el-icon>
           导出
         </el-button>
@@ -256,12 +432,19 @@
       class="cleanup-dialog"
       destroy-on-close
     >
-      <el-form :model="cleanupForm" label-width="120px" class="cleanup-form">
+      <el-form
+        :model="cleanupForm"
+        label-width="120px"
+        class="cleanup-form"
+      >
         <el-form-item label="启用自动清理">
           <el-switch v-model="cleanupForm.enabled" />
         </el-form-item>
 
-        <el-form-item label="保留时间" v-if="cleanupForm.enabled">
+        <el-form-item
+          v-if="cleanupForm.enabled"
+          label="保留时间"
+        >
           <el-input-number
             v-model="cleanupForm.retention_days"
             :min="7"
@@ -271,15 +454,33 @@
           <span class="form-hint">天（超过此时间的日志将被清理）</span>
         </el-form-item>
 
-        <el-form-item label="清理周期" v-if="cleanupForm.enabled">
-          <el-select v-model="cleanupForm.cleanup_interval" class="form-select">
-            <el-option label="每天" value="daily" />
-            <el-option label="每周" value="weekly" />
-            <el-option label="每月" value="monthly" />
+        <el-form-item
+          v-if="cleanupForm.enabled"
+          label="清理周期"
+        >
+          <el-select
+            v-model="cleanupForm.cleanup_interval"
+            class="form-select"
+          >
+            <el-option
+              label="每天"
+              value="daily"
+            />
+            <el-option
+              label="每周"
+              value="weekly"
+            />
+            <el-option
+              label="每月"
+              value="monthly"
+            />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="保留重要日志" v-if="cleanupForm.enabled">
+        <el-form-item
+          v-if="cleanupForm.enabled"
+          label="保留重要日志"
+        >
           <el-switch v-model="cleanupForm.keep_important" />
           <span class="form-hint">保留标记为重要的日志</span>
         </el-form-item>
@@ -295,31 +496,50 @@
               placeholder="天数"
             />
             <span class="form-hint">天前的日志</span>
-            <el-button type="danger" @click="handleManualCleanup" :loading="cleanupLoading">
+            <el-button
+              type="danger"
+              :loading="cleanupLoading"
+              @click="handleManualCleanup"
+            >
               立即清理
             </el-button>
           </div>
         </el-form-item>
 
         <el-form-item label="清理预览">
-          <el-button @click="handlePreviewCleanup" :loading="previewLoading">
+          <el-button
+            :loading="previewLoading"
+            @click="handlePreviewCleanup"
+          >
             查看预览
           </el-button>
-          <div v-if="cleanupPreview" class="preview-result">
+          <div
+            v-if="cleanupPreview"
+            class="preview-result"
+          >
             <p>将清理 <strong>{{ cleanupPreview.count }}</strong> 条日志</p>
             <p>释放空间约 <strong>{{ formatBytes(cleanupPreview.size) }}</strong></p>
             <p>最早日志时间: {{ formatTime(cleanupPreview.earliest) }}</p>
           </div>
         </el-form-item>
 
-        <el-form-item label="上次清理时间" v-if="auditStore.cleanupConfig.last_cleanup_time">
+        <el-form-item
+          v-if="auditStore.cleanupConfig.last_cleanup_time"
+          label="上次清理时间"
+        >
           <span>{{ formatTime(auditStore.cleanupConfig.last_cleanup_time) }}</span>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="showCleanupDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleSaveCleanupConfig" :loading="savingConfig">
+        <el-button @click="showCleanupDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="savingConfig"
+          @click="handleSaveCleanupConfig"
+        >
           保存配置
         </el-button>
       </template>
@@ -333,13 +553,25 @@
       class="export-dialog"
       destroy-on-close
     >
-      <el-form :model="exportForm" label-width="100px" class="export-form">
+      <el-form
+        :model="exportForm"
+        label-width="100px"
+        class="export-form"
+      >
         <el-form-item label="导出格式">
           <el-radio-group v-model="exportForm.format">
-            <el-radio label="csv">CSV</el-radio>
-            <el-radio label="excel">Excel</el-radio>
-            <el-radio label="pdf">PDF</el-radio>
-            <el-radio label="json">JSON</el-radio>
+            <el-radio label="csv">
+              CSV
+            </el-radio>
+            <el-radio label="excel">
+              Excel
+            </el-radio>
+            <el-radio label="pdf">
+              PDF
+            </el-radio>
+            <el-radio label="json">
+              JSON
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -352,47 +584,108 @@
         </el-form-item>
 
         <el-form-item label="日期格式">
-          <el-select v-model="exportForm.date_format" class="form-select">
-            <el-option label="YYYY-MM-DD HH:mm:ss" value="YYYY-MM-DD HH:mm:ss" />
-            <el-option label="YYYY/MM/DD HH:mm:ss" value="YYYY/MM/DD HH:mm:ss" />
-            <el-option label="MM/DD/YYYY HH:mm:ss" value="MM/DD/YYYY HH:mm:ss" />
+          <el-select
+            v-model="exportForm.date_format"
+            class="form-select"
+          >
+            <el-option
+              label="YYYY-MM-DD HH:mm:ss"
+              value="YYYY-MM-DD HH:mm:ss"
+            />
+            <el-option
+              label="YYYY/MM/DD HH:mm:ss"
+              value="YYYY/MM/DD HH:mm:ss"
+            />
+            <el-option
+              label="MM/DD/YYYY HH:mm:ss"
+              value="MM/DD/YYYY HH:mm:ss"
+            />
           </el-select>
         </el-form-item>
 
         <el-form-item label="时区">
-          <el-select v-model="exportForm.timezone" class="form-select">
-            <el-option label="本地时间" value="local" />
-            <el-option label="UTC" value="utc" />
+          <el-select
+            v-model="exportForm.timezone"
+            class="form-select"
+          >
+            <el-option
+              label="本地时间"
+              value="local"
+            />
+            <el-option
+              label="UTC"
+              value="utc"
+            />
           </el-select>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmExport" :loading="exporting">
+        <el-button @click="showExportDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="exporting"
+          @click="handleConfirmExport"
+        >
           确认导出
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 打印预览 -->
-    <div v-if="printMode" class="print-container">
+    <div
+      v-if="printMode"
+      class="print-container"
+    >
       <div class="print-header">
         <h1>审计日志报告</h1>
         <p>生成时间: {{ new Date().toLocaleString('zh-CN') }}</p>
       </div>
-      <el-table :data="printData" border style="width: 100%">
-        <el-table-column prop="timestamp" label="时间" width="180">
+      <el-table
+        :data="printData"
+        border
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="timestamp"
+          label="时间"
+          width="180"
+        >
           <template #default="{ row }">
             {{ formatTime(row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column prop="user_id" label="用户" width="100" />
-        <el-table-column prop="device_id" label="设备" width="100" />
-        <el-table-column prop="operation_type" label="操作类型" width="150" />
-        <el-table-column prop="request_path" label="路径" />
-        <el-table-column prop="response_status" label="状态" width="80" />
-        <el-table-column prop="duration_ms" label="耗时(ms)" width="100" />
+        <el-table-column
+          prop="user_id"
+          label="用户"
+          width="100"
+        />
+        <el-table-column
+          prop="device_id"
+          label="设备"
+          width="100"
+        />
+        <el-table-column
+          prop="operation_type"
+          label="操作类型"
+          width="150"
+        />
+        <el-table-column
+          prop="request_path"
+          label="路径"
+        />
+        <el-table-column
+          prop="response_status"
+          label="状态"
+          width="80"
+        />
+        <el-table-column
+          prop="duration_ms"
+          label="耗时(ms)"
+          width="100"
+        />
       </el-table>
     </div>
   </div>

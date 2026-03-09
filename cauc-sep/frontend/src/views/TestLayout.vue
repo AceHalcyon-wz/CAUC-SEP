@@ -3,7 +3,9 @@
     <el-card class="test-card">
       <template #header>
         <div class="card-header">
-          <el-icon class="header-icon"><Setting /></el-icon>
+          <el-icon class="header-icon">
+            <Setting />
+          </el-icon>
           <span>布局系统测试页面</span>
         </div>
       </template>
@@ -19,7 +21,10 @@
         
         <div class="test-info">
           <h3>当前布局信息</h3>
-          <el-descriptions :column="2" border>
+          <el-descriptions
+            :column="2"
+            border
+          >
             <el-descriptions-item label="当前模块">
               {{ layoutStore.activeModule?.name }}
             </el-descriptions-item>
@@ -50,7 +55,10 @@
             <el-button @click="handleAddWarning">
               添加警告
             </el-button>
-            <el-button type="danger" @click="handleAddError">
+            <el-button
+              type="danger"
+              @click="handleAddError"
+            >
               添加错误
             </el-button>
             <el-button @click="handleClearWarnings">

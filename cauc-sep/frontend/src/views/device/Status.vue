@@ -4,15 +4,24 @@
     <div class="page-header">
       <div class="header-main">
         <div class="header-left">
-          <el-icon class="header-icon"><DataBoard /></el-icon>
+          <el-icon class="header-icon">
+            <DataBoard />
+          </el-icon>
           <div class="header-content">
-            <h1 class="page-title">设备状态监控</h1>
-            <p class="page-subtitle">实时监控设备运行状态、健康度和告警信息</p>
+            <h1 class="page-title">
+              设备状态监控
+            </h1>
+            <p class="page-subtitle">
+              实时监控设备运行状态、健康度和告警信息
+            </p>
           </div>
         </div>
         <div class="header-right">
-          <div class="status-indicator" :class="`status-indicator--${devicesStore.systemStatusType}`">
-            <span class="status-dot"></span>
+          <div
+            class="status-indicator"
+            :class="`status-indicator--${devicesStore.systemStatusType}`"
+          >
+            <span class="status-dot" />
             <span class="status-text">{{ devicesStore.systemStatusText }}</span>
           </div>
         </div>
@@ -21,50 +30,94 @@
 
     <!-- 快速操作区域 -->
     <div class="content-wrapper">
-      <el-row :gutter="16" class="quick-actions-row">
-        <el-col :xs="12" :sm="6">
-          <div class="quick-action-card" @click="refreshAllStatus">
+      <el-row
+        :gutter="16"
+        class="quick-actions-row"
+      >
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
+          <div
+            class="quick-action-card"
+            @click="refreshAllStatus"
+          >
             <div class="action-icon action-icon--primary">
               <el-icon><Refresh /></el-icon>
             </div>
             <div class="action-content">
-              <div class="action-title">刷新状态</div>
-              <div class="action-desc">更新所有设备状态</div>
+              <div class="action-title">
+                刷新状态
+              </div>
+              <div class="action-desc">
+                更新所有设备状态
+              </div>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
-          <div class="quick-action-card" @click="viewAlarms">
-            <div class="action-icon" :class="unacknowledgedAlarmsCount > 0 ? 'action-icon--danger' : 'action-icon--success'">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
+          <div
+            class="quick-action-card"
+            @click="viewAlarms"
+          >
+            <div
+              class="action-icon"
+              :class="unacknowledgedAlarmsCount > 0 ? 'action-icon--danger' : 'action-icon--success'"
+            >
               <el-icon><Bell /></el-icon>
             </div>
             <div class="action-content">
-              <div class="action-title">告警管理</div>
+              <div class="action-title">
+                告警管理
+              </div>
               <div class="action-desc">
                 {{ unacknowledgedAlarmsCount > 0 ? `${unacknowledgedAlarmsCount} 条未确认` : '无告警' }}
               </div>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
-          <div class="quick-action-card" @click="exportStatus">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
+          <div
+            class="quick-action-card"
+            @click="exportStatus"
+          >
             <div class="action-icon action-icon--info">
               <el-icon><Download /></el-icon>
             </div>
             <div class="action-content">
-              <div class="action-title">导出报告</div>
-              <div class="action-desc">生成状态报告</div>
+              <div class="action-title">
+                导出报告
+              </div>
+              <div class="action-desc">
+                生成状态报告
+              </div>
             </div>
           </div>
         </el-col>
-        <el-col :xs="12" :sm="6">
-          <div class="quick-action-card" @click="viewHistory">
+        <el-col
+          :xs="12"
+          :sm="6"
+        >
+          <div
+            class="quick-action-card"
+            @click="viewHistory"
+          >
             <div class="action-icon action-icon--warning">
               <el-icon><Clock /></el-icon>
             </div>
             <div class="action-content">
-              <div class="action-title">历史记录</div>
-              <div class="action-desc">查看历史状态</div>
+              <div class="action-title">
+                历史记录
+              </div>
+              <div class="action-desc">
+                查看历史状态
+              </div>
             </div>
           </div>
         </el-col>
@@ -77,21 +130,35 @@
 
       <!-- 详细状态监控（可折叠） -->
       <div class="detailed-monitor-section">
-        <div class="section-header" @click="toggleDetailedMonitor">
+        <div
+          class="section-header"
+          @click="toggleDetailedMonitor"
+        >
           <div class="section-title">
             <el-icon><Monitor /></el-icon>
             <span>详细状态监控</span>
-            <el-tag size="small" type="info" effect="plain" class="collapse-hint">
+            <el-tag
+              size="small"
+              type="info"
+              effect="plain"
+              class="collapse-hint"
+            >
               {{ showDetailedMonitor ? '点击收起' : '点击展开' }}
             </el-tag>
           </div>
-          <el-icon class="toggle-icon" :class="{ 'toggle-icon--expanded': showDetailedMonitor }">
+          <el-icon
+            class="toggle-icon"
+            :class="{ 'toggle-icon--expanded': showDetailedMonitor }"
+          >
             <ArrowDown />
           </el-icon>
         </div>
         
         <Transition name="expand">
-          <div v-show="showDetailedMonitor" class="section-content">
+          <div
+            v-show="showDetailedMonitor"
+            class="section-content"
+          >
             <DeviceStatusMonitor ref="statusMonitorRef" />
           </div>
         </Transition>

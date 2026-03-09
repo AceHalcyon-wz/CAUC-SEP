@@ -2,7 +2,9 @@
   <el-card class="safety-panel">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Warning /></el-icon>
+        <el-icon class="header-icon">
+          <Warning />
+        </el-icon>
         <span class="header-title">安全控制</span>
       </div>
     </template>
@@ -16,9 +18,11 @@
           :disabled="!motorStore.isConnected"
           @click="handleEmergencyStop"
         >
-          <div class="btn-glow"></div>
+          <div class="btn-glow" />
           <div class="btn-content">
-            <el-icon class="btn-icon"><CircleClose /></el-icon>
+            <el-icon class="btn-icon">
+              <CircleClose />
+            </el-icon>
             <span class="btn-text">急 停</span>
           </div>
         </button>
@@ -29,7 +33,9 @@
             class="reset-btn"
             @click="handleReset"
           >
-            <el-icon class="reset-icon"><RefreshRight /></el-icon>
+            <el-icon class="reset-icon">
+              <RefreshRight />
+            </el-icon>
             <span>复位急停</span>
           </button>
         </transition>
@@ -40,7 +46,10 @@
         <div class="status-item">
           <span class="status-label">电机状态</span>
           <div class="status-indicator">
-            <span class="indicator-dot" :class="`indicator-dot--${motorStatusType}`"></span>
+            <span
+              class="indicator-dot"
+              :class="`indicator-dot--${motorStatusType}`"
+            />
             <span class="indicator-text">{{ motorStatusText }}</span>
           </div>
         </div>
@@ -48,7 +57,10 @@
         <div class="status-item">
           <span class="status-label">限位状态</span>
           <div class="status-indicator">
-            <span class="indicator-dot" :class="`indicator-dot--${motorStore.limitStatusType}`"></span>
+            <span
+              class="indicator-dot"
+              :class="`indicator-dot--${motorStore.limitStatusType}`"
+            />
             <span class="indicator-text">{{ motorStore.limitStatus }}</span>
           </div>
         </div>
@@ -59,7 +71,7 @@
             <span 
               class="indicator-dot" 
               :class="motorStore.canControl ? 'indicator-dot--success' : 'indicator-dot--info'"
-            ></span>
+            />
             <span class="indicator-text">{{ motorStore.canControl ? '可用' : '禁用' }}</span>
           </div>
         </div>
@@ -68,7 +80,9 @@
       <!-- 安全提示 -->
       <div class="safety-alert">
         <div class="alert-header">
-          <el-icon class="alert-icon"><InfoFilled /></el-icon>
+          <el-icon class="alert-icon">
+            <InfoFilled />
+          </el-icon>
           <span class="alert-title">安全提示</span>
         </div>
         <ul class="safety-list">

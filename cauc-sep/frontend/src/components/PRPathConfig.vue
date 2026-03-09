@@ -4,14 +4,16 @@
       <template #header>
         <div class="card-header">
           <div class="header-title">
-            <el-icon class="header-icon"><Setting /></el-icon>
+            <el-icon class="header-icon">
+              <Setting />
+            </el-icon>
             <span>PR 路径配置</span>
           </div>
           <el-button 
             type="primary" 
             :loading="loading" 
-            @click="saveAllPaths" 
-            class="save-all-btn"
+            class="save-all-btn" 
+            @click="saveAllPaths"
           >
             <el-icon><Check /></el-icon>
             保存所有配置
@@ -24,11 +26,15 @@
         :title="motorStore.alarmMessage"
         type="error"
         :closable="true"
-        @close="motorStore.clearAlarm()"
         class="alarm-alert"
+        @close="motorStore.clearAlarm()"
       />
 
-      <el-tabs v-model="activePath" type="card" class="path-tabs">
+      <el-tabs
+        v-model="activePath"
+        type="card"
+        class="path-tabs"
+      >
         <el-tab-pane 
           v-for="pathNum in 16" 
           :key="pathNum" 
@@ -43,19 +49,31 @@
             >
               <el-row :gutter="24">
                 <el-col :span="12">
-                  <el-form-item label="运行模式" class="form-item">
+                  <el-form-item
+                    label="运行模式"
+                    class="form-item"
+                  >
                     <el-select 
                       v-model="pathConfigs[pathNum - 1].mode" 
                       placeholder="选择模式"
                       class="form-select"
                     >
-                      <el-option label="绝对位置" :value="0" />
-                      <el-option label="增量位置" :value="1" />
+                      <el-option
+                        label="绝对位置"
+                        :value="0"
+                      />
+                      <el-option
+                        label="增量位置"
+                        :value="1"
+                      />
                     </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="目标位置" class="form-item">
+                  <el-form-item
+                    label="目标位置"
+                    class="form-item"
+                  >
                     <div class="input-with-unit">
                       <el-input-number 
                         v-model="pathConfigs[pathNum - 1].position_mm" 
@@ -73,7 +91,10 @@
               
               <el-row :gutter="24">
                 <el-col :span="12">
-                  <el-form-item label="速度" class="form-item">
+                  <el-form-item
+                    label="速度"
+                    class="form-item"
+                  >
                     <div class="input-with-unit">
                       <el-input-number 
                         v-model="pathConfigs[pathNum - 1].velocity_mm_s" 
@@ -88,7 +109,10 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="加速时间" class="form-item">
+                  <el-form-item
+                    label="加速时间"
+                    class="form-item"
+                  >
                     <div class="input-with-unit">
                       <el-input-number 
                         v-model="pathConfigs[pathNum - 1].accel_time" 
@@ -105,7 +129,10 @@
               
               <el-row :gutter="24">
                 <el-col :span="12">
-                  <el-form-item label="减速时间" class="form-item">
+                  <el-form-item
+                    label="减速时间"
+                    class="form-item"
+                  >
                     <div class="input-with-unit">
                       <el-input-number 
                         v-model="pathConfigs[pathNum - 1].decel_time" 
@@ -119,7 +146,10 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                  <el-form-item label="停留时间" class="form-item">
+                  <el-form-item
+                    label="停留时间"
+                    class="form-item"
+                  >
                     <div class="input-with-unit">
                       <el-input-number 
                         v-model="pathConfigs[pathNum - 1].dwell_time" 
@@ -136,7 +166,10 @@
               
               <el-row :gutter="24">
                 <el-col :span="12">
-                  <el-form-item label="特殊参数" class="form-item">
+                  <el-form-item
+                    label="特殊参数"
+                    class="form-item"
+                  >
                     <el-input-number 
                       v-model="pathConfigs[pathNum - 1].special_param" 
                       :min="0" 
@@ -152,8 +185,8 @@
                 <el-button 
                   type="success" 
                   :loading="motorStore.loading.prConfig" 
-                  @click="savePath(pathNum)"
                   class="action-btn"
+                  @click="savePath(pathNum)"
                 >
                   <el-icon><Check /></el-icon>
                   保存路径 {{ pathNum }}
@@ -162,8 +195,8 @@
                   type="primary" 
                   :loading="motorStore.loading.prTrigger" 
                   :disabled="!motorStore.canControl"
-                  @click="triggerPath(pathNum)"
                   class="action-btn trigger-btn"
+                  @click="triggerPath(pathNum)"
                 >
                   <el-icon><VideoPlay /></el-icon>
                   触发路径 {{ pathNum }}

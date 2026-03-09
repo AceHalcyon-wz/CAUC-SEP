@@ -10,11 +10,15 @@
   <div class="design-system-examples">
     <!-- 色彩系统示例 -->
     <section class="example-section">
-      <h2 class="section-title">色彩系统</h2>
+      <h2 class="section-title">
+        色彩系统
+      </h2>
       
       <!-- 主色 -->
       <div class="color-group">
-        <h3 class="group-title">主色（Primary）</h3>
+        <h3 class="group-title">
+          主色（Primary）
+        </h3>
         <div class="color-swatches">
           <div 
             v-for="level in [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]" 
@@ -29,7 +33,9 @@
       
       <!-- 辅助色 -->
       <div class="color-group">
-        <h3 class="group-title">辅助色（Secondary）</h3>
+        <h3 class="group-title">
+          辅助色（Secondary）
+        </h3>
         <div class="color-swatches">
           <div 
             v-for="level in [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]" 
@@ -44,18 +50,32 @@
       
       <!-- 功能色 -->
       <div class="color-group">
-        <h3 class="group-title">功能色</h3>
+        <h3 class="group-title">
+          功能色
+        </h3>
         <div class="color-swatches">
-          <div class="color-swatch" style="background-color: var(--color-success)">
+          <div
+            class="color-swatch"
+            style="background-color: var(--color-success)"
+          >
             <span class="light-text">成功</span>
           </div>
-          <div class="color-swatch" style="background-color: var(--color-warning)">
+          <div
+            class="color-swatch"
+            style="background-color: var(--color-warning)"
+          >
             <span>警告</span>
           </div>
-          <div class="color-swatch" style="background-color: var(--color-error)">
+          <div
+            class="color-swatch"
+            style="background-color: var(--color-error)"
+          >
             <span class="light-text">错误</span>
           </div>
-          <div class="color-swatch" style="background-color: var(--color-info)">
+          <div
+            class="color-swatch"
+            style="background-color: var(--color-info)"
+          >
             <span class="light-text">信息</span>
           </div>
         </div>
@@ -64,26 +84,34 @@
     
     <!-- 间距系统示例 -->
     <section class="example-section">
-      <h2 class="section-title">间距系统</h2>
+      <h2 class="section-title">
+        间距系统
+      </h2>
       <div class="spacing-examples">
         <div 
           v-for="level in [1, 2, 3, 4, 5, 6, 8, 10, 12]" 
           :key="level"
           class="spacing-item"
         >
-          <div class="spacing-label">spacing-{{ level }}</div>
+          <div class="spacing-label">
+            spacing-{{ level }}
+          </div>
           <div 
             class="spacing-box"
             :style="{ width: `var(--spacing-${level})`, height: `var(--spacing-${level})` }"
-          ></div>
-          <div class="spacing-value">{{ getSpacingValue(level) }}</div>
+          />
+          <div class="spacing-value">
+            {{ getSpacingValue(level) }}
+          </div>
         </div>
       </div>
     </section>
     
     <!-- 圆角系统示例 -->
     <section class="example-section">
-      <h2 class="section-title">圆角系统</h2>
+      <h2 class="section-title">
+        圆角系统
+      </h2>
       <div class="radius-examples">
         <div 
           v-for="size in ['xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', 'full']" 
@@ -98,7 +126,9 @@
     
     <!-- 阴影系统示例 -->
     <section class="example-section">
-      <h2 class="section-title">阴影系统</h2>
+      <h2 class="section-title">
+        阴影系统
+      </h2>
       <div class="shadow-examples">
         <div 
           v-for="size in ['sm', 'md', 'lg', 'xl']" 
@@ -113,10 +143,14 @@
     
     <!-- 字体系统示例 -->
     <section class="example-section">
-      <h2 class="section-title">字体系统</h2>
+      <h2 class="section-title">
+        字体系统
+      </h2>
       
       <div class="font-examples">
-        <h3 class="group-title">字体大小</h3>
+        <h3 class="group-title">
+          字体大小
+        </h3>
         <div 
           v-for="size in ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl']" 
           :key="size"
@@ -128,7 +162,9 @@
       </div>
       
       <div class="font-examples">
-        <h3 class="group-title">字重</h3>
+        <h3 class="group-title">
+          字重
+        </h3>
         <div 
           v-for="weight in ['light', 'normal', 'medium', 'semibold', 'bold']" 
           :key="weight"
@@ -140,14 +176,25 @@
       </div>
       
       <div class="font-examples">
-        <h3 class="group-title">字体族</h3>
-        <div class="font-family-item" style="font-family: var(--font-family-chinese)">
+        <h3 class="group-title">
+          字体族
+        </h3>
+        <div
+          class="font-family-item"
+          style="font-family: var(--font-family-chinese)"
+        >
           中文字体：自旋电子器件实验平台
         </div>
-        <div class="font-family-item" style="font-family: var(--font-family-english)">
+        <div
+          class="font-family-item"
+          style="font-family: var(--font-family-english)"
+        >
           English Font: Spintronic Device Platform
         </div>
-        <div class="font-family-item" style="font-family: var(--font-family-mono)">
+        <div
+          class="font-family-item"
+          style="font-family: var(--font-family-mono)"
+        >
           Mono Font: 12345.67890
         </div>
       </div>
@@ -155,88 +202,166 @@
     
     <!-- 动画过渡示例 -->
     <section class="example-section">
-      <h2 class="section-title">动画过渡</h2>
+      <h2 class="section-title">
+        动画过渡
+      </h2>
       
       <div class="transition-examples">
         <div class="transition-item">
-          <div class="transition-label">transition-fast (150ms)</div>
-          <div class="transition-box" style="transition: all var(--transition-fast)"></div>
+          <div class="transition-label">
+            transition-fast (150ms)
+          </div>
+          <div
+            class="transition-box"
+            style="transition: all var(--transition-fast)"
+          />
         </div>
         <div class="transition-item">
-          <div class="transition-label">transition-base (200ms)</div>
-          <div class="transition-box" style="transition: all var(--transition-base)"></div>
+          <div class="transition-label">
+            transition-base (200ms)
+          </div>
+          <div
+            class="transition-box"
+            style="transition: all var(--transition-base)"
+          />
         </div>
         <div class="transition-item">
-          <div class="transition-label">transition-slow (300ms)</div>
-          <div class="transition-box" style="transition: all var(--transition-slow)"></div>
+          <div class="transition-label">
+            transition-slow (300ms)
+          </div>
+          <div
+            class="transition-box"
+            style="transition: all var(--transition-slow)"
+          />
         </div>
       </div>
     </section>
     
     <!-- 状态指示器示例 -->
     <section class="example-section">
-      <h2 class="section-title">状态指示器</h2>
+      <h2 class="section-title">
+        状态指示器
+      </h2>
       
       <div class="status-examples">
-        <div class="status-item status-online">在线</div>
-        <div class="status-item status-offline">离线</div>
-        <div class="status-item status-warning">警告</div>
-        <div class="status-item status-error">错误</div>
-        <div class="status-item status-measuring">测量中</div>
-        <div class="status-item status-standby">待机</div>
+        <div class="status-item status-online">
+          在线
+        </div>
+        <div class="status-item status-offline">
+          离线
+        </div>
+        <div class="status-item status-warning">
+          警告
+        </div>
+        <div class="status-item status-error">
+          错误
+        </div>
+        <div class="status-item status-measuring">
+          测量中
+        </div>
+        <div class="status-item status-standby">
+          待机
+        </div>
       </div>
     </section>
     
     <!-- 数值显示示例 -->
     <section class="example-section">
-      <h2 class="section-title">数值显示</h2>
+      <h2 class="section-title">
+        数值显示
+      </h2>
       
       <div class="numeric-examples">
         <div class="numeric-item">
-          <div class="numeric-label">小号数值</div>
-          <div class="numeric-display numeric-display--small">1234.56</div>
+          <div class="numeric-label">
+            小号数值
+          </div>
+          <div class="numeric-display numeric-display--small">
+            1234.56
+          </div>
         </div>
         <div class="numeric-item">
-          <div class="numeric-label">标准数值</div>
-          <div class="numeric-display">7890.12</div>
+          <div class="numeric-label">
+            标准数值
+          </div>
+          <div class="numeric-display">
+            7890.12
+          </div>
         </div>
         <div class="numeric-item">
-          <div class="numeric-label">大号数值</div>
-          <div class="numeric-display numeric-display--large">3456.78</div>
+          <div class="numeric-label">
+            大号数值
+          </div>
+          <div class="numeric-display numeric-display--large">
+            3456.78
+          </div>
         </div>
       </div>
     </section>
     
     <!-- 按钮示例 -->
     <section class="example-section">
-      <h2 class="section-title">按钮样式</h2>
+      <h2 class="section-title">
+        按钮样式
+      </h2>
       
       <div class="button-examples">
-        <el-button type="primary">主按钮</el-button>
-        <el-button type="success">成功按钮</el-button>
-        <el-button type="warning">警告按钮</el-button>
-        <el-button type="danger">危险按钮</el-button>
-        <el-button type="info">信息按钮</el-button>
+        <el-button type="primary">
+          主按钮
+        </el-button>
+        <el-button type="success">
+          成功按钮
+        </el-button>
+        <el-button type="warning">
+          警告按钮
+        </el-button>
+        <el-button type="danger">
+          危险按钮
+        </el-button>
+        <el-button type="info">
+          信息按钮
+        </el-button>
       </div>
       
       <div class="button-examples">
         <el-button>默认按钮</el-button>
-        <el-button type="primary" plain>朴素按钮</el-button>
-        <el-button type="primary" round>圆角按钮</el-button>
-        <el-button type="primary" circle :icon="Plus" />
+        <el-button
+          type="primary"
+          plain
+        >
+          朴素按钮
+        </el-button>
+        <el-button
+          type="primary"
+          round
+        >
+          圆角按钮
+        </el-button>
+        <el-button
+          type="primary"
+          circle
+          :icon="Plus"
+        />
       </div>
     </section>
     
     <!-- 卡片示例 -->
     <section class="example-section">
-      <h2 class="section-title">卡片样式</h2>
+      <h2 class="section-title">
+        卡片样式
+      </h2>
       
       <div class="card-examples">
         <el-card class="example-card">
           <template #header>
             <div class="card-header">
               <span>标准卡片</span>
-              <el-button type="primary" size="small">操作</el-button>
+              <el-button
+                type="primary"
+                size="small"
+              >
+                操作
+              </el-button>
             </div>
           </template>
           <div class="card-content">
@@ -245,7 +370,9 @@
         </el-card>
         
         <div class="data-panel">
-          <div class="panel-header">数据面板</div>
+          <div class="panel-header">
+            数据面板
+          </div>
           <div class="panel-content">
             <div class="data-row">
               <span class="param-label">温度</span>

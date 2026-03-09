@@ -3,14 +3,25 @@
     <!-- 页面标题 - 状态指示器位于顶部 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><Thermometer /></el-icon>
+        <el-icon class="header-icon">
+          <Thermometer />
+        </el-icon>
         <div class="header-text">
-          <h1 class="page-title">温度控制</h1>
-          <p class="page-description">精密恒温控制与程序升温</p>
+          <h1 class="page-title">
+            温度控制
+          </h1>
+          <p class="page-description">
+            精密恒温控制与程序升温
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <el-tag type="success" effect="dark" size="large" class="status-indicator">
+        <el-tag
+          type="success"
+          effect="dark"
+          size="large"
+          class="status-indicator"
+        >
           <el-icon><Thermometer /></el-icon>
           恒温控制
         </el-tag>
@@ -19,19 +30,32 @@
 
     <!-- 主内容区域 - 标签页布局 -->
     <div class="content-wrapper">
-      <el-tabs v-model="activeTab" type="border-card" class="main-tabs">
+      <el-tabs
+        v-model="activeTab"
+        type="border-card"
+        class="main-tabs"
+      >
         <!-- 温度控制面板 -->
-        <el-tab-pane label="温度控制" name="control">
+        <el-tab-pane
+          label="温度控制"
+          name="control"
+        >
           <TemperatureControl class="main-card" />
         </el-tab-pane>
 
         <!-- 温度曲线监控 -->
-        <el-tab-pane label="实时曲线" name="curve">
+        <el-tab-pane
+          label="实时曲线"
+          name="curve"
+        >
           <TemperatureCurve class="main-card" />
         </el-tab-pane>
 
         <!-- 程序升温配置 -->
-        <el-tab-pane label="程序升温" name="program">
+        <el-tab-pane
+          label="程序升温"
+          name="program"
+        >
           <TemperatureProgram class="main-card" />
         </el-tab-pane>
       </el-tabs>

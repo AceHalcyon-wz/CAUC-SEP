@@ -13,8 +13,8 @@
           </el-button>
           <el-button 
             :icon="Refresh" 
-            @click="refreshData"
             :loading="isRefreshing"
+            @click="refreshData"
           >
             刷新
           </el-button>
@@ -49,14 +49,28 @@
 
       <div class="toolbar-right">
         <el-dropdown @command="handleExportCommand">
-          <el-button type="success" :icon="Download">
-            导出数据 <el-icon class="el-icon--right"><arrow-down /></el-icon>
+          <el-button
+            type="success"
+            :icon="Download"
+          >
+            导出数据 <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="csv">导出为 CSV</el-dropdown-item>
-              <el-dropdown-item command="json">导出为 JSON</el-dropdown-item>
-              <el-dropdown-item divided command="screenshot">截图保存</el-dropdown-item>
+              <el-dropdown-item command="csv">
+                导出为 CSV
+              </el-dropdown-item>
+              <el-dropdown-item command="json">
+                导出为 JSON
+              </el-dropdown-item>
+              <el-dropdown-item
+                divided
+                command="screenshot"
+              >
+                截图保存
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -72,14 +86,27 @@
 
     <!-- 设备选择器面板 -->
     <el-collapse-transition>
-      <div v-show="showDeviceSelector" class="device-selector-panel">
+      <div
+        v-show="showDeviceSelector"
+        class="device-selector-panel"
+      >
         <el-card shadow="hover">
           <template #header>
             <div class="panel-header">
               <span><el-icon><Monitor /></el-icon> 多设备数据选择器</span>
               <div class="panel-actions">
-                <el-button size="small" @click="selectAllDevices">全选</el-button>
-                <el-button size="small" @click="deselectAllDevices">清空</el-button>
+                <el-button
+                  size="small"
+                  @click="selectAllDevices"
+                >
+                  全选
+                </el-button>
+                <el-button
+                  size="small"
+                  @click="deselectAllDevices"
+                >
+                  清空
+                </el-button>
               </div>
             </div>
           </template>
@@ -88,7 +115,10 @@
             <el-col 
               v-for="device in analysisStore.availableDevices" 
               :key="device.id"
-              :xs="24" :sm="12" :md="8" :lg="6"
+              :xs="24"
+              :sm="12"
+              :md="8"
+              :lg="6"
             >
               <el-card 
                 shadow="hover" 
@@ -112,7 +142,10 @@
                   </el-tag>
                 </div>
 
-                <div v-if="isSelectedDevice(device.id)" class="channel-list">
+                <div
+                  v-if="isSelectedDevice(device.id)"
+                  class="channel-list"
+                >
                   <el-checkbox-group 
                     v-model="selectedChannels[device.id]"
                     @change="handleChannelChange(device.id)"
@@ -140,7 +173,9 @@
 
           <div class="selection-summary">
             <el-tag>已选择 {{ analysisStore.selectedDeviceCount }} 个设备</el-tag>
-            <el-tag type="success">{{ analysisStore.selectedChannelCount }} 个通道</el-tag>
+            <el-tag type="success">
+              {{ analysisStore.selectedChannelCount }} 个通道
+            </el-tag>
           </div>
         </el-card>
       </div>
@@ -148,18 +183,30 @@
 
     <!-- 数据过滤面板 -->
     <el-collapse-transition>
-      <div v-show="showFilterPanel" class="filter-panel">
+      <div
+        v-show="showFilterPanel"
+        class="filter-panel"
+      >
         <el-card shadow="hover">
           <template #header>
             <div class="panel-header">
               <span><el-icon><Filter /></el-icon> 数据过滤条件</span>
-              <el-button size="small" @click="resetFilters">重置</el-button>
+              <el-button
+                size="small"
+                @click="resetFilters"
+              >
+                重置
+              </el-button>
             </div>
           </template>
 
           <el-form label-width="100px">
             <el-row :gutter="20">
-              <el-col :xs="24" :sm="12" :md="8">
+              <el-col
+                :xs="24"
+                :sm="12"
+                :md="8"
+              >
                 <el-form-item label="时间范围">
                   <el-date-picker
                     v-model="timeRangeValue"
@@ -174,7 +221,11 @@
                 </el-form-item>
               </el-col>
 
-              <el-col :xs="24" :sm="12" :md="8">
+              <el-col
+                :xs="24"
+                :sm="12"
+                :md="8"
+              >
                 <el-form-item label="数值范围">
                   <el-slider
                     v-model="valueRangeValue"
@@ -186,7 +237,11 @@
                 </el-form-item>
               </el-col>
 
-              <el-col :xs="24" :sm="12" :md="8">
+              <el-col
+                :xs="24"
+                :sm="12"
+                :md="8"
+              >
                 <el-form-item label="采样间隔">
                   <el-input-number
                     v-model="samplingInterval"
@@ -201,7 +256,10 @@
             </el-row>
 
             <el-row :gutter="20">
-              <el-col :xs="24" :sm="12">
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
                 <el-form-item label="数据平滑">
                   <el-switch 
                     v-model="enableSmoothing"
@@ -215,11 +273,17 @@
                     :step="2"
                     style="margin-left: 16px"
                   />
-                  <span v-if="enableSmoothing" class="form-hint">窗口大小</span>
+                  <span
+                    v-if="enableSmoothing"
+                    class="form-hint"
+                  >窗口大小</span>
                 </el-form-item>
               </el-col>
 
-              <el-col :xs="24" :sm="12">
+              <el-col
+                :xs="24"
+                :sm="12"
+              >
                 <el-form-item label="实时预览">
                   <el-switch v-model="realtimePreview" />
                 </el-form-item>
@@ -232,7 +296,10 @@
 
     <!-- 统计指标面板 -->
     <el-collapse-transition>
-      <div v-show="showStatisticsPanel" class="statistics-panel">
+      <div
+        v-show="showStatisticsPanel"
+        class="statistics-panel"
+      >
         <el-card shadow="hover">
           <template #header>
             <div class="panel-header">
@@ -243,11 +310,17 @@
             </div>
           </template>
 
-          <div v-if="!analysisStore.hasData" class="empty-state">
+          <div
+            v-if="!analysisStore.hasData"
+            class="empty-state"
+          >
             <el-empty description="暂无数据，请选择设备并开始采集" />
           </div>
 
-          <div v-else class="statistics-grid">
+          <div
+            v-else
+            class="statistics-grid"
+          >
             <div 
               v-for="(deviceStats, deviceId) in analysisStore.statistics" 
               :key="deviceId"
@@ -261,9 +334,14 @@
                 <el-col 
                   v-for="(stats, channelId) in deviceStats" 
                   :key="channelId"
-                  :xs="24" :sm="12" :md="8"
+                  :xs="24"
+                  :sm="12"
+                  :md="8"
                 >
-                  <el-card shadow="hover" class="stat-card">
+                  <el-card
+                    shadow="hover"
+                    class="stat-card"
+                  >
                     <div class="stat-header">
                       <span class="stat-channel">
                         {{ getChannelName(deviceId, channelId) }}
@@ -276,7 +354,11 @@
                       </el-tag>
                     </div>
 
-                    <el-descriptions :column="2" border size="small">
+                    <el-descriptions
+                      :column="2"
+                      border
+                      size="small"
+                    >
                       <el-descriptions-item label="数据点">
                         <span class="mono">{{ stats.count }}</span>
                       </el-descriptions-item>
@@ -320,8 +402,14 @@
     <div class="main-content">
       <el-row :gutter="24">
         <!-- 左侧：同步时间轴 -->
-        <el-col :xs="24" :lg="8">
-          <el-card shadow="hover" class="timeline-card">
+        <el-col
+          :xs="24"
+          :lg="8"
+        >
+          <el-card
+            shadow="hover"
+            class="timeline-card"
+          >
             <template #header>
               <div class="card-header">
                 <span><el-icon><Clock /></el-icon> 同步时间轴</span>
@@ -351,7 +439,10 @@
             <el-divider />
 
             <div class="timeline-controls">
-              <el-form label-width="80px" size="small">
+              <el-form
+                label-width="80px"
+                size="small"
+              >
                 <el-form-item label="显示网格">
                   <el-switch v-model="timeAxisConfig.showGrid" />
                 </el-form-item>
@@ -372,19 +463,31 @@
           </el-card>
 
           <!-- 对比视图配置 -->
-          <el-card shadow="hover" class="comparison-card">
+          <el-card
+            shadow="hover"
+            class="comparison-card"
+          >
             <template #header>
               <div class="card-header">
                 <span><el-icon><Grid /></el-icon> 对比视图</span>
               </div>
             </template>
 
-            <el-form label-width="80px" size="small">
+            <el-form
+              label-width="80px"
+              size="small"
+            >
               <el-form-item label="布局方式">
                 <el-radio-group v-model="comparisonConfig.layout">
-                  <el-radio-button label="horizontal">水平</el-radio-button>
-                  <el-radio-button label="vertical">垂直</el-radio-button>
-                  <el-radio-button label="grid">网格</el-radio-button>
+                  <el-radio-button label="horizontal">
+                    水平
+                  </el-radio-button>
+                  <el-radio-button label="vertical">
+                    垂直
+                  </el-radio-button>
+                  <el-radio-button label="grid">
+                    网格
+                  </el-radio-button>
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="归一化">
@@ -401,8 +504,15 @@
         </el-col>
 
         <!-- 右侧：数据图表 -->
-        <el-col :xs="24" :lg="16">
-          <el-card shadow="hover" class="chart-card" ref="chartCardRef">
+        <el-col
+          :xs="24"
+          :lg="16"
+        >
+          <el-card
+            ref="chartCardRef"
+            shadow="hover"
+            class="chart-card"
+          >
             <template #header>
               <div class="card-header">
                 <span><el-icon><TrendCharts /></el-icon> 实时数据图表</span>
@@ -425,15 +535,25 @@
               </div>
             </template>
 
-            <div v-if="!analysisStore.hasData" class="empty-chart">
+            <div
+              v-if="!analysisStore.hasData"
+              class="empty-chart"
+            >
               <el-empty description="暂无数据，请选择设备并开始采集">
-                <el-button type="primary" @click="showDeviceSelector = true">
+                <el-button
+                  type="primary"
+                  @click="showDeviceSelector = true"
+                >
                   选择设备
                 </el-button>
               </el-empty>
             </div>
 
-            <div v-else ref="chartRef" class="chart-container"></div>
+            <div
+              v-else
+              ref="chartRef"
+              class="chart-container"
+            />
           </el-card>
         </el-col>
       </el-row>
@@ -447,12 +567,18 @@
       :close-on-click-modal="false"
     >
       <el-form label-width="120px">
-        <el-divider content-position="left">导出格式</el-divider>
+        <el-divider content-position="left">
+          导出格式
+        </el-divider>
 
         <el-form-item label="默认格式">
           <el-radio-group v-model="exportConfig.format">
-            <el-radio label="csv">CSV</el-radio>
-            <el-radio label="json">JSON</el-radio>
+            <el-radio label="csv">
+              CSV
+            </el-radio>
+            <el-radio label="json">
+              JSON
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -464,7 +590,9 @@
           <el-switch v-model="exportConfig.includeStatistics" />
         </el-form-item>
 
-        <el-divider content-position="left">格式化选项</el-divider>
+        <el-divider content-position="left">
+          格式化选项
+        </el-divider>
 
         <el-form-item label="日期格式">
           <el-input v-model="exportConfig.dateFormat" />
@@ -479,10 +607,15 @@
         </el-form-item>
 
         <el-form-item label="分隔符">
-          <el-input v-model="exportConfig.separator" style="width: 100px" />
+          <el-input
+            v-model="exportConfig.separator"
+            style="width: 100px"
+          />
         </el-form-item>
 
-        <el-divider content-position="left">截图选项</el-divider>
+        <el-divider content-position="left">
+          截图选项
+        </el-divider>
 
         <el-form-item label="背景颜色">
           <el-color-picker v-model="screenshotBackgroundColor" />
@@ -498,8 +631,15 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="showSettingsDialog = false">取消</el-button>
-        <el-button type="primary" @click="applyExportSettings">应用</el-button>
+        <el-button @click="showSettingsDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="applyExportSettings"
+        >
+          应用
+        </el-button>
       </template>
     </el-dialog>
   </div>

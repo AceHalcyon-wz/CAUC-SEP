@@ -89,7 +89,7 @@ const mockIndexedDB = () => {
                   if (!range) return true
                   return item.expiresAt && item.expiresAt <= range.upper
                 })
-                let index = 0
+                const index = 0
                 return {
                   onsuccess: null,
                   result: items[index] ? { value: items[index], delete: vi.fn(), continue: vi.fn() } : null
@@ -371,8 +371,8 @@ describe('OfflineQueue', () => {
       
       // 第一次处理应该失败
       await queue.processAll()
-      let operations = await queue.getOperations()
-      let op = operations.find(o => o.id === id)
+      const operations = await queue.getOperations()
+      const op = operations.find(o => o.id === id)
       expect(op.retryCount).toBe(1)
       expect(op.status).toBe(OperationStatus.PENDING)
     })

@@ -511,34 +511,43 @@ onUnmounted(() => {
       }"
     >
       <!-- 最小化状态 -->
-      <div v-if="minimized" class="notification-minimized" @click="expandNotification">
+      <div
+        v-if="minimized"
+        class="notification-minimized"
+        @click="expandNotification"
+      >
         <span class="minimized-icon">{{ priorityStyle.icon }}</span>
         <span class="minimized-text">有新版本可用</span>
         <span class="minimized-badge">{{ updateInfo?.latest_version }}</span>
       </div>
 
       <!-- 完整通知 -->
-      <div v-else class="notification-content">
+      <div
+        v-else
+        class="notification-content"
+      >
         <!-- 头部 -->
         <div class="notification-header">
           <div class="header-left">
             <span class="header-icon">{{ priorityStyle.icon }}</span>
-            <h3 class="header-title">{{ notificationTitle }}</h3>
+            <h3 class="header-title">
+              {{ notificationTitle }}
+            </h3>
           </div>
           <div class="header-right">
             <button
               v-if="canClose"
               class="header-btn"
-              @click="minimizeNotification"
               title="最小化"
+              @click="minimizeNotification"
             >
               −
             </button>
             <button
               v-if="canClose"
               class="header-btn"
-              @click="closeNotification"
               title="关闭"
+              @click="closeNotification"
             >
               ×
             </button>
@@ -548,7 +557,10 @@ onUnmounted(() => {
         <!-- 内容区 -->
         <div class="notification-body">
           <!-- 更新可用 -->
-          <div v-if="status === UPDATE_STATUS.AVAILABLE" class="update-available">
+          <div
+            v-if="status === UPDATE_STATUS.AVAILABLE"
+            class="update-available"
+          >
             <div class="version-info">
               <div class="version-item">
                 <span class="version-label">当前版本：</span>
@@ -561,36 +573,56 @@ onUnmounted(() => {
             </div>
 
             <div class="update-meta">
-              <span class="meta-badge" :style="{ borderColor: priorityStyle.color }">
+              <span
+                class="meta-badge"
+                :style="{ borderColor: priorityStyle.color }"
+              >
                 {{ updateTypeText }}
               </span>
               <span class="meta-size">{{ updateInfo?.package_size_mb }} MB</span>
               <span class="meta-date">{{ updateInfo?.release_date }}</span>
             </div>
 
-            <div v-if="updateInfo?.changelog?.length" class="changelog">
-              <h4 class="changelog-title">更新内容：</h4>
+            <div
+              v-if="updateInfo?.changelog?.length"
+              class="changelog"
+            >
+              <h4 class="changelog-title">
+                更新内容：
+              </h4>
               <ul class="changelog-list">
-                <li v-for="(item, index) in updateInfo.changelog" :key="index">
+                <li
+                  v-for="(item, index) in updateInfo.changelog"
+                  :key="index"
+                >
                   {{ item }}
                 </li>
               </ul>
             </div>
 
-            <div v-if="updateInfo?.release_notes" class="release-notes">
+            <div
+              v-if="updateInfo?.release_notes"
+              class="release-notes"
+            >
               {{ updateInfo.release_notes }}
             </div>
           </div>
 
           <!-- 下载进度 -->
-          <div v-else-if="showDownloadProgress" class="download-progress">
+          <div
+            v-else-if="showDownloadProgress"
+            class="download-progress"
+          >
             <div class="progress-header">
               <span class="progress-text">正在下载更新...</span>
               <span class="progress-percent">{{ downloadProgress.percent.toFixed(1) }}%</span>
             </div>
 
             <div class="progress-bar">
-              <div class="progress-bar-fill" :style="downloadProgressStyle"></div>
+              <div
+                class="progress-bar-fill"
+                :style="downloadProgressStyle"
+              />
             </div>
 
             <div class="progress-details">
@@ -600,7 +632,10 @@ onUnmounted(() => {
           </div>
 
           <!-- 安装进度 -->
-          <div v-else-if="showInstallProgress" class="install-progress">
+          <div
+            v-else-if="showInstallProgress"
+            class="install-progress"
+          >
             <div class="progress-header">
               <span class="progress-text">{{ installProgress.currentStep }}</span>
               <span class="progress-percent">{{ installProgress.percent }}%</span>
@@ -610,29 +645,56 @@ onUnmounted(() => {
               <div
                 class="progress-bar-fill"
                 :style="{ width: `${installProgress.percent}%` }"
-              ></div>
+              />
             </div>
           </div>
 
           <!-- 更新就绪 -->
-          <div v-else-if="status === UPDATE_STATUS.READY" class="update-ready">
-            <div class="ready-icon">✓</div>
-            <p class="ready-text">更新已下载完成，可以立即安装</p>
-            <p class="ready-hint">建议在空闲时安装，安装过程需要重启服务</p>
+          <div
+            v-else-if="status === UPDATE_STATUS.READY"
+            class="update-ready"
+          >
+            <div class="ready-icon">
+              ✓
+            </div>
+            <p class="ready-text">
+              更新已下载完成，可以立即安装
+            </p>
+            <p class="ready-hint">
+              建议在空闲时安装，安装过程需要重启服务
+            </p>
           </div>
 
           <!-- 更新完成 -->
-          <div v-else-if="status === UPDATE_STATUS.COMPLETED" class="update-completed">
-            <div class="completed-icon">✓</div>
-            <p class="completed-text">更新已成功安装！</p>
-            <p class="completed-hint">请重启应用以完成更新</p>
+          <div
+            v-else-if="status === UPDATE_STATUS.COMPLETED"
+            class="update-completed"
+          >
+            <div class="completed-icon">
+              ✓
+            </div>
+            <p class="completed-text">
+              更新已成功安装！
+            </p>
+            <p class="completed-hint">
+              请重启应用以完成更新
+            </p>
           </div>
 
           <!-- 更新失败 -->
-          <div v-else-if="status === UPDATE_STATUS.FAILED" class="update-failed">
-            <div class="failed-icon">✕</div>
-            <p class="failed-text">更新失败</p>
-            <p class="failed-reason">{{ errorMessage }}</p>
+          <div
+            v-else-if="status === UPDATE_STATUS.FAILED"
+            class="update-failed"
+          >
+            <div class="failed-icon">
+              ✕
+            </div>
+            <p class="failed-text">
+              更新失败
+            </p>
+            <p class="failed-reason">
+              {{ errorMessage }}
+            </p>
           </div>
         </div>
 
@@ -642,22 +704,22 @@ onUnmounted(() => {
           <template v-if="status === UPDATE_STATUS.AVAILABLE">
             <button
               class="btn btn-secondary"
-              @click="viewUpdateDetails"
               :disabled="processing"
+              @click="viewUpdateDetails"
             >
               查看详情
             </button>
             <button
               class="btn btn-secondary"
-              @click="remindLater"
               :disabled="processing"
+              @click="remindLater"
             >
               稍后提醒
             </button>
             <button
               class="btn btn-primary"
-              @click="installNow"
               :disabled="processing"
+              @click="installNow"
             >
               立即更新
             </button>
@@ -665,7 +727,10 @@ onUnmounted(() => {
 
           <!-- 下载中 -->
           <template v-else-if="status === UPDATE_STATUS.DOWNLOADING">
-            <button class="btn btn-secondary" disabled>
+            <button
+              class="btn btn-secondary"
+              disabled
+            >
               后台下载中...
             </button>
           </template>
@@ -674,15 +739,15 @@ onUnmounted(() => {
           <template v-else-if="status === UPDATE_STATUS.READY">
             <button
               class="btn btn-secondary"
-              @click="remindLater"
               :disabled="processing"
+              @click="remindLater"
             >
               稍后安装
             </button>
             <button
               class="btn btn-primary"
-              @click="installNow"
               :disabled="processing"
+              @click="installNow"
             >
               立即安装
             </button>
@@ -690,17 +755,26 @@ onUnmounted(() => {
 
           <!-- 更新完成 -->
           <template v-else-if="status === UPDATE_STATUS.COMPLETED">
-            <button class="btn btn-primary" @click="closeNotification">
+            <button
+              class="btn btn-primary"
+              @click="closeNotification"
+            >
               确定
             </button>
           </template>
 
           <!-- 更新失败 -->
           <template v-else-if="status === UPDATE_STATUS.FAILED">
-            <button class="btn btn-secondary" @click="closeNotification">
+            <button
+              class="btn btn-secondary"
+              @click="closeNotification"
+            >
               关闭
             </button>
-            <button class="btn btn-primary" @click="checkUpdate">
+            <button
+              class="btn btn-primary"
+              @click="checkUpdate"
+            >
               重试
             </button>
           </template>

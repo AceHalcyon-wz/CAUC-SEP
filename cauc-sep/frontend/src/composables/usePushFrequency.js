@@ -90,7 +90,7 @@ export function usePushFrequency(options = {}) {
   const frequencyCallbacks = new Set()
 
   /** 频率变更定时器 */
-  let frequencyTimer = null
+  const frequencyTimer = null
 
   // ==================== 计算属性 ====================
 

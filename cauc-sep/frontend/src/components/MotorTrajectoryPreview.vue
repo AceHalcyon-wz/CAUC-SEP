@@ -3,7 +3,9 @@
     <template #header>
       <div class="card-header">
         <div class="header-left">
-          <el-icon class="header-icon"><TrendCharts /></el-icon>
+          <el-icon class="header-icon">
+            <TrendCharts />
+          </el-icon>
           <span class="header-title">轨迹预览</span>
         </div>
         <div class="header-actions">
@@ -35,7 +37,7 @@
           class="trajectory-canvas"
           :width="canvasWidth"
           :height="canvasHeight"
-        ></canvas>
+        />
       </div>
 
       <!-- 运动参数显示 -->

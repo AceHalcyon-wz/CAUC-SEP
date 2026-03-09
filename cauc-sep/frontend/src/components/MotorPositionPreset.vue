@@ -3,7 +3,9 @@
     <template #header>
       <div class="card-header">
         <div class="header-left">
-          <el-icon class="header-icon"><Collection /></el-icon>
+          <el-icon class="header-icon">
+            <Collection />
+          </el-icon>
           <span class="header-title">位置预设</span>
         </div>
         <el-button
@@ -19,7 +21,10 @@
 
     <div class="preset-content">
       <!-- 预设列表 -->
-      <div v-if="motorStore.positionPresets.length > 0" class="preset-list">
+      <div
+        v-if="motorStore.positionPresets.length > 0"
+        class="preset-list"
+      >
         <div
           v-for="preset in motorStore.positionPresets"
           :key="preset.id"
@@ -28,7 +33,9 @@
         >
           <div class="preset-info">
             <div class="preset-header">
-              <el-icon class="preset-icon"><Location /></el-icon>
+              <el-icon class="preset-icon">
+                <Location />
+              </el-icon>
               <span class="preset-name">{{ preset.name }}</span>
             </div>
             <div class="preset-details">
@@ -41,7 +48,10 @@
                 {{ preset.velocity }} mm/s
               </span>
             </div>
-            <div v-if="preset.description" class="preset-description">
+            <div
+              v-if="preset.description"
+              class="preset-description"
+            >
               {{ preset.description }}
             </div>
           </div>
@@ -70,7 +80,10 @@
               @confirm="deletePreset(preset.id)"
             >
               <template #reference>
-                <el-button type="danger" size="small">
+                <el-button
+                  type="danger"
+                  size="small"
+                >
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </template>
@@ -86,7 +99,10 @@
         :image-size="120"
         class="empty-state"
       >
-        <el-button type="primary" @click="showAddDialog">
+        <el-button
+          type="primary"
+          @click="showAddDialog"
+        >
           添加第一个预设
         </el-button>
       </el-empty>
@@ -105,7 +121,10 @@
         :rules="presetRules"
         label-width="100px"
       >
-        <el-form-item label="预设名称" prop="name">
+        <el-form-item
+          label="预设名称"
+          prop="name"
+        >
           <el-input
             v-model="presetForm.name"
             placeholder="请输入预设名称"
@@ -114,7 +133,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="目标位置" prop="position">
+        <el-form-item
+          label="目标位置"
+          prop="position"
+        >
           <el-input-number
             v-model="presetForm.position"
             :min="motorStore.limits.negative_mm"
@@ -126,7 +148,10 @@
           <span class="unit-label">mm</span>
         </el-form-item>
 
-        <el-form-item label="运动速度" prop="velocity">
+        <el-form-item
+          label="运动速度"
+          prop="velocity"
+        >
           <el-input-number
             v-model="presetForm.velocity"
             :min="1"
@@ -150,7 +175,10 @@
         </el-form-item>
 
         <el-form-item label="当前位置">
-          <el-tag type="info" size="large">
+          <el-tag
+            type="info"
+            size="large"
+          >
             {{ motorStore.positionMm.toFixed(3) }} mm
           </el-tag>
           <el-button
@@ -164,8 +192,14 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="savePreset">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="saving"
+          @click="savePreset"
+        >
           {{ isEditing ? '保存' : '添加' }}
         </el-button>
       </template>

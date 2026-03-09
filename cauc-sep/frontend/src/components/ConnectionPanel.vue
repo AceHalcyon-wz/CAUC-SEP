@@ -2,7 +2,9 @@
   <el-card class="connection-panel">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Link /></el-icon>
+        <el-icon class="header-icon">
+          <Link />
+        </el-icon>
         <span class="header-title">连接控制</span>
       </div>
     </template>
@@ -19,7 +21,7 @@
               'status-dot--connecting': motorStore.isConnecting,
               'status-dot--disconnected': !motorStore.isConnected && !motorStore.isConnecting
             }"
-          ></span>
+          />
           <el-tag 
             :type="statusType" 
             effect="dark" 
@@ -41,7 +43,7 @@
               'status-dot--connected': motorStore.wsConnected,
               'status-dot--disconnected': !motorStore.wsConnected
             }"
-          ></span>
+          />
           <el-tag 
             :type="motorStore.wsConnected ? 'success' : 'info'" 
             size="small"
@@ -83,24 +85,65 @@
         <span>串口配置</span>
       </el-divider>
       
-      <el-form :model="config" label-width="80px" size="small" class="config-form">
+      <el-form
+        :model="config"
+        label-width="80px"
+        size="small"
+        class="config-form"
+      >
         <el-form-item label="串口号">
-          <el-select v-model="config.port" class="form-select">
-            <el-option label="COM1" value="COM1" />
-            <el-option label="COM2" value="COM2" />
-            <el-option label="COM3" value="COM3" />
-            <el-option label="COM4" value="COM4" />
-            <el-option label="COM5" value="COM5" />
+          <el-select
+            v-model="config.port"
+            class="form-select"
+          >
+            <el-option
+              label="COM1"
+              value="COM1"
+            />
+            <el-option
+              label="COM2"
+              value="COM2"
+            />
+            <el-option
+              label="COM3"
+              value="COM3"
+            />
+            <el-option
+              label="COM4"
+              value="COM4"
+            />
+            <el-option
+              label="COM5"
+              value="COM5"
+            />
           </el-select>
         </el-form-item>
         
         <el-form-item label="波特率">
-          <el-select v-model="config.baudrate" class="form-select">
-            <el-option label="9600" :value="9600" />
-            <el-option label="19200" :value="19200" />
-            <el-option label="38400" :value="38400" />
-            <el-option label="57600" :value="57600" />
-            <el-option label="115200" :value="115200" />
+          <el-select
+            v-model="config.baudrate"
+            class="form-select"
+          >
+            <el-option
+              label="9600"
+              :value="9600"
+            />
+            <el-option
+              label="19200"
+              :value="19200"
+            />
+            <el-option
+              label="38400"
+              :value="38400"
+            />
+            <el-option
+              label="57600"
+              :value="57600"
+            />
+            <el-option
+              label="115200"
+              :value="115200"
+            />
           </el-select>
         </el-form-item>
         

@@ -10,18 +10,32 @@
   >
     <div class="error-display">
       <!-- 错误概览 -->
-      <div class="error-overview" :class="`severity-${errorInfo?.severity || 'medium'}`">
-        <div class="error-icon-wrapper" :style="{ backgroundColor: severityBgColor }">
-          <el-icon class="error-icon" :style="{ color: severityColor }">
+      <div
+        class="error-overview"
+        :class="`severity-${errorInfo?.severity || 'medium'}`"
+      >
+        <div
+          class="error-icon-wrapper"
+          :style="{ backgroundColor: severityBgColor }"
+        >
+          <el-icon
+            class="error-icon"
+            :style="{ color: severityColor }"
+          >
             <component :is="errorIcon" />
           </el-icon>
         </div>
 
         <div class="error-info">
           <div class="error-header-row">
-            <h3 class="error-title">{{ displayTitle }}</h3>
+            <h3 class="error-title">
+              {{ displayTitle }}
+            </h3>
             <div class="error-actions">
-              <el-tooltip content="复制错误信息" placement="top">
+              <el-tooltip
+                content="复制错误信息"
+                placement="top"
+              >
                 <el-button
                   circle
                   size="small"
@@ -30,7 +44,10 @@
                   <el-icon><CopyDocument /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="复制堆栈信息" placement="top">
+              <el-tooltip
+                content="复制堆栈信息"
+                placement="top"
+              >
                 <el-button
                   circle
                   size="small"
@@ -41,22 +58,39 @@
               </el-tooltip>
             </div>
           </div>
-          <p class="error-message">{{ displayMessage }}</p>
+          <p class="error-message">
+            {{ displayMessage }}
+          </p>
 
           <div class="error-meta">
-            <el-tag :type="severityTagType" effect="dark" size="small">
-              <el-icon class="tag-icon"><component :is="severityIcon" /></el-icon>
+            <el-tag
+              :type="severityTagType"
+              effect="dark"
+              size="small"
+            >
+              <el-icon class="tag-icon">
+                <component :is="severityIcon" />
+              </el-icon>
               {{ severityLabel }}
             </el-tag>
-            <el-tag type="info" effect="plain" size="small">
-              <el-icon class="tag-icon"><component :is="typeIconComponent" /></el-icon>
+            <el-tag
+              type="info"
+              effect="plain"
+              size="small"
+            >
+              <el-icon class="tag-icon">
+                <component :is="typeIconComponent" />
+              </el-icon>
               {{ typeLabel }}
             </el-tag>
             <span class="error-time">
               <el-icon><Clock /></el-icon>
               {{ formattedTime }}
             </span>
-            <span v-if="errorInfo?.id" class="error-id">
+            <span
+              v-if="errorInfo?.id"
+              class="error-id"
+            >
               <el-icon><Key /></el-icon>
               {{ errorInfo.id.slice(-8) }}
             </span>
@@ -65,23 +99,38 @@
       </div>
 
       <!-- 标签页切换 -->
-      <el-tabs v-model="activeTab" class="error-tabs">
+      <el-tabs
+        v-model="activeTab"
+        class="error-tabs"
+      >
         <!-- 解决方案标签页 -->
-        <el-tab-pane label="解决方案" name="solution">
+        <el-tab-pane
+          label="解决方案"
+          name="solution"
+        >
           <ErrorSolution
             v-if="errorInfo?.solution"
             :solution="errorInfo.solution"
             @auto-action="handleAutoAction"
           />
-          <el-empty v-else description="暂无解决方案" />
+          <el-empty
+            v-else
+            description="暂无解决方案"
+          />
         </el-tab-pane>
 
         <!-- 错误详情标签页 -->
-        <el-tab-pane label="错误详情" name="detail">
+        <el-tab-pane
+          label="错误详情"
+          name="detail"
+        >
           <div class="error-detail">
             <!-- 错误消息 -->
             <div class="detail-section">
-              <div class="section-header" @click="toggleSection('message')">
+              <div
+                class="section-header"
+                @click="toggleSection('message')"
+              >
                 <div class="section-title">
                   <el-icon><Message /></el-icon>
                   <h4>错误消息</h4>
@@ -95,31 +144,49 @@
                     <el-icon><CopyDocument /></el-icon>
                     <span>复制</span>
                   </el-button>
-                  <el-icon class="collapse-icon" :class="{ expanded: expandedSections.message }">
+                  <el-icon
+                    class="collapse-icon"
+                    :class="{ expanded: expandedSections.message }"
+                  >
                     <ArrowDown />
                   </el-icon>
                 </div>
               </div>
               <el-collapse-transition>
-                <div v-show="expandedSections.message" class="detail-content">
+                <div
+                  v-show="expandedSections.message"
+                  class="detail-content"
+                >
                   <pre class="error-text">{{ errorInfo?.message }}</pre>
                 </div>
               </el-collapse-transition>
             </div>
 
             <!-- 错误上下文 -->
-            <div v-if="errorInfo?.context" class="detail-section">
-              <div class="section-header" @click="toggleSection('context')">
+            <div
+              v-if="errorInfo?.context"
+              class="detail-section"
+            >
+              <div
+                class="section-header"
+                @click="toggleSection('context')"
+              >
                 <div class="section-title">
                   <el-icon><InfoFilled /></el-icon>
                   <h4>错误上下文</h4>
                 </div>
-                <el-icon class="collapse-icon" :class="{ expanded: expandedSections.context }">
+                <el-icon
+                  class="collapse-icon"
+                  :class="{ expanded: expandedSections.context }"
+                >
                   <ArrowDown />
                 </el-icon>
               </div>
               <el-collapse-transition>
-                <div v-show="expandedSections.context" class="detail-content">
+                <div
+                  v-show="expandedSections.context"
+                  class="detail-content"
+                >
                   <div class="context-item">
                     <span class="context-label">组件:</span>
                     <span class="context-value">{{ errorInfo.context.component }}</span>
@@ -132,7 +199,10 @@
                     <span class="context-label">路由:</span>
                     <span class="context-value">{{ errorInfo.context.route }}</span>
                   </div>
-                  <div v-if="errorInfo.context.userMessage" class="context-item">
+                  <div
+                    v-if="errorInfo.context.userMessage"
+                    class="context-item"
+                  >
                     <span class="context-label">提示:</span>
                     <span class="context-value highlight">{{ errorInfo.context.userMessage }}</span>
                   </div>
@@ -141,12 +211,23 @@
             </div>
 
             <!-- 错误堆栈（可折叠） -->
-            <div v-if="errorInfo?.stack?.length" class="detail-section">
-              <div class="section-header" @click="toggleSection('stack')">
+            <div
+              v-if="errorInfo?.stack?.length"
+              class="detail-section"
+            >
+              <div
+                class="section-header"
+                @click="toggleSection('stack')"
+              >
                 <div class="section-title">
                   <el-icon><Document /></el-icon>
                   <h4>错误堆栈</h4>
-                  <el-tag size="small" type="info">{{ errorInfo.stack.length }} 行</el-tag>
+                  <el-tag
+                    size="small"
+                    type="info"
+                  >
+                    {{ errorInfo.stack.length }} 行
+                  </el-tag>
                 </div>
                 <div class="section-actions">
                   <el-button
@@ -157,13 +238,19 @@
                     <el-icon><CopyDocument /></el-icon>
                     <span>复制</span>
                   </el-button>
-                  <el-icon class="collapse-icon" :class="{ expanded: expandedSections.stack }">
+                  <el-icon
+                    class="collapse-icon"
+                    :class="{ expanded: expandedSections.stack }"
+                  >
                     <ArrowDown />
                   </el-icon>
                 </div>
               </div>
               <el-collapse-transition>
-                <div v-show="expandedSections.stack" class="detail-content">
+                <div
+                  v-show="expandedSections.stack"
+                  class="detail-content"
+                >
                   <pre class="stack-trace">{{ errorInfo.fullStack }}</pre>
                 </div>
               </el-collapse-transition>
@@ -172,11 +259,19 @@
         </el-tab-pane>
 
         <!-- 系统信息标签页 -->
-        <el-tab-pane label="系统信息" name="system">
-          <div v-if="errorInfo?.system" class="system-info">
+        <el-tab-pane
+          label="系统信息"
+          name="system"
+        >
+          <div
+            v-if="errorInfo?.system"
+            class="system-info"
+          >
             <!-- 基础信息 -->
             <div class="info-section">
-              <h4 class="info-title">基础信息</h4>
+              <h4 class="info-title">
+                基础信息
+              </h4>
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">平台:</span>
@@ -188,7 +283,10 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">在线状态:</span>
-                  <el-tag :type="errorInfo.system.online ? 'success' : 'danger'" size="small">
+                  <el-tag
+                    :type="errorInfo.system.online ? 'success' : 'danger'"
+                    size="small"
+                  >
                     {{ errorInfo.system.online ? '在线' : '离线' }}
                   </el-tag>
                 </div>
@@ -201,7 +299,9 @@
 
             <!-- 视口信息 -->
             <div class="info-section">
-              <h4 class="info-title">视口信息</h4>
+              <h4 class="info-title">
+                视口信息
+              </h4>
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">视口尺寸:</span>
@@ -215,8 +315,13 @@
             </div>
 
             <!-- 内存信息 -->
-            <div v-if="errorInfo.system.memory" class="info-section">
-              <h4 class="info-title">内存使用</h4>
+            <div
+              v-if="errorInfo.system.memory"
+              class="info-section"
+            >
+              <h4 class="info-title">
+                内存使用
+              </h4>
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">已用堆:</span>
@@ -235,7 +340,9 @@
 
             <!-- 用户代理 -->
             <div class="info-section">
-              <h4 class="info-title">用户代理</h4>
+              <h4 class="info-title">
+                用户代理
+              </h4>
               <div class="user-agent">
                 <pre>{{ errorInfo.system.userAgent }}</pre>
               </div>
@@ -244,8 +351,14 @@
         </el-tab-pane>
 
         <!-- 操作历史标签页 -->
-        <el-tab-pane label="操作历史" name="history">
-          <div v-if="errorInfo?.userActions?.length" class="action-history">
+        <el-tab-pane
+          label="操作历史"
+          name="history"
+        >
+          <div
+            v-if="errorInfo?.userActions?.length"
+            class="action-history"
+          >
             <el-timeline>
               <el-timeline-item
                 v-for="(action, index) in errorInfo.userActions"
@@ -255,19 +368,30 @@
                 :type="getActionType(index)"
               >
                 <div class="action-card">
-                  <div class="action-name">{{ action.action }}</div>
-                  <div v-if="action.route" class="action-route">
+                  <div class="action-name">
+                    {{ action.action }}
+                  </div>
+                  <div
+                    v-if="action.route"
+                    class="action-route"
+                  >
                     <el-icon><Location /></el-icon>
                     <span>{{ action.route }}</span>
                   </div>
-                  <div v-if="action.data" class="action-data">
+                  <div
+                    v-if="action.data"
+                    class="action-data"
+                  >
                     <pre>{{ JSON.stringify(action.data, null, 2) }}</pre>
                   </div>
                 </div>
               </el-timeline-item>
             </el-timeline>
           </div>
-          <el-empty v-else description="暂无操作历史" />
+          <el-empty
+            v-else
+            description="暂无操作历史"
+          />
         </el-tab-pane>
       </el-tabs>
 
@@ -294,7 +418,9 @@
       class="copy-success-dialog"
     >
       <div class="copy-success-content">
-        <el-icon class="success-icon"><CircleCheck /></el-icon>
+        <el-icon class="success-icon">
+          <CircleCheck />
+        </el-icon>
         <p>错误信息已复制到剪贴板</p>
       </div>
     </el-dialog>

@@ -22,17 +22,23 @@ const measurementData = ref({
   <div class="example-container">
     <!-- 标题区域 -->
     <header class="example-header">
-      <h1 class="title">设计令牌示例</h1>
+      <h1 class="title">
+        设计令牌示例
+      </h1>
     </header>
 
     <!-- 数据面板示例 -->
     <section class="data-section">
-      <h2 class="section-title">数据面板</h2>
+      <h2 class="section-title">
+        数据面板
+      </h2>
       
       <div class="data-grid">
         <!-- 数值显示 -->
         <div class="data-panel">
-          <div class="param-label">电压 (V)</div>
+          <div class="param-label">
+            电压 (V)
+          </div>
           <div class="numeric-display">
             {{ measurementData.voltage.toFixed(3) }}
             <span class="unit">V</span>
@@ -40,7 +46,9 @@ const measurementData = ref({
         </div>
 
         <div class="data-panel">
-          <div class="param-label">电流 (A)</div>
+          <div class="param-label">
+            电流 (A)
+          </div>
           <div class="numeric-display numeric-display--small">
             {{ measurementData.current.toFixed(4) }}
             <span class="unit">A</span>
@@ -48,7 +56,9 @@ const measurementData = ref({
         </div>
 
         <div class="data-panel">
-          <div class="param-label">电阻 (Ω)</div>
+          <div class="param-label">
+            电阻 (Ω)
+          </div>
           <div class="numeric-display">
             {{ measurementData.resistance.toFixed(2) }}
             <span class="unit">Ω</span>
@@ -56,7 +66,9 @@ const measurementData = ref({
         </div>
 
         <div class="data-panel">
-          <div class="param-label">温度 (K)</div>
+          <div class="param-label">
+            温度 (K)
+          </div>
           <div class="numeric-display numeric-display--large">
             {{ measurementData.temperature.toFixed(2) }}
             <span class="unit">K</span>
@@ -67,7 +79,9 @@ const measurementData = ref({
 
     <!-- 状态指示器示例 -->
     <section class="status-section">
-      <h2 class="section-title">状态指示器</h2>
+      <h2 class="section-title">
+        状态指示器
+      </h2>
       
       <div class="status-grid">
         <div class="status-item">
@@ -100,51 +114,93 @@ const measurementData = ref({
 
     <!-- 颜色系统示例 -->
     <section class="colors-section">
-      <h2 class="section-title">颜色系统</h2>
+      <h2 class="section-title">
+        颜色系统
+      </h2>
       
       <div class="color-group">
-        <h3 class="group-title">主色系</h3>
+        <h3 class="group-title">
+          主色系
+        </h3>
         <div class="color-swatches">
-          <div class="swatch" style="background: var(--color-primary-500)">
+          <div
+            class="swatch"
+            style="background: var(--color-primary-500)"
+          >
             <span class="swatch-label">Primary 500</span>
           </div>
-          <div class="swatch" style="background: var(--color-primary-600)">
+          <div
+            class="swatch"
+            style="background: var(--color-primary-600)"
+          >
             <span class="swatch-label">Primary 600</span>
           </div>
-          <div class="swatch" style="background: var(--color-accent-500)">
+          <div
+            class="swatch"
+            style="background: var(--color-accent-500)"
+          >
             <span class="swatch-label">Accent 500</span>
           </div>
-          <div class="swatch" style="background: var(--color-accent-600)">
+          <div
+            class="swatch"
+            style="background: var(--color-accent-600)"
+          >
             <span class="swatch-label">Accent 600</span>
           </div>
         </div>
       </div>
 
       <div class="color-group">
-        <h3 class="group-title">数据色</h3>
+        <h3 class="group-title">
+          数据色
+        </h3>
         <div class="color-swatches">
-          <div class="swatch" style="background: var(--color-data-blue)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-blue)"
+          >
             <span class="swatch-label">Blue</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-cyan)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-cyan)"
+          >
             <span class="swatch-label">Cyan</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-green)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-green)"
+          >
             <span class="swatch-label">Green</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-yellow)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-yellow)"
+          >
             <span class="swatch-label">Yellow</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-orange)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-orange)"
+          >
             <span class="swatch-label">Orange</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-red)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-red)"
+          >
             <span class="swatch-label">Red</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-purple)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-purple)"
+          >
             <span class="swatch-label">Purple</span>
           </div>
-          <div class="swatch" style="background: var(--color-data-pink)">
+          <div
+            class="swatch"
+            style="background: var(--color-data-pink)"
+          >
             <span class="swatch-label">Pink</span>
           </div>
         </div>
@@ -153,22 +209,39 @@ const measurementData = ref({
 
     <!-- 间距系统示例 -->
     <section class="spacing-section">
-      <h2 class="section-title">间距系统</h2>
+      <h2 class="section-title">
+        间距系统
+      </h2>
       
       <div class="spacing-demo">
-        <div class="spacing-item" style="width: var(--spacing-1); height: var(--spacing-1)">
+        <div
+          class="spacing-item"
+          style="width: var(--spacing-1); height: var(--spacing-1)"
+        >
           <span>4px</span>
         </div>
-        <div class="spacing-item" style="width: var(--spacing-2); height: var(--spacing-2)">
+        <div
+          class="spacing-item"
+          style="width: var(--spacing-2); height: var(--spacing-2)"
+        >
           <span>8px</span>
         </div>
-        <div class="spacing-item" style="width: var(--spacing-4); height: var(--spacing-4)">
+        <div
+          class="spacing-item"
+          style="width: var(--spacing-4); height: var(--spacing-4)"
+        >
           <span>16px</span>
         </div>
-        <div class="spacing-item" style="width: var(--spacing-6); height: var(--spacing-6)">
+        <div
+          class="spacing-item"
+          style="width: var(--spacing-6); height: var(--spacing-6)"
+        >
           <span>24px</span>
         </div>
-        <div class="spacing-item" style="width: var(--spacing-8); height: var(--spacing-8)">
+        <div
+          class="spacing-item"
+          style="width: var(--spacing-8); height: var(--spacing-8)"
+        >
           <span>32px</span>
         </div>
       </div>
@@ -176,7 +249,9 @@ const measurementData = ref({
 
     <!-- 发光效果示例 -->
     <section class="glow-section">
-      <h2 class="section-title">发光效果</h2>
+      <h2 class="section-title">
+        发光效果
+      </h2>
       
       <div class="glow-grid">
         <div class="glow-box glow-primary">

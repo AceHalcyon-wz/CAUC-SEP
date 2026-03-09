@@ -4,10 +4,16 @@
     <div class="page-header">
       <div class="header-main">
         <div class="header-left">
-          <el-icon class="header-icon"><Setting /></el-icon>
+          <el-icon class="header-icon">
+            <Setting />
+          </el-icon>
           <div class="header-content">
-            <h1 class="page-title">PR 路径配置</h1>
-            <p class="page-subtitle">可视化配置和管理运动路径参数</p>
+            <h1 class="page-title">
+              PR 路径配置
+            </h1>
+            <p class="page-subtitle">
+              可视化配置和管理运动路径参数
+            </p>
           </div>
         </div>
         <div class="header-right">
@@ -15,24 +21,24 @@
             <el-button 
               type="primary" 
               :icon="Download"
-              @click="showExportDialog"
               class="action-button"
+              @click="showExportDialog"
             >
               导出配置
             </el-button>
             <el-button 
               type="success" 
               :icon="Upload"
-              @click="showImportDialog"
               class="action-button"
+              @click="showImportDialog"
             >
               导入配置
             </el-button>
             <el-button 
               type="warning" 
               :icon="FolderOpened"
-              @click="showTemplateDialog"
               class="action-button"
+              @click="showTemplateDialog"
             >
               模板管理
             </el-button>
@@ -43,7 +49,10 @@
 
     <!-- 主内容区：可视化编辑器 -->
     <div class="content-wrapper">
-      <el-row :gutter="24" class="content-row">
+      <el-row
+        :gutter="24"
+        class="content-row"
+      >
         <el-col :span="24">
           <PRPathEditor 
             ref="pathEditorRef"
@@ -55,13 +64,18 @@
       </el-row>
 
       <!-- 路径选择器 -->
-      <el-row :gutter="24" class="selector-row">
+      <el-row
+        :gutter="24"
+        class="selector-row"
+      >
         <el-col :span="24">
           <el-card class="path-selector-card">
             <template #header>
               <div class="card-header">
                 <div class="header-title-group">
-                  <el-icon class="header-icon"><Grid /></el-icon>
+                  <el-icon class="header-icon">
+                    <Grid />
+                  </el-icon>
                   <span class="header-title">路径选择</span>
                 </div>
                 <div class="header-actions">
@@ -69,15 +83,15 @@
                     type="primary" 
                     :icon="VideoPlay"
                     :disabled="!motorStore.canControl || !selectedPath"
-                    @click="executeSelectedPath"
                     size="small"
+                    @click="executeSelectedPath"
                   >
                     执行选中路径
                   </el-button>
                   <el-button 
                     :icon="RefreshRight"
-                    @click="resetCurrentPath"
                     size="small"
+                    @click="resetCurrentPath"
                   >
                     重置当前路径
                   </el-button>
@@ -97,12 +111,20 @@
                 }"
                 @click="selectPath(i)"
               >
-                <div class="path-number">{{ i }}</div>
+                <div class="path-number">
+                  {{ i }}
+                </div>
                 <div class="path-status">
-                  <el-icon v-if="isPathConfigured(i)" class="status-icon configured">
+                  <el-icon
+                    v-if="isPathConfigured(i)"
+                    class="status-icon configured"
+                  >
                     <CircleCheck />
                   </el-icon>
-                  <el-icon v-else class="status-icon empty">
+                  <el-icon
+                    v-else
+                    class="status-icon empty"
+                  >
                     <CircleClose />
                   </el-icon>
                 </div>
@@ -112,13 +134,28 @@
             <el-divider />
 
             <!-- 路径信息 -->
-            <div class="path-info" v-if="selectedPath">
-              <el-descriptions :column="4" border size="small">
+            <div
+              v-if="selectedPath"
+              class="path-info"
+            >
+              <el-descriptions
+                :column="4"
+                border
+                size="small"
+              >
                 <el-descriptions-item label="路径编号">
-                  <el-tag type="primary" effect="plain">{{ selectedPath }}</el-tag>
+                  <el-tag
+                    type="primary"
+                    effect="plain"
+                  >
+                    {{ selectedPath }}
+                  </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="配置状态">
-                  <el-tag :type="isPathConfigured(selectedPath) ? 'success' : 'info'" effect="plain">
+                  <el-tag
+                    :type="isPathConfigured(selectedPath) ? 'success' : 'info'"
+                    effect="plain"
+                  >
                     {{ isPathConfigured(selectedPath) ? '已配置' : '未配置' }}
                   </el-tag>
                 </el-descriptions-item>
@@ -149,32 +186,59 @@
         <el-form label-width="100px">
           <el-form-item label="导出范围">
             <el-radio-group v-model="exportScope">
-              <el-radio label="current">当前路径</el-radio>
-              <el-radio label="all">所有路径</el-radio>
-              <el-radio label="selected">选中路径</el-radio>
+              <el-radio label="current">
+                当前路径
+              </el-radio>
+              <el-radio label="all">
+                所有路径
+              </el-radio>
+              <el-radio label="selected">
+                选中路径
+              </el-radio>
             </el-radio-group>
           </el-form-item>
           
           <el-form-item label="文件格式">
-            <el-select v-model="exportFormat" style="width: 100%">
-              <el-option label="JSON" value="json" />
-              <el-option label="CSV" value="csv" />
+            <el-select
+              v-model="exportFormat"
+              style="width: 100%"
+            >
+              <el-option
+                label="JSON"
+                value="json"
+              />
+              <el-option
+                label="CSV"
+                value="csv"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item label="包含信息">
             <el-checkbox-group v-model="exportOptions">
-              <el-checkbox label="metadata">元数据</el-checkbox>
-              <el-checkbox label="timestamps">时间戳</el-checkbox>
-              <el-checkbox label="descriptions">描述信息</el-checkbox>
+              <el-checkbox label="metadata">
+                元数据
+              </el-checkbox>
+              <el-checkbox label="timestamps">
+                时间戳
+              </el-checkbox>
+              <el-checkbox label="descriptions">
+                描述信息
+              </el-checkbox>
             </el-checkbox-group>
           </el-form-item>
         </el-form>
       </div>
 
       <template #footer>
-        <el-button @click="handleExportDialogClose">取消</el-button>
-        <el-button type="primary" :icon="Download" @click="handleExport">
+        <el-button @click="handleExportDialogClose">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :icon="Download"
+          @click="handleExport"
+        >
           导出
         </el-button>
       </template>
@@ -199,7 +263,9 @@
           :on-change="handleFileChange"
           drag
         >
-          <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+          <el-icon class="el-icon--upload">
+            <UploadFilled />
+          </el-icon>
           <div class="el-upload__text">
             拖拽文件到此处或<em>点击上传</em>
           </div>
@@ -212,9 +278,16 @@
 
         <el-divider />
 
-        <el-form v-if="importPreview" label-width="100px">
+        <el-form
+          v-if="importPreview"
+          label-width="100px"
+        >
           <el-form-item label="文件信息">
-            <el-descriptions :column="2" border size="small">
+            <el-descriptions
+              :column="2"
+              border
+              size="small"
+            >
               <el-descriptions-item label="文件名">
                 {{ importPreview.fileName }}
               </el-descriptions-item>
@@ -232,16 +305,24 @@
 
           <el-form-item label="导入策略">
             <el-radio-group v-model="importStrategy">
-              <el-radio label="merge">合并（保留现有）</el-radio>
-              <el-radio label="overwrite">覆盖（替换现有）</el-radio>
-              <el-radio label="append">追加（添加到末尾）</el-radio>
+              <el-radio label="merge">
+                合并（保留现有）
+              </el-radio>
+              <el-radio label="overwrite">
+                覆盖（替换现有）
+              </el-radio>
+              <el-radio label="append">
+                追加（添加到末尾）
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-form>
       </div>
 
       <template #footer>
-        <el-button @click="handleImportDialogClose">取消</el-button>
+        <el-button @click="handleImportDialogClose">
+          取消
+        </el-button>
         <el-button 
           type="primary" 
           :icon="Upload"
@@ -273,8 +354,8 @@
                 <el-button 
                   type="primary" 
                   :icon="Plus"
-                  @click="showCreateTemplateDialog"
                   size="small"
+                  @click="showCreateTemplateDialog"
                 >
                   新建模板
                 </el-button>
@@ -297,7 +378,9 @@
                   @click="selectTemplate(template)"
                 >
                   <div class="template-info">
-                    <div class="template-name">{{ template.name }}</div>
+                    <div class="template-name">
+                      {{ template.name }}
+                    </div>
                     <div class="template-meta">
                       <span>{{ template.points.length }} 个点</span>
                       <span>{{ formatDate(template.updatedAt) }}</span>
@@ -309,24 +392,24 @@
                       :icon="Check"
                       circle
                       size="small"
-                      @click.stop="applyTemplate(template)"
                       title="应用模板"
+                      @click.stop="applyTemplate(template)"
                     />
                     <el-button
                       type="warning"
                       :icon="Download"
                       circle
                       size="small"
-                      @click.stop="exportTemplate(template)"
                       title="导出模板"
+                      @click.stop="exportTemplate(template)"
                     />
                     <el-button
                       type="danger"
                       :icon="Delete"
                       circle
                       size="small"
-                      @click.stop="deleteTemplate(template.id)"
                       title="删除模板"
+                      @click.stop="deleteTemplate(template.id)"
                     />
                   </div>
                 </div>
@@ -347,8 +430,14 @@
                 <h3>模板预览</h3>
               </div>
 
-              <div v-if="selectedTemplate" class="preview-content">
-                <el-descriptions :column="1" border>
+              <div
+                v-if="selectedTemplate"
+                class="preview-content"
+              >
+                <el-descriptions
+                  :column="1"
+                  border
+                >
                   <el-descriptions-item label="模板名称">
                     {{ selectedTemplate.name }}
                   </el-descriptions-item>
@@ -378,18 +467,45 @@
                     max-height="300"
                     size="small"
                   >
-                    <el-table-column prop="mode" label="模式" width="80">
+                    <el-table-column
+                      prop="mode"
+                      label="模式"
+                      width="80"
+                    >
                       <template #default="{ row }">
-                        <el-tag :type="row.mode === 0 ? 'primary' : 'success'" size="small">
+                        <el-tag
+                          :type="row.mode === 0 ? 'primary' : 'success'"
+                          size="small"
+                        >
                           {{ row.mode === 0 ? '绝对' : '增量' }}
                         </el-tag>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="position_mm" label="位置(mm)" width="100" />
-                    <el-table-column prop="velocity_mm_s" label="速度(mm/s)" width="110" />
-                    <el-table-column prop="accel_time" label="加速(ms)" width="90" />
-                    <el-table-column prop="decel_time" label="减速(ms)" width="90" />
-                    <el-table-column prop="dwell_time" label="停留(ms)" width="90" />
+                    <el-table-column
+                      prop="position_mm"
+                      label="位置(mm)"
+                      width="100"
+                    />
+                    <el-table-column
+                      prop="velocity_mm_s"
+                      label="速度(mm/s)"
+                      width="110"
+                    />
+                    <el-table-column
+                      prop="accel_time"
+                      label="加速(ms)"
+                      width="90"
+                    />
+                    <el-table-column
+                      prop="decel_time"
+                      label="减速(ms)"
+                      width="90"
+                    />
+                    <el-table-column
+                      prop="dwell_time"
+                      label="停留(ms)"
+                      width="90"
+                    />
                   </el-table>
                 </div>
               </div>
@@ -412,7 +528,9 @@
         >
           导入模板
         </el-button>
-        <el-button @click="handleTemplateDialogClose">关闭</el-button>
+        <el-button @click="handleTemplateDialogClose">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
 
@@ -432,7 +550,10 @@
         :rules="templateRules"
         label-width="100px"
       >
-        <el-form-item label="模板名称" prop="name">
+        <el-form-item
+          label="模板名称"
+          prop="name"
+        >
           <el-input 
             v-model="newTemplate.name"
             placeholder="请输入模板名称"
@@ -441,7 +562,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="模板描述" prop="description">
+        <el-form-item
+          label="模板描述"
+          prop="description"
+        >
           <el-input
             v-model="newTemplate.description"
             type="textarea"
@@ -462,7 +586,9 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="handleCreateTemplateDialogClose">取消</el-button>
+        <el-button @click="handleCreateTemplateDialogClose">
+          取消
+        </el-button>
         <el-button 
           type="primary" 
           :icon="Check"
@@ -491,7 +617,9 @@
         :on-change="handleTemplateFileChange"
         drag
       >
-        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <el-icon class="el-icon--upload">
+          <UploadFilled />
+        </el-icon>
         <div class="el-upload__text">
           拖拽模板文件到此处或<em>点击上传</em>
         </div>
@@ -503,7 +631,9 @@
       </el-upload>
 
       <template #footer>
-        <el-button @click="handleImportTemplateDialogClose">取消</el-button>
+        <el-button @click="handleImportTemplateDialogClose">
+          取消
+        </el-button>
         <el-button 
           type="primary" 
           :icon="Upload"

@@ -13,10 +13,16 @@
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <el-icon class="header-icon"><Setting /></el-icon>
+          <el-icon class="header-icon">
+            <Setting />
+          </el-icon>
           <div class="header-text">
-            <h1 class="page-title">系统配置</h1>
-            <p class="page-subtitle">配置系统参数、设备连接与安全策略</p>
+            <h1 class="page-title">
+              系统配置
+            </h1>
+            <p class="page-subtitle">
+              配置系统参数、设备连接与安全策略
+            </p>
           </div>
         </div>
         <div class="header-actions">
@@ -34,8 +40,8 @@
           </el-button>
           <el-button
             type="primary"
-            @click="handleSave"
             :disabled="!settingsStore.hasChanges || settingsStore.hasValidationErrors"
+            @click="handleSave"
           >
             <el-icon><Check /></el-icon>
             保存配置
@@ -47,22 +53,40 @@
     <!-- 配置状态指示器 -->
     <div class="status-bar">
       <div class="status-left">
-        <el-tag v-if="settingsStore.hasChanges" type="warning" effect="plain" size="small">
+        <el-tag
+          v-if="settingsStore.hasChanges"
+          type="warning"
+          effect="plain"
+          size="small"
+        >
           <el-icon><Edit /></el-icon>
           有未保存的更改
         </el-tag>
-        <el-tag v-if="settingsStore.hasValidationErrors" type="danger" effect="plain" size="small">
+        <el-tag
+          v-if="settingsStore.hasValidationErrors"
+          type="danger"
+          effect="plain"
+          size="small"
+        >
           <el-icon><WarningFilled /></el-icon>
           存在验证错误
         </el-tag>
-        <el-tag v-if="!settingsStore.hasChanges && !settingsStore.hasValidationErrors" type="success" effect="plain" size="small">
+        <el-tag
+          v-if="!settingsStore.hasChanges && !settingsStore.hasValidationErrors"
+          type="success"
+          effect="plain"
+          size="small"
+        >
           <el-icon><CircleCheck /></el-icon>
           配置正常
         </el-tag>
       </div>
       <div class="status-right">
         <span class="version-info">版本：{{ settingsStore.currentVersion }}</span>
-        <span class="last-saved" v-if="lastSavedTime">
+        <span
+          v-if="lastSavedTime"
+          class="last-saved"
+        >
           上次保存：{{ formatLastSaved(lastSavedTime) }}
         </span>
       </div>
@@ -71,14 +95,24 @@
     <!-- 主内容区域 - 扁平化布局 -->
     <div class="config-main">
       <!-- 配置验证错误面板 -->
-      <el-card v-if="settingsStore.hasValidationErrors" class="error-panel" shadow="hover">
+      <el-card
+        v-if="settingsStore.hasValidationErrors"
+        class="error-panel"
+        shadow="hover"
+      >
         <template #header>
           <div class="error-header">
             <div class="error-title">
-              <el-icon class="error-icon"><WarningFilled /></el-icon>
+              <el-icon class="error-icon">
+                <WarningFilled />
+              </el-icon>
               <span>验证错误</span>
             </div>
-            <el-button text size="small" @click="handleClearErrors">
+            <el-button
+              text
+              size="small"
+              @click="handleClearErrors"
+            >
               清除错误
             </el-button>
           </div>
@@ -90,7 +124,9 @@
             :key="path"
             class="error-item"
           >
-            <el-icon class="error-icon"><CircleClose /></el-icon>
+            <el-icon class="error-icon">
+              <CircleClose />
+            </el-icon>
             <span class="error-path">{{ path }}</span>
             <span class="error-message">{{ message }}</span>
           </div>
@@ -98,12 +134,18 @@
       </el-card>
 
       <!-- 配置编辑器 -->
-      <el-card class="editor-card" shadow="never">
+      <el-card
+        class="editor-card"
+        shadow="never"
+      >
         <ConfigEditor />
       </el-card>
 
       <!-- 配置历史记录 -->
-      <el-card class="history-card" shadow="never">
+      <el-card
+        class="history-card"
+        shadow="never"
+      >
         <template #header>
           <div class="card-header">
             <el-icon><Clock /></el-icon>
@@ -136,11 +178,19 @@
           </ul>
         </el-alert>
 
-        <el-form :model="importForm" label-width="100px" class="import-form">
+        <el-form
+          :model="importForm"
+          label-width="100px"
+          class="import-form"
+        >
           <el-form-item label="导入模式">
             <el-radio-group v-model="importForm.mode">
-              <el-radio value="merge">合并模式</el-radio>
-              <el-radio value="replace">替换模式</el-radio>
+              <el-radio value="merge">
+                合并模式
+              </el-radio>
+              <el-radio value="replace">
+                替换模式
+              </el-radio>
             </el-radio-group>
           </el-form-item>
 
@@ -155,7 +205,9 @@
               drag
               class="upload-area"
             >
-              <el-icon class="upload-icon"><UploadFilled /></el-icon>
+              <el-icon class="upload-icon">
+                <UploadFilled />
+              </el-icon>
               <div class="upload-text">
                 将配置文件拖到此处，或<em>点击上传</em>
               </div>
@@ -177,9 +229,16 @@
         </el-form>
 
         <!-- 导入预览 -->
-        <div v-if="importPreview" class="import-preview">
+        <div
+          v-if="importPreview"
+          class="import-preview"
+        >
           <h4>配置预览</h4>
-          <el-descriptions :column="1" border size="small">
+          <el-descriptions
+            :column="1"
+            border
+            size="small"
+          >
             <el-descriptions-item label="版本">
               {{ importPreview.version || '未知' }}
             </el-descriptions-item>
@@ -194,11 +253,13 @@
       </div>
 
       <template #footer>
-        <el-button @click="showImportDialog = false">取消</el-button>
+        <el-button @click="showImportDialog = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
-          @click="handleImport"
           :disabled="!importFile"
+          @click="handleImport"
         >
           确定导入
         </el-button>
@@ -213,7 +274,11 @@
       class="export-dialog"
     >
       <div class="export-content">
-        <el-form :model="exportForm" label-width="120px" class="export-form">
+        <el-form
+          :model="exportForm"
+          label-width="120px"
+          class="export-form"
+        >
           <el-form-item label="导出分类">
             <el-checkbox-group v-model="exportForm.categories">
               <el-checkbox
@@ -236,7 +301,9 @@
 
           <el-form-item label="文件格式">
             <el-radio-group v-model="exportForm.format">
-              <el-radio value="json">JSON</el-radio>
+              <el-radio value="json">
+                JSON
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-form>
@@ -251,8 +318,13 @@
       </div>
 
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleConfirmExport">
+        <el-button @click="showExportDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleConfirmExport"
+        >
           确定导出
         </el-button>
       </template>

@@ -10,21 +10,41 @@
 <template>
   <div class="config-editor">
     <!-- 加载状态 -->
-    <div v-if="settingsStore.loading" class="loading-state">
-      <el-icon class="loading-icon"><Loading /></el-icon>
+    <div
+      v-if="settingsStore.loading"
+      class="loading-state"
+    >
+      <el-icon class="loading-icon">
+        <Loading />
+      </el-icon>
       <p>正在加载配置...</p>
     </div>
 
     <!-- 错误状态 -->
-    <div v-else-if="settingsStore.errorMessage && !settingsStore.currentConfig" class="error-state">
-      <el-icon class="error-icon"><WarningFilled /></el-icon>
+    <div
+      v-else-if="settingsStore.errorMessage && !settingsStore.currentConfig"
+      class="error-state"
+    >
+      <el-icon class="error-icon">
+        <WarningFilled />
+      </el-icon>
       <p>{{ settingsStore.errorMessage }}</p>
-      <el-button type="primary" @click="handleRetry">重试</el-button>
+      <el-button
+        type="primary"
+        @click="handleRetry"
+      >
+        重试
+      </el-button>
     </div>
 
     <!-- 空状态 -->
-    <div v-else-if="!settingsStore.configCategories || settingsStore.configCategories.length === 0" class="empty-state">
-      <el-icon class="empty-icon"><Tools /></el-icon>
+    <div
+      v-else-if="!settingsStore.configCategories || settingsStore.configCategories.length === 0"
+      class="empty-state"
+    >
+      <el-icon class="empty-icon">
+        <Tools />
+      </el-icon>
       <p>暂无配置项</p>
     </div>
 
@@ -45,7 +65,11 @@
       </div>
 
       <!-- 配置分类标签页 -->
-      <el-tabs v-model="activeCategory" class="config-tabs" @tab-change="handleCategoryChange">
+      <el-tabs
+        v-model="activeCategory"
+        class="config-tabs"
+        @tab-change="handleCategoryChange"
+      >
         <el-tab-pane
           v-for="category in filteredCategories"
           :key="category.id"
@@ -97,7 +121,10 @@
               />
 
               <!-- 数字类型：数字输入框 -->
-              <div v-else-if="typeof configItem === 'number'" class="number-input-wrapper">
+              <div
+                v-else-if="typeof configItem === 'number'"
+                class="number-input-wrapper"
+              >
                 <el-input-number
                   v-model="categoryConfig[key]"
                   :min="getNumberConfig(key, 'min')"
@@ -107,7 +134,10 @@
                   class="number-input"
                   @change="handleConfigChange(category.id, key, $event)"
                 />
-                <span v-if="getConfigUnit(key)" class="unit">{{ getConfigUnit(key) }}</span>
+                <span
+                  v-if="getConfigUnit(key)"
+                  class="unit"
+                >{{ getConfigUnit(key) }}</span>
               </div>
 
               <!-- 枚举类型：下拉选择 -->
@@ -134,7 +164,10 @@
                 class="form-input"
                 @change="handleConfigChange(category.id, key, $event)"
               >
-                <template v-if="key.includes('Url') || key.includes('Path')" #prepend>
+                <template
+                  v-if="key.includes('Url') || key.includes('Path')"
+                  #prepend
+                >
                   <el-icon><Link /></el-icon>
                 </template>
               </el-input>
@@ -146,14 +179,18 @@
                   content="已修改"
                   placement="top"
                 >
-                  <el-icon class="status-icon modified"><Edit /></el-icon>
+                  <el-icon class="status-icon modified">
+                    <Edit />
+                  </el-icon>
                 </el-tooltip>
                 <el-tooltip
                   v-if="getFieldError(category.id, key)"
                   :content="getFieldError(category.id, key)"
                   placement="top"
                 >
-                  <el-icon class="status-icon error"><WarningFilled /></el-icon>
+                  <el-icon class="status-icon error">
+                    <WarningFilled />
+                  </el-icon>
                 </el-tooltip>
               </div>
             </el-form-item>
@@ -164,11 +201,19 @@
       <!-- 配置状态栏 -->
       <div class="config-status-bar">
         <div class="status-left">
-          <el-tag v-if="settingsStore.hasChanges" type="warning" effect="plain">
+          <el-tag
+            v-if="settingsStore.hasChanges"
+            type="warning"
+            effect="plain"
+          >
             <el-icon><Edit /></el-icon>
             有未保存的更改
           </el-tag>
-          <el-tag v-if="settingsStore.hasValidationErrors" type="danger" effect="plain">
+          <el-tag
+            v-if="settingsStore.hasValidationErrors"
+            type="danger"
+            effect="plain"
+          >
             <el-icon><WarningFilled /></el-icon>
             存在验证错误
           </el-tag>
@@ -176,8 +221,8 @@
         <div class="status-right">
           <el-button
             text
-            @click="handleResetCategory"
             :disabled="!settingsStore.hasChanges"
+            @click="handleResetCategory"
           >
             <el-icon><RefreshLeft /></el-icon>
             重置当前分类

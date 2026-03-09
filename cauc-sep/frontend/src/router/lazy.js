@@ -280,6 +280,8 @@ export const PreloadStrategy = {
  */
 export function preloadByStrategy(strategy, context = {}) {
   const { routes = [], currentPath = '' } = context
+  let currentIndex
+  let commonRoutes
 
   switch (strategy) {
     case PreloadStrategy.ALL:
@@ -293,7 +295,7 @@ export function preloadByStrategy(strategy, context = {}) {
 
     case PreloadStrategy.ADJACENT:
       // 预加载相邻路由
-      const currentIndex = routes.findIndex(r => r.path === currentPath)
+      currentIndex = routes.findIndex(r => r.path === currentPath)
       if (currentIndex > 0) {
         const prevRoute = routes[currentIndex - 1]
         if (prevRoute?.component) {
@@ -310,7 +312,7 @@ export function preloadByStrategy(strategy, context = {}) {
 
     case PreloadStrategy.COMMON:
       // 预加载常用路由（根据业务需求配置）
-      const commonRoutes = ['ExperimentMotor', 'DeviceStatus', 'AnalysisRealtime']
+      commonRoutes = ['ExperimentMotor', 'DeviceStatus', 'AnalysisRealtime']
       routes.forEach(route => {
         if (commonRoutes.includes(route.name) && route.component) {
           preloadRoute(route.name, route.component, { priority: 3, delay: 1000 })

@@ -7,7 +7,7 @@
  */
 
 import { config } from '@vue/test-utils';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
 import ElementPlus from 'element-plus';
 
 config.global.plugins = [ElementPlus];

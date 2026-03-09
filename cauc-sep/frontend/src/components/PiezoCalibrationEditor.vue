@@ -3,27 +3,58 @@
     <!-- 编辑器头部 -->
     <div class="editor-header">
       <div class="header-left">
-        <h3 class="editor-title">校准曲线编辑器</h3>
+        <h3 class="editor-title">
+          校准曲线编辑器
+        </h3>
         <div class="calibration-mode">
           <span class="mode-label">校准模式:</span>
-          <el-select v-model="currentMode" size="small" @change="handleModeChange">
-            <el-option label="线性校准" value="linear" />
-            <el-option label="多项式校准" value="polynomial" />
-            <el-option label="查表校准" value="lookup_table" />
-            <el-option label="自动校准" value="auto" />
+          <el-select
+            v-model="currentMode"
+            size="small"
+            @change="handleModeChange"
+          >
+            <el-option
+              label="线性校准"
+              value="linear"
+            />
+            <el-option
+              label="多项式校准"
+              value="polynomial"
+            />
+            <el-option
+              label="查表校准"
+              value="lookup_table"
+            />
+            <el-option
+              label="自动校准"
+              value="auto"
+            />
           </el-select>
         </div>
       </div>
       <div class="header-right">
-        <button class="tool-btn" @click="importCalibrationData" title="导入校准数据">
+        <button
+          class="tool-btn"
+          title="导入校准数据"
+          @click="importCalibrationData"
+        >
           <el-icon><Upload /></el-icon>
           <span>导入</span>
         </button>
-        <button class="tool-btn" @click="exportCalibrationData" :disabled="calibrationPoints.length === 0" title="导出校准数据">
+        <button
+          class="tool-btn"
+          :disabled="calibrationPoints.length === 0"
+          title="导出校准数据"
+          @click="exportCalibrationData"
+        >
           <el-icon><Download /></el-icon>
           <span>导出</span>
         </button>
-        <button class="tool-btn" @click="showHistoryDialog = true" title="校准历史">
+        <button
+          class="tool-btn"
+          title="校准历史"
+          @click="showHistoryDialog = true"
+        >
           <el-icon><Clock /></el-icon>
           <span>历史</span>
         </button>
@@ -34,20 +65,23 @@
     <div class="editor-main">
       <!-- 图表区域 -->
       <div class="chart-section">
-        <div ref="chartContainer" class="chart-container"></div>
+        <div
+          ref="chartContainer"
+          class="chart-container"
+        />
 
         <!-- 图例说明 -->
         <div class="chart-legend">
           <div class="legend-item">
-            <span class="legend-dot legend-dot--actual"></span>
+            <span class="legend-dot legend-dot--actual" />
             <span class="legend-label">实际校准点</span>
           </div>
           <div class="legend-item">
-            <span class="legend-line legend-line--fitted"></span>
+            <span class="legend-line legend-line--fitted" />
             <span class="legend-label">拟合曲线</span>
           </div>
           <div class="legend-item">
-            <span class="legend-line legend-line--theoretical"></span>
+            <span class="legend-line legend-line--theoretical" />
             <span class="legend-label">理论曲线</span>
           </div>
         </div>
@@ -58,14 +92,23 @@
         <!-- 校准点列表 -->
         <div class="points-section">
           <div class="section-header">
-            <h4 class="section-title">校准点列表</h4>
-            <button class="add-btn" @click="addCalibrationPoint" :disabled="!piezoStore.canControl">
+            <h4 class="section-title">
+              校准点列表
+            </h4>
+            <button
+              class="add-btn"
+              :disabled="!piezoStore.canControl"
+              @click="addCalibrationPoint"
+            >
               <el-icon><Plus /></el-icon>
               <span>添加点</span>
             </button>
           </div>
 
-          <div class="points-list" v-if="calibrationPoints.length > 0">
+          <div
+            v-if="calibrationPoints.length > 0"
+            class="points-list"
+          >
             <div
               v-for="(point, index) in calibrationPoints"
               :key="index"
@@ -73,7 +116,9 @@
               :class="{ 'point-item--selected': selectedIndex === index }"
               @click="selectPoint(index)"
             >
-              <div class="point-index">{{ index + 1 }}</div>
+              <div class="point-index">
+                {{ index + 1 }}
+              </div>
               <div class="point-data">
                 <div class="data-row">
                   <span class="data-label">电压:</span>
@@ -85,7 +130,7 @@
                     max="150"
                     class="data-input"
                     @change="handlePointChange(index)"
-                  />
+                  >
                   <span class="data-unit">V</span>
                 </div>
                 <div class="data-row">
@@ -96,26 +141,44 @@
                     step="0.001"
                     class="data-input"
                     @change="handlePointChange(index)"
-                  />
+                  >
                   <span class="data-unit">μm</span>
                 </div>
               </div>
-              <button class="delete-btn" @click.stop="deletePoint(index)" title="删除此点">
+              <button
+                class="delete-btn"
+                title="删除此点"
+                @click.stop="deletePoint(index)"
+              >
                 <el-icon><Close /></el-icon>
               </button>
             </div>
           </div>
 
-          <div class="empty-state" v-else>
-            <el-icon class="empty-icon"><Document /></el-icon>
-            <p class="empty-text">暂无校准点</p>
-            <p class="empty-hint">点击"添加点"按钮开始校准</p>
+          <div
+            v-else
+            class="empty-state"
+          >
+            <el-icon class="empty-icon">
+              <Document />
+            </el-icon>
+            <p class="empty-text">
+              暂无校准点
+            </p>
+            <p class="empty-hint">
+              点击"添加点"按钮开始校准
+            </p>
           </div>
         </div>
 
         <!-- 拟合参数 -->
-        <div class="fit-params" v-if="fitResult">
-          <h4 class="section-title">拟合参数</h4>
+        <div
+          v-if="fitResult"
+          class="fit-params"
+        >
+          <h4 class="section-title">
+            拟合参数
+          </h4>
           <div class="params-grid">
             <div class="param-item">
               <span class="param-label">拟合类型:</span>
@@ -125,15 +188,24 @@
               <span class="param-label">R²:</span>
               <span class="param-value">{{ fitResult.r2.toFixed(4) }}</span>
             </div>
-            <div class="param-item" v-if="fitResult.type === 'linear'">
+            <div
+              v-if="fitResult.type === 'linear'"
+              class="param-item"
+            >
               <span class="param-label">斜率 (a):</span>
               <span class="param-value">{{ fitResult.coefficients.a.toFixed(6) }}</span>
             </div>
-            <div class="param-item" v-if="fitResult.type === 'linear'">
+            <div
+              v-if="fitResult.type === 'linear'"
+              class="param-item"
+            >
               <span class="param-label">截距 (b):</span>
               <span class="param-value">{{ fitResult.coefficients.b.toFixed(6) }}</span>
             </div>
-            <div class="param-item" v-if="fitResult.type === 'polynomial'">
+            <div
+              v-if="fitResult.type === 'polynomial'"
+              class="param-item"
+            >
               <span class="param-label">多项式系数:</span>
               <span class="param-value">{{ fitResult.coefficients.map(c => c.toFixed(6)).join(', ') }}</span>
             </div>
@@ -171,7 +243,10 @@
     </div>
 
     <!-- 校准进度显示 -->
-    <div class="calibration-progress" v-if="isCalibrating">
+    <div
+      v-if="isCalibrating"
+      class="calibration-progress"
+    >
       <div class="progress-header">
         <span class="progress-title">校准进度</span>
         <span class="progress-percent">{{ calibrationProgress }}%</span>
@@ -192,23 +267,36 @@
             'step-item--completed': currentStep > index
           }"
         >
-          <div class="step-indicator">{{ index + 1 }}</div>
-          <div class="step-label">{{ step }}</div>
+          <div class="step-indicator">
+            {{ index + 1 }}
+          </div>
+          <div class="step-label">
+            {{ step }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 校准结果统计 -->
-    <div class="calibration-result" v-if="fitResult && !isCalibrating">
-      <h4 class="result-title">校准结果统计</h4>
+    <div
+      v-if="fitResult && !isCalibrating"
+      class="calibration-result"
+    >
+      <h4 class="result-title">
+        校准结果统计
+      </h4>
       <div class="result-stats">
         <div class="stat-item">
           <div class="stat-icon stat-icon--success">
             <el-icon><SuccessFilled /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">拟合优度</div>
-            <div class="stat-value">{{ (fitResult.r2 * 100).toFixed(2) }}%</div>
+            <div class="stat-label">
+              拟合优度
+            </div>
+            <div class="stat-value">
+              {{ (fitResult.r2 * 100).toFixed(2) }}%
+            </div>
           </div>
         </div>
         <div class="stat-item">
@@ -216,8 +304,12 @@
             <el-icon><DataAnalysis /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">平均误差</div>
-            <div class="stat-value">{{ averageError.toFixed(4) }} μm</div>
+            <div class="stat-label">
+              平均误差
+            </div>
+            <div class="stat-value">
+              {{ averageError.toFixed(4) }} μm
+            </div>
           </div>
         </div>
         <div class="stat-item">
@@ -225,8 +317,12 @@
             <el-icon><WarningFilled /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">最大误差</div>
-            <div class="stat-value">{{ maxError.toFixed(4) }} μm</div>
+            <div class="stat-label">
+              最大误差
+            </div>
+            <div class="stat-value">
+              {{ maxError.toFixed(4) }} μm
+            </div>
           </div>
         </div>
         <div class="stat-item">
@@ -234,8 +330,12 @@
             <el-icon><Document /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">校准点数</div>
-            <div class="stat-value">{{ calibrationPoints.length }}</div>
+            <div class="stat-label">
+              校准点数
+            </div>
+            <div class="stat-value">
+              {{ calibrationPoints.length }}
+            </div>
           </div>
         </div>
       </div>
@@ -248,31 +348,53 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="importForm" label-width="100px">
+      <el-form
+        :model="importForm"
+        label-width="100px"
+      >
         <el-form-item label="导入方式">
           <el-radio-group v-model="importForm.method">
-            <el-radio label="file">文件上传</el-radio>
-            <el-radio label="paste">粘贴数据</el-radio>
+            <el-radio label="file">
+              文件上传
+            </el-radio>
+            <el-radio label="paste">
+              粘贴数据
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="文件格式" v-if="importForm.method === 'file'">
+        <el-form-item
+          v-if="importForm.method === 'file'"
+          label="文件格式"
+        >
           <el-select v-model="importForm.format">
-            <el-option label="CSV" value="csv" />
-            <el-option label="JSON" value="json" />
+            <el-option
+              label="CSV"
+              value="csv"
+            />
+            <el-option
+              label="JSON"
+              value="json"
+            />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="选择文件" v-if="importForm.method === 'file'">
+        <el-form-item
+          v-if="importForm.method === 'file'"
+          label="选择文件"
+        >
           <input
             type="file"
             :accept="importForm.format === 'csv' ? '.csv' : '.json'"
-            @change="handleFileSelect"
             class="file-input"
-          />
+            @change="handleFileSelect"
+          >
         </el-form-item>
 
-        <el-form-item label="数据内容" v-if="importForm.method === 'paste'">
+        <el-form-item
+          v-if="importForm.method === 'paste'"
+          label="数据内容"
+        >
           <el-input
             v-model="importForm.content"
             type="textarea"
@@ -283,8 +405,15 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="showImportDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmImport">确认导入</el-button>
+        <el-button @click="showImportDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmImport"
+        >
+          确认导入
+        </el-button>
       </template>
     </el-dialog>
 
@@ -295,20 +424,37 @@
       width="400px"
       :close-on-click-modal="false"
     >
-      <el-form :model="exportForm" label-width="100px">
+      <el-form
+        :model="exportForm"
+        label-width="100px"
+      >
         <el-form-item label="导出格式">
           <el-radio-group v-model="exportForm.format">
-            <el-radio label="csv">CSV</el-radio>
-            <el-radio label="json">JSON</el-radio>
+            <el-radio label="csv">
+              CSV
+            </el-radio>
+            <el-radio label="json">
+              JSON
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="文件名">
-          <el-input v-model="exportForm.filename" placeholder="请输入文件名" />
+          <el-input
+            v-model="exportForm.filename"
+            placeholder="请输入文件名"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showExportDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmExport">确认导出</el-button>
+        <el-button @click="showExportDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmExport"
+        >
+          确认导出
+        </el-button>
       </template>
     </el-dialog>
 
@@ -318,14 +464,19 @@
       title="校准历史版本"
       width="600px"
     >
-      <div class="history-list" v-if="calibrationHistory.length > 0">
+      <div
+        v-if="calibrationHistory.length > 0"
+        class="history-list"
+      >
         <div
           v-for="(item, index) in calibrationHistory"
           :key="index"
           class="history-item"
         >
           <div class="history-info">
-            <div class="history-time">{{ formatTime(item.timestamp) }}</div>
+            <div class="history-time">
+              {{ formatTime(item.timestamp) }}
+            </div>
             <div class="history-meta">
               <span class="meta-item">模式: {{ item.mode }}</span>
               <span class="meta-item">点数: {{ item.points.length }}</span>
@@ -333,20 +484,33 @@
             </div>
           </div>
           <div class="history-actions">
-            <button class="history-btn" @click="restoreHistory(index)">
+            <button
+              class="history-btn"
+              @click="restoreHistory(index)"
+            >
               <el-icon><RefreshRight /></el-icon>
               <span>恢复</span>
             </button>
-            <button class="history-btn history-btn--danger" @click="deleteHistory(index)">
+            <button
+              class="history-btn history-btn--danger"
+              @click="deleteHistory(index)"
+            >
               <el-icon><Delete /></el-icon>
               <span>删除</span>
             </button>
           </div>
         </div>
       </div>
-      <div class="empty-state" v-else>
-        <el-icon class="empty-icon"><Clock /></el-icon>
-        <p class="empty-text">暂无历史版本</p>
+      <div
+        v-else
+        class="empty-state"
+      >
+        <el-icon class="empty-icon">
+          <Clock />
+        </el-icon>
+        <p class="empty-text">
+          暂无历史版本
+        </p>
       </div>
     </el-dialog>
   </div>
@@ -634,7 +798,7 @@ function updateChart() {
   const pointsData = calibrationPoints.value.map(p => [p.voltage, p.displacement]);
 
   // 拟合曲线数据
-  let fittedData = [];
+  const fittedData = [];
   if (fitResult.value) {
     for (let v = 0; v <= 150; v += 1) {
       fittedData.push([v, predictDisplacement(v)]);

@@ -9,14 +9,17 @@
       >
         <div class="status-bar__connection-content">
           <div class="status-bar__indicator-wrapper">
-            <span class="status-bar__indicator"></span>
-            <span class="status-bar__indicator-ring"></span>
+            <span class="status-bar__indicator" />
+            <span class="status-bar__indicator-ring" />
           </div>
           <div class="status-bar__connection-info">
             <span class="status-bar__text">
               {{ connectionStatusText[connectionStatus] }}
             </span>
-            <span v-if="connectionStatus === 'connected'" class="status-bar__connection-detail">
+            <span
+              v-if="connectionStatus === 'connected'"
+              class="status-bar__connection-detail"
+            >
               WebSocket 已连接
             </span>
           </div>
@@ -84,7 +87,10 @@
       </transition>
 
       <!-- 操作提示（无告警时显示） -->
-      <div v-if="!hasVisibleAlerts && !hasWarnings" class="status-bar__tip">
+      <div
+        v-if="!hasVisibleAlerts && !hasWarnings"
+        class="status-bar__tip"
+      >
         <el-icon class="status-bar__tip-icon">
           <InfoFilled />
         </el-icon>
@@ -124,7 +130,10 @@
       <!-- 性能指标组 -->
       <div class="status-bar__metrics">
         <!-- 推送频率 -->
-        <div v-if="wsPushFrequency > 0" class="status-bar__metric">
+        <div
+          v-if="wsPushFrequency > 0"
+          class="status-bar__metric"
+        >
           <div class="status-bar__metric-icon-wrapper">
             <el-icon class="status-bar__metric-icon">
               <TrendCharts />
@@ -137,7 +146,10 @@
         </div>
         
         <!-- 数据延迟 -->
-        <div v-if="wsDataLatency > 0" class="status-bar__metric">
+        <div
+          v-if="wsDataLatency > 0"
+          class="status-bar__metric"
+        >
           <div class="status-bar__metric-icon-wrapper">
             <el-icon class="status-bar__metric-icon">
               <Timer />
@@ -151,7 +163,7 @@
       </div>
       
       <!-- 分隔线 -->
-      <div class="status-bar__divider"></div>
+      <div class="status-bar__divider" />
       
       <!-- 时间戳 -->
       <div class="status-bar__time">

@@ -22,7 +22,10 @@
         <div class="sidebar__logo-glow" />
       </div>
       <transition name="slide-fade">
-        <div v-show="!isCollapsed || isHovering" class="sidebar__title-wrapper">
+        <div
+          v-show="!isCollapsed || isHovering"
+          class="sidebar__title-wrapper"
+        >
           <span class="sidebar__title">自旋电子</span>
           <span class="sidebar__subtitle">实验平台</span>
         </div>
@@ -52,21 +55,30 @@
               <component :is="module.icon" />
             </el-icon>
             <!-- 激活状态光晕效果 -->
-            <div v-if="activeModuleId === module.id" class="sidebar__icon-glow" />
+            <div
+              v-if="activeModuleId === module.id"
+              class="sidebar__icon-glow"
+            />
             <!-- 悬停光晕 -->
             <div class="sidebar__icon-hover-glow" />
           </div>
         </el-tooltip>
         
         <transition name="slide-fade">
-          <span v-show="!isCollapsed || isHovering" class="sidebar__label">
+          <span
+            v-show="!isCollapsed || isHovering"
+            class="sidebar__label"
+          >
             {{ module.name }}
           </span>
         </transition>
 
         <!-- 激活状态指示器 -->
         <transition name="indicator-fade">
-          <div v-if="activeModuleId === module.id" class="sidebar__active-indicator">
+          <div
+            v-if="activeModuleId === module.id"
+            class="sidebar__active-indicator"
+          >
             <div class="sidebar__active-indicator-bar" />
           </div>
         </transition>
@@ -86,7 +98,10 @@
         @click="toggleSidebar"
       />
       <transition name="slide-fade">
-        <span v-show="!isCollapsed" class="sidebar__toggle-label">
+        <span
+          v-show="!isCollapsed"
+          class="sidebar__toggle-label"
+        >
           {{ isCollapsed ? '展开' : '收起' }}
         </span>
       </transition>

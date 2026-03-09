@@ -1,7 +1,10 @@
 <template>
   <div class="motor-control-wrapper">
     <!-- 急停按钮（固定在顶部） -->
-    <el-card class="emergency-stop-card" :class="{ 'emergency-active': motorStore.isEmergencyStopped }">
+    <el-card
+      class="emergency-stop-card"
+      :class="{ 'emergency-active': motorStore.isEmergencyStopped }"
+    >
       <div class="emergency-stop-container">
         <el-button
           type="danger"
@@ -11,7 +14,9 @@
           class="emergency-stop-btn"
           @click="handleEmergencyStop"
         >
-          <el-icon class="emergency-icon"><WarningFilled /></el-icon>
+          <el-icon class="emergency-icon">
+            <WarningFilled />
+          </el-icon>
           <span class="emergency-text">急停</span>
         </el-button>
         <transition name="zoom-fade">
@@ -44,7 +49,9 @@
     <el-card class="motor-control">
       <template #header>
         <div class="card-header">
-          <el-icon class="header-icon"><SetUp /></el-icon>
+          <el-icon class="header-icon">
+            <SetUp />
+          </el-icon>
           <span class="header-title">运动控制</span>
         </div>
       </template>
@@ -57,8 +64,8 @@
             :title="motorStore.alarmMessage"
             type="error"
             closable
-            @close="motorStore.clearAlarm()"
             class="error-alert"
+            @close="motorStore.clearAlarm()"
           />
         </transition>
 
@@ -77,7 +84,10 @@
               <div class="limit-text">
                 限位范围: {{ motorStore.limits.negative_mm }}mm ~ {{ motorStore.limits.positive_mm }}mm
               </div>
-              <div v-if="limitWarning" class="limit-warning-text">
+              <div
+                v-if="limitWarning"
+                class="limit-warning-text"
+              >
                 <el-icon><Warning /></el-icon>
                 {{ limitWarning }}
               </div>
@@ -86,7 +96,11 @@
         </el-alert>
 
         <!-- 运动参数 -->
-        <el-form :model="moveForm" label-width="100px" class="move-form">
+        <el-form
+          :model="moveForm"
+          label-width="100px"
+          class="move-form"
+        >
           <el-form-item label="目标位置">
             <div class="form-item-content">
               <el-input-number
@@ -101,7 +115,12 @@
               />
               <span class="unit">mm</span>
               <transition name="fade">
-                <el-tag v-if="positionError" type="danger" size="small" class="error-tag">
+                <el-tag
+                  v-if="positionError"
+                  type="danger"
+                  size="small"
+                  class="error-tag"
+                >
                   {{ positionError }}
                 </el-tag>
               </transition>
@@ -122,7 +141,12 @@
               <span class="unit">mm/s</span>
               <span class="range-hint">({{ VELOCITY_MIN }}-{{ VELOCITY_MAX }})</span>
               <transition name="fade">
-                <el-tag v-if="velocityError" type="danger" size="small" class="error-tag">
+                <el-tag
+                  v-if="velocityError"
+                  type="danger"
+                  size="small"
+                  class="error-tag"
+                >
                   {{ velocityError }}
                 </el-tag>
               </transition>
@@ -164,7 +188,10 @@
           </el-button>
 
           <!-- 回零模式选择器 -->
-          <el-form-item label="回零模式" class="home-mode-selector">
+          <el-form-item
+            label="回零模式"
+            class="home-mode-selector"
+          >
             <el-select
               v-model="homeForm.mode"
               placeholder="选择回零模式"
@@ -178,8 +205,13 @@
                 :value="option.value"
               />
             </el-select>
-            <el-tooltip content="根据DM2C-RS556手册，不同模式适用于不同的限位和原点信号配置" placement="top">
-              <el-icon class="tooltip-icon"><QuestionFilled /></el-icon>
+            <el-tooltip
+              content="根据DM2C-RS556手册，不同模式适用于不同的限位和原点信号配置"
+              placement="top"
+            >
+              <el-icon class="tooltip-icon">
+                <QuestionFilled />
+              </el-icon>
             </el-tooltip>
           </el-form-item>
 
@@ -198,7 +230,10 @@
               <el-icon><ArrowLeft /></el-icon>
               <span>JOG-</span>
               <transition name="fade">
-                <span v-if="jogState.active && jogState.direction === -1" class="jog-indicator">
+                <span
+                  v-if="jogState.active && jogState.direction === -1"
+                  class="jog-indicator"
+                >
                   运行中
                 </span>
               </transition>
@@ -217,7 +252,10 @@
               <span>JOG+</span>
               <el-icon><ArrowRight /></el-icon>
               <transition name="fade">
-                <span v-if="jogState.active && jogState.direction === 1" class="jog-indicator">
+                <span
+                  v-if="jogState.active && jogState.direction === 1"
+                  class="jog-indicator"
+                >
                   运行中
                 </span>
               </transition>
@@ -231,7 +269,12 @@
           <span>限位设置</span>
         </el-divider>
         
-        <el-form :model="limitForm" label-width="100px" size="small" class="limit-form">
+        <el-form
+          :model="limitForm"
+          label-width="100px"
+          size="small"
+          class="limit-form"
+        >
           <el-form-item label="正向限位">
             <div class="form-item-content">
               <el-input-number

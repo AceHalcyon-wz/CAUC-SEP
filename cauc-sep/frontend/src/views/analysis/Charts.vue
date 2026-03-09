@@ -3,10 +3,16 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><PieChart /></el-icon>
+        <el-icon class="header-icon">
+          <PieChart />
+        </el-icon>
         <div class="header-content">
-          <h1 class="page-title">图表分析</h1>
-          <p class="page-subtitle">多维度数据可视化分析，支持自定义图表配置</p>
+          <h1 class="page-title">
+            图表分析
+          </h1>
+          <p class="page-subtitle">
+            多维度数据可视化分析，支持自定义图表配置
+          </p>
         </div>
       </div>
       <div class="header-right">
@@ -30,23 +36,42 @@
             高级图表
           </el-button>
         </el-button-group>
-        <el-button type="primary" :icon="Plus" @click="createNewChart">
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="createNewChart"
+        >
           新建图表
         </el-button>
       </div>
     </div>
 
     <!-- 数据分析视图 -->
-    <transition name="fade" mode="out-in">
-      <div v-if="viewMode === 'analysis'" key="analysis">
+    <transition
+      name="fade"
+      mode="out-in"
+    >
+      <div
+        v-if="viewMode === 'analysis'"
+        key="analysis"
+      >
         <DataAnalysis />
       </div>
 
       <!-- 高级图表视图 -->
-      <div v-else-if="viewMode === 'advanced'" key="advanced" class="advanced-view">
+      <div
+        v-else-if="viewMode === 'advanced'"
+        key="advanced"
+        class="advanced-view"
+      >
         <el-row :gutter="24">
           <!-- 左侧：数据源配置 -->
-          <el-col :xs="24" :sm="24" :md="8" :lg="6">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="8"
+            :lg="6"
+          >
             <el-card class="data-source-card">
               <template #header>
                 <div class="card-header">
@@ -55,16 +80,34 @@
                 </div>
               </template>
               
-              <el-form label-width="80px" size="small">
+              <el-form
+                label-width="80px"
+                size="small"
+              >
                 <el-form-item label="数据来源">
-                  <el-select v-model="dataSource" style="width: 100%">
-                    <el-option label="生成示例数据" value="demo" />
-                    <el-option label="导入CSV文件" value="import" />
-                    <el-option label="实时数据" value="realtime" />
+                  <el-select
+                    v-model="dataSource"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      label="生成示例数据"
+                      value="demo"
+                    />
+                    <el-option
+                      label="导入CSV文件"
+                      value="import"
+                    />
+                    <el-option
+                      label="实时数据"
+                      value="realtime"
+                    />
                   </el-select>
                 </el-form-item>
                 
-                <el-form-item label="数据点数" v-if="dataSource === 'demo'">
+                <el-form-item
+                  v-if="dataSource === 'demo'"
+                  label="数据点数"
+                >
                   <el-input-number 
                     v-model="dataPointCount" 
                     :min="100" 
@@ -74,11 +117,21 @@
                   />
                 </el-form-item>
                 
-                <el-form-item label="噪声强度" v-if="dataSource === 'demo'">
-                  <el-slider v-model="noiseLevel" :min="0" :max="100" />
+                <el-form-item
+                  v-if="dataSource === 'demo'"
+                  label="噪声强度"
+                >
+                  <el-slider
+                    v-model="noiseLevel"
+                    :min="0"
+                    :max="100"
+                  />
                 </el-form-item>
                 
-                <el-form-item label="数据系列" v-if="dataSource === 'demo'">
+                <el-form-item
+                  v-if="dataSource === 'demo'"
+                  label="数据系列"
+                >
                   <el-input-number 
                     v-model="seriesCount" 
                     :min="1" 
@@ -94,7 +147,10 @@
                     accept=".csv"
                     :on-change="handleFileUpload"
                   >
-                    <el-button type="primary" style="width: 100%">
+                    <el-button
+                      type="primary"
+                      style="width: 100%"
+                    >
                       <el-icon><Upload /></el-icon>
                       选择CSV文件
                     </el-button>
@@ -105,8 +161,8 @@
                   <el-button 
                     type="success" 
                     style="width: 100%"
-                    @click="generateData"
                     :loading="isGenerating"
+                    @click="generateData"
                   >
                     生成数据
                   </el-button>
@@ -133,7 +189,9 @@
                   <div class="template-info">
                     <el-icon><Files /></el-icon>
                     <div class="template-details">
-                      <div class="template-name">{{ template.name }}</div>
+                      <div class="template-name">
+                        {{ template.name }}
+                      </div>
                       <div class="template-meta">
                         <span>{{ template.chartType }}</span>
                       </div>
@@ -159,7 +217,12 @@
           </el-col>
 
           <!-- 右侧：高级图表 -->
-          <el-col :xs="24" :sm="24" :md="16" :lg="18">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="16"
+            :lg="18"
+          >
             <ChartAnalysis
               ref="chartAnalysisRef"
               :data="chartData"
@@ -176,10 +239,19 @@
       </div>
 
       <!-- 数据对比视图 -->
-      <div v-else key="comparison" class="comparison-view">
+      <div
+        v-else
+        key="comparison"
+        class="comparison-view"
+      >
         <el-row :gutter="24">
           <!-- 左侧：图表选择 -->
-          <el-col :xs="24" :sm="24" :md="8" :lg="6">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="8"
+            :lg="6"
+          >
             <el-card class="chart-selector-card">
               <template #header>
                 <div class="card-header">
@@ -190,7 +262,7 @@
               
               <div class="chart-list">
                 <div
-                  v-for="(chart, index) in chartList"
+                  v-for="chart in chartList"
                   :key="chart.id"
                   class="chart-item"
                   :class="{ active: selectedCharts.includes(chart.id) }"
@@ -199,7 +271,9 @@
                   <div class="chart-info">
                     <el-icon><TrendCharts /></el-icon>
                     <div class="chart-details">
-                      <div class="chart-name">{{ chart.name }}</div>
+                      <div class="chart-name">
+                        {{ chart.name }}
+                      </div>
                       <div class="chart-meta">
                         <span>{{ chart.type }}</span>
                         <span>{{ chart.dataPoints }} 点</span>
@@ -235,12 +309,27 @@
                 </div>
               </template>
               
-              <el-form label-width="80px" size="small">
+              <el-form
+                label-width="80px"
+                size="small"
+              >
                 <el-form-item label="对比方式">
-                  <el-select v-model="comparisonMode" style="width: 100%">
-                    <el-option label="叠加显示" value="overlay" />
-                    <el-option label="并列显示" value="sideBySide" />
-                    <el-option label="差值显示" value="difference" />
+                  <el-select
+                    v-model="comparisonMode"
+                    style="width: 100%"
+                  >
+                    <el-option
+                      label="叠加显示"
+                      value="overlay"
+                    />
+                    <el-option
+                      label="并列显示"
+                      value="sideBySide"
+                    />
+                    <el-option
+                      label="差值显示"
+                      value="difference"
+                    />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="归一化">
@@ -257,7 +346,12 @@
           </el-col>
 
           <!-- 右侧：对比图表 -->
-          <el-col :xs="24" :sm="24" :md="16" :lg="18">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="16"
+            :lg="18"
+          >
             <el-card class="comparison-chart-card">
               <template #header>
                 <div class="card-header">
@@ -286,17 +380,31 @@
                 </div>
               </template>
               
-              <div v-if="selectedCharts.length === 0" class="empty-state">
-                <el-icon :size="64"><PieChart /></el-icon>
+              <div
+                v-if="selectedCharts.length === 0"
+                class="empty-state"
+              >
+                <el-icon :size="64">
+                  <PieChart />
+                </el-icon>
                 <p>请从左侧选择要对比的图表</p>
-                <p class="hint">支持多选，最多可同时对比 4 个图表</p>
+                <p class="hint">
+                  支持多选，最多可同时对比 4 个图表
+                </p>
               </div>
               
-              <div v-else ref="comparisonChartRef" class="chart-container"></div>
+              <div
+                v-else
+                ref="comparisonChartRef"
+                class="chart-container"
+              />
             </el-card>
 
             <!-- 对比统计 -->
-            <el-card v-if="selectedCharts.length > 0" class="comparison-stats-card">
+            <el-card
+              v-if="selectedCharts.length > 0"
+              class="comparison-stats-card"
+            >
               <template #header>
                 <div class="card-header">
                   <el-icon><DataLine /></el-icon>
@@ -304,29 +412,57 @@
                 </div>
               </template>
               
-              <el-table :data="comparisonStats" border style="width: 100%">
-                <el-table-column prop="name" label="图表名称" width="150" />
-                <el-table-column prop="max" label="最大值" width="120">
+              <el-table
+                :data="comparisonStats"
+                border
+                style="width: 100%"
+              >
+                <el-table-column
+                  prop="name"
+                  label="图表名称"
+                  width="150"
+                />
+                <el-table-column
+                  prop="max"
+                  label="最大值"
+                  width="120"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.max.toFixed(3) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="min" label="最小值" width="120">
+                <el-table-column
+                  prop="min"
+                  label="最小值"
+                  width="120"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.min.toFixed(3) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="avg" label="平均值" width="120">
+                <el-table-column
+                  prop="avg"
+                  label="平均值"
+                  width="120"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.avg.toFixed(3) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="std" label="标准差" width="120">
+                <el-table-column
+                  prop="std"
+                  label="标准差"
+                  width="120"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.std.toFixed(3) }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column prop="range" label="极差" width="120">
+                <el-table-column
+                  prop="range"
+                  label="极差"
+                  width="120"
+                >
                   <template #default="{ row }">
                     <span class="mono">{{ row.range.toFixed(3) }}</span>
                   </template>
@@ -345,26 +481,68 @@
       width="600px"
       :close-on-click-modal="false"
     >
-      <el-form :model="newChartForm" label-width="100px">
-        <el-form-item label="图表名称" required>
-          <el-input v-model="newChartForm.name" placeholder="请输入图表名称" />
+      <el-form
+        :model="newChartForm"
+        label-width="100px"
+      >
+        <el-form-item
+          label="图表名称"
+          required
+        >
+          <el-input
+            v-model="newChartForm.name"
+            placeholder="请输入图表名称"
+          />
         </el-form-item>
-        <el-form-item label="图表类型" required>
-          <el-select v-model="newChartForm.type" style="width: 100%">
-            <el-option label="折线图" value="line" />
-            <el-option label="柱状图" value="bar" />
-            <el-option label="散点图" value="scatter" />
-            <el-option label="面积图" value="area" />
+        <el-form-item
+          label="图表类型"
+          required
+        >
+          <el-select
+            v-model="newChartForm.type"
+            style="width: 100%"
+          >
+            <el-option
+              label="折线图"
+              value="line"
+            />
+            <el-option
+              label="柱状图"
+              value="bar"
+            />
+            <el-option
+              label="散点图"
+              value="scatter"
+            />
+            <el-option
+              label="面积图"
+              value="area"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="数据来源">
-          <el-select v-model="newChartForm.dataSource" style="width: 100%">
-            <el-option label="实时数据" value="realtime" />
-            <el-option label="历史数据" value="history" />
-            <el-option label="导入文件" value="import" />
+          <el-select
+            v-model="newChartForm.dataSource"
+            style="width: 100%"
+          >
+            <el-option
+              label="实时数据"
+              value="realtime"
+            />
+            <el-option
+              label="历史数据"
+              value="history"
+            />
+            <el-option
+              label="导入文件"
+              value="import"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="时间范围" v-if="newChartForm.dataSource === 'history'">
+        <el-form-item
+          v-if="newChartForm.dataSource === 'history'"
+          label="时间范围"
+        >
           <el-date-picker
             v-model="newChartForm.timeRange"
             type="datetimerange"
@@ -384,8 +562,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreateDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreateChart">创建图表</el-button>
+        <el-button @click="showCreateDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleCreateChart"
+        >
+          创建图表
+        </el-button>
       </template>
     </el-dialog>
   </div>

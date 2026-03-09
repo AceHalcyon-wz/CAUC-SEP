@@ -5,10 +5,16 @@
       <el-col :span="24">
         <div class="header-content">
           <div class="header-left">
-            <el-icon class="header-icon"><InfoFilled /></el-icon>
+            <el-icon class="header-icon">
+              <InfoFilled />
+            </el-icon>
             <div class="header-text">
-              <h1 class="page-title">关于</h1>
-              <p class="page-subtitle">系统信息、版本号与技术栈</p>
+              <h1 class="page-title">
+                关于
+              </h1>
+              <p class="page-subtitle">
+                系统信息、版本号与技术栈
+              </p>
             </div>
           </div>
         </div>
@@ -21,11 +27,17 @@
       <el-card class="about-card system-info-card">
         <div class="system-header">
           <div class="logo-container">
-            <el-icon class="logo-icon"><Cpu /></el-icon>
+            <el-icon class="logo-icon">
+              <Cpu />
+            </el-icon>
           </div>
           <div class="system-title">
-            <h2 class="app-name">{{ systemInfo.name }}</h2>
-            <p class="app-version">{{ systemInfo.version }}</p>
+            <h2 class="app-name">
+              {{ systemInfo.name }}
+            </h2>
+            <p class="app-version">
+              {{ systemInfo.version }}
+            </p>
           </div>
         </div>
         
@@ -39,23 +51,37 @@
       <!-- 详细信息 -->
       <el-row :gutter="24">
         <!-- 基本信息 -->
-        <el-col :xs="24" :lg="12">
+        <el-col
+          :xs="24"
+          :lg="12"
+        >
           <el-card class="about-card">
             <template #header>
               <div class="card-header">
                 <div class="header-title">
-                  <el-icon class="title-icon"><Document /></el-icon>
+                  <el-icon class="title-icon">
+                    <Document />
+                  </el-icon>
                   <span>基本信息</span>
                 </div>
               </div>
             </template>
             
-            <el-descriptions :column="1" border class="info-descriptions">
+            <el-descriptions
+              :column="1"
+              border
+              class="info-descriptions"
+            >
               <el-descriptions-item label="项目名称">
                 {{ systemInfo.projectName }}
               </el-descriptions-item>
               <el-descriptions-item label="版本号">
-                <el-tag type="primary" size="small">{{ systemInfo.version }}</el-tag>
+                <el-tag
+                  type="primary"
+                  size="small"
+                >
+                  {{ systemInfo.version }}
+                </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="开发团队">
                 {{ systemInfo.developer }}
@@ -71,12 +97,17 @@
         </el-col>
 
         <!-- 技术栈 -->
-        <el-col :xs="24" :lg="12">
+        <el-col
+          :xs="24"
+          :lg="12"
+        >
           <el-card class="about-card">
             <template #header>
               <div class="card-header">
                 <div class="header-title">
-                  <el-icon class="title-icon"><SetUp /></el-icon>
+                  <el-icon class="title-icon">
+                    <SetUp />
+                  </el-icon>
                   <span>技术栈</span>
                 </div>
               </div>
@@ -84,7 +115,9 @@
             
             <div class="tech-stack">
               <div class="tech-category">
-                <h4 class="category-title">前端技术</h4>
+                <h4 class="category-title">
+                  前端技术
+                </h4>
                 <div class="tech-tags">
                   <el-tag 
                     v-for="tech in frontendTech" 
@@ -98,7 +131,9 @@
               </div>
               
               <div class="tech-category">
-                <h4 class="category-title">后端技术</h4>
+                <h4 class="category-title">
+                  后端技术
+                </h4>
                 <div class="tech-tags">
                   <el-tag 
                     v-for="tech in backendTech" 
@@ -112,7 +147,9 @@
               </div>
               
               <div class="tech-category">
-                <h4 class="category-title">开发工具</h4>
+                <h4 class="category-title">
+                  开发工具
+                </h4>
                 <div class="tech-tags">
                   <el-tag 
                     v-for="tech in devTools" 
@@ -134,7 +171,9 @@
             <template #header>
               <div class="card-header">
                 <div class="header-title">
-                  <el-icon class="title-icon"><Grid /></el-icon>
+                  <el-icon class="title-icon">
+                    <Grid />
+                  </el-icon>
                   <span>主要功能</span>
                 </div>
               </div>
@@ -149,11 +188,18 @@
                 :md="6"
               >
                 <div class="feature-card">
-                  <el-icon class="feature-icon" :style="{ color: feature.color }">
+                  <el-icon
+                    class="feature-icon"
+                    :style="{ color: feature.color }"
+                  >
                     <component :is="feature.icon" />
                   </el-icon>
-                  <h4 class="feature-title">{{ feature.title }}</h4>
-                  <p class="feature-description">{{ feature.description }}</p>
+                  <h4 class="feature-title">
+                    {{ feature.title }}
+                  </h4>
+                  <p class="feature-description">
+                    {{ feature.description }}
+                  </p>
                 </div>
               </el-col>
             </el-row>
@@ -161,15 +207,25 @@
         </el-col>
 
         <!-- 系统资源 -->
-        <el-col :xs="24" :lg="12">
+        <el-col
+          :xs="24"
+          :lg="12"
+        >
           <el-card class="about-card">
             <template #header>
               <div class="card-header">
                 <div class="header-title">
-                  <el-icon class="title-icon"><Monitor /></el-icon>
+                  <el-icon class="title-icon">
+                    <Monitor />
+                  </el-icon>
                   <span>系统资源</span>
                 </div>
-                <el-tag type="info" size="small">实时监控</el-tag>
+                <el-tag
+                  type="info"
+                  size="small"
+                >
+                  实时监控
+                </el-tag>
               </div>
             </template>
             
@@ -214,12 +270,17 @@
         </el-col>
 
         <!-- 联系信息 -->
-        <el-col :xs="24" :lg="12">
+        <el-col
+          :xs="24"
+          :lg="12"
+        >
           <el-card class="about-card">
             <template #header>
               <div class="card-header">
                 <div class="header-title">
-                  <el-icon class="title-icon"><Message /></el-icon>
+                  <el-icon class="title-icon">
+                    <Message />
+                  </el-icon>
                   <span>联系信息</span>
                 </div>
               </div>
@@ -227,7 +288,9 @@
             
             <div class="contact-list">
               <div class="contact-item">
-                <el-icon class="contact-icon"><User /></el-icon>
+                <el-icon class="contact-icon">
+                  <User />
+                </el-icon>
                 <div class="contact-content">
                   <span class="contact-label">项目负责人</span>
                   <span class="contact-value">{{ contactInfo.leader }}</span>
@@ -235,7 +298,9 @@
               </div>
               
               <div class="contact-item">
-                <el-icon class="contact-icon"><Message /></el-icon>
+                <el-icon class="contact-icon">
+                  <Message />
+                </el-icon>
                 <div class="contact-content">
                   <span class="contact-label">电子邮箱</span>
                   <span class="contact-value">{{ contactInfo.email }}</span>
@@ -243,7 +308,9 @@
               </div>
               
               <div class="contact-item">
-                <el-icon class="contact-icon"><Location /></el-icon>
+                <el-icon class="contact-icon">
+                  <Location />
+                </el-icon>
                 <div class="contact-content">
                   <span class="contact-label">实验室地址</span>
                   <span class="contact-value">{{ contactInfo.location }}</span>

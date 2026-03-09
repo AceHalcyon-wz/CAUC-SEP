@@ -297,7 +297,10 @@ onUnmounted(() => {
         <!-- 进度信息 -->
         <div class="progress-info">
           <span class="progress-message">{{ progressData.message }}</span>
-          <span v-if="showPercentage" class="progress-percentage">
+          <span
+            v-if="showPercentage"
+            class="progress-percentage"
+          >
             {{ progressData.percentage }}%
           </span>
         </div>
@@ -305,8 +308,14 @@ onUnmounted(() => {
         <!-- 进度条 -->
         <div class="progress-bar-wrapper">
           <div class="progress-bar">
-            <div class="progress-bar-fill" :style="progressStyle">
-              <div v-if="progressData.status === OPERATION_STATUS.RUNNING" class="progress-bar-indeterminate"></div>
+            <div
+              class="progress-bar-fill"
+              :style="progressStyle"
+            >
+              <div
+                v-if="progressData.status === OPERATION_STATUS.RUNNING"
+                class="progress-bar-indeterminate"
+              />
             </div>
           </div>
 
@@ -324,15 +333,18 @@ onUnmounted(() => {
         <button
           v-if="canCancel"
           class="progress-cancel-btn"
-          @click="handleCancel"
           title="取消操作"
+          @click="handleCancel"
         >
           <span class="cancel-icon">✕</span>
         </button>
       </div>
 
       <!-- 步骤详情 -->
-      <div v-if="showSteps && steps.length > 0" class="progress-steps">
+      <div
+        v-if="showSteps && steps.length > 0"
+        class="progress-steps"
+      >
         <div
           v-for="(step, index) in steps"
           :key="index"
@@ -344,7 +356,10 @@ onUnmounted(() => {
           </div>
           <div class="step-content">
             <span class="step-name">{{ step.name }}</span>
-            <span v-if="step.message && index === currentStepIndex" class="step-message">
+            <span
+              v-if="step.message && index === currentStepIndex"
+              class="step-message"
+            >
               {{ step.message }}
             </span>
           </div>

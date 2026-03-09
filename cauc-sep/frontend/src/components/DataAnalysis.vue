@@ -19,17 +19,38 @@
             >
               历史记录
             </el-button>
-            <el-dropdown @command="handleExportCommand" style="margin-left: 10px;">
-              <el-button type="success" size="small">
-                导出数据 <el-icon class="el-icon--right"><arrow-down /></el-icon>
+            <el-dropdown
+              style="margin-left: 10px;"
+              @command="handleExportCommand"
+            >
+              <el-button
+                type="success"
+                size="small"
+              >
+                导出数据 <el-icon class="el-icon--right">
+                  <arrow-down />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="csv">导出为 CSV</el-dropdown-item>
-                  <el-dropdown-item command="png">导出图表为 PNG</el-dropdown-item>
-                  <el-dropdown-item command="svg">导出图表为 SVG</el-dropdown-item>
-                  <el-dropdown-item divided command="report-json">导出报告 (JSON)</el-dropdown-item>
-                  <el-dropdown-item command="report-csv">导出报告 (CSV)</el-dropdown-item>
+                  <el-dropdown-item command="csv">
+                    导出为 CSV
+                  </el-dropdown-item>
+                  <el-dropdown-item command="png">
+                    导出图表为 PNG
+                  </el-dropdown-item>
+                  <el-dropdown-item command="svg">
+                    导出图表为 SVG
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    command="report-json"
+                  >
+                    导出报告 (JSON)
+                  </el-dropdown-item>
+                  <el-dropdown-item command="report-csv">
+                    导出报告 (CSV)
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -39,19 +60,35 @@
 
       <!-- 标注面板 -->
       <el-collapse-transition>
-        <div v-show="showAnnotationPanel" class="annotation-panel">
+        <div
+          v-show="showAnnotationPanel"
+          class="annotation-panel"
+        >
           <el-card shadow="hover">
             <template #header>
               <div class="panel-header">
                 <span>标注工具</span>
-                <el-button type="danger" size="small" @click="clearAllMarks">清除所有标注</el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="clearAllMarks"
+                >
+                  清除所有标注
+                </el-button>
               </div>
             </template>
-            <el-form :inline="true" size="small">
+            <el-form
+              :inline="true"
+              size="small"
+            >
               <el-form-item label="标注类型">
                 <el-radio-group v-model="annotationType">
-                  <el-radio-button label="point">标注点</el-radio-button>
-                  <el-radio-button label="line">标注线</el-radio-button>
+                  <el-radio-button label="point">
+                    标注点
+                  </el-radio-button>
+                  <el-radio-button label="line">
+                    标注线
+                  </el-radio-button>
                 </el-radio-group>
               </el-form-item>
             </el-form>
@@ -65,15 +102,18 @@
                 点击图表上的数据点即可添加{{ annotationType === 'point' ? '标注点' : '标注线' }}
               </template>
             </el-alert>
-            <div v-if="markPoints.length > 0 || markLines.length > 0" class="marks-display">
+            <div
+              v-if="markPoints.length > 0 || markLines.length > 0"
+              class="marks-display"
+            >
               <el-divider />
               <h4>已添加的标注</h4>
               <el-tag 
                 v-for="(point, index) in markPoints" 
                 :key="`point-${index}`"
                 closable
-                @close="removeMarkPoint(index)"
                 style="margin: 5px;"
+                @close="removeMarkPoint(index)"
               >
                 {{ point.name }}: {{ point.value }}
               </el-tag>
@@ -82,8 +122,8 @@
                 :key="`line-${index}`"
                 type="warning"
                 closable
-                @close="removeMarkLine(index)"
                 style="margin: 5px;"
+                @close="removeMarkLine(index)"
               >
                 {{ line.name }}: {{ line.yAxis?.toFixed(4) }}
               </el-tag>
@@ -97,13 +137,19 @@
         :title="motorStore.alarmMessage"
         type="error"
         :closable="true"
-        @close="motorStore.clearAlarm()"
         style="margin-bottom: 20px"
+        @close="motorStore.clearAlarm()"
       />
 
-      <el-tabs v-model="activeTab" type="border-card">
+      <el-tabs
+        v-model="activeTab"
+        type="border-card"
+      >
         <!-- 信号平滑标签页 -->
-        <el-tab-pane label="信号平滑" name="smooth">
+        <el-tab-pane
+          label="信号平滑"
+          name="smooth"
+        >
           <el-row :gutter="20">
             <el-col :span="8">
               <el-card shadow="hover">
@@ -112,39 +158,88 @@
                 </template>
                 <el-form label-width="120px">
                   <el-form-item label="平滑方法">
-                    <el-select v-model="smoothConfig.method" placeholder="选择方法">
-                      <el-option label="Savitzky-Golay 滤波" value="savitzky_golay" />
-                      <el-option label="巴特沃斯低通滤波" value="butterworth" />
+                    <el-select
+                      v-model="smoothConfig.method"
+                      placeholder="选择方法"
+                    >
+                      <el-option
+                        label="Savitzky-Golay 滤波"
+                        value="savitzky_golay"
+                      />
+                      <el-option
+                        label="巴特沃斯低通滤波"
+                        value="butterworth"
+                      />
                     </el-select>
                   </el-form-item>
                   <template v-if="smoothConfig.method === 'savitzky_golay'">
                     <el-form-item label="窗口长度">
-                      <el-input-number v-model="smoothConfig.window_length" :min="3" :max="101" :step="2" style="width: 100%" />
+                      <el-input-number
+                        v-model="smoothConfig.window_length"
+                        :min="3"
+                        :max="101"
+                        :step="2"
+                        style="width: 100%"
+                      />
                     </el-form-item>
                     <el-form-item label="多项式阶数">
-                      <el-input-number v-model="smoothConfig.polyorder" :min="1" :max="7" style="width: 100%" />
+                      <el-input-number
+                        v-model="smoothConfig.polyorder"
+                        :min="1"
+                        :max="7"
+                        style="width: 100%"
+                      />
                     </el-form-item>
                   </template>
                   <template v-if="smoothConfig.method === 'butterworth'">
                     <el-form-item label="截止频率">
-                      <el-input-number v-model="smoothConfig.butter_lowcut" :min="0.01" :max="10" :step="0.01" style="width: 100%" />
+                      <el-input-number
+                        v-model="smoothConfig.butter_lowcut"
+                        :min="0.01"
+                        :max="10"
+                        :step="0.01"
+                        style="width: 100%"
+                      />
                     </el-form-item>
                     <el-form-item label="滤波器阶数">
-                      <el-input-number v-model="smoothConfig.butter_order" :min="1" :max="10" style="width: 100%" />
+                      <el-input-number
+                        v-model="smoothConfig.butter_order"
+                        :min="1"
+                        :max="10"
+                        style="width: 100%"
+                      />
                     </el-form-item>
                   </template>
                   <el-form-item>
-                    <el-button type="primary" :loading="motorStore.loading.smooth" @click="generateDemoData" style="width: 100%; margin-bottom: 10px;">
+                    <el-button
+                      type="primary"
+                      :loading="motorStore.loading.smooth"
+                      style="width: 100%; margin-bottom: 10px;"
+                      @click="generateDemoData"
+                    >
                       生成示例数据
                     </el-button>
-                    <el-button type="success" :loading="motorStore.loading.smooth" :disabled="!rawData.length" @click="applySmooth" style="width: 100%">
+                    <el-button
+                      type="success"
+                      :loading="motorStore.loading.smooth"
+                      :disabled="!rawData.length"
+                      style="width: 100%"
+                      @click="applySmooth"
+                    >
                       应用平滑
                     </el-button>
                   </el-form-item>
                 </el-form>
                 <el-divider />
-                <div v-if="isLargeSmoothData" class="optimization-info">
-                  <el-alert type="warning" :closable="false" show-icon>
+                <div
+                  v-if="isLargeSmoothData"
+                  class="optimization-info"
+                >
+                  <el-alert
+                    type="warning"
+                    :closable="false"
+                    show-icon
+                  >
                     <template #title>
                       大数据量优化已启用
                     </template>
@@ -159,19 +254,36 @@
                   <div class="chart-header">
                     <span>数据图表</span>
                     <div class="chart-tips">
-                      <el-tag size="small" type="info">滚轮缩放</el-tag>
-                      <el-tag size="small" type="info" style="margin-left: 5px;">拖拽平移</el-tag>
+                      <el-tag
+                        size="small"
+                        type="info"
+                      >
+                        滚轮缩放
+                      </el-tag>
+                      <el-tag
+                        size="small"
+                        type="info"
+                        style="margin-left: 5px;"
+                      >
+                        拖拽平移
+                      </el-tag>
                     </div>
                   </div>
                 </template>
-                <div ref="smoothChartRef" style="height: 450px;"></div>
+                <div
+                  ref="smoothChartRef"
+                  style="height: 450px;"
+                />
               </el-card>
             </el-col>
           </el-row>
         </el-tab-pane>
 
         <!-- 磁滞回线分析标签页 -->
-        <el-tab-pane label="磁滞回线分析" name="hysteresis">
+        <el-tab-pane
+          label="磁滞回线分析"
+          name="hysteresis"
+        >
           <el-row :gutter="20">
             <el-col :span="8">
               <el-card shadow="hover">
@@ -183,21 +295,45 @@
                     <el-switch v-model="hysteresisConfig.subtract_background" />
                   </el-form-item>
                   <el-form-item label="饱和阈值">
-                    <el-input-number v-model="hysteresisConfig.saturation_threshold" :min="0.5" :max="1" :step="0.01" style="width: 100%" />
+                    <el-input-number
+                      v-model="hysteresisConfig.saturation_threshold"
+                      :min="0.5"
+                      :max="1"
+                      :step="0.01"
+                      style="width: 100%"
+                    />
                   </el-form-item>
                   <el-form-item>
-                    <el-button type="primary" :loading="motorStore.loading.hysteresis" @click="generateHysteresisDemoData" style="width: 100%; margin-bottom: 10px;">
+                    <el-button
+                      type="primary"
+                      :loading="motorStore.loading.hysteresis"
+                      style="width: 100%; margin-bottom: 10px;"
+                      @click="generateHysteresisDemoData"
+                    >
                       生成示例数据
                     </el-button>
-                    <el-button type="success" :loading="motorStore.loading.hysteresis" :disabled="!hysteresisData.x.length" @click="analyzeHysteresis" style="width: 100%">
+                    <el-button
+                      type="success"
+                      :loading="motorStore.loading.hysteresis"
+                      :disabled="!hysteresisData.x.length"
+                      style="width: 100%"
+                      @click="analyzeHysteresis"
+                    >
                       分析磁滞回线
                     </el-button>
                   </el-form-item>
                 </el-form>
                 <el-divider />
-                <div v-if="hysteresisResult" class="result-display">
+                <div
+                  v-if="hysteresisResult"
+                  class="result-display"
+                >
                   <h4>分析结果</h4>
-                  <el-descriptions :column="1" border size="small">
+                  <el-descriptions
+                    :column="1"
+                    border
+                    size="small"
+                  >
                     <el-descriptions-item label="矫顽力 (Hc)">
                       {{ hysteresisResult.Hc?.toFixed(4) }}
                     </el-descriptions-item>
@@ -209,8 +345,16 @@
                     </el-descriptions-item>
                   </el-descriptions>
                 </div>
-                <div v-if="isLargeHysteresisData" class="optimization-info">
-                  <el-alert type="warning" :closable="false" show-icon style="margin-top: 10px;">
+                <div
+                  v-if="isLargeHysteresisData"
+                  class="optimization-info"
+                >
+                  <el-alert
+                    type="warning"
+                    :closable="false"
+                    show-icon
+                    style="margin-top: 10px;"
+                  >
                     <template #title>
                       大数据量优化已启用
                     </template>
@@ -225,19 +369,36 @@
                   <div class="chart-header">
                     <span>磁滞回线</span>
                     <div class="chart-tips">
-                      <el-tag size="small" type="info">滚轮缩放</el-tag>
-                      <el-tag size="small" type="info" style="margin-left: 5px;">拖拽平移</el-tag>
+                      <el-tag
+                        size="small"
+                        type="info"
+                      >
+                        滚轮缩放
+                      </el-tag>
+                      <el-tag
+                        size="small"
+                        type="info"
+                        style="margin-left: 5px;"
+                      >
+                        拖拽平移
+                      </el-tag>
                     </div>
                   </div>
                 </template>
-                <div ref="hysteresisChartRef" style="height: 450px;"></div>
+                <div
+                  ref="hysteresisChartRef"
+                  style="height: 450px;"
+                />
               </el-card>
             </el-col>
           </el-row>
         </el-tab-pane>
 
         <!-- 多模型对比标签页 -->
-        <el-tab-pane label="多模型对比" name="multi-model">
+        <el-tab-pane
+          label="多模型对比"
+          name="multi-model"
+        >
           <el-row :gutter="20">
             <el-col :span="8">
               <el-card shadow="hover">
@@ -261,17 +422,24 @@
                       type="primary" 
                       :loading="multiFitLoading" 
                       :disabled="!hysteresisData.x.length || selectedModels.length < 2"
-                      @click="runMultiModelFit"
                       style="width: 100%"
+                      @click="runMultiModelFit"
                     >
                       执行多模型拟合
                     </el-button>
                   </el-form-item>
                 </el-form>
                 <el-divider />
-                <div v-if="bestModel" class="result-display">
+                <div
+                  v-if="bestModel"
+                  class="result-display"
+                >
                   <h4>最佳模型</h4>
-                  <el-alert type="success" :closable="false" show-icon>
+                  <el-alert
+                    type="success"
+                    :closable="false"
+                    show-icon
+                  >
                     <template #title>
                       推荐使用: {{ getModelName(bestModel) }}
                     </template>
@@ -294,30 +462,53 @@
                   stripe
                   style="width: 100%"
                 >
-                  <el-table-column prop="model_name" label="模型名称" width="180" />
-                  <el-table-column prop="r_squared" label="R²" width="120">
+                  <el-table-column
+                    prop="model_name"
+                    label="模型名称"
+                    width="180"
+                  />
+                  <el-table-column
+                    prop="r_squared"
+                    label="R²"
+                    width="120"
+                  >
                     <template #default="{ row }">
                       <el-tag :type="getR2TagType(row.r_squared)">
                         {{ row.r_squared?.toFixed(4) }}
                       </el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="rmse" label="RMSE" width="120">
+                  <el-table-column
+                    prop="rmse"
+                    label="RMSE"
+                    width="120"
+                  >
                     <template #default="{ row }">
                       {{ row.rmse?.toFixed(6) }}
                     </template>
                   </el-table-column>
-                  <el-table-column prop="aic" label="AIC" width="120">
+                  <el-table-column
+                    prop="aic"
+                    label="AIC"
+                    width="120"
+                  >
                     <template #default="{ row }">
                       {{ row.aic?.toFixed(2) }}
                     </template>
                   </el-table-column>
-                  <el-table-column prop="bic" label="BIC" width="120">
+                  <el-table-column
+                    prop="bic"
+                    label="BIC"
+                    width="120"
+                  >
                     <template #default="{ row }">
                       {{ row.bic?.toFixed(2) }}
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" width="150">
+                  <el-table-column
+                    label="操作"
+                    width="150"
+                  >
                     <template #default="{ row }">
                       <el-button 
                         size="small" 
@@ -329,14 +520,20 @@
                     </template>
                   </el-table-column>
                 </el-table>
-                <el-empty v-else description="请先执行多模型拟合" />
+                <el-empty
+                  v-else
+                  description="请先执行多模型拟合"
+                />
               </el-card>
             </el-col>
           </el-row>
         </el-tab-pane>
 
         <!-- 分析报告标签页 -->
-        <el-tab-pane label="分析报告" name="report">
+        <el-tab-pane
+          label="分析报告"
+          name="report"
+        >
           <el-row :gutter="20">
             <el-col :span="8">
               <el-card shadow="hover">
@@ -352,26 +549,32 @@
                       type="primary" 
                       :loading="reportLoading"
                       :disabled="!hysteresisData.x.length"
-                      @click="generateReport"
                       style="width: 100%; margin-bottom: 10px;"
+                      @click="generateReport"
                     >
                       生成报告
                     </el-button>
                     <el-dropdown 
-                      @command="exportReport"
                       style="width: 100%"
+                      @command="exportReport"
                     >
                       <el-button 
                         type="success" 
                         :disabled="!reportData"
                         style="width: 100%"
                       >
-                        导出报告 <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                        导出报告 <el-icon class="el-icon--right">
+                          <arrow-down />
+                        </el-icon>
                       </el-button>
                       <template #dropdown>
                         <el-dropdown-menu>
-                          <el-dropdown-item command="json">JSON格式</el-dropdown-item>
-                          <el-dropdown-item command="csv">CSV格式</el-dropdown-item>
+                          <el-dropdown-item command="json">
+                            JSON格式
+                          </el-dropdown-item>
+                          <el-dropdown-item command="csv">
+                            CSV格式
+                          </el-dropdown-item>
                         </el-dropdown-menu>
                       </template>
                     </el-dropdown>
@@ -386,7 +589,10 @@
                     <span>报告预览</span>
                   </div>
                 </template>
-                <div v-if="reportData" class="report-content">
+                <div
+                  v-if="reportData"
+                  class="report-content"
+                >
                   <div class="report-header">
                     <h3>磁滞回线分析报告</h3>
                     <p>实验ID: {{ reportData.experiment_id }}</p>
@@ -397,7 +603,10 @@
                   
                   <div class="report-section">
                     <h4>磁滞参数</h4>
-                    <el-descriptions :column="2" border>
+                    <el-descriptions
+                      :column="2"
+                      border
+                    >
                       <el-descriptions-item label="饱和磁感应强度 Bs">
                         {{ reportData.hysteresis_params?.Bs?.toFixed(4) }} T
                       </el-descriptions-item>
@@ -413,30 +622,66 @@
                     </el-descriptions>
                   </div>
                   
-                  <div v-if="reportData.fit_results" class="report-section">
+                  <div
+                    v-if="reportData.fit_results"
+                    class="report-section"
+                  >
                     <h4>拟合结果</h4>
-                    <el-table :data="reportData.fit_results" border size="small">
-                      <el-table-column prop="parameter" label="参数" width="150" />
-                      <el-table-column prop="value" label="数值" width="150">
+                    <el-table
+                      :data="reportData.fit_results"
+                      border
+                      size="small"
+                    >
+                      <el-table-column
+                        prop="parameter"
+                        label="参数"
+                        width="150"
+                      />
+                      <el-table-column
+                        prop="value"
+                        label="数值"
+                        width="150"
+                      >
                         <template #default="{ row }">
                           {{ row.value?.toFixed(6) }}
                         </template>
                       </el-table-column>
-                      <el-table-column prop="unit" label="单位" width="100" />
-                      <el-table-column prop="description" label="描述" />
+                      <el-table-column
+                        prop="unit"
+                        label="单位"
+                        width="100"
+                      />
+                      <el-table-column
+                        prop="description"
+                        label="描述"
+                      />
                     </el-table>
                   </div>
                   
-                  <div v-if="reportData.quality_metrics" class="report-section">
+                  <div
+                    v-if="reportData.quality_metrics"
+                    class="report-section"
+                  >
                     <h4>质量指标</h4>
                     <el-row :gutter="10">
-                      <el-col :span="6" v-for="(value, key) in reportData.quality_metrics" :key="key">
-                        <el-statistic :title="key" :value="value" :precision="4" />
+                      <el-col
+                        v-for="(value, key) in reportData.quality_metrics"
+                        :key="key"
+                        :span="6"
+                      >
+                        <el-statistic
+                          :title="key"
+                          :value="value"
+                          :precision="4"
+                        />
                       </el-col>
                     </el-row>
                   </div>
                   
-                  <div v-if="reportData.recommendations" class="report-section">
+                  <div
+                    v-if="reportData.recommendations"
+                    class="report-section"
+                  >
                     <h4>分析建议</h4>
                     <el-alert 
                       v-for="(rec, index) in reportData.recommendations" 
@@ -448,7 +693,10 @@
                     />
                   </div>
                 </div>
-                <el-empty v-else description="请先生成分析报告" />
+                <el-empty
+                  v-else
+                  description="请先生成分析报告"
+                />
               </el-card>
             </el-col>
           </el-row>
@@ -464,37 +712,69 @@
       :close-on-click-modal="false"
     >
       <div class="history-toolbar">
-        <el-button type="danger" size="small" @click="handleClearHistory">
+        <el-button
+          type="danger"
+          size="small"
+          @click="handleClearHistory"
+        >
           清空历史
         </el-button>
       </div>
-      <el-table :data="analysisHistory" border stripe>
-        <el-table-column prop="timestamp" label="时间" width="180">
+      <el-table
+        :data="analysisHistory"
+        border
+        stripe
+      >
+        <el-table-column
+          prop="timestamp"
+          label="时间"
+          width="180"
+        >
           <template #default="{ row }">
             {{ formatTimestamp(row.timestamp) }}
           </template>
         </el-table-column>
-        <el-table-column label="数据点数" width="120">
+        <el-table-column
+          label="数据点数"
+          width="120"
+        >
           <template #default="{ row }">
             {{ row.result?.h_data?.length || 0 }}
           </template>
         </el-table-column>
-        <el-table-column label="最佳模型" width="150">
+        <el-table-column
+          label="最佳模型"
+          width="150"
+        >
           <template #default="{ row }">
             {{ row.result?.best_model || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="R²" width="120">
+        <el-table-column
+          label="R²"
+          width="120"
+        >
           <template #default="{ row }">
             {{ row.result?.r_squared?.toFixed(4) || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column
+          label="操作"
+          width="200"
+        >
           <template #default="{ row }">
-            <el-button size="small" type="primary" @click="loadHistoryRecord(row)">
+            <el-button
+              size="small"
+              type="primary"
+              @click="loadHistoryRecord(row)"
+            >
               加载
             </el-button>
-            <el-button size="small" type="danger" @click="handleDeleteHistory(row.id)">
+            <el-button
+              size="small"
+              type="danger"
+              @click="handleDeleteHistory(row.id)"
+            >
               删除
             </el-button>
           </template>
@@ -508,8 +788,14 @@
       title="模型拟合详情" 
       width="60%"
     >
-      <div v-if="selectedModelDetail" class="model-detail">
-        <el-descriptions :column="2" border>
+      <div
+        v-if="selectedModelDetail"
+        class="model-detail"
+      >
+        <el-descriptions
+          :column="2"
+          border
+        >
           <el-descriptions-item label="模型名称">
             {{ selectedModelDetail.model_name }}
           </el-descriptions-item>
@@ -527,11 +813,24 @@
           </el-descriptions-item>
         </el-descriptions>
         
-        <div v-if="selectedModelDetail.parameters" style="margin-top: 20px;">
+        <div
+          v-if="selectedModelDetail.parameters"
+          style="margin-top: 20px;"
+        >
           <h4>拟合参数</h4>
-          <el-table :data="formatParameters(selectedModelDetail.parameters)" border size="small">
-            <el-table-column prop="name" label="参数名" />
-            <el-table-column prop="value" label="数值">
+          <el-table
+            :data="formatParameters(selectedModelDetail.parameters)"
+            border
+            size="small"
+          >
+            <el-table-column
+              prop="name"
+              label="参数名"
+            />
+            <el-table-column
+              prop="value"
+              label="数值"
+            >
               <template #default="{ row }">
                 {{ row.value?.toFixed(6) }}
               </template>

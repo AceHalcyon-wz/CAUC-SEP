@@ -6,8 +6,11 @@
           <el-icon><Location /></el-icon>
           <span>实时位置</span>
         </div>
-        <div v-if="motorStore.wsConnected" class="live-indicator">
-          <span class="pulse-dot"></span>
+        <div
+          v-if="motorStore.wsConnected"
+          class="live-indicator"
+        >
+          <span class="pulse-dot" />
           <span class="live-text">实时</span>
         </div>
       </div>
@@ -17,7 +20,10 @@
       <!-- 主要位置显示 -->
       <div class="main-position">
         <div class="position-value-wrapper">
-          <transition name="number-update" mode="out-in">
+          <transition
+            name="number-update"
+            mode="out-in"
+          >
             <div 
               :key="positionMmDisplay" 
               class="position-value"
@@ -27,7 +33,9 @@
             </div>
           </transition>
         </div>
-        <div class="position-unit">mm</div>
+        <div class="position-unit">
+          mm
+        </div>
       </div>
 
       <!-- 位置进度条 -->
@@ -37,7 +45,7 @@
             class="progress-fill"
             :style="{ width: positionProgress + '%' }"
             :class="{ 'progress-animated': motorStore.status === 'busy' }"
-          ></div>
+          />
         </div>
         <div class="progress-labels">
           <span class="progress-min">{{ formatPosition(motorStore.minPosition) }}</span>
@@ -62,7 +70,11 @@
             <el-icon><CircleCheck /></el-icon>
             状态
           </span>
-          <el-tag :type="statusType" size="small" class="status-tag">
+          <el-tag
+            :type="statusType"
+            size="small"
+            class="status-tag"
+          >
             {{ statusText }}
           </el-tag>
         </div>
@@ -72,7 +84,11 @@
             <el-icon><Warning /></el-icon>
             限位
           </span>
-          <el-tag :type="motorStore.limitStatusType" size="small" class="status-tag">
+          <el-tag
+            :type="motorStore.limitStatusType"
+            size="small"
+            class="status-tag"
+          >
             {{ motorStore.limitStatus }}
           </el-tag>
         </div>
@@ -82,7 +98,11 @@
             <el-icon><Connection /></el-icon>
             连接
           </span>
-          <el-tag :type="motorStore.wsConnected ? 'success' : 'info'" size="small" class="status-tag">
+          <el-tag
+            :type="motorStore.wsConnected ? 'success' : 'info'"
+            size="small"
+            class="status-tag"
+          >
             {{ motorStore.wsConnected ? '在线' : '离线' }}
           </el-tag>
         </div>

@@ -3,14 +3,25 @@
     <!-- 页面标题 - 状态指示器位于顶部 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon warning-icon"><Warning /></el-icon>
+        <el-icon class="header-icon warning-icon">
+          <Warning />
+        </el-icon>
         <div class="header-text">
-          <h1 class="page-title">安全面板</h1>
-          <p class="page-description">设备安全监控与紧急控制</p>
+          <h1 class="page-title">
+            安全面板
+          </h1>
+          <p class="page-description">
+            设备安全监控与紧急控制
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <el-tag type="danger" effect="dark" size="large" class="status-indicator danger">
+        <el-tag
+          type="danger"
+          effect="dark"
+          size="large"
+          class="status-indicator danger"
+        >
           <el-icon><Warning /></el-icon>
           安全第一
         </el-tag>
@@ -18,44 +29,94 @@
     </div>
 
     <!-- 主内容区域 - 左右分栏布局 -->
-    <el-row :gutter="24" class="content-row">
+    <el-row
+      :gutter="24"
+      class="content-row"
+    >
       <!-- 左侧：安全控制面板 -->
-      <el-col :xs="24" :lg="16" class="control-col">
+      <el-col
+        :xs="24"
+        :lg="16"
+        class="control-col"
+      >
         <SafetyPanel class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
-      <el-col :xs="24" :lg="8" class="info-col">
+      <el-col
+        :xs="24"
+        :lg="8"
+        class="info-col"
+      >
         <!-- 安全状态卡片 - 可折叠 -->
         <el-card class="status-card">
           <template #header>
-            <div class="card-header" @click="toggleStatusPanel">
+            <div
+              class="card-header"
+              @click="toggleStatusPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon safety-icon"><CircleCheck /></el-icon>
+                <el-icon class="header-icon safety-icon">
+                  <CircleCheck />
+                </el-icon>
                 <span class="header-title">安全状态</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': statusCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': statusCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
-            <div v-show="!statusCollapsed" class="status-grid">
+            <div
+              v-show="!statusCollapsed"
+              class="status-grid"
+            >
               <div class="status-item">
-                <div class="status-label">系统状态</div>
-                <el-tag :type="systemStatusType" size="small">{{ systemStatusText }}</el-tag>
+                <div class="status-label">
+                  系统状态
+                </div>
+                <el-tag
+                  :type="systemStatusType"
+                  size="small"
+                >
+                  {{ systemStatusText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">急停状态</div>
-                <el-tag :type="emergencyStopType" size="small">{{ emergencyStopText }}</el-tag>
+                <div class="status-label">
+                  急停状态
+                </div>
+                <el-tag
+                  :type="emergencyStopType"
+                  size="small"
+                >
+                  {{ emergencyStopText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">门锁状态</div>
-                <el-tag :type="doorLockType" size="small">{{ doorLockText }}</el-tag>
+                <div class="status-label">
+                  门锁状态
+                </div>
+                <el-tag
+                  :type="doorLockType"
+                  size="small"
+                >
+                  {{ doorLockText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">报警数量</div>
-                <div class="status-value mono" :class="{ 'warning': alarmCount > 0 }">{{ alarmCount }}</div>
+                <div class="status-label">
+                  报警数量
+                </div>
+                <div
+                  class="status-value mono"
+                  :class="{ 'warning': alarmCount > 0 }"
+                >
+                  {{ alarmCount }}
+                </div>
               </div>
             </div>
           </el-collapse-transition>
@@ -64,12 +125,20 @@
         <!-- 报警历史卡片 - 可折叠 -->
         <el-card class="alarm-card">
           <template #header>
-            <div class="card-header" @click="toggleAlarmPanel">
+            <div
+              class="card-header"
+              @click="toggleAlarmPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon alarm-icon"><Bell /></el-icon>
+                <el-icon class="header-icon alarm-icon">
+                  <Bell />
+                </el-icon>
                 <span class="header-title">报警历史</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': alarmCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': alarmCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
@@ -85,8 +154,12 @@
                   placement="top"
                 >
                   <div class="alarm-item">
-                    <div class="alarm-title">{{ alarm.title }}</div>
-                    <div class="alarm-desc">{{ alarm.description }}</div>
+                    <div class="alarm-title">
+                      {{ alarm.title }}
+                    </div>
+                    <div class="alarm-desc">
+                      {{ alarm.description }}
+                    </div>
                   </div>
                 </el-timeline-item>
               </el-timeline>
@@ -97,12 +170,20 @@
         <!-- 安全操作指南卡片 - 可折叠 -->
         <el-card class="guide-card">
           <template #header>
-            <div class="card-header" @click="toggleGuidePanel">
+            <div
+              class="card-header"
+              @click="toggleGuidePanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">安全操作指南</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': guideCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': guideCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>

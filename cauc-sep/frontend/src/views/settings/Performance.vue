@@ -5,22 +5,38 @@
       <el-col :span="24">
         <div class="header-content">
           <div class="header-left">
-            <el-icon class="header-icon"><DataAnalysis /></el-icon>
+            <el-icon class="header-icon">
+              <DataAnalysis />
+            </el-icon>
             <div class="header-text">
-              <h1 class="page-title">性能分析</h1>
-              <p class="page-subtitle">系统性能监控与资源使用分析</p>
+              <h1 class="page-title">
+                性能分析
+              </h1>
+              <p class="page-subtitle">
+                系统性能监控与资源使用分析
+              </p>
             </div>
           </div>
           <div class="header-right">
-            <el-button @click="refreshData" class="action-btn" :loading="loading">
+            <el-button
+              class="action-btn"
+              :loading="loading"
+              @click="refreshData"
+            >
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
-            <el-button @click="generateReport" class="action-btn">
+            <el-button
+              class="action-btn"
+              @click="generateReport"
+            >
               <el-icon><Document /></el-icon>
               生成报告
             </el-button>
-            <el-button @click="handleExportReport" class="action-btn">
+            <el-button
+              class="action-btn"
+              @click="handleExportReport"
+            >
               <el-icon><Download /></el-icon>
               导出报告
             </el-button>
@@ -30,16 +46,27 @@
     </el-row>
 
     <!-- 性能摘要卡片 -->
-    <el-row :gutter="24" class="summary-row">
-      <el-col :xs="24" :sm="12" :lg="6">
+    <el-row
+      :gutter="24"
+      class="summary-row"
+    >
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <el-card class="summary-card cpu-card">
           <div class="summary-content">
             <div class="summary-icon">
               <el-icon><Cpu /></el-icon>
             </div>
             <div class="summary-info">
-              <div class="summary-value">{{ systemSummary.cpu_percent?.toFixed(1) || 0 }}%</div>
-              <div class="summary-label">CPU使用率</div>
+              <div class="summary-value">
+                {{ systemSummary.cpu_percent?.toFixed(1) || 0 }}%
+              </div>
+              <div class="summary-label">
+                CPU使用率
+              </div>
             </div>
           </div>
           <el-progress 
@@ -50,15 +77,23 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <el-card class="summary-card memory-card">
           <div class="summary-content">
             <div class="summary-icon">
               <el-icon><Coin /></el-icon>
             </div>
             <div class="summary-info">
-              <div class="summary-value">{{ systemSummary.memory_percent?.toFixed(1) || 0 }}%</div>
-              <div class="summary-label">内存使用率</div>
+              <div class="summary-value">
+                {{ systemSummary.memory_percent?.toFixed(1) || 0 }}%
+              </div>
+              <div class="summary-label">
+                内存使用率
+              </div>
             </div>
           </div>
           <el-progress 
@@ -69,15 +104,23 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <el-card class="summary-card function-card">
           <div class="summary-content">
             <div class="summary-icon">
               <el-icon><Operation /></el-icon>
             </div>
             <div class="summary-info">
-              <div class="summary-value">{{ functionSummary.tracked_count || 0 }}</div>
-              <div class="summary-label">追踪函数数</div>
+              <div class="summary-value">
+                {{ functionSummary.tracked_count || 0 }}
+              </div>
+              <div class="summary-label">
+                追踪函数数
+              </div>
             </div>
           </div>
           <div class="summary-detail">
@@ -86,15 +129,23 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :sm="12" :lg="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :lg="6"
+      >
         <el-card class="summary-card time-card">
           <div class="summary-content">
             <div class="summary-icon">
               <el-icon><Timer /></el-icon>
             </div>
             <div class="summary-info">
-              <div class="summary-value">{{ (functionSummary.total_time_sec || 0).toFixed(3) }}s</div>
-              <div class="summary-label">总执行时间</div>
+              <div class="summary-value">
+                {{ (functionSummary.total_time_sec || 0).toFixed(3) }}s
+              </div>
+              <div class="summary-label">
+                总执行时间
+              </div>
             </div>
           </div>
           <div class="summary-detail">
@@ -106,17 +157,30 @@
 
     <!-- 详细信息标签页 -->
     <el-card class="detail-card">
-      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+      <el-tabs
+        v-model="activeTab"
+        @tab-click="handleTabClick"
+      >
         <!-- 系统资源 -->
-        <el-tab-pane label="系统资源" name="system">
+        <el-tab-pane
+          label="系统资源"
+          name="system"
+        >
           <div class="tab-content">
             <el-row :gutter="24">
-              <el-col :xs="24" :lg="12">
+              <el-col
+                :xs="24"
+                :lg="12"
+              >
                 <div class="section-title">
                   <el-icon><Monitor /></el-icon>
                   <span>CPU信息</span>
                 </div>
-                <el-descriptions :column="1" border class="info-descriptions">
+                <el-descriptions
+                  :column="1"
+                  border
+                  class="info-descriptions"
+                >
                   <el-descriptions-item label="CPU使用率">
                     <el-tag :type="getTagType(systemInfo.cpu?.percent)">
                       {{ (systemInfo.cpu?.percent || 0).toFixed(1) }}%
@@ -128,12 +192,19 @@
                 </el-descriptions>
               </el-col>
 
-              <el-col :xs="24" :lg="12">
+              <el-col
+                :xs="24"
+                :lg="12"
+              >
                 <div class="section-title">
                   <el-icon><Coin /></el-icon>
                   <span>内存信息</span>
                 </div>
-                <el-descriptions :column="1" border class="info-descriptions">
+                <el-descriptions
+                  :column="1"
+                  border
+                  class="info-descriptions"
+                >
                   <el-descriptions-item label="总内存">
                     {{ (systemInfo.memory?.total_mb || 0).toFixed(0) }} MB
                   </el-descriptions-item>
@@ -155,13 +226,23 @@
               </el-col>
             </el-row>
 
-            <el-row :gutter="24" style="margin-top: 24px;">
-              <el-col :xs="24" :lg="12">
+            <el-row
+              :gutter="24"
+              style="margin-top: 24px;"
+            >
+              <el-col
+                :xs="24"
+                :lg="12"
+              >
                 <div class="section-title">
                   <el-icon><Folder /></el-icon>
                   <span>磁盘信息</span>
                 </div>
-                <el-descriptions :column="1" border class="info-descriptions">
+                <el-descriptions
+                  :column="1"
+                  border
+                  class="info-descriptions"
+                >
                   <el-descriptions-item label="总容量">
                     {{ (systemInfo.disk?.total_gb || 0).toFixed(2) }} GB
                   </el-descriptions-item>
@@ -180,12 +261,19 @@
                 </el-descriptions>
               </el-col>
 
-              <el-col :xs="24" :lg="12">
+              <el-col
+                :xs="24"
+                :lg="12"
+              >
                 <div class="section-title">
                   <el-icon><User /></el-icon>
                   <span>进程信息</span>
                 </div>
-                <el-descriptions :column="1" border class="info-descriptions">
+                <el-descriptions
+                  :column="1"
+                  border
+                  class="info-descriptions"
+                >
                   <el-descriptions-item label="进程ID">
                     {{ systemInfo.process?.pid || 0 }}
                   </el-descriptions-item>
@@ -205,54 +293,107 @@
         </el-tab-pane>
 
         <!-- 函数性能 -->
-        <el-tab-pane label="函数性能" name="functions">
+        <el-tab-pane
+          label="函数性能"
+          name="functions"
+        >
           <div class="tab-content">
             <div class="tab-header">
               <div class="tab-actions">
-                <el-button type="primary" size="small" @click="startProfiling" :loading="profiling">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="profiling"
+                  @click="startProfiling"
+                >
                   开始分析
                 </el-button>
-                <el-button size="small" @click="stopProfiling" :disabled="!profiling">
+                <el-button
+                  size="small"
+                  :disabled="!profiling"
+                  @click="stopProfiling"
+                >
                   停止分析
                 </el-button>
-                <el-button size="small" @click="loadFunctionProfiles">
+                <el-button
+                  size="small"
+                  @click="loadFunctionProfiles"
+                >
                   刷新数据
                 </el-button>
               </div>
             </div>
 
             <el-table 
+              v-loading="loadingFunctions" 
               :data="functionProfiles" 
-              stripe 
+              stripe
               style="width: 100%"
               max-height="500"
-              v-loading="loadingFunctions"
             >
-              <el-table-column prop="function_name" label="函数名" min-width="200" show-overflow-tooltip />
-              <el-table-column prop="total_calls" label="调用次数" width="100" align="right" />
-              <el-table-column prop="total_time" label="总时间(s)" width="120" align="right">
+              <el-table-column
+                prop="function_name"
+                label="函数名"
+                min-width="200"
+                show-overflow-tooltip
+              />
+              <el-table-column
+                prop="total_calls"
+                label="调用次数"
+                width="100"
+                align="right"
+              />
+              <el-table-column
+                prop="total_time"
+                label="总时间(s)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
                   {{ row.total_time.toFixed(6) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="avg_time" label="平均时间(s)" width="120" align="right">
+              <el-table-column
+                prop="avg_time"
+                label="平均时间(s)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
-                  <el-tag :type="getAvgTimeTagType(row.avg_time)" size="small">
+                  <el-tag
+                    :type="getAvgTimeTagType(row.avg_time)"
+                    size="small"
+                  >
                     {{ row.avg_time.toFixed(6) }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column prop="min_time" label="最小时间(s)" width="120" align="right">
+              <el-table-column
+                prop="min_time"
+                label="最小时间(s)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
                   {{ row.min_time.toFixed(6) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="max_time" label="最大时间(s)" width="120" align="right">
+              <el-table-column
+                prop="max_time"
+                label="最大时间(s)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
                   {{ row.max_time.toFixed(6) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="cumulative_time" label="累计时间(s)" width="120" align="right">
+              <el-table-column
+                prop="cumulative_time"
+                label="累计时间(s)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
                   {{ row.cumulative_time.toFixed(6) }}
                 </template>
@@ -262,7 +403,10 @@
         </el-tab-pane>
 
         <!-- 性能热点 -->
-        <el-tab-pane label="性能热点" name="hotspots">
+        <el-tab-pane
+          label="性能热点"
+          name="hotspots"
+        >
           <div class="tab-content">
             <div class="tab-header">
               <div class="filter-group">
@@ -276,61 +420,125 @@
                   style="width: 120px;"
                 />
                 <span class="filter-unit">ms</span>
-                <el-button size="small" @click="loadHotspots" style="margin-left: 16px;">
+                <el-button
+                  size="small"
+                  style="margin-left: 16px;"
+                  @click="loadHotspots"
+                >
                   应用筛选
                 </el-button>
               </div>
             </div>
 
             <el-table 
+              v-loading="loadingHotspots" 
               :data="hotspots" 
-              stripe 
+              stripe
               style="width: 100%"
               max-height="500"
-              v-loading="loadingHotspots"
             >
-              <el-table-column type="index" label="#" width="50" />
-              <el-table-column prop="function_name" label="函数名" min-width="200" show-overflow-tooltip />
-              <el-table-column prop="total_calls" label="调用次数" width="100" align="right" />
-              <el-table-column prop="avg_time" label="平均时间(ms)" width="120" align="right">
+              <el-table-column
+                type="index"
+                label="#"
+                width="50"
+              />
+              <el-table-column
+                prop="function_name"
+                label="函数名"
+                min-width="200"
+                show-overflow-tooltip
+              />
+              <el-table-column
+                prop="total_calls"
+                label="调用次数"
+                width="100"
+                align="right"
+              />
+              <el-table-column
+                prop="avg_time"
+                label="平均时间(ms)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
-                  <el-tag type="danger" size="small">
+                  <el-tag
+                    type="danger"
+                    size="small"
+                  >
                     {{ (row.avg_time * 1000).toFixed(3) }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column prop="total_time" label="总时间(ms)" width="120" align="right">
+              <el-table-column
+                prop="total_time"
+                label="总时间(ms)"
+                width="120"
+                align="right"
+              >
                 <template #default="{ row }">
                   {{ (row.total_time * 1000).toFixed(3) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="file_path" label="文件路径" min-width="200" show-overflow-tooltip />
-              <el-table-column prop="line_number" label="行号" width="80" align="right" />
+              <el-table-column
+                prop="file_path"
+                label="文件路径"
+                min-width="200"
+                show-overflow-tooltip
+              />
+              <el-table-column
+                prop="line_number"
+                label="行号"
+                width="80"
+                align="right"
+              />
             </el-table>
 
-            <el-empty v-if="hotspots.length === 0 && !loadingHotspots" description="暂无性能热点数据" />
+            <el-empty
+              v-if="hotspots.length === 0 && !loadingHotspots"
+              description="暂无性能热点数据"
+            />
           </div>
         </el-tab-pane>
 
         <!-- 内存分析 -->
-        <el-tab-pane label="内存分析" name="memory">
+        <el-tab-pane
+          label="内存分析"
+          name="memory"
+        >
           <div class="tab-content">
             <div class="tab-header">
               <div class="tab-actions">
-                <el-button type="primary" size="small" @click="startMemoryTracking" :loading="memoryTracking">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :loading="memoryTracking"
+                  @click="startMemoryTracking"
+                >
                   开始追踪
                 </el-button>
-                <el-button size="small" @click="stopMemoryTracking" :disabled="!memoryTracking">
+                <el-button
+                  size="small"
+                  :disabled="!memoryTracking"
+                  @click="stopMemoryTracking"
+                >
                   停止追踪
                 </el-button>
-                <el-button size="small" @click="loadMemorySnapshots">
+                <el-button
+                  size="small"
+                  @click="loadMemorySnapshots"
+                >
                   刷新数据
                 </el-button>
               </div>
             </div>
 
             <el-row :gutter="24">
-              <el-col :xs="24" :lg="12" v-for="(snapshot, index) in memorySnapshots" :key="index">
+              <el-col
+                v-for="(snapshot, index) in memorySnapshots"
+                :key="index"
+                :xs="24"
+                :lg="12"
+              >
                 <el-card class="memory-snapshot-card">
                   <template #header>
                     <div class="snapshot-header">
@@ -338,7 +546,10 @@
                       <span class="snapshot-time">{{ snapshot.timestamp }}</span>
                     </div>
                   </template>
-                  <el-descriptions :column="1" border>
+                  <el-descriptions
+                    :column="1"
+                    border
+                  >
                     <el-descriptions-item label="当前内存">
                       {{ snapshot.current_memory_mb.toFixed(2) }} MB
                     </el-descriptions-item>
@@ -352,26 +563,49 @@
                     </el-descriptions-item>
                   </el-descriptions>
 
-                  <div v-if="snapshot.top_allocations && snapshot.top_allocations.length > 0" style="margin-top: 16px;">
+                  <div
+                    v-if="snapshot.top_allocations && snapshot.top_allocations.length > 0"
+                    style="margin-top: 16px;"
+                  >
                     <div class="section-title">
                       <el-icon><Top /></el-icon>
                       <span>TOP内存分配</span>
                     </div>
-                    <el-table :data="snapshot.top_allocations.slice(0, 5)" size="small">
-                      <el-table-column prop="file" label="位置" show-overflow-tooltip />
-                      <el-table-column prop="size_mb" label="大小(MB)" width="100" align="right">
+                    <el-table
+                      :data="snapshot.top_allocations.slice(0, 5)"
+                      size="small"
+                    >
+                      <el-table-column
+                        prop="file"
+                        label="位置"
+                        show-overflow-tooltip
+                      />
+                      <el-table-column
+                        prop="size_mb"
+                        label="大小(MB)"
+                        width="100"
+                        align="right"
+                      >
                         <template #default="{ row }">
                           {{ row.size_mb.toFixed(2) }}
                         </template>
                       </el-table-column>
-                      <el-table-column prop="count" label="次数" width="80" align="right" />
+                      <el-table-column
+                        prop="count"
+                        label="次数"
+                        width="80"
+                        align="right"
+                      />
                     </el-table>
                   </div>
                 </el-card>
               </el-col>
             </el-row>
 
-            <el-empty v-if="memorySnapshots.length === 0 && !loadingMemory" description="暂无内存快照数据" />
+            <el-empty
+              v-if="memorySnapshots.length === 0 && !loadingMemory"
+              description="暂无内存快照数据"
+            />
           </div>
         </el-tab-pane>
       </el-tabs>

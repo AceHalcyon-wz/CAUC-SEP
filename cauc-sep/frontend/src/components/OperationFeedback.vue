@@ -255,9 +255,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="operation-feedback" :class="positionClass">
+  <div
+    class="operation-feedback"
+    :class="positionClass"
+  >
     <!-- 成功提示列表 -->
-    <TransitionGroup name="notification" tag="div" class="success-list">
+    <TransitionGroup
+      name="notification"
+      tag="div"
+      class="success-list"
+    >
       <div
         v-for="notification in visibleSuccessNotifications"
         :key="notification.id"
@@ -265,20 +272,35 @@ onUnmounted(() => {
       >
         <!-- 成功图标 -->
         <div class="notification-icon success-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+          >
+            <path
+              fill="currentColor"
+              d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
+            />
           </svg>
         </div>
 
         <!-- 内容 -->
         <div class="notification-content">
-          <div class="notification-title">{{ notification.title }}</div>
-          <div v-if="notification.message" class="notification-message">
+          <div class="notification-title">
+            {{ notification.title }}
+          </div>
+          <div
+            v-if="notification.message"
+            class="notification-message"
+          >
             {{ notification.message }}
           </div>
           
           <!-- 操作结果摘要 -->
-          <div v-if="notification.result" class="notification-result">
+          <div
+            v-if="notification.result"
+            class="notification-result"
+          >
             <template v-if="notification.result.deviceId">
               设备ID: {{ notification.result.deviceId }}
             </template>
@@ -300,11 +322,18 @@ onUnmounted(() => {
         <!-- 关闭按钮 -->
         <button
           class="notification-close"
-          @click="dismissSuccess(notification.id)"
           title="关闭"
+          @click="dismissSuccess(notification.id)"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+          >
+            <path
+              fill="currentColor"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+            />
           </svg>
         </button>
 
@@ -313,13 +342,17 @@ onUnmounted(() => {
           <div
             class="notification-progress-bar"
             :style="{ animationDuration: `${notification.duration}ms` }"
-          ></div>
+          />
         </div>
       </div>
     </TransitionGroup>
 
     <!-- 错误提示列表 -->
-    <TransitionGroup name="notification" tag="div" class="error-list">
+    <TransitionGroup
+      name="notification"
+      tag="div"
+      class="error-list"
+    >
       <div
         v-for="notification in visibleErrorNotifications"
         :key="notification.id"
@@ -328,8 +361,15 @@ onUnmounted(() => {
       >
         <!-- 错误图标 -->
         <div class="notification-icon error-icon">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+          >
+            <path
+              fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+            />
           </svg>
         </div>
 
@@ -339,11 +379,18 @@ onUnmounted(() => {
             <span>{{ notification.title }}</span>
             <span class="error-type-badge">{{ getErrorTypeText(notification.error?.type) }}</span>
           </div>
-          <div class="notification-message">{{ notification.error?.message }}</div>
+          <div class="notification-message">
+            {{ notification.error?.message }}
+          </div>
 
           <!-- 错误详情（可展开） -->
-          <div v-if="notification.expanded && notification.error?.details" class="error-details">
-            <div class="error-details-title">详细信息：</div>
+          <div
+            v-if="notification.expanded && notification.error?.details"
+            class="error-details"
+          >
+            <div class="error-details-title">
+              详细信息：
+            </div>
             <pre class="error-details-content">{{ JSON.stringify(notification.error.details, null, 2) }}</pre>
           </div>
 
@@ -354,8 +401,15 @@ onUnmounted(() => {
               class="action-btn retry-btn"
               @click="handleRetry(notification.id)"
             >
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path fill="currentColor" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path
+                  fill="currentColor"
+                  d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+                />
               </svg>
               重试
             </button>
@@ -372,8 +426,15 @@ onUnmounted(() => {
               class="action-btn help-btn"
               target="_blank"
             >
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+              >
+                <path
+                  fill="currentColor"
+                  d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"
+                />
               </svg>
               帮助
             </a>
@@ -383,18 +444,29 @@ onUnmounted(() => {
         <!-- 关闭按钮 -->
         <button
           class="notification-close"
-          @click="dismissError(notification.id)"
           title="关闭"
+          @click="dismissError(notification.id)"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+          >
+            <path
+              fill="currentColor"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+            />
           </svg>
         </button>
       </div>
     </TransitionGroup>
 
     <!-- 撤销操作提示 -->
-    <TransitionGroup name="notification" tag="div" class="undo-list">
+    <TransitionGroup
+      name="notification"
+      tag="div"
+      class="undo-list"
+    >
       <div
         v-for="undoItem in undoableOperations"
         :key="undoItem.id"

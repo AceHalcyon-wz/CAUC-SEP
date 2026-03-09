@@ -20,7 +20,10 @@
     >
       <div class="layout__content">
         <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
+          <transition
+            name="fade"
+            mode="out-in"
+          >
             <keep-alive :include="cachedViews">
               <component :is="Component" />
             </keep-alive>

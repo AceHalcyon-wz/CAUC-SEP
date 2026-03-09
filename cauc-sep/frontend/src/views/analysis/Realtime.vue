@@ -3,19 +3,31 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><TrendCharts /></el-icon>
+        <el-icon class="header-icon">
+          <TrendCharts />
+        </el-icon>
         <div class="header-content">
-          <h1 class="page-title">实时数据分析</h1>
-          <p class="page-subtitle">实时监控设备数据变化，支持多通道同步显示</p>
+          <h1 class="page-title">
+            实时数据分析
+          </h1>
+          <p class="page-subtitle">
+            实时监控设备数据变化，支持多通道同步显示
+          </p>
         </div>
       </div>
       <div class="header-right">
         <div class="refresh-status">
-          <div class="status-indicator" :class="{ 'is-active': autoRefresh }">
-            <span class="status-dot"></span>
+          <div
+            class="status-indicator"
+            :class="{ 'is-active': autoRefresh }"
+          >
+            <span class="status-dot" />
             <span class="status-text">{{ autoRefresh ? '自动刷新中' : '手动模式' }}</span>
           </div>
-          <div class="refresh-info" v-if="autoRefresh">
+          <div
+            v-if="autoRefresh"
+            class="refresh-info"
+          >
             <span class="interval-text">间隔: {{ refreshInterval }}ms</span>
           </div>
         </div>
@@ -25,55 +37,90 @@
           inactive-text="手动"
           @change="handleAutoRefreshChange"
         />
-        <el-button type="primary" :icon="Refresh" @click="refreshData">
+        <el-button
+          type="primary"
+          :icon="Refresh"
+          @click="refreshData"
+        >
           刷新数据
         </el-button>
       </div>
     </div>
 
     <!-- 数据统计概览 -->
-    <el-row :gutter="16" class="stats-row">
-      <el-col :xs="12" :sm="6">
+    <el-row
+      :gutter="16"
+      class="stats-row"
+    >
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card">
           <div class="stat-icon stat-icon--primary">
             <el-icon><DataLine /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">数据点数</div>
-            <div class="stat-value mono">{{ dataStats.pointCount }}</div>
+            <div class="stat-label">
+              数据点数
+            </div>
+            <div class="stat-value mono">
+              {{ dataStats.pointCount }}
+            </div>
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card">
           <div class="stat-icon stat-icon--success">
             <el-icon><Top /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">最大值</div>
-            <div class="stat-value mono">{{ dataStats.maxValue.toFixed(3) }}</div>
+            <div class="stat-label">
+              最大值
+            </div>
+            <div class="stat-value mono">
+              {{ dataStats.maxValue.toFixed(3) }}
+            </div>
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card">
           <div class="stat-icon stat-icon--warning">
             <el-icon><Bottom /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">最小值</div>
-            <div class="stat-value mono">{{ dataStats.minValue.toFixed(3) }}</div>
+            <div class="stat-label">
+              最小值
+            </div>
+            <div class="stat-value mono">
+              {{ dataStats.minValue.toFixed(3) }}
+            </div>
           </div>
         </div>
       </el-col>
-      <el-col :xs="12" :sm="6">
+      <el-col
+        :xs="12"
+        :sm="6"
+      >
         <div class="stat-card">
           <div class="stat-icon stat-icon--info">
             <el-icon><TrendCharts /></el-icon>
           </div>
           <div class="stat-content">
-            <div class="stat-label">平均值</div>
-            <div class="stat-value mono">{{ dataStats.avgValue.toFixed(3) }}</div>
+            <div class="stat-label">
+              平均值
+            </div>
+            <div class="stat-value mono">
+              {{ dataStats.avgValue.toFixed(3) }}
+            </div>
           </div>
         </div>
       </el-col>
@@ -91,7 +138,11 @@
         </div>
       </template>
       <el-row :gutter="16">
-        <el-col :xs="24" :sm="12" :md="6">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="6"
+        >
           <el-button 
             type="primary" 
             :icon="Download" 
@@ -101,7 +152,11 @@
             导出实时数据
           </el-button>
         </el-col>
-        <el-col :xs="24" :sm="12" :md="6">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="6"
+        >
           <el-button 
             type="success" 
             :icon="VideoPause" 
@@ -112,7 +167,11 @@
             暂停刷新
           </el-button>
         </el-col>
-        <el-col :xs="24" :sm="12" :md="6">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="6"
+        >
           <el-button 
             type="warning" 
             :icon="Delete" 
@@ -122,7 +181,11 @@
             清除数据
           </el-button>
         </el-col>
-        <el-col :xs="24" :sm="12" :md="6">
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="6"
+        >
           <el-button 
             type="info" 
             :icon="Setting" 
@@ -170,8 +233,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showSettingsDialog = false">取消</el-button>
-        <el-button type="primary" @click="applySettings">应用设置</el-button>
+        <el-button @click="showSettingsDialog = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="applySettings"
+        >
+          应用设置
+        </el-button>
       </template>
     </el-dialog>
   </div>

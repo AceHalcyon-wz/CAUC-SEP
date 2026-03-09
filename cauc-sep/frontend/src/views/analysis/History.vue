@@ -3,10 +3,16 @@
     <!-- 页面标题 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><Clock /></el-icon>
+        <el-icon class="header-icon">
+          <Clock />
+        </el-icon>
         <div class="header-content">
-          <h1 class="page-title">历史数据分析</h1>
-          <p class="page-subtitle">查询历史实验数据，支持多维度对比分析</p>
+          <h1 class="page-title">
+            历史数据分析
+          </h1>
+          <p class="page-subtitle">
+            查询历史实验数据，支持多维度对比分析
+          </p>
         </div>
       </div>
       <div class="header-right">
@@ -14,21 +20,31 @@
           v-if="activeTab === 'compare'"
           type="primary" 
           :icon="Plus"
-          @click="addCompareDataset"
           :disabled="compareDatasets.length >= 4"
+          @click="addCompareDataset"
         >
           添加对比数据
         </el-button>
-        <el-button type="success" :icon="Download" @click="exportHistoryData">
+        <el-button
+          type="success"
+          :icon="Download"
+          @click="exportHistoryData"
+        >
           导出数据
         </el-button>
       </div>
     </div>
 
     <!-- 标签页切换 -->
-    <el-tabs v-model="activeTab" class="main-tabs">
+    <el-tabs
+      v-model="activeTab"
+      class="main-tabs"
+    >
       <!-- 查询标签页 -->
-      <el-tab-pane label="数据查询" name="query">
+      <el-tab-pane
+        label="数据查询"
+        name="query"
+      >
         <!-- 查询条件面板 -->
         <HistoryQuery
           ref="queryRef"
@@ -39,15 +55,28 @@
         />
 
         <!-- 数据展示区域 -->
-        <el-row :gutter="24" class="content-row">
+        <el-row
+          :gutter="24"
+          class="content-row"
+        >
           <!-- 左侧：数据列表 -->
-          <el-col :xs="24" :sm="24" :md="10" :lg="8">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="10"
+            :lg="8"
+          >
             <el-card class="data-list-card">
               <template #header>
                 <div class="card-header">
                   <el-icon><List /></el-icon>
                   <span>数据记录</span>
-                  <el-tag type="info" size="small">{{ totalRecords }} 条</el-tag>
+                  <el-tag
+                    type="info"
+                    size="small"
+                  >
+                    {{ totalRecords }} 条
+                  </el-tag>
                 </div>
               </template>
               
@@ -61,11 +90,15 @@
                 @lazy-load="handleLazyLoad"
                 @item-click="handleRowClick"
               >
-                <template #default="{ item, index }">
+                <template #default="{ item }">
                   <div class="data-item">
                     <div class="item-main">
-                      <div class="item-time">{{ item.timestamp }}</div>
-                      <div class="item-device">{{ item.device }}</div>
+                      <div class="item-time">
+                        {{ item.timestamp }}
+                      </div>
+                      <div class="item-device">
+                        {{ item.device }}
+                      </div>
                     </div>
                     <div class="item-value">
                       <span class="value-number mono">{{ item.value.toFixed(3) }}</span>
@@ -76,10 +109,17 @@
               </VirtualScrollList>
               
               <!-- 空状态 -->
-              <div v-if="!isLoading && tableData.length === 0" class="empty-list">
-                <el-icon class="empty-icon"><Document /></el-icon>
+              <div
+                v-if="!isLoading && tableData.length === 0"
+                class="empty-list"
+              >
+                <el-icon class="empty-icon">
+                  <Document />
+                </el-icon>
                 <p>暂无历史数据</p>
-                <p class="empty-hint">请使用上方查询条件获取数据</p>
+                <p class="empty-hint">
+                  请使用上方查询条件获取数据
+                </p>
               </div>
               
               <!-- 分页控制 -->
@@ -98,7 +138,12 @@
           </el-col>
 
           <!-- 右侧：数据图表 -->
-          <el-col :xs="24" :sm="24" :md="14" :lg="16">
+          <el-col
+            :xs="24"
+            :sm="24"
+            :md="14"
+            :lg="16"
+          >
             <el-card class="chart-card">
               <template #header>
                 <div class="card-header">
@@ -129,15 +174,29 @@
                 </div>
               </template>
               
-              <div v-if="isLoading" class="chart-loading">
-                <el-icon class="loading-icon"><Loading /></el-icon>
+              <div
+                v-if="isLoading"
+                class="chart-loading"
+              >
+                <el-icon class="loading-icon">
+                  <Loading />
+                </el-icon>
                 <p>正在加载数据...</p>
               </div>
-              <div v-else-if="tableData.length === 0" class="chart-empty">
-                <el-icon class="empty-icon"><Document /></el-icon>
+              <div
+                v-else-if="tableData.length === 0"
+                class="chart-empty"
+              >
+                <el-icon class="empty-icon">
+                  <Document />
+                </el-icon>
                 <p>暂无数据，请先查询历史数据</p>
               </div>
-              <div v-else ref="chartRef" class="chart-container"></div>
+              <div
+                v-else
+                ref="chartRef"
+                class="chart-container"
+              />
             </el-card>
 
             <!-- 数据统计 -->
@@ -150,28 +209,56 @@
               </template>
               
               <el-row :gutter="20">
-                <el-col :xs="12" :sm="6">
+                <el-col
+                  :xs="12"
+                  :sm="6"
+                >
                   <div class="stat-item">
-                    <div class="stat-label">数据总量</div>
-                    <div class="stat-value mono">{{ statistics.total }}</div>
+                    <div class="stat-label">
+                      数据总量
+                    </div>
+                    <div class="stat-value mono">
+                      {{ statistics.total }}
+                    </div>
                   </div>
                 </el-col>
-                <el-col :xs="12" :sm="6">
+                <el-col
+                  :xs="12"
+                  :sm="6"
+                >
                   <div class="stat-item">
-                    <div class="stat-label">平均值</div>
-                    <div class="stat-value mono">{{ statistics.avg.toFixed(3) }}</div>
+                    <div class="stat-label">
+                      平均值
+                    </div>
+                    <div class="stat-value mono">
+                      {{ statistics.avg.toFixed(3) }}
+                    </div>
                   </div>
                 </el-col>
-                <el-col :xs="12" :sm="6">
+                <el-col
+                  :xs="12"
+                  :sm="6"
+                >
                   <div class="stat-item">
-                    <div class="stat-label">最大值</div>
-                    <div class="stat-value mono">{{ statistics.max.toFixed(3) }}</div>
+                    <div class="stat-label">
+                      最大值
+                    </div>
+                    <div class="stat-value mono">
+                      {{ statistics.max.toFixed(3) }}
+                    </div>
                   </div>
                 </el-col>
-                <el-col :xs="12" :sm="6">
+                <el-col
+                  :xs="12"
+                  :sm="6"
+                >
                   <div class="stat-item">
-                    <div class="stat-label">最小值</div>
-                    <div class="stat-value mono">{{ statistics.min.toFixed(3) }}</div>
+                    <div class="stat-label">
+                      最小值
+                    </div>
+                    <div class="stat-value mono">
+                      {{ statistics.min.toFixed(3) }}
+                    </div>
                   </div>
                 </el-col>
               </el-row>
@@ -181,18 +268,29 @@
       </el-tab-pane>
 
       <!-- 数据对比标签页 -->
-      <el-tab-pane label="数据对比" name="compare">
+      <el-tab-pane
+        label="数据对比"
+        name="compare"
+      >
         <el-card class="compare-card">
           <template #header>
             <div class="card-header">
               <el-icon><Connection /></el-icon>
               <span>多数据集对比分析</span>
-              <el-tag type="info" size="small">{{ compareDatasets.length }} / 4 个数据集</el-tag>
+              <el-tag
+                type="info"
+                size="small"
+              >
+                {{ compareDatasets.length }} / 4 个数据集
+              </el-tag>
             </div>
           </template>
 
           <!-- 对比数据集列表 -->
-          <div v-if="compareDatasets.length > 0" class="compare-datasets">
+          <div
+            v-if="compareDatasets.length > 0"
+            class="compare-datasets"
+          >
             <el-row :gutter="16">
               <el-col
                 v-for="(dataset, index) in compareDatasets"
@@ -201,7 +299,10 @@
                 :sm="12"
                 :md="6"
               >
-                <div class="dataset-card" :class="`dataset-color-${index}`">
+                <div
+                  class="dataset-card"
+                  :class="`dataset-color-${index}`"
+                >
                   <div class="dataset-header">
                     <span class="dataset-name">{{ dataset.name }}</span>
                     <el-button
@@ -235,16 +336,30 @@
           />
 
           <!-- 对比图表 -->
-          <div v-if="compareDatasets.length > 0" ref="compareChartRef" class="compare-chart"></div>
+          <div
+            v-if="compareDatasets.length > 0"
+            ref="compareChartRef"
+            class="compare-chart"
+          />
 
           <!-- 差异分析 -->
-          <div v-if="compareDatasets.length >= 2" class="difference-analysis">
+          <div
+            v-if="compareDatasets.length >= 2"
+            class="difference-analysis"
+          >
             <div class="analysis-header">
               <el-icon><DataAnalysis /></el-icon>
               <span>差异分析</span>
             </div>
-            <el-table :data="differenceData" style="width: 100%">
-              <el-table-column prop="metric" label="指标" width="150" />
+            <el-table
+              :data="differenceData"
+              style="width: 100%"
+            >
+              <el-table-column
+                prop="metric"
+                label="指标"
+                width="150"
+              />
               <el-table-column
                 v-for="(dataset, index) in compareDatasets"
                 :key="dataset.id"
@@ -255,7 +370,11 @@
                   <span class="mono">{{ row.values[index].toFixed(3) }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="差异" align="center" width="150">
+              <el-table-column
+                label="差异"
+                align="center"
+                width="150"
+              >
                 <template #default="{ row }">
                   <span :class="getDifferenceClass(row.difference)">
                     {{ row.difference > 0 ? '+' : '' }}{{ row.difference.toFixed(3) }}
@@ -268,7 +387,10 @@
       </el-tab-pane>
 
       <!-- 数据叠加标签页 -->
-      <el-tab-pane label="数据叠加" name="overlay">
+      <el-tab-pane
+        label="数据叠加"
+        name="overlay"
+      >
         <el-card class="overlay-card">
           <template #header>
             <div class="card-header">
@@ -281,21 +403,49 @@
           <div class="overlay-config">
             <el-form :inline="true">
               <el-form-item label="叠加方式">
-                <el-select v-model="overlayMode" style="width: 150px">
-                  <el-option label="时间对齐" value="time" />
-                  <el-option label="数值对齐" value="value" />
-                  <el-option label="归一化" value="normalize" />
+                <el-select
+                  v-model="overlayMode"
+                  style="width: 150px"
+                >
+                  <el-option
+                    label="时间对齐"
+                    value="time"
+                  />
+                  <el-option
+                    label="数值对齐"
+                    value="value"
+                  />
+                  <el-option
+                    label="归一化"
+                    value="normalize"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item label="显示模式">
-                <el-select v-model="overlayDisplay" style="width: 150px">
-                  <el-option label="叠加显示" value="overlay" />
-                  <el-option label="差值显示" value="difference" />
-                  <el-option label="比值显示" value="ratio" />
+                <el-select
+                  v-model="overlayDisplay"
+                  style="width: 150px"
+                >
+                  <el-option
+                    label="叠加显示"
+                    value="overlay"
+                  />
+                  <el-option
+                    label="差值显示"
+                    value="difference"
+                  />
+                  <el-option
+                    label="比值显示"
+                    value="ratio"
+                  />
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" :icon="Refresh" @click="updateOverlayChart">
+                <el-button
+                  type="primary"
+                  :icon="Refresh"
+                  @click="updateOverlayChart"
+                >
                   更新图表
                 </el-button>
               </el-form-item>
@@ -303,7 +453,10 @@
           </div>
 
           <!-- 叠加图表 -->
-          <div ref="overlayChartRef" class="overlay-chart"></div>
+          <div
+            ref="overlayChartRef"
+            class="overlay-chart"
+          />
         </el-card>
       </el-tab-pane>
     </el-tabs>
@@ -428,6 +581,7 @@ const differenceData = computed(() => {
   return metrics.map(metric => {
     const values = compareDatasets.value.map(dataset => {
       const data = dataset.data.map(d => d.value)
+      let avg
       switch (metric) {
         case '平均值':
           return data.reduce((a, b) => a + b, 0) / data.length
@@ -436,7 +590,7 @@ const differenceData = computed(() => {
         case '最小值':
           return Math.min(...data)
         case '标准差':
-          const avg = data.reduce((a, b) => a + b, 0) / data.length
+          avg = data.reduce((a, b) => a + b, 0) / data.length
           return Math.sqrt(data.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / data.length)
         default:
           return 0

@@ -4,16 +4,25 @@
     <div class="page-header">
       <div class="header-main">
         <div class="header-left">
-          <el-icon class="header-icon"><Link /></el-icon>
+          <el-icon class="header-icon">
+            <Link />
+          </el-icon>
           <div class="header-content">
-            <h1 class="page-title">设备连接配置</h1>
-            <p class="page-subtitle">管理设备串口连接、配置模板和实时数据通信</p>
+            <h1 class="page-title">
+              设备连接配置
+            </h1>
+            <p class="page-subtitle">
+              管理设备串口连接、配置模板和实时数据通信
+            </p>
           </div>
         </div>
         <div class="header-right">
           <div class="status-indicators">
-            <div class="status-indicator" :class="`status-indicator--${devicesStore.systemStatusType}`">
-              <span class="status-dot"></span>
+            <div
+              class="status-indicator"
+              :class="`status-indicator--${devicesStore.systemStatusType}`"
+            >
+              <span class="status-dot" />
               <span class="status-text">{{ devicesStore.systemStatusText }}</span>
             </div>
             <div class="connection-counter">
@@ -27,13 +36,25 @@
 
     <!-- 主内容区域 -->
     <div class="content-wrapper">
-      <el-row :gutter="24" class="content-row">
-        <el-col :xs="24" :lg="16">
+      <el-row
+        :gutter="24"
+        class="content-row"
+      >
+        <el-col
+          :xs="24"
+          :lg="16"
+        >
           <!-- 设备连接配置标签页 -->
           <el-card class="config-card">
-            <el-tabs v-model="activeTab" class="config-tabs">
+            <el-tabs
+              v-model="activeTab"
+              class="config-tabs"
+            >
               <!-- 单设备配置 -->
-              <el-tab-pane label="设备配置" name="single">
+              <el-tab-pane
+                label="设备配置"
+                name="single"
+              >
                 <div class="tab-content">
                   <!-- 设备选择器卡片 -->
                   <div class="device-selector-card">
@@ -72,30 +93,46 @@
                   </div>
 
                   <!-- 配置表单区域 -->
-                  <div v-if="selectedDevice" class="config-form-section">
+                  <div
+                    v-if="selectedDevice"
+                    class="config-form-section"
+                  >
                     <ConnectionConfig
-                      :device-type="selectedDevice"
                       v-model="currentConfig"
+                      :device-type="selectedDevice"
                       @test-success="handleTestSuccess"
                       @test-failed="handleTestFailed"
                     />
                   </div>
 
-                  <el-empty v-else description="请先选择要配置的设备" :image-size="120" />
+                  <el-empty
+                    v-else
+                    description="请先选择要配置的设备"
+                    :image-size="120"
+                  />
                 </div>
               </el-tab-pane>
 
               <!-- 多设备管理 -->
-              <el-tab-pane label="多设备管理" name="multi">
+              <el-tab-pane
+                label="多设备管理"
+                name="multi"
+              >
                 <div class="tab-content">
                   <!-- 快速操作工具栏 -->
                   <div class="quick-actions-toolbar">
                     <div class="toolbar-left">
-                      <el-button type="primary" @click="connectSelectedDevices">
+                      <el-button
+                        type="primary"
+                        @click="connectSelectedDevices"
+                      >
                         <el-icon><Connection /></el-icon>
                         连接选中设备
                       </el-button>
-                      <el-button type="danger" @click="disconnectSelectedDevices">
+                      <el-button
+                        type="danger"
+                        @click="disconnectSelectedDevices"
+                      >
                         <el-icon><CircleClose /></el-icon>
                         断开选中设备
                       </el-button>
@@ -116,44 +153,99 @@
                   <el-table
                     ref="deviceTableRef"
                     :data="deviceList"
-                    @selection-change="handleSelectionChange"
                     class="device-table"
                     stripe
+                    @selection-change="handleSelectionChange"
                   >
-                    <el-table-column type="selection" width="55" align="center" />
-                    <el-table-column prop="name" label="设备名称" min-width="140">
+                    <el-table-column
+                      type="selection"
+                      width="55"
+                      align="center"
+                    />
+                    <el-table-column
+                      prop="name"
+                      label="设备名称"
+                      min-width="140"
+                    >
                       <template #default="{ row }">
                         <div class="device-name-cell">
                           <span class="device-name-text">{{ row.name }}</span>
                         </div>
                       </template>
                     </el-table-column>
-                    <el-table-column label="连接状态" width="120" align="center">
+                    <el-table-column
+                      label="连接状态"
+                      width="120"
+                      align="center"
+                    >
                       <template #default="{ row }">
-                        <div class="status-badge" :class="row.isConnected ? 'status-badge--success' : 'status-badge--default'">
-                          <span class="badge-dot"></span>
+                        <div
+                          class="status-badge"
+                          :class="row.isConnected ? 'status-badge--success' : 'status-badge--default'"
+                        >
+                          <span class="badge-dot" />
                           <span>{{ row.isConnected ? '已连接' : '未连接' }}</span>
                         </div>
                       </template>
                     </el-table-column>
-                    <el-table-column label="健康状态" width="120" align="center">
+                    <el-table-column
+                      label="健康状态"
+                      width="120"
+                      align="center"
+                    >
                       <template #default="{ row }">
-                        <el-tag :type="getHealthType(row.health)" size="small" effect="plain">
+                        <el-tag
+                          :type="getHealthType(row.health)"
+                          size="small"
+                          effect="plain"
+                        >
                           {{ getHealthText(row.health) }}
                         </el-tag>
                       </template>
                     </el-table-column>
-                    <el-table-column label="配置信息" min-width="220">
+                    <el-table-column
+                      label="配置信息"
+                      min-width="220"
+                    >
                       <template #default="{ row }">
-                        <div v-if="row.config" class="config-tags">
-                          <el-tag size="small" type="info" effect="plain">{{ row.config.port }}</el-tag>
-                          <el-tag size="small" type="info" effect="plain">{{ row.config.baudrate }}</el-tag>
-                          <el-tag size="small" type="info" effect="plain">ID: {{ row.config.slaveId }}</el-tag>
+                        <div
+                          v-if="row.config"
+                          class="config-tags"
+                        >
+                          <el-tag
+                            size="small"
+                            type="info"
+                            effect="plain"
+                          >
+                            {{ row.config.port }}
+                          </el-tag>
+                          <el-tag
+                            size="small"
+                            type="info"
+                            effect="plain"
+                          >
+                            {{ row.config.baudrate }}
+                          </el-tag>
+                          <el-tag
+                            size="small"
+                            type="info"
+                            effect="plain"
+                          >
+                            ID: {{ row.config.slaveId }}
+                          </el-tag>
                         </div>
-                        <span v-else class="no-config-text">未配置</span>
+                        <span
+                          v-else
+                          class="no-config-text"
+                        >未配置</span>
                       </template>
                     </el-table-column>
-                    <el-table-column label="操作" width="200" fixed="right" align="center">
+                    <el-table-column
+                      label="操作"
+                      width="200"
+                      fixed="right"
+                      align="center"
+                    >
                       <template #default="{ row }">
                         <el-button-group class="action-buttons">
                           <el-button
@@ -190,12 +282,18 @@
               </el-tab-pane>
 
               <!-- 配置模板管理 -->
-              <el-tab-pane label="配置模板" name="templates">
+              <el-tab-pane
+                label="配置模板"
+                name="templates"
+              >
                 <div class="tab-content">
                   <!-- 模板操作工具栏 -->
                   <div class="template-toolbar">
                     <div class="toolbar-left">
-                      <el-button type="primary" @click="createNewTemplate">
+                      <el-button
+                        type="primary"
+                        @click="createNewTemplate"
+                      >
                         <el-icon><Plus /></el-icon>
                         新建模板
                       </el-button>
@@ -213,22 +311,54 @@
                   </div>
 
                   <!-- 模板列表表格 -->
-                  <el-table :data="allTemplates" class="template-table" stripe>
-                    <el-table-column prop="name" label="模板名称" min-width="180">
+                  <el-table
+                    :data="allTemplates"
+                    class="template-table"
+                    stripe
+                  >
+                    <el-table-column
+                      prop="name"
+                      label="模板名称"
+                      min-width="180"
+                    >
                       <template #default="{ row }">
                         <div class="template-name-cell">
                           <span class="template-name">{{ row.name }}</span>
-                          <el-tag v-if="row.isDefault" type="success" size="small" effect="plain">默认</el-tag>
+                          <el-tag
+                            v-if="row.isDefault"
+                            type="success"
+                            size="small"
+                            effect="plain"
+                          >
+                            默认
+                          </el-tag>
                         </div>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="deviceType" label="设备类型" width="140">
+                    <el-table-column
+                      prop="deviceType"
+                      label="设备类型"
+                      width="140"
+                    >
                       <template #default="{ row }">
-                        <el-tag size="small" effect="plain">{{ getDeviceTypeName(row.deviceType) }}</el-tag>
+                        <el-tag
+                          size="small"
+                          effect="plain"
+                        >
+                          {{ getDeviceTypeName(row.deviceType) }}
+                        </el-tag>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-                    <el-table-column label="配置预览" width="180">
+                    <el-table-column
+                      prop="description"
+                      label="描述"
+                      min-width="200"
+                      show-overflow-tooltip
+                    />
+                    <el-table-column
+                      label="配置预览"
+                      width="180"
+                    >
                       <template #default="{ row }">
                         <div class="config-preview">
                           <span class="preview-item">{{ row.config.port }}</span>
@@ -236,7 +366,12 @@
                         </div>
                       </template>
                     </el-table-column>
-                    <el-table-column label="操作" width="180" fixed="right" align="center">
+                    <el-table-column
+                      label="操作"
+                      width="180"
+                      fixed="right"
+                      align="center"
+                    >
                       <template #default="{ row }">
                         <el-button-group class="action-buttons">
                           <el-button
@@ -274,12 +409,17 @@
         </el-col>
         
         <!-- 右侧状态面板 -->
-        <el-col :xs="24" :lg="8">
+        <el-col
+          :xs="24"
+          :lg="8"
+        >
           <!-- 系统状态卡片 -->
           <el-card class="status-overview-card">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><DataLine /></el-icon>
+                <el-icon class="header-icon">
+                  <DataLine />
+                </el-icon>
                 <span class="header-title">系统状态</span>
               </div>
             </template>
@@ -290,28 +430,46 @@
                   <el-icon><Connection /></el-icon>
                 </div>
                 <div class="status-info">
-                  <div class="status-label">已连接设备</div>
-                  <div class="status-value">{{ connectedCount }} / {{ totalDevicesCount }}</div>
+                  <div class="status-label">
+                    已连接设备
+                  </div>
+                  <div class="status-value">
+                    {{ connectedCount }} / {{ totalDevicesCount }}
+                  </div>
                 </div>
               </div>
 
               <div class="status-item">
-                <div class="status-icon-wrapper" :class="`status-icon--${devicesStore.systemHealthType}`">
+                <div
+                  class="status-icon-wrapper"
+                  :class="`status-icon--${devicesStore.systemHealthType}`"
+                >
                   <el-icon><Monitor /></el-icon>
                 </div>
                 <div class="status-info">
-                  <div class="status-label">系统健康度</div>
-                  <div class="status-value">{{ devicesStore.systemHealthText }}</div>
+                  <div class="status-label">
+                    系统健康度
+                  </div>
+                  <div class="status-value">
+                    {{ devicesStore.systemHealthText }}
+                  </div>
                 </div>
               </div>
 
               <div class="status-item">
-                <div class="status-icon-wrapper" :class="unacknowledgedAlarmsCount > 0 ? 'status-icon--danger' : 'status-icon--success'">
+                <div
+                  class="status-icon-wrapper"
+                  :class="unacknowledgedAlarmsCount > 0 ? 'status-icon--danger' : 'status-icon--success'"
+                >
                   <el-icon><Bell /></el-icon>
                 </div>
                 <div class="status-info">
-                  <div class="status-label">未确认告警</div>
-                  <div class="status-value">{{ unacknowledgedAlarmsCount }}</div>
+                  <div class="status-label">
+                    未确认告警
+                  </div>
+                  <div class="status-value">
+                    {{ unacknowledgedAlarmsCount }}
+                  </div>
                 </div>
               </div>
 
@@ -320,8 +478,12 @@
                   <el-icon><Timer /></el-icon>
                 </div>
                 <div class="status-info">
-                  <div class="status-label">连接时长</div>
-                  <div class="status-value mono">{{ connectionDuration }}</div>
+                  <div class="status-label">
+                    连接时长
+                  </div>
+                  <div class="status-value mono">
+                    {{ connectionDuration }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,7 +493,9 @@
           <el-card class="guide-card">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><Document /></el-icon>
+                <el-icon class="header-icon">
+                  <Document />
+                </el-icon>
                 <span class="header-title">连接指南</span>
               </div>
             </template>
@@ -345,8 +509,12 @@
                 :size="step.size"
               >
                 <div class="timeline-content">
-                  <div class="step-title">{{ step.title }}</div>
-                  <div class="step-desc">{{ step.description }}</div>
+                  <div class="step-title">
+                    {{ step.title }}
+                  </div>
+                  <div class="step-desc">
+                    {{ step.description }}
+                  </div>
                 </div>
               </el-timeline-item>
             </el-timeline>
@@ -356,7 +524,9 @@
           <el-card class="tips-card">
             <template #header>
               <div class="card-header">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">连接提示</span>
               </div>
             </template>
@@ -387,15 +557,22 @@
     >
       <ConnectionConfig
         v-if="deviceConfigDialogVisible"
-        :device-type="currentDeviceId"
         v-model="tempConfig"
+        :device-type="currentDeviceId"
         @test-success="handleTestSuccess"
         @test-failed="handleTestFailed"
       />
 
       <template #footer>
-        <el-button @click="deviceConfigDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveDeviceConfig">保存配置</el-button>
+        <el-button @click="deviceConfigDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="saveDeviceConfig"
+        >
+          保存配置
+        </el-button>
       </template>
     </el-dialog>
 
@@ -406,12 +583,27 @@
       width="600px"
       :close-on-click-modal="false"
     >
-      <el-form :model="templateForm" label-width="100px">
-        <el-form-item label="模板名称" required>
-          <el-input v-model="templateForm.name" placeholder="请输入模板名称" />
+      <el-form
+        :model="templateForm"
+        label-width="100px"
+      >
+        <el-form-item
+          label="模板名称"
+          required
+        >
+          <el-input
+            v-model="templateForm.name"
+            placeholder="请输入模板名称"
+          />
         </el-form-item>
-        <el-form-item label="设备类型" required>
-          <el-select v-model="templateForm.deviceType" placeholder="请选择设备类型">
+        <el-form-item
+          label="设备类型"
+          required
+        >
+          <el-select
+            v-model="templateForm.deviceType"
+            placeholder="请选择设备类型"
+          >
             <el-option
               v-for="device in deviceOptions"
               :key="device.value"
@@ -435,21 +627,42 @@
 
       <el-divider>连接参数</el-divider>
 
-      <el-form :model="templateForm.config" label-width="100px">
+      <el-form
+        :model="templateForm.config"
+        label-width="100px"
+      >
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="串口号">
-              <el-input v-model="templateForm.config.port" placeholder="如: COM3" />
+              <el-input
+                v-model="templateForm.config.port"
+                placeholder="如: COM3"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="波特率">
               <el-select v-model="templateForm.config.baudrate">
-                <el-option label="9600" :value="9600" />
-                <el-option label="19200" :value="19200" />
-                <el-option label="38400" :value="38400" />
-                <el-option label="57600" :value="57600" />
-                <el-option label="115200" :value="115200" />
+                <el-option
+                  label="9600"
+                  :value="9600"
+                />
+                <el-option
+                  label="19200"
+                  :value="19200"
+                />
+                <el-option
+                  label="38400"
+                  :value="38400"
+                />
+                <el-option
+                  label="57600"
+                  :value="57600"
+                />
+                <el-option
+                  label="115200"
+                  :value="115200"
+                />
               </el-select>
             </el-form-item>
           </el-col>
@@ -457,20 +670,36 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="从站地址">
-              <el-input-number v-model="templateForm.config.slaveId" :min="1" :max="247" />
+              <el-input-number
+                v-model="templateForm.config.slaveId"
+                :min="1"
+                :max="247"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="超时时间">
-              <el-input-number v-model="templateForm.config.timeout" :min="100" :max="10000" :step="100" />
+              <el-input-number
+                v-model="templateForm.config.timeout"
+                :min="100"
+                :max="10000"
+                :step="100"
+              />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
 
       <template #footer>
-        <el-button @click="templateDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveTemplate">保存</el-button>
+        <el-button @click="templateDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="saveTemplate"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
   </div>

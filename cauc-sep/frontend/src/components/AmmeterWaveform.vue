@@ -5,14 +5,20 @@
       <div class="toolbar-left">
         <div class="channel-selector">
           <span class="selector-label">显示通道:</span>
-          <el-checkbox-group v-model="visibleChannels" size="small">
+          <el-checkbox-group
+            v-model="visibleChannels"
+            size="small"
+          >
             <el-checkbox-button
               v-for="channel in channelList"
               :key="channel.id"
               :label="channel.id"
               :disabled="!channel.enabled"
             >
-              <span class="channel-dot" :style="{ background: channel.color }"></span>
+              <span
+                class="channel-dot"
+                :style="{ background: channel.color }"
+              />
               通道 {{ channel.id }}
             </el-checkbox-button>
           </el-checkbox-group>
@@ -21,21 +27,39 @@
 
       <div class="toolbar-right">
         <div class="display-mode">
-          <el-radio-group v-model="displayMode" size="small">
-            <el-radio-button label="overlay">叠加显示</el-radio-button>
-            <el-radio-button label="separate">分离显示</el-radio-button>
+          <el-radio-group
+            v-model="displayMode"
+            size="small"
+          >
+            <el-radio-button label="overlay">
+              叠加显示
+            </el-radio-button>
+            <el-radio-button label="separate">
+              分离显示
+            </el-radio-button>
           </el-radio-group>
         </div>
 
         <div class="zoom-controls">
           <el-button-group>
-            <el-button size="small" @click="zoomIn" :disabled="zoomLevel >= maxZoom">
+            <el-button
+              size="small"
+              :disabled="zoomLevel >= maxZoom"
+              @click="zoomIn"
+            >
               <el-icon><ZoomIn /></el-icon>
             </el-button>
-            <el-button size="small" @click="zoomOut" :disabled="zoomLevel <= minZoom">
+            <el-button
+              size="small"
+              :disabled="zoomLevel <= minZoom"
+              @click="zoomOut"
+            >
               <el-icon><ZoomOut /></el-icon>
             </el-button>
-            <el-button size="small" @click="resetZoom">
+            <el-button
+              size="small"
+              @click="resetZoom"
+            >
               <el-icon><RefreshRight /></el-icon>
             </el-button>
           </el-button-group>
@@ -44,11 +68,27 @@
 
         <div class="time-range">
           <span class="range-label">时间范围:</span>
-          <el-select v-model="timeRange" size="small" @change="handleTimeRangeChange">
-            <el-option label="10秒" :value="10" />
-            <el-option label="30秒" :value="30" />
-            <el-option label="1分钟" :value="60" />
-            <el-option label="5分钟" :value="300" />
+          <el-select
+            v-model="timeRange"
+            size="small"
+            @change="handleTimeRangeChange"
+          >
+            <el-option
+              label="10秒"
+              :value="10"
+            />
+            <el-option
+              label="30秒"
+              :value="30"
+            />
+            <el-option
+              label="1分钟"
+              :value="60"
+            />
+            <el-option
+              label="5分钟"
+              :value="300"
+            />
           </el-select>
         </div>
       </div>
@@ -56,17 +96,29 @@
 
     <!-- 波形图表容器 -->
     <div class="waveform-container">
-      <div ref="chartContainer" class="chart-wrapper"></div>
+      <div
+        ref="chartContainer"
+        class="chart-wrapper"
+      />
       
       <!-- 波形信息提示 -->
-      <div v-if="hoverData" class="waveform-tooltip" :style="tooltipStyle">
-        <div class="tooltip-time">{{ hoverData.time }}</div>
+      <div
+        v-if="hoverData"
+        class="waveform-tooltip"
+        :style="tooltipStyle"
+      >
+        <div class="tooltip-time">
+          {{ hoverData.time }}
+        </div>
         <div
           v-for="item in hoverData.values"
           :key="item.channel"
           class="tooltip-item"
         >
-          <span class="tooltip-dot" :style="{ background: item.color }"></span>
+          <span
+            class="tooltip-dot"
+            :style="{ background: item.color }"
+          />
           <span class="tooltip-label">通道 {{ item.channel }}:</span>
           <span class="tooltip-value">{{ formatCurrent(item.value) }}</span>
         </div>
@@ -75,9 +127,16 @@
 
     <!-- 波形统计信息 -->
     <div class="waveform-stats">
-      <div class="stat-item" v-for="channel in activeChannels" :key="channel.id">
+      <div
+        v-for="channel in activeChannels"
+        :key="channel.id"
+        class="stat-item"
+      >
         <div class="stat-header">
-          <span class="channel-dot" :style="{ background: channel.color }"></span>
+          <span
+            class="channel-dot"
+            :style="{ background: channel.color }"
+          />
           <span class="channel-name">通道 {{ channel.id }}</span>
         </div>
         <div class="stat-values">

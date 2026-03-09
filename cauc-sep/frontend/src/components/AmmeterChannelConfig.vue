@@ -11,7 +11,10 @@
           全选
         </el-checkbox>
         
-        <div class="selected-count" v-if="selectedChannels.length > 0">
+        <div
+          v-if="selectedChannels.length > 0"
+          class="selected-count"
+        >
           已选择 {{ selectedChannels.length }} 个通道
         </div>
       </div>
@@ -49,11 +52,13 @@
     <!-- 通道分组管理 -->
     <div class="channel-groups">
       <div class="groups-header">
-        <h3 class="groups-title">通道分组</h3>
+        <h3 class="groups-title">
+          通道分组
+        </h3>
         <el-button
           size="small"
-          @click="showGroupDialog = true"
           :disabled="!canControl || isCollecting"
+          @click="showGroupDialog = true"
         >
           <el-icon><Plus /></el-icon>
           新建分组
@@ -130,7 +135,10 @@
 
           <div class="col col-channel">
             <div class="channel-info">
-              <span class="channel-dot" :style="{ background: channel.color }"></span>
+              <span
+                class="channel-dot"
+                :style="{ background: channel.color }"
+              />
               <span class="channel-name">通道 {{ channel.id }}</span>
             </div>
           </div>
@@ -150,10 +158,22 @@
               :disabled="!channel.enabled || !canControl || isCollecting"
               @change="handleChannelConfig(channel.id, 'range', $event)"
             >
-              <el-option label="自动" value="auto" />
-              <el-option label="低量程" value="low" />
-              <el-option label="中量程" value="medium" />
-              <el-option label="高量程" value="high" />
+              <el-option
+                label="自动"
+                value="auto"
+              />
+              <el-option
+                label="低量程"
+                value="low"
+              />
+              <el-option
+                label="中量程"
+                value="medium"
+              />
+              <el-option
+                label="高量程"
+                value="high"
+              />
             </el-select>
           </div>
 
@@ -164,9 +184,18 @@
               :disabled="!channel.enabled || !canControl || isCollecting"
               @change="handleChannelConfig(channel.id, 'filter', $event)"
             >
-              <el-option label="低通滤波" value="low" />
-              <el-option label="中通滤波" value="medium" />
-              <el-option label="高通滤波" value="high" />
+              <el-option
+                label="低通滤波"
+                value="low"
+              />
+              <el-option
+                label="中通滤波"
+                value="medium"
+              />
+              <el-option
+                label="高通滤波"
+                value="high"
+              />
             </el-select>
           </div>
 
@@ -190,28 +219,68 @@
       title="批量配置通道"
       width="500px"
     >
-      <el-form :model="batchConfig" label-width="100px">
+      <el-form
+        :model="batchConfig"
+        label-width="100px"
+      >
         <el-form-item label="配置项">
           <el-checkbox-group v-model="batchConfigItems">
-            <el-checkbox label="range">量程</el-checkbox>
-            <el-checkbox label="filter">滤波</el-checkbox>
+            <el-checkbox label="range">
+              量程
+            </el-checkbox>
+            <el-checkbox label="filter">
+              滤波
+            </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
 
-        <el-form-item v-if="batchConfigItems.includes('range')" label="量程">
-          <el-select v-model="batchConfig.range" placeholder="选择量程">
-            <el-option label="自动" value="auto" />
-            <el-option label="低量程" value="low" />
-            <el-option label="中量程" value="medium" />
-            <el-option label="高量程" value="high" />
+        <el-form-item
+          v-if="batchConfigItems.includes('range')"
+          label="量程"
+        >
+          <el-select
+            v-model="batchConfig.range"
+            placeholder="选择量程"
+          >
+            <el-option
+              label="自动"
+              value="auto"
+            />
+            <el-option
+              label="低量程"
+              value="low"
+            />
+            <el-option
+              label="中量程"
+              value="medium"
+            />
+            <el-option
+              label="高量程"
+              value="high"
+            />
           </el-select>
         </el-form-item>
 
-        <el-form-item v-if="batchConfigItems.includes('filter')" label="滤波">
-          <el-select v-model="batchConfig.filter" placeholder="选择滤波">
-            <el-option label="低通滤波" value="low" />
-            <el-option label="中通滤波" value="medium" />
-            <el-option label="高通滤波" value="high" />
+        <el-form-item
+          v-if="batchConfigItems.includes('filter')"
+          label="滤波"
+        >
+          <el-select
+            v-model="batchConfig.filter"
+            placeholder="选择滤波"
+          >
+            <el-option
+              label="低通滤波"
+              value="low"
+            />
+            <el-option
+              label="中通滤波"
+              value="medium"
+            />
+            <el-option
+              label="高通滤波"
+              value="high"
+            />
           </el-select>
         </el-form-item>
 
@@ -230,11 +299,13 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="showBatchConfigDialog = false">取消</el-button>
+        <el-button @click="showBatchConfigDialog = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
-          @click="handleBatchConfig"
           :disabled="batchConfigItems.length === 0"
+          @click="handleBatchConfig"
         >
           应用配置
         </el-button>
@@ -247,7 +318,10 @@
       :title="editingGroup ? '编辑分组' : '新建分组'"
       width="500px"
     >
-      <el-form :model="groupForm" label-width="100px">
+      <el-form
+        :model="groupForm"
+        label-width="100px"
+      >
         <el-form-item label="分组名称">
           <el-input
             v-model="groupForm.name"
@@ -269,11 +343,13 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="cancelGroupEdit">取消</el-button>
+        <el-button @click="cancelGroupEdit">
+          取消
+        </el-button>
         <el-button
           type="primary"
-          @click="saveGroup"
           :disabled="!groupForm.name || groupForm.channels.length === 0"
+          @click="saveGroup"
         >
           保存
         </el-button>

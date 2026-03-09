@@ -8,6 +8,7 @@
 
 // ==================== 基础使用 ====================
 
+import { watch } from 'vue'
 import { useWebSocket, ConnectionState } from '@/composables/useWebSocket'
 
 /**

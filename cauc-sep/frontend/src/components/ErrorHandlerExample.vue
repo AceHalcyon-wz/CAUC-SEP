@@ -17,16 +17,28 @@
         <div class="error-triggers">
           <h4>触发不同类型的错误</h4>
           <div class="trigger-buttons">
-            <el-button type="primary" @click="triggerNetworkError">
+            <el-button
+              type="primary"
+              @click="triggerNetworkError"
+            >
               网络错误
             </el-button>
-            <el-button type="warning" @click="triggerDeviceError">
+            <el-button
+              type="warning"
+              @click="triggerDeviceError"
+            >
               设备错误
             </el-button>
-            <el-button type="danger" @click="triggerValidationError">
+            <el-button
+              type="danger"
+              @click="triggerValidationError"
+            >
               验证错误
             </el-button>
-            <el-button type="info" @click="triggerTimeoutError">
+            <el-button
+              type="info"
+              @click="triggerTimeoutError"
+            >
               超时错误
             </el-button>
             <el-button @click="triggerUnknownError">
@@ -36,7 +48,10 @@
         </div>
 
         <!-- 错误统计 -->
-        <div v-if="errorStats.total > 0" class="error-stats">
+        <div
+          v-if="errorStats.total > 0"
+          class="error-stats"
+        >
           <h4>错误统计</h4>
           <div class="stats-grid">
             <div class="stat-item">
@@ -63,10 +78,16 @@
         <div class="action-recorder">
           <h4>操作记录</h4>
           <div class="action-buttons">
-            <el-button size="small" @click="recordDemoAction('点击按钮')">
+            <el-button
+              size="small"
+              @click="recordDemoAction('点击按钮')"
+            >
               记录操作
             </el-button>
-            <el-button size="small" @click="recordDemoAction('提交表单', { form: 'user-data' })">
+            <el-button
+              size="small"
+              @click="recordDemoAction('提交表单', { form: 'user-data' })"
+            >
               记录带数据操作
             </el-button>
           </div>
@@ -74,7 +95,11 @@
 
         <!-- 清理按钮 -->
         <div class="cleanup-actions">
-          <el-button type="danger" plain @click="handleClearHistory">
+          <el-button
+            type="danger"
+            plain
+            @click="handleClearHistory"
+          >
             清空错误历史
           </el-button>
         </div>

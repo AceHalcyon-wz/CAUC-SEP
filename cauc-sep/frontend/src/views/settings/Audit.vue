@@ -5,18 +5,30 @@
       <el-col :span="24">
         <div class="header-content">
           <div class="header-left">
-            <el-icon class="header-icon"><Document /></el-icon>
+            <el-icon class="header-icon">
+              <Document />
+            </el-icon>
             <div class="header-text">
-              <h1 class="page-title">审计日志</h1>
-              <p class="page-subtitle">系统操作记录与审计追踪</p>
+              <h1 class="page-title">
+                审计日志
+              </h1>
+              <p class="page-subtitle">
+                系统操作记录与审计追踪
+              </p>
             </div>
           </div>
           <div class="header-right">
-            <el-button @click="handleRefresh" class="action-btn">
+            <el-button
+              class="action-btn"
+              @click="handleRefresh"
+            >
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
-            <el-button @click="handleExport" class="action-btn">
+            <el-button
+              class="action-btn"
+              @click="handleExport"
+            >
               <el-icon><Download /></el-icon>
               导出
             </el-button>

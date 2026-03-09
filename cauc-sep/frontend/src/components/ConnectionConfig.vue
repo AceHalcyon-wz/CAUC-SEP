@@ -1,10 +1,15 @@
 <template>
   <div class="connection-config">
     <!-- 串口扫描区域 -->
-    <el-card class="scan-card" shadow="hover">
+    <el-card
+      class="scan-card"
+      shadow="hover"
+    >
       <template #header>
         <div class="card-header">
-          <el-icon class="header-icon"><Search /></el-icon>
+          <el-icon class="header-icon">
+            <Search />
+          </el-icon>
           <span class="header-title">串口扫描</span>
         </div>
       </template>
@@ -21,7 +26,10 @@
           <span>{{ scanning ? '扫描中...' : '扫描串口' }}</span>
         </el-button>
 
-        <div v-if="availablePorts.length > 0" class="ports-list">
+        <div
+          v-if="availablePorts.length > 0"
+          class="ports-list"
+        >
           <div class="list-header">
             <span class="header-text">发现 {{ availablePorts.length }} 个串口</span>
             <el-button
@@ -37,17 +45,33 @@
           <el-table
             :data="availablePorts"
             highlight-current-row
-            @current-change="handlePortSelect"
             class="ports-table"
+            @current-change="handlePortSelect"
           >
-            <el-table-column prop="port" label="串口号" width="100" />
-            <el-table-column prop="description" label="设备描述" min-width="150" />
-            <el-table-column prop="hwid" label="硬件ID" min-width="180">
+            <el-table-column
+              prop="port"
+              label="串口号"
+              width="100"
+            />
+            <el-table-column
+              prop="description"
+              label="设备描述"
+              min-width="150"
+            />
+            <el-table-column
+              prop="hwid"
+              label="硬件ID"
+              min-width="180"
+            >
               <template #default="{ row }">
                 <span class="hwid-text">{{ row.hwid || '未知' }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="100" align="center">
+            <el-table-column
+              label="操作"
+              width="100"
+              align="center"
+            >
               <template #default="{ row }">
                 <el-button
                   type="primary"
@@ -71,19 +95,32 @@
     </el-card>
 
     <!-- 连接配置区域 -->
-    <el-card class="config-card" shadow="hover">
+    <el-card
+      class="config-card"
+      shadow="hover"
+    >
       <template #header>
         <div class="card-header">
           <div class="header-left">
-            <el-icon class="header-icon"><Setting /></el-icon>
+            <el-icon class="header-icon">
+              <Setting />
+            </el-icon>
             <span class="header-title">连接参数</span>
           </div>
           <div class="header-right">
-            <el-dropdown @command="handleTemplateCommand" trigger="click">
-              <el-button type="primary" text>
+            <el-dropdown
+              trigger="click"
+              @command="handleTemplateCommand"
+            >
+              <el-button
+                type="primary"
+                text
+              >
                 <el-icon><Document /></el-icon>
                 <span>加载模板</span>
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                <el-icon class="el-icon--right">
+                  <ArrowDown />
+                </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -94,7 +131,13 @@
                   >
                     <div class="template-item">
                       <span class="template-name">{{ template.name }}</span>
-                      <el-tag v-if="template.isDefault" size="small" type="info">默认</el-tag>
+                      <el-tag
+                        v-if="template.isDefault"
+                        size="small"
+                        type="info"
+                      >
+                        默认
+                      </el-tag>
                     </div>
                   </el-dropdown-item>
                 </el-dropdown-menu>
@@ -113,7 +156,10 @@
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="串口号" prop="port">
+            <el-form-item
+              label="串口号"
+              prop="port"
+            >
               <el-select
                 v-model="localConfig.port"
                 placeholder="请选择串口"
@@ -132,8 +178,14 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="波特率" prop="baudrate">
-              <el-select v-model="localConfig.baudrate" class="form-select">
+            <el-form-item
+              label="波特率"
+              prop="baudrate"
+            >
+              <el-select
+                v-model="localConfig.baudrate"
+                class="form-select"
+              >
                 <el-option
                   v-for="opt in BAUDRATE_OPTIONS"
                   :key="opt.value"
@@ -147,8 +199,14 @@
 
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="数据位" prop="databits">
-              <el-select v-model="localConfig.databits" class="form-select">
+            <el-form-item
+              label="数据位"
+              prop="databits"
+            >
+              <el-select
+                v-model="localConfig.databits"
+                class="form-select"
+              >
                 <el-option
                   v-for="opt in DATABITS_OPTIONS"
                   :key="opt.value"
@@ -160,8 +218,14 @@
           </el-col>
 
           <el-col :span="8">
-            <el-form-item label="停止位" prop="stopbits">
-              <el-select v-model="localConfig.stopbits" class="form-select">
+            <el-form-item
+              label="停止位"
+              prop="stopbits"
+            >
+              <el-select
+                v-model="localConfig.stopbits"
+                class="form-select"
+              >
                 <el-option
                   v-for="opt in STOPBITS_OPTIONS"
                   :key="opt.value"
@@ -173,8 +237,14 @@
           </el-col>
 
           <el-col :span="8">
-            <el-form-item label="校验位" prop="parity">
-              <el-select v-model="localConfig.parity" class="form-select">
+            <el-form-item
+              label="校验位"
+              prop="parity"
+            >
+              <el-select
+                v-model="localConfig.parity"
+                class="form-select"
+              >
                 <el-option
                   v-for="opt in PARITY_OPTIONS"
                   :key="opt.value"
@@ -188,8 +258,14 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="流控制" prop="flowcontrol">
-              <el-select v-model="localConfig.flowcontrol" class="form-select">
+            <el-form-item
+              label="流控制"
+              prop="flowcontrol"
+            >
+              <el-select
+                v-model="localConfig.flowcontrol"
+                class="form-select"
+              >
                 <el-option
                   v-for="opt in FLOWCONTROL_OPTIONS"
                   :key="opt.value"
@@ -201,7 +277,10 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="从站地址" prop="slaveId">
+            <el-form-item
+              label="从站地址"
+              prop="slaveId"
+            >
               <el-input-number
                 v-model="localConfig.slaveId"
                 :min="1"
@@ -214,7 +293,10 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="超时时间" prop="timeout">
+            <el-form-item
+              label="超时时间"
+              prop="timeout"
+            >
               <el-input-number
                 v-model="localConfig.timeout"
                 :min="100"
@@ -227,7 +309,10 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="配置名称" prop="name">
+            <el-form-item
+              label="配置名称"
+              prop="name"
+            >
               <el-input
                 v-model="localConfig.name"
                 placeholder="为配置命名（可选）"
@@ -255,21 +340,33 @@
           <span>重置</span>
         </el-button>
 
-        <el-button type="success" @click="saveAsTemplate">
+        <el-button
+          type="success"
+          @click="saveAsTemplate"
+        >
           <el-icon><DocumentAdd /></el-icon>
           <span>保存为模板</span>
         </el-button>
 
-        <el-dropdown @command="handleExportCommand" trigger="click">
+        <el-dropdown
+          trigger="click"
+          @command="handleExportCommand"
+        >
           <el-button>
             <el-icon><Download /></el-icon>
             <span>导出配置</span>
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="json">导出为 JSON</el-dropdown-item>
-              <el-dropdown-item command="clipboard">复制到剪贴板</el-dropdown-item>
+              <el-dropdown-item command="json">
+                导出为 JSON
+              </el-dropdown-item>
+              <el-dropdown-item command="clipboard">
+                复制到剪贴板
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -282,38 +379,77 @@
     </el-card>
 
     <!-- 连接测试结果 -->
-    <el-card v-if="testResult" class="result-card" shadow="hover">
+    <el-card
+      v-if="testResult"
+      class="result-card"
+      shadow="hover"
+    >
       <template #header>
         <div class="card-header">
-          <el-icon class="header-icon"><DataAnalysis /></el-icon>
+          <el-icon class="header-icon">
+            <DataAnalysis />
+          </el-icon>
           <span class="header-title">测试结果</span>
         </div>
       </template>
 
-      <div class="test-result" :class="`test-result--${testResult.success ? 'success' : 'error'}`">
+      <div
+        class="test-result"
+        :class="`test-result--${testResult.success ? 'success' : 'error'}`"
+      >
         <div class="result-header">
-          <el-icon class="result-icon" :class="testResult.success ? 'success-icon' : 'error-icon'">
+          <el-icon
+            class="result-icon"
+            :class="testResult.success ? 'success-icon' : 'error-icon'"
+          >
             <component :is="testResult.success ? 'CircleCheck' : 'CircleClose'" />
           </el-icon>
           <span class="result-title">{{ testResult.success ? '连接成功' : '连接失败' }}</span>
         </div>
 
-        <div v-if="testResult.diagnostics" class="diagnostics">
-          <div class="diagnostic-item" v-for="(item, index) in testResult.diagnostics" :key="index">
+        <div
+          v-if="testResult.diagnostics"
+          class="diagnostics"
+        >
+          <div
+            v-for="(item, index) in testResult.diagnostics"
+            :key="index"
+            class="diagnostic-item"
+          >
             <div class="diagnostic-header">
-              <el-tag :type="item.level" size="small">{{ item.title }}</el-tag>
+              <el-tag
+                :type="item.level"
+                size="small"
+              >
+                {{ item.title }}
+              </el-tag>
             </div>
-            <div class="diagnostic-desc">{{ item.description }}</div>
-            <ul v-if="item.suggestions && item.suggestions.length > 0" class="suggestions-list">
-              <li v-for="(suggestion, sIndex) in item.suggestions" :key="sIndex">
+            <div class="diagnostic-desc">
+              {{ item.description }}
+            </div>
+            <ul
+              v-if="item.suggestions && item.suggestions.length > 0"
+              class="suggestions-list"
+            >
+              <li
+                v-for="(suggestion, sIndex) in item.suggestions"
+                :key="sIndex"
+              >
                 {{ suggestion }}
               </li>
             </ul>
           </div>
         </div>
 
-        <div v-if="testResult.details" class="result-details">
-          <el-descriptions :column="2" border size="small">
+        <div
+          v-if="testResult.details"
+          class="result-details"
+        >
+          <el-descriptions
+            :column="2"
+            border
+            size="small"
+          >
             <el-descriptions-item
               v-for="(value, key) in testResult.details"
               :key="key"
@@ -333,9 +469,18 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form :model="templateForm" label-width="80px">
-        <el-form-item label="模板名称" required>
-          <el-input v-model="templateForm.name" placeholder="请输入模板名称" />
+      <el-form
+        :model="templateForm"
+        label-width="80px"
+      >
+        <el-form-item
+          label="模板名称"
+          required
+        >
+          <el-input
+            v-model="templateForm.name"
+            placeholder="请输入模板名称"
+          />
         </el-form-item>
         <el-form-item label="模板描述">
           <el-input
@@ -351,8 +496,15 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="saveTemplateDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmSaveTemplate">保存</el-button>
+        <el-button @click="saveTemplateDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmSaveTemplate"
+        >
+          保存
+        </el-button>
       </template>
     </el-dialog>
 
@@ -371,8 +523,15 @@
       />
 
       <template #footer>
-        <el-button @click="importDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmImport">导入</el-button>
+        <el-button @click="importDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmImport"
+        >
+          导入
+        </el-button>
       </template>
     </el-dialog>
   </div>

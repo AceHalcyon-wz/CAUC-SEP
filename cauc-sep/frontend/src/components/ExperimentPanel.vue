@@ -2,7 +2,9 @@
   <el-card class="experiment-panel">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Document /></el-icon>
+        <el-icon class="header-icon">
+          <Document />
+        </el-icon>
         <span class="header-title">实验记录</span>
       </div>
     </template>
@@ -10,7 +12,10 @@
     <div class="experiment-content">
       <!-- 当前实验控制 -->
       <div class="current-experiment">
-        <el-form :model="experimentForm" label-width="80px">
+        <el-form
+          :model="experimentForm"
+          label-width="80px"
+        >
           <el-form-item label="实验名称">
             <el-input
               v-model="experimentForm.name"
@@ -58,10 +63,20 @@
 
         <!-- 实验状态 -->
         <transition name="recording-fade">
-          <div v-if="isRecording" class="recording-status">
+          <div
+            v-if="isRecording"
+            class="recording-status"
+          >
             <div class="recording-indicator">
-              <el-tag type="danger" effect="dark" size="large" class="recording-tag">
-                <el-icon class="recording-icon"><VideoCamera /></el-icon>
+              <el-tag
+                type="danger"
+                effect="dark"
+                size="large"
+                class="recording-tag"
+              >
+                <el-icon class="recording-icon">
+                  <VideoCamera />
+                </el-icon>
                 <span>正在记录实验 #{{ currentExperimentId }}</span>
               </el-tag>
             </div>
@@ -79,7 +94,11 @@
 
       <!-- 实验列表 -->
       <div class="experiment-list">
-        <transition-group name="list-fade" tag="div" class="list-container">
+        <transition-group
+          name="list-fade"
+          tag="div"
+          class="list-container"
+        >
           <div
             v-for="(item, index) in experiments"
             :key="item.id"
@@ -89,12 +108,20 @@
             <div class="item-main">
               <div class="item-header">
                 <span class="item-id">#{{ item.id }}</span>
-                <el-tag :type="getStatusType(item.status)" size="small" class="status-tag">
+                <el-tag
+                  :type="getStatusType(item.status)"
+                  size="small"
+                  class="status-tag"
+                >
                   {{ getStatusText(item.status) }}
                 </el-tag>
               </div>
-              <div class="item-name">{{ item.name }}</div>
-              <div class="item-time">{{ formatDate(item.created_at) }}</div>
+              <div class="item-name">
+                {{ item.name }}
+              </div>
+              <div class="item-time">
+                {{ formatDate(item.created_at) }}
+              </div>
             </div>
             <div class="item-actions">
               <el-button
@@ -110,7 +137,11 @@
           </div>
         </transition-group>
 
-        <el-empty v-if="experiments.length === 0" description="暂无实验记录" class="empty-state" />
+        <el-empty
+          v-if="experiments.length === 0"
+          description="暂无实验记录"
+          class="empty-state"
+        />
       </div>
     </div>
   </el-card>

@@ -1,38 +1,69 @@
 <template>
   <div class="device-status-dashboard">
     <!-- 系统概览卡片 -->
-    <el-row :gutter="16" class="overview-row">
-      <el-col :xs="24" :sm="12" :md="6">
-        <div class="overview-card" :class="`overview-card--${devicesStore.systemStatusType}`">
+    <el-row
+      :gutter="16"
+      class="overview-row"
+    >
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="6"
+      >
+        <div
+          class="overview-card"
+          :class="`overview-card--${devicesStore.systemStatusType}`"
+        >
           <div class="overview-icon">
             <el-icon><Monitor /></el-icon>
           </div>
           <div class="overview-content">
-            <div class="overview-label">系统状态</div>
-            <div class="overview-value">{{ devicesStore.systemStatusText }}</div>
+            <div class="overview-label">
+              系统状态
+            </div>
+            <div class="overview-value">
+              {{ devicesStore.systemStatusText }}
+            </div>
           </div>
         </div>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <div class="overview-card" :class="`overview-card--${devicesStore.systemHealthType}`">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="6"
+      >
+        <div
+          class="overview-card"
+          :class="`overview-card--${devicesStore.systemHealthType}`"
+        >
           <div class="overview-icon">
             <el-icon><Cpu /></el-icon>
           </div>
           <div class="overview-content">
-            <div class="overview-label">系统健康度</div>
-            <div class="overview-value">{{ devicesStore.systemHealthText }}</div>
+            <div class="overview-label">
+              系统健康度
+            </div>
+            <div class="overview-value">
+              {{ devicesStore.systemHealthText }}
+            </div>
           </div>
         </div>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="6"
+      >
         <div class="overview-card overview-card--primary">
           <div class="overview-icon">
             <el-icon><Connection /></el-icon>
           </div>
           <div class="overview-content">
-            <div class="overview-label">设备连接</div>
+            <div class="overview-label">
+              设备连接
+            </div>
             <div class="overview-value">
               <span class="value-highlight">{{ devicesStore.connectedCount }}</span>
               <span class="value-total">/ {{ devicesStore.totalDevicesCount }}</span>
@@ -41,13 +72,22 @@
         </div>
       </el-col>
       
-      <el-col :xs="24" :sm="12" :md="6">
-        <div class="overview-card" :class="devicesStore.unacknowledgedAlarmsCount > 0 ? 'overview-card--danger' : 'overview-card--success'">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="6"
+      >
+        <div
+          class="overview-card"
+          :class="devicesStore.unacknowledgedAlarmsCount > 0 ? 'overview-card--danger' : 'overview-card--success'"
+        >
           <div class="overview-icon">
             <el-icon><Bell /></el-icon>
           </div>
           <div class="overview-content">
-            <div class="overview-label">活跃告警</div>
+            <div class="overview-label">
+              活跃告警
+            </div>
             <div class="overview-value">
               <span class="value-highlight">{{ devicesStore.unacknowledgedAlarmsCount }}</span>
             </div>
@@ -112,7 +152,10 @@
 
     <!-- 批量操作进度条 -->
     <Transition name="slide-down">
-      <div v-if="devicesStore.batchOperation.inProgress" class="batch-progress">
+      <div
+        v-if="devicesStore.batchOperation.inProgress"
+        class="batch-progress"
+      >
         <div class="progress-header">
           <span class="progress-title">
             {{ devicesStore.batchOperation.type === 'connect' ? '批量连接中...' : '批量断开中...' }}
@@ -151,13 +194,21 @@
         <!-- 设备头部 -->
         <div class="device-header">
           <div class="device-info">
-            <div class="device-icon" :class="`device-icon--${device.isConnected ? 'connected' : 'disconnected'}`">
+            <div
+              class="device-icon"
+              :class="`device-icon--${device.isConnected ? 'connected' : 'disconnected'}`"
+            >
               <el-icon><component :is="getDeviceIcon(device.id)" /></el-icon>
             </div>
-            <div class="device-name">{{ device.name }}</div>
+            <div class="device-name">
+              {{ device.name }}
+            </div>
           </div>
           <div class="device-status">
-            <el-tag :type="getStatusTagType(device)" size="small">
+            <el-tag
+              :type="getStatusTagType(device)"
+              size="small"
+            >
               {{ getStatusText(device) }}
             </el-tag>
           </div>
@@ -167,7 +218,10 @@
         <div class="device-health">
           <div class="health-header">
             <span class="health-label">健康度</span>
-            <span class="health-score" :class="`health-score--${devicesStore.HEALTH_STATUS_TYPE[device.health]}`">
+            <span
+              class="health-score"
+              :class="`health-score--${devicesStore.HEALTH_STATUS_TYPE[device.health]}`"
+            >
               {{ device.healthScore }}%
             </span>
           </div>
@@ -198,7 +252,10 @@
           <div class="metric-item">
             <el-icon><Warning /></el-icon>
             <span class="metric-label">错误次数</span>
-            <span class="metric-value" :class="{ 'metric-value--warning': device.metrics.errorCount > 0 }">
+            <span
+              class="metric-value"
+              :class="{ 'metric-value--warning': device.metrics.errorCount > 0 }"
+            >
               {{ device.metrics.errorCount }}
             </span>
           </div>
@@ -211,8 +268,14 @@
         </div>
 
         <!-- 告警指示器 -->
-        <div v-if="device.alarms && device.alarms.length > 0" class="alarm-indicator">
-          <el-badge :value="device.alarms.length" type="danger">
+        <div
+          v-if="device.alarms && device.alarms.length > 0"
+          class="alarm-indicator"
+        >
+          <el-badge
+            :value="device.alarms.length"
+            type="danger"
+          >
             <el-icon><Bell /></el-icon>
           </el-badge>
         </div>
@@ -250,30 +313,82 @@
           max-height="400"
           @selection-change="handleAlarmSelectionChange"
         >
-          <el-table-column type="selection" width="55" />
-          <el-table-column prop="deviceName" label="设备" width="120" />
-          <el-table-column prop="code" label="代码" width="80" />
-          <el-table-column prop="message" label="告警信息" min-width="200" />
-          <el-table-column prop="severity" label="级别" width="100">
+          <el-table-column
+            type="selection"
+            width="55"
+          />
+          <el-table-column
+            prop="deviceName"
+            label="设备"
+            width="120"
+          />
+          <el-table-column
+            prop="code"
+            label="代码"
+            width="80"
+          />
+          <el-table-column
+            prop="message"
+            label="告警信息"
+            min-width="200"
+          />
+          <el-table-column
+            prop="severity"
+            label="级别"
+            width="100"
+          >
             <template #default="{ row }">
-              <el-tag :type="getSeverityType(row.severity)" size="small">
+              <el-tag
+                :type="getSeverityType(row.severity)"
+                size="small"
+              >
                 {{ getSeverityText(row.severity) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="timestamp" label="时间" width="180">
+          <el-table-column
+            prop="timestamp"
+            label="时间"
+            width="180"
+          >
             <template #default="{ row }">
               {{ formatTimestamp(row.timestamp) }}
             </template>
           </el-table-column>
-          <el-table-column prop="acknowledged" label="状态" width="100">
+          <el-table-column
+            prop="acknowledged"
+            label="状态"
+            width="100"
+          >
             <template #default="{ row }">
-              <el-tag v-if="row.cleared" type="info" size="small">已清除</el-tag>
-              <el-tag v-else-if="row.acknowledged" type="success" size="small">已确认</el-tag>
-              <el-tag v-else type="warning" size="small">未确认</el-tag>
+              <el-tag
+                v-if="row.cleared"
+                type="info"
+                size="small"
+              >
+                已清除
+              </el-tag>
+              <el-tag
+                v-else-if="row.acknowledged"
+                type="success"
+                size="small"
+              >
+                已确认
+              </el-tag>
+              <el-tag
+                v-else
+                type="warning"
+                size="small"
+              >
+                未确认
+              </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="120" fixed="right">
+          <el-table-column
+            label="操作"
+            width="120"
+            fixed="right"
+          >
             <template #default="{ row }">
               <el-button
                 v-if="!row.acknowledged"
@@ -331,7 +446,10 @@
             value-format="timestamp"
           />
           
-          <el-button type="primary" @click="handleQueryHistory">
+          <el-button
+            type="primary"
+            @click="handleQueryHistory"
+          >
             查询
           </el-button>
           
@@ -352,7 +470,10 @@
               <div class="history-card">
                 <div class="history-header">
                   <span class="history-device">{{ record.deviceName }}</span>
-                  <el-tag size="small" :type="record.currentConnected ? 'success' : 'danger'">
+                  <el-tag
+                    size="small"
+                    :type="record.currentConnected ? 'success' : 'danger'"
+                  >
                     {{ record.currentConnected ? '已连接' : '已断开' }}
                   </el-tag>
                 </div>
@@ -360,7 +481,9 @@
                   <div class="history-change">
                     <span class="change-label">状态变更:</span>
                     <span class="change-value">{{ record.previousStatus }}</span>
-                    <el-icon class="change-arrow"><Right /></el-icon>
+                    <el-icon class="change-arrow">
+                      <Right />
+                    </el-icon>
                     <span class="change-value">{{ record.currentStatus }}</span>
                   </div>
                 </div>
@@ -368,7 +491,10 @@
             </el-timeline-item>
           </el-timeline>
           
-          <el-empty v-if="filteredHistory.length === 0" description="暂无历史记录" />
+          <el-empty
+            v-if="filteredHistory.length === 0"
+            description="暂无历史记录"
+          />
         </div>
       </div>
     </el-dialog>

@@ -2,29 +2,43 @@
   <el-card class="piezo-control">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Cpu /></el-icon>
+        <el-icon class="header-icon">
+          <Cpu />
+        </el-icon>
         <span class="header-title">压电陶瓷控制</span>
       </div>
     </template>
 
     <div class="control-content">
       <!-- 连接状态 -->
-      <div class="connection-status" :class="piezoStore.isConnected ? 'connected' : 'disconnected'">
-        <span class="status-dot"></span>
+      <div
+        class="connection-status"
+        :class="piezoStore.isConnected ? 'connected' : 'disconnected'"
+      >
+        <span class="status-dot" />
         <span class="status-text">{{ connectionStatus }}</span>
       </div>
 
       <!-- 主要控制区域 -->
-      <el-tabs v-model="activeTab" class="control-tabs">
+      <el-tabs
+        v-model="activeTab"
+        class="control-tabs"
+      >
         <!-- 电压控制面板 -->
-        <el-tab-pane label="电压控制" name="voltage">
+        <el-tab-pane
+          label="电压控制"
+          name="voltage"
+        >
           <div class="voltage-control">
             <!-- 电压滑块 -->
             <div class="voltage-slider-section">
               <div class="slider-header">
                 <span class="label">输出电压</span>
                 <div class="value-display">
-                  <span class="value-number" :class="{ 'value-changing': isVoltageChanging }">
+                  <span
+                    class="value-number"
+                    :class="{ 'value-changing': isVoltageChanging }"
+                  >
                     {{ voltageValue.toFixed(1) }}
                   </span>
                   <span class="value-unit">V</span>
@@ -55,7 +69,9 @@
 
             <!-- 快捷电压按钮 -->
             <div class="quick-voltage-section">
-              <div class="section-label">快捷设置</div>
+              <div class="section-label">
+                快捷设置
+              </div>
               <div class="quick-voltage-buttons">
                 <button
                   v-for="voltage in quickVoltages"
@@ -72,7 +88,9 @@
 
             <!-- 位移显示 -->
             <div class="displacement-section">
-              <div class="section-label">实时位移</div>
+              <div class="section-label">
+                实时位移
+              </div>
 
               <div class="displacement-display">
                 <div class="main-displacement">
@@ -84,29 +102,38 @@
                     <div
                       class="bar-fill"
                       :style="{ width: `${(piezoStore.currentDisplacement / piezoStore.displacementLimits.max) * 100}%` }"
-                    ></div>
+                    />
                   </div>
                 </div>
 
                 <div class="displacement-details">
                   <div class="detail-card">
-                    <div class="detail-label">电压</div>
+                    <div class="detail-label">
+                      电压
+                    </div>
                     <div class="detail-value">
                       <span class="mono">{{ piezoStore.currentVoltage.toFixed(1) }}</span>
                       <span class="unit">V</span>
                     </div>
                   </div>
                   <div class="detail-card">
-                    <div class="detail-label">温度</div>
+                    <div class="detail-label">
+                      温度
+                    </div>
                     <div class="detail-value">
                       <span class="mono">{{ currentTemperature.toFixed(1) }}</span>
                       <span class="unit">°C</span>
                     </div>
                   </div>
                   <div class="detail-card">
-                    <div class="detail-label">状态</div>
+                    <div class="detail-label">
+                      状态
+                    </div>
                     <div class="detail-value">
-                      <span class="status-badge" :class="`status-badge--${statusType}`">
+                      <span
+                        class="status-badge"
+                        :class="`status-badge--${statusType}`"
+                      >
                         {{ statusText }}
                       </span>
                     </div>
@@ -118,24 +145,43 @@
         </el-tab-pane>
 
         <!-- 电压位移映射面板 -->
-        <el-tab-pane label="电压位移映射" name="voltageMap">
+        <el-tab-pane
+          label="电压位移映射"
+          name="voltageMap"
+        >
           <PiezoVoltageMap />
         </el-tab-pane>
 
         <!-- 校准面板 -->
-        <el-tab-pane label="校准" name="calibration">
+        <el-tab-pane
+          label="校准"
+          name="calibration"
+        >
           <PiezoCalibrationEditor />
         </el-tab-pane>
 
         <!-- 数据可视化面板 -->
-        <el-tab-pane label="数据图表" name="chart">
+        <el-tab-pane
+          label="数据图表"
+          name="chart"
+        >
           <div class="chart-panel">
             <!-- 图表控制 -->
             <div class="chart-controls">
-              <el-radio-group v-model="chartType" size="small" class="chart-type-group">
-                <el-radio-button label="realtime">实时曲线</el-radio-button>
-                <el-radio-button label="calibration">校准曲线</el-radio-button>
-                <el-radio-button label="history">历史数据</el-radio-button>
+              <el-radio-group
+                v-model="chartType"
+                size="small"
+                class="chart-type-group"
+              >
+                <el-radio-button label="realtime">
+                  实时曲线
+                </el-radio-button>
+                <el-radio-button label="calibration">
+                  校准曲线
+                </el-radio-button>
+                <el-radio-button label="history">
+                  历史数据
+                </el-radio-button>
               </el-radio-group>
 
               <div class="chart-actions">
@@ -170,7 +216,10 @@
             </div>
 
             <!-- ECharts 图表 -->
-            <div ref="chartContainer" class="chart-container"></div>
+            <div
+              ref="chartContainer"
+              class="chart-container"
+            />
           </div>
         </el-tab-pane>
       </el-tabs>

@@ -28,6 +28,22 @@ vi.mock('echarts', () => ({
   init: vi.fn(() => mockChartInstance),
 }));
 
+// Mock motor store
+const mockMotorStore = {
+  alarmMessage: '',
+  loading: {
+    smooth: false,
+    hysteresis: false,
+  },
+  smoothSignal: vi.fn().mockResolvedValue({ smoothed_data: [] }),
+  analyzeHysteresis: vi.fn().mockResolvedValue(null),
+  clearAlarm: vi.fn(),
+};
+
+vi.mock('../../stores/motor', () => ({
+  useMotorStore: vi.fn(() => mockMotorStore),
+}));
+
 // Mock API
 vi.mock('../../api/analysis', () => ({
   multiModelFit: vi.fn(),
@@ -37,6 +53,31 @@ vi.mock('../../api/analysis', () => ({
   saveAnalysisToHistory: vi.fn(),
   deleteAnalysisHistory: vi.fn(),
   clearAnalysisHistory: vi.fn(),
+}));
+
+// Mock chartUtils
+vi.mock('../../utils/chartUtils', () => ({
+  downsampleArray: vi.fn((arr) => arr),
+  downsampleData: vi.fn((arr) => arr),
+  createZoomConfig: vi.fn(() => []),
+  createMarkPointConfig: vi.fn(() => ({})),
+  createMarkLineConfig: vi.fn(() => ({})),
+  exportChartAsImage: vi.fn(),
+  exportChartAsSVG: vi.fn(),
+  createToolboxConfig: vi.fn(() => ({})),
+  createTooltipConfig: vi.fn(() => ({})),
+  getLargeDataOptimization: vi.fn(() => ({ isLargeData: false, animation: true, sampling: 'lttb', progressive: 200, progressiveThreshold: 3000 })),
+  exportSmoothDataAsCSV: vi.fn(),
+  exportHysteresisDataAsCSV: vi.fn(),
+  smartSampling: vi.fn((arr) => arr),
+  BatchDataProcessor: vi.fn().mockImplementation(() => ({
+    process: vi.fn((data) => Promise.resolve(data)),
+  })),
+  FPSMonitor: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    addListener: vi.fn(),
+  })),
 }));
 
 describe('DataAnalysis', () => {
@@ -51,7 +92,9 @@ describe('DataAnalysis', () => {
       global: {
         plugins: [pinia],
         stubs: {
-          'el-card': { template: '<div class="el-card"><slot /></div>' },
+          'el-card': {
+            template: '<div class="el-card"><slot name="header" /><slot /></div>',
+          },
           'el-tabs': { template: '<div class="el-tabs"><slot /></div>' },
           'el-tab-pane': { template: '<div class="el-tab-pane"><slot /></div>' },
           'el-form': { template: '<form class="el-form"><slot /></form>' },
@@ -82,6 +125,7 @@ describe('DataAnalysis', () => {
           'el-radio-group': { template: '<div class="el-radio-group"><slot /></div>' },
           'el-radio-button': { template: '<label class="el-radio-button"><slot /></label>' },
           'el-collapse-transition': { template: '<div class="el-collapse-transition"><slot /></div>' },
+          'arrow-down': { template: '<span class="arrow-down"></span>' },
         },
       },
     });

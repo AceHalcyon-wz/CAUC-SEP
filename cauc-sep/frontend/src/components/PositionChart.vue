@@ -19,13 +19,23 @@
     </template>
 
     <div class="chart-content">
-      <div ref="chartRef" class="chart-container"></div>
+      <div
+        ref="chartRef"
+        class="chart-container"
+      />
       
       <transition name="fade">
-        <div v-if="dataPoints.length === 0" class="empty-state">
-          <el-icon :size="48"><TrendCharts /></el-icon>
+        <div
+          v-if="dataPoints.length === 0"
+          class="empty-state"
+        >
+          <el-icon :size="48">
+            <TrendCharts />
+          </el-icon>
           <p>等待数据...</p>
-          <p class="hint">连接设备后将显示实时位置曲线</p>
+          <p class="hint">
+            连接设备后将显示实时位置曲线
+          </p>
         </div>
       </transition>
     </div>
@@ -294,7 +304,7 @@ function handleResize() {
   chart?.resize()
 }
 
-let themeObserver = null
+const themeObserver = null
 
 onMounted(() => {
   initChart()

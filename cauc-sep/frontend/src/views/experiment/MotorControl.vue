@@ -4,10 +4,16 @@
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <el-icon class="header-icon"><Connection /></el-icon>
+          <el-icon class="header-icon">
+            <Connection />
+          </el-icon>
           <div class="header-text">
-            <h1 class="page-title">电机控制</h1>
-            <p class="page-subtitle">精密电机运动控制系统</p>
+            <h1 class="page-title">
+              电机控制
+            </h1>
+            <p class="page-subtitle">
+              精密电机运动控制系统
+            </p>
           </div>
         </div>
         <div class="header-right">
@@ -32,11 +38,18 @@
             <el-icon><CircleClose /></el-icon>
             离线
           </el-tag>
-          <el-button @click="handleRefresh" class="action-btn" :loading="refreshing">
+          <el-button
+            class="action-btn"
+            :loading="refreshing"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>
             刷新数据
           </el-button>
-          <el-button @click="handleExport" class="action-btn">
+          <el-button
+            class="action-btn"
+            @click="handleExport"
+          >
             <el-icon><Download /></el-icon>
             导出数据
           </el-button>
@@ -48,7 +61,11 @@
     <div class="main-content">
       <el-row :gutter="24">
         <!-- 左侧：控制区域（操作流程从上到下） -->
-        <el-col :xs="24" :sm="24" :lg="8">
+        <el-col
+          :xs="24"
+          :sm="24"
+          :lg="8"
+        >
           <!-- 连接面板 - 首要操作 -->
           <ConnectionPanel class="control-card" />
           
@@ -66,30 +83,52 @@
         </el-col>
 
         <!-- 右侧：实时数据展示区域（支持折叠） -->
-        <el-col :xs="24" :sm="24" :lg="16">
+        <el-col
+          :xs="24"
+          :sm="24"
+          :lg="16"
+        >
           <!-- 设备状态卡片 - 可折叠 -->
-          <el-card class="status-card" shadow="hover">
+          <el-card
+            class="status-card"
+            shadow="hover"
+          >
             <template #header>
-              <div class="card-header" @click="toggleStatusPanel">
+              <div
+                class="card-header"
+                @click="toggleStatusPanel"
+              >
                 <div class="header-left-section">
                   <el-icon><Monitor /></el-icon>
                   <span>设备状态</span>
                 </div>
-                <el-icon class="collapse-icon" :class="{ 'is-collapsed': statusCollapsed }">
+                <el-icon
+                  class="collapse-icon"
+                  :class="{ 'is-collapsed': statusCollapsed }"
+                >
                   <ArrowDown />
                 </el-icon>
               </div>
             </template>
 
             <el-collapse-transition>
-              <div v-show="!statusCollapsed" class="status-grid">
+              <div
+                v-show="!statusCollapsed"
+                class="status-grid"
+              >
                 <!-- 运行状态组 -->
                 <div class="status-group">
-                  <div class="status-group-title">运行状态</div>
+                  <div class="status-group-title">
+                    运行状态
+                  </div>
                   <div class="status-items">
                     <div class="status-item">
                       <span class="status-label">连接状态</span>
-                      <el-tag :type="connectionStatus.type" size="large" effect="plain">
+                      <el-tag
+                        :type="connectionStatus.type"
+                        size="large"
+                        effect="plain"
+                      >
                         {{ connectionStatus.text }}
                       </el-tag>
                     </div>
@@ -98,12 +137,17 @@
 
                 <!-- 位置信息组 -->
                 <div class="status-group">
-                  <div class="status-group-title">位置信息</div>
+                  <div class="status-group-title">
+                    位置信息
+                  </div>
                   <div class="status-items">
                     <div class="status-item">
                       <span class="status-label">
                         目标位置
-                        <el-tooltip content="单位：脉冲数" placement="top">
+                        <el-tooltip
+                          content="单位：脉冲数"
+                          placement="top"
+                        >
                           <el-icon class="tooltip-icon"><QuestionFilled /></el-icon>
                         </el-tooltip>
                       </span>
@@ -118,12 +162,17 @@
 
                 <!-- 速度信息组 -->
                 <div class="status-group">
-                  <div class="status-group-title">速度信息</div>
+                  <div class="status-group-title">
+                    速度信息
+                  </div>
                   <div class="status-items">
                     <div class="status-item">
                       <span class="status-label">
                         目标速度
-                        <el-tooltip content="单位：RPM" placement="top">
+                        <el-tooltip
+                          content="单位：RPM"
+                          placement="top"
+                        >
                           <el-icon class="tooltip-icon"><QuestionFilled /></el-icon>
                         </el-tooltip>
                       </span>
@@ -140,21 +189,33 @@
           </el-card>
 
           <!-- 实时曲线卡片 - 可折叠 -->
-          <el-card class="chart-card" shadow="hover">
+          <el-card
+            class="chart-card"
+            shadow="hover"
+          >
             <template #header>
-              <div class="card-header" @click="toggleChartPanel">
+              <div
+                class="card-header"
+                @click="toggleChartPanel"
+              >
                 <div class="header-left-section">
                   <el-icon><TrendCharts /></el-icon>
                   <span>实时曲线</span>
                 </div>
-                <el-icon class="collapse-icon" :class="{ 'is-collapsed': chartCollapsed }">
+                <el-icon
+                  class="collapse-icon"
+                  :class="{ 'is-collapsed': chartCollapsed }"
+                >
                   <ArrowDown />
                 </el-icon>
               </div>
             </template>
 
             <el-collapse-transition>
-              <div v-show="!chartCollapsed" class="chart-container">
+              <div
+                v-show="!chartCollapsed"
+                class="chart-container"
+              >
                 <PositionChart
                   ref="chartRef"
                   height="300px"

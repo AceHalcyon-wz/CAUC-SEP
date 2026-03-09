@@ -3,14 +3,25 @@
     <!-- 页面标题 - 状态指示器位于顶部 -->
     <div class="page-header">
       <div class="header-left">
-        <el-icon class="header-icon"><Aim /></el-icon>
+        <el-icon class="header-icon">
+          <Aim />
+        </el-icon>
         <div class="header-text">
-          <h1 class="page-title">微电流测量</h1>
-          <p class="page-description">高精度多通道电流采集与分析</p>
+          <h1 class="page-title">
+            微电流测量
+          </h1>
+          <p class="page-description">
+            高精度多通道电流采集与分析
+          </p>
         </div>
       </div>
       <div class="header-right">
-        <el-tag type="info" effect="dark" size="large" class="status-indicator">
+        <el-tag
+          type="info"
+          effect="dark"
+          size="large"
+          class="status-indicator"
+        >
           <el-icon><Aim /></el-icon>
           高精度测量
         </el-tag>
@@ -18,44 +29,85 @@
     </div>
 
     <!-- 主内容区域 - 左右分栏布局 -->
-    <el-row :gutter="24" class="content-row">
+    <el-row
+      :gutter="24"
+      class="content-row"
+    >
       <!-- 左侧：控制面板 -->
-      <el-col :xs="24" :lg="12" class="control-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="control-col"
+      >
         <AmmeterControl class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
-      <el-col :xs="24" :lg="12" class="info-col">
+      <el-col
+        :xs="24"
+        :lg="12"
+        class="info-col"
+      >
         <!-- 实时状态卡片 - 可折叠 -->
         <el-card class="status-card">
           <template #header>
-            <div class="card-header" @click="toggleStatusPanel">
+            <div
+              class="card-header"
+              @click="toggleStatusPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><Aim /></el-icon>
+                <el-icon class="header-icon">
+                  <Aim />
+                </el-icon>
                 <span class="header-title">实时状态</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': statusCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': statusCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
-            <div v-show="!statusCollapsed" class="status-grid">
+            <div
+              v-show="!statusCollapsed"
+              class="status-grid"
+            >
               <div class="status-item">
-                <div class="status-label">当前电流</div>
-                <div class="status-value mono highlight">{{ currentCurrent.toFixed(6) }} A</div>
+                <div class="status-label">
+                  当前电流
+                </div>
+                <div class="status-value mono highlight">
+                  {{ currentCurrent.toFixed(6) }} A
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">采样率</div>
-                <div class="status-value mono">{{ sampleRate }} S/s</div>
+                <div class="status-label">
+                  采样率
+                </div>
+                <div class="status-value mono">
+                  {{ sampleRate }} S/s
+                </div>
               </div>
               <div class="status-item">
-                <div class="status-label">工作模式</div>
-                <el-tag :type="workModeType" size="small">{{ workModeText }}</el-tag>
+                <div class="status-label">
+                  工作模式
+                </div>
+                <el-tag
+                  :type="workModeType"
+                  size="small"
+                >
+                  {{ workModeText }}
+                </el-tag>
               </div>
               <div class="status-item">
-                <div class="status-label">通道数</div>
-                <div class="status-value mono">{{ channelCount }}</div>
+                <div class="status-label">
+                  通道数
+                </div>
+                <div class="status-value mono">
+                  {{ channelCount }}
+                </div>
               </div>
             </div>
           </el-collapse-transition>
@@ -64,30 +116,52 @@
         <!-- 测量精度卡片 - 可折叠 -->
         <el-card class="precision-card">
           <template #header>
-            <div class="card-header" @click="togglePrecisionPanel">
+            <div
+              class="card-header"
+              @click="togglePrecisionPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><SetUp /></el-icon>
+                <el-icon class="header-icon">
+                  <SetUp />
+                </el-icon>
                 <span class="header-title">测量精度</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': precisionCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': precisionCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>
           </template>
           <el-collapse-transition>
             <div v-show="!precisionCollapsed">
-              <el-descriptions :column="1" border size="small">
+              <el-descriptions
+                :column="1"
+                border
+                size="small"
+              >
                 <el-descriptions-item label="分辨率">
                   <span class="mono">{{ resolution }} pA</span>
                 </el-descriptions-item>
                 <el-descriptions-item label="准确度">
-                  <el-tag :type="accuracyType" size="small">{{ accuracy }}</el-tag>
+                  <el-tag
+                    :type="accuracyType"
+                    size="small"
+                  >
+                    {{ accuracy }}
+                  </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="量程">
                   {{ measurementRange }}
                 </el-descriptions-item>
                 <el-descriptions-item label="噪声抑制">
-                  <el-tag type="success" size="small">{{ noiseRejection }}</el-tag>
+                  <el-tag
+                    type="success"
+                    size="small"
+                  >
+                    {{ noiseRejection }}
+                  </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
             </div>
@@ -97,12 +171,20 @@
         <!-- 操作提示卡片 - 可折叠 -->
         <el-card class="tips-card">
           <template #header>
-            <div class="card-header" @click="toggleTipsPanel">
+            <div
+              class="card-header"
+              @click="toggleTipsPanel"
+            >
               <div class="header-left-section">
-                <el-icon class="header-icon"><InfoFilled /></el-icon>
+                <el-icon class="header-icon">
+                  <InfoFilled />
+                </el-icon>
                 <span class="header-title">操作提示</span>
               </div>
-              <el-icon class="collapse-icon" :class="{ 'is-collapsed': tipsCollapsed }">
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': tipsCollapsed }"
+              >
                 <ArrowDown />
               </el-icon>
             </div>

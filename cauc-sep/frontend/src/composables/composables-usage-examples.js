@@ -56,7 +56,8 @@ export function exampleProgressManagement() {
     failOperation,
     cancelOperation,
     formattedDuration,
-    formattedEstimatedTime
+    formattedEstimatedTime,
+    updateSubtask
   } = useProgress({
     autoResetDelay: 5000,
     enableAutoReset: true,

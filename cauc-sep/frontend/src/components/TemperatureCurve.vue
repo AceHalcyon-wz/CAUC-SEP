@@ -3,7 +3,9 @@
     <!-- 图表控制栏 -->
     <div class="curve-header">
       <div class="header-left">
-        <h3 class="curve-title">温度曲线实时监控</h3>
+        <h3 class="curve-title">
+          温度曲线实时监控
+        </h3>
         <div class="curve-stats">
           <div class="stat-item">
             <span class="stat-label">当前温度:</span>
@@ -15,7 +17,10 @@
           </div>
           <div class="stat-item">
             <span class="stat-label">变化率:</span>
-            <span class="stat-value mono" :class="rateClass">{{ heatingRateDisplay }}</span>
+            <span
+              class="stat-value mono"
+              :class="rateClass"
+            >{{ heatingRateDisplay }}</span>
           </div>
         </div>
       </div>
@@ -38,7 +43,10 @@
         >
           {{ isAutoRefresh ? '暂停' : '播放' }}
         </el-button>
-        <el-button size="small" @click="handleExportChart">
+        <el-button
+          size="small"
+          @click="handleExportChart"
+        >
           <el-icon><Download /></el-icon>
           导出
         </el-button>
@@ -47,7 +55,7 @@
 
     <!-- 主图表区域 -->
     <div class="chart-wrapper">
-      <v-chart
+      <VChart
         ref="mainChart"
         :option="chartOption"
         :autoresize="true"
@@ -56,25 +64,44 @@
       />
       
       <!-- 温度变化率指示器 -->
-      <div class="rate-indicator" :class="rateIndicatorClass">
+      <div
+        class="rate-indicator"
+        :class="rateIndicatorClass"
+      >
         <div class="rate-arrow">
-          <el-icon v-if="heatingRate > 0.1"><Top /></el-icon>
-          <el-icon v-else-if="heatingRate < -0.1"><Bottom /></el-icon>
-          <el-icon v-else><Minus /></el-icon>
+          <el-icon v-if="heatingRate > 0.1">
+            <Top />
+          </el-icon>
+          <el-icon v-else-if="heatingRate < -0.1">
+            <Bottom />
+          </el-icon>
+          <el-icon v-else>
+            <Minus />
+          </el-icon>
         </div>
         <div class="rate-value">
           <span class="rate-number mono">{{ Math.abs(heatingRate).toFixed(2) }}</span>
           <span class="rate-unit">K/s</span>
         </div>
-        <div class="rate-label">{{ rateLabel }}</div>
+        <div class="rate-label">
+          {{ rateLabel }}
+        </div>
       </div>
     </div>
 
     <!-- 历史数据查看面板 -->
-    <div v-if="showHistoryPanel" class="history-panel">
+    <div
+      v-if="showHistoryPanel"
+      class="history-panel"
+    >
       <div class="panel-header">
-        <h4 class="panel-title">历史数据查看</h4>
-        <el-button text @click="showHistoryPanel = false">
+        <h4 class="panel-title">
+          历史数据查看
+        </h4>
+        <el-button
+          text
+          @click="showHistoryPanel = false"
+        >
           <el-icon><Close /></el-icon>
         </el-button>
       </div>
@@ -88,22 +115,47 @@
           size="small"
           @change="handleHistoryDateChange"
         />
-        <el-button size="small" type="primary" @click="handleFetchHistory">
+        <el-button
+          size="small"
+          type="primary"
+          @click="handleFetchHistory"
+        >
           查询
         </el-button>
       </div>
       <div class="history-stats">
-        <el-statistic title="数据点数" :value="historyData.length" />
-        <el-statistic title="最高温度" :value="historyMaxTemp" suffix="K" />
-        <el-statistic title="最低温度" :value="historyMinTemp" suffix="K" />
-        <el-statistic title="平均温度" :value="historyAvgTemp" suffix="K" />
+        <el-statistic
+          title="数据点数"
+          :value="historyData.length"
+        />
+        <el-statistic
+          title="最高温度"
+          :value="historyMaxTemp"
+          suffix="K"
+        />
+        <el-statistic
+          title="最低温度"
+          :value="historyMinTemp"
+          suffix="K"
+        />
+        <el-statistic
+          title="平均温度"
+          :value="historyAvgTemp"
+          suffix="K"
+        />
       </div>
     </div>
 
     <!-- 目标温度线标记 -->
     <div class="target-line-marker">
-      <div class="marker-line" :style="{ top: targetLinePosition }"></div>
-      <div class="marker-label" :style="{ top: targetLinePosition }">
+      <div
+        class="marker-line"
+        :style="{ top: targetLinePosition }"
+      />
+      <div
+        class="marker-label"
+        :style="{ top: targetLinePosition }"
+      >
         目标: {{ targetTempDisplay }}
       </div>
     </div>
@@ -566,7 +618,7 @@ async function handleFetchHistory() {
 
 // ============ 生命周期 ============
 
-let updateTimer = null
+const updateTimer = null
 
 onMounted(() => {
   // 初始化数据

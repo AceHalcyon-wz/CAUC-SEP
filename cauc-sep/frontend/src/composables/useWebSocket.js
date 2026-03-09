@@ -309,7 +309,7 @@ export function useWebSocket(options = {}) {
   /** 协议协商超时定时器 */
   let protocolNegotiateTimer = null
   /** 原始URL（不含协议参数） */
-  let baseUrl = url
+  const baseUrl = url
   /** 是否正在等待心跳响应 */
   let waitingForPong = false
   /** 是否正在同步数据 */

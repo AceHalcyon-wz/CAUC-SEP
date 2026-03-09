@@ -2,29 +2,45 @@
   <el-card class="ammeter-control">
     <template #header>
       <div class="card-header">
-        <el-icon class="header-icon"><Aim /></el-icon>
+        <el-icon class="header-icon">
+          <Aim />
+        </el-icon>
         <span class="header-title">微电流采集控制</span>
       </div>
     </template>
 
     <div class="control-content">
       <!-- 连接状态 -->
-      <div class="connection-status" :class="isConnected ? 'connected' : 'disconnected'">
-        <span class="status-dot"></span>
+      <div
+        class="connection-status"
+        :class="isConnected ? 'connected' : 'disconnected'"
+      >
+        <span class="status-dot" />
         <span class="status-text">{{ connectionStatus }}</span>
       </div>
 
       <!-- 主要控制区域 -->
-      <el-tabs v-model="activeTab" class="control-tabs">
+      <el-tabs
+        v-model="activeTab"
+        class="control-tabs"
+      >
         <!-- 采集控制面板 -->
-        <el-tab-pane label="采集控制" name="collection">
+        <el-tab-pane
+          label="采集控制"
+          name="collection"
+        >
           <div class="collection-control">
             <!-- 采样率设置 -->
             <div class="sample-rate-section">
-              <div class="section-label">采样率设置</div>
+              <div class="section-label">
+                采样率设置
+              </div>
               <div class="rate-control">
                 <div class="rate-display">
-                  <span class="rate-value" :class="{ 'rate-changing': isRateChanging }">
+                  <span
+                    class="rate-value"
+                    :class="{ 'rate-changing': isRateChanging }"
+                  >
                     {{ sampleRate }}
                   </span>
                   <span class="rate-unit">Hz</span>
@@ -52,7 +68,9 @@
 
             <!-- 快捷采样率按钮 -->
             <div class="quick-rate-section">
-              <div class="section-label">快捷设置</div>
+              <div class="section-label">
+                快捷设置
+              </div>
               <div class="quick-rate-buttons">
                 <button
                   v-for="rate in quickSampleRates"
@@ -75,8 +93,12 @@
                 :disabled="!canControl"
                 @click="toggleCollection"
               >
-                <el-icon v-if="!isCollecting"><VideoPlay /></el-icon>
-                <el-icon v-else><VideoPause /></el-icon>
+                <el-icon v-if="!isCollecting">
+                  <VideoPlay />
+                </el-icon>
+                <el-icon v-else>
+                  <VideoPause />
+                </el-icon>
                 <span>{{ isCollecting ? '停止采集' : '开始采集' }}</span>
               </button>
 
@@ -101,32 +123,45 @@
 
             <!-- 采集统计信息 -->
             <div class="stats-section">
-              <div class="section-label">采集统计</div>
+              <div class="section-label">
+                采集统计
+              </div>
               <div class="stats-grid">
                 <div class="stat-card">
-                  <div class="stat-label">采集状态</div>
+                  <div class="stat-label">
+                    采集状态
+                  </div>
                   <div class="stat-value">
-                    <span class="status-badge" :class="`status-badge--${collectingStatusType}`">
+                    <span
+                      class="status-badge"
+                      :class="`status-badge--${collectingStatusType}`"
+                    >
                       {{ collectingStatusText }}
                     </span>
                   </div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">采样率</div>
+                  <div class="stat-label">
+                    采样率
+                  </div>
                   <div class="stat-value">
                     <span class="mono">{{ sampleRate }}</span>
                     <span class="unit">Hz</span>
                   </div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">已采集样本</div>
+                  <div class="stat-label">
+                    已采集样本
+                  </div>
                   <div class="stat-value">
                     <span class="mono">{{ collectionStats.samples_collected }}</span>
                     <span class="unit">个</span>
                   </div>
                 </div>
                 <div class="stat-card">
-                  <div class="stat-label">数据速率</div>
+                  <div class="stat-label">
+                    数据速率
+                  </div>
                   <div class="stat-value">
                     <span class="mono">{{ collectionStats.data_rate.toFixed(1) }}</span>
                     <span class="unit">样本/秒</span>
@@ -138,9 +173,14 @@
         </el-tab-pane>
 
         <!-- 通道配置面板 -->
-        <el-tab-pane label="通道配置" name="channels">
+        <el-tab-pane
+          label="通道配置"
+          name="channels"
+        >
           <div class="channel-config-panel">
-            <div class="section-label">通道参数配置</div>
+            <div class="section-label">
+              通道参数配置
+            </div>
             
             <el-row :gutter="16">
               <el-col
@@ -149,7 +189,10 @@
                 :span="12"
                 class="channel-col"
               >
-                <el-card shadow="hover" class="channel-config-card">
+                <el-card
+                  shadow="hover"
+                  class="channel-config-card"
+                >
                   <div class="channel-header">
                     <div class="channel-title">
                       <el-switch
@@ -180,10 +223,22 @@
                         placeholder="选择量程"
                         @change="handleChannelConfig(channelNum, 'range', $event)"
                       >
-                        <el-option label="自动" value="auto" />
-                        <el-option label="低量程" value="low" />
-                        <el-option label="中量程" value="medium" />
-                        <el-option label="高量程" value="high" />
+                        <el-option
+                          label="自动"
+                          value="auto"
+                        />
+                        <el-option
+                          label="低量程"
+                          value="low"
+                        />
+                        <el-option
+                          label="中量程"
+                          value="medium"
+                        />
+                        <el-option
+                          label="高量程"
+                          value="high"
+                        />
                       </el-select>
                     </el-form-item>
 
@@ -194,9 +249,18 @@
                         placeholder="选择滤波"
                         @change="handleChannelConfig(channelNum, 'filter', $event)"
                       >
-                        <el-option label="低通滤波" value="low" />
-                        <el-option label="中通滤波" value="medium" />
-                        <el-option label="高通滤波" value="high" />
+                        <el-option
+                          label="低通滤波"
+                          value="low"
+                        />
+                        <el-option
+                          label="中通滤波"
+                          value="medium"
+                        />
+                        <el-option
+                          label="高通滤波"
+                          value="high"
+                        />
                       </el-select>
                     </el-form-item>
                   </el-form>
@@ -207,16 +271,24 @@
         </el-tab-pane>
 
         <!-- 实时数据面板 -->
-        <el-tab-pane label="实时数据" name="realtime">
+        <el-tab-pane
+          label="实时数据"
+          name="realtime"
+        >
           <div class="realtime-panel">
             <!-- 缓冲区状态 -->
             <div class="buffer-status-section">
-              <div class="section-label">缓冲区状态</div>
+              <div class="section-label">
+                缓冲区状态
+              </div>
               <div class="buffer-status-display">
                 <div class="buffer-info">
                   <div class="buffer-header">
                     <span class="buffer-label">缓冲区使用率</span>
-                    <span class="buffer-percent" :class="`buffer-percent--${bufferStatusType}`">
+                    <span
+                      class="buffer-percent"
+                      :class="`buffer-percent--${bufferStatusType}`"
+                    >
                       {{ bufferUsagePercent }}%
                     </span>
                   </div>
@@ -225,7 +297,7 @@
                       class="buffer-fill"
                       :class="`buffer-fill--${bufferStatusType}`"
                       :style="{ width: `${bufferUsagePercent}%` }"
-                    ></div>
+                    />
                   </div>
                   <div class="buffer-details">
                     <span>已用: {{ bufferStatus.size }} / {{ bufferStatus.max_size }}</span>
@@ -237,7 +309,9 @@
 
             <!-- 通道数据显示 -->
             <div class="channel-data-section">
-              <div class="section-label">通道实时数据</div>
+              <div class="section-label">
+                通道实时数据
+              </div>
               <el-row :gutter="16">
                 <el-col
                   v-for="channelNum in channelCount"
@@ -262,11 +336,17 @@
                       </el-tag>
                     </div>
                     <div class="data-channel-value">
-                      <span class="data-value" :class="{ 'data-value-changing': isCollecting }">
+                      <span
+                        class="data-value"
+                        :class="{ 'data-value-changing': isCollecting }"
+                      >
                         {{ formatCurrent(channelData[channelNum] || 0) }}
                       </span>
                     </div>
-                    <div class="data-channel-snr" v-if="snrData[channelNum]">
+                    <div
+                      v-if="snrData[channelNum]"
+                      class="data-channel-snr"
+                    >
                       <span class="snr-label">SNR:</span>
                       <span class="snr-value">{{ snrData[channelNum].snr?.toFixed(2) || 'N/A' }} dB</span>
                     </div>
@@ -277,7 +357,9 @@
 
             <!-- 信噪比监控 -->
             <div class="snr-section">
-              <div class="section-label">信噪比监控</div>
+              <div class="section-label">
+                信噪比监控
+              </div>
               <div class="snr-actions">
                 <button
                   class="snr-btn"
@@ -295,7 +377,9 @@
                   :span="6"
                 >
                   <div class="snr-card">
-                    <div class="snr-header">通道 {{ channelNum }}</div>
+                    <div class="snr-header">
+                      通道 {{ channelNum }}
+                    </div>
                     <div class="snr-content">
                       <div class="snr-item">
                         <span class="snr-item-label">SNR</span>
@@ -324,7 +408,10 @@
         </el-tab-pane>
 
         <!-- 数据可视化面板 -->
-        <el-tab-pane label="数据图表" name="chart">
+        <el-tab-pane
+          label="数据图表"
+          name="chart"
+        >
           <div class="chart-panel">
             <AmmeterWaveform
               :data="realtimeData"
@@ -340,7 +427,10 @@
         </el-tab-pane>
 
         <!-- 高级通道配置面板 -->
-        <el-tab-pane label="高级配置" name="advanced">
+        <el-tab-pane
+          label="高级配置"
+          name="advanced"
+        >
           <div class="advanced-panel">
             <AmmeterChannelConfig
               :channel-config="channelConfigs"
@@ -356,12 +446,17 @@
         </el-tab-pane>
 
         <!-- 采集模板管理面板 -->
-        <el-tab-pane label="模板管理" name="templates">
+        <el-tab-pane
+          label="模板管理"
+          name="templates"
+        >
           <div class="templates-panel">
             <!-- 模板列表 -->
             <div class="templates-section">
               <div class="section-header">
-                <h3 class="section-title">采集参数模板</h3>
+                <h3 class="section-title">
+                  采集参数模板
+                </h3>
                 <el-button
                   size="small"
                   type="primary"
@@ -373,7 +468,10 @@
                 </el-button>
               </div>
 
-              <div class="templates-list" v-if="collectionTemplates.length > 0">
+              <div
+                v-if="collectionTemplates.length > 0"
+                class="templates-list"
+              >
                 <div
                   v-for="template in collectionTemplates"
                   :key="template.id"
@@ -381,7 +479,9 @@
                   :class="{ 'template-active': activeTemplateId === template.id }"
                 >
                   <div class="template-info">
-                    <div class="template-name">{{ template.name }}</div>
+                    <div class="template-name">
+                      {{ template.name }}
+                    </div>
                     <div class="template-meta">
                       <span>采样率: {{ template.config.sampleRate }} Hz</span>
                       <span>创建时间: {{ formatDate(template.createdAt) }}</span>
@@ -412,8 +512,13 @@
                 </div>
               </div>
 
-              <div class="empty-state" v-else>
-                <el-icon class="empty-icon"><Document /></el-icon>
+              <div
+                v-else
+                class="empty-state"
+              >
+                <el-icon class="empty-icon">
+                  <Document />
+                </el-icon>
                 <p>暂无模板，请保存当前配置为模板</p>
               </div>
             </div>
@@ -421,7 +526,9 @@
             <!-- SNR阈值配置 -->
             <div class="snr-config-section">
               <div class="section-header">
-                <h3 class="section-title">SNR阈值配置</h3>
+                <h3 class="section-title">
+                  SNR阈值配置
+                </h3>
               </div>
 
               <div class="snr-thresholds">
@@ -448,18 +555,23 @@
               </div>
 
               <!-- SNR告警显示 -->
-              <div class="snr-alarms" v-if="hasSNRAlarm">
+              <div
+                v-if="hasSNRAlarm"
+                class="snr-alarms"
+              >
                 <div class="alarms-header">
-                  <el-icon class="alarm-icon"><Warning /></el-icon>
+                  <el-icon class="alarm-icon">
+                    <Warning />
+                  </el-icon>
                   <span>SNR告警</span>
                 </div>
                 <div class="alarms-list">
                   <div
                     v-for="(alarm, channel) in snrAlarms"
+                    v-if="alarm.active"
                     :key="channel"
                     class="alarm-item"
                     :class="`alarm-${alarm.level}`"
-                    v-if="alarm.active"
                   >
                     <span class="alarm-channel">通道 {{ channel }}</span>
                     <span class="alarm-message">{{ alarm.message }}</span>
@@ -471,7 +583,9 @@
             <!-- 缓冲区配置 -->
             <div class="buffer-config-section">
               <div class="section-header">
-                <h3 class="section-title">缓冲区配置</h3>
+                <h3 class="section-title">
+                  缓冲区配置
+                </h3>
               </div>
 
               <div class="buffer-settings">
@@ -521,8 +635,8 @@
               <div class="buffer-optimization">
                 <el-button
                   size="small"
-                  @click="showBufferOptimization"
                   :disabled="realtimeData.length === 0"
+                  @click="showBufferOptimization"
                 >
                   分析缓冲区使用情况
                 </el-button>
@@ -539,7 +653,10 @@
       title="保存采集参数模板"
       width="500px"
     >
-      <el-form :model="templateForm" label-width="100px">
+      <el-form
+        :model="templateForm"
+        label-width="100px"
+      >
         <el-form-item label="模板名称">
           <el-input
             v-model="templateForm.name"
@@ -566,11 +683,13 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="showSaveTemplateDialog = false">取消</el-button>
+        <el-button @click="showSaveTemplateDialog = false">
+          取消
+        </el-button>
         <el-button
           type="primary"
-          @click="handleSaveTemplate"
           :disabled="!templateForm.name"
+          @click="handleSaveTemplate"
         >
           保存
         </el-button>
@@ -639,10 +758,10 @@ const channelConfigs = reactive({
 
 // 图表相关
 const chartContainer = ref(null)
-let chartInstance = null
+const chartInstance = null
 const visibleChannels = ref([1, 2, 3, 4])
 const autoUpdate = ref(false)
-let chartUpdateTimer = null
+const chartUpdateTimer = null
 
 // 模板管理相关
 const showSaveTemplateDialog = ref(false)
@@ -845,7 +964,6 @@ function clearChartData() {
   ammeterStore.clearRealtimeData()
   if (chartInstance) {
     chartInstance.clear()
-    initChart()
   }
   ElMessage.info('数据已清空')
 }

@@ -7,8 +7,11 @@
           {{ activeModule?.name || '实验平台' }}
         </h1>
         <transition name="subtitle-fade">
-          <span v-if="activeChild" class="topbar__subtitle">
-            <span class="topbar__subtitle-divider"></span>
+          <span
+            v-if="activeChild"
+            class="topbar__subtitle"
+          >
+            <span class="topbar__subtitle-divider" />
             {{ activeChild.name }}
           </span>
         </transition>
@@ -16,16 +19,19 @@
     </div>
 
     <!-- 中间：子功能标签页 -->
-    <nav v-if="activeModule?.children?.length" class="topbar__tabs">
+    <nav
+      v-if="activeModule?.children?.length"
+      class="topbar__tabs"
+    >
       <div class="topbar__tabs-wrapper">
         <div
           v-for="child in activeModule.children"
           :key="child.id"
           class="topbar__tab"
           :class="{ 'topbar__tab--active': activeChildId === child.id }"
-          @click="handleTabClick(child)"
           role="tab"
           :aria-selected="activeChildId === child.id"
+          @click="handleTabClick(child)"
         >
           <div class="topbar__tab-icon-wrapper">
             <el-icon class="topbar__tab-icon">
@@ -33,7 +39,7 @@
             </el-icon>
           </div>
           <span class="topbar__tab-label">{{ child.name }}</span>
-          <div class="topbar__tab-indicator"></div>
+          <div class="topbar__tab-indicator" />
         </div>
       </div>
     </nav>
@@ -42,37 +48,68 @@
     <div class="topbar__right">
       <!-- 快速操作 -->
       <div class="topbar__actions">
-        <el-tooltip content="刷新数据" placement="bottom" :show-after="500">
-          <button class="topbar__action-btn" @click="handleRefresh">
+        <el-tooltip
+          content="刷新数据"
+          placement="bottom"
+          :show-after="500"
+        >
+          <button
+            class="topbar__action-btn"
+            @click="handleRefresh"
+          >
             <el-icon><Refresh /></el-icon>
           </button>
         </el-tooltip>
         
-        <el-tooltip content="导出数据" placement="bottom" :show-after="500">
-          <button class="topbar__action-btn" @click="handleExport">
+        <el-tooltip
+          content="导出数据"
+          placement="bottom"
+          :show-after="500"
+        >
+          <button
+            class="topbar__action-btn"
+            @click="handleExport"
+          >
             <el-icon><Download /></el-icon>
           </button>
         </el-tooltip>
         
-        <el-tooltip content="全屏显示" placement="bottom" :show-after="500">
-          <button class="topbar__action-btn" @click="handleFullscreen">
+        <el-tooltip
+          content="全屏显示"
+          placement="bottom"
+          :show-after="500"
+        >
+          <button
+            class="topbar__action-btn"
+            @click="handleFullscreen"
+          >
             <el-icon><FullScreen /></el-icon>
           </button>
         </el-tooltip>
       </div>
 
       <!-- 用户信息 -->
-      <el-dropdown trigger="click" @command="handleUserCommand" class="topbar__user-dropdown">
+      <el-dropdown
+        trigger="click"
+        class="topbar__user-dropdown"
+        @command="handleUserCommand"
+      >
         <div class="topbar__user">
           <div class="topbar__avatar-wrapper">
-            <el-avatar :size="32" class="topbar__avatar">
+            <el-avatar
+              :size="32"
+              class="topbar__avatar"
+            >
               {{ userStore.avatarText }}
             </el-avatar>
-            <div class="topbar__avatar-ring"></div>
+            <div class="topbar__avatar-ring" />
           </div>
           <div class="topbar__user-info">
             <span class="topbar__username">{{ userStore.currentUser?.username || '实验员' }}</span>
-            <span v-if="userStore.currentUser?.role" class="topbar__role-badge">
+            <span
+              v-if="userStore.currentUser?.role"
+              class="topbar__role-badge"
+            >
               {{ userStore.roleLabel }}
             </span>
           </div>
@@ -90,7 +127,10 @@
               <el-icon><Setting /></el-icon>
               <span>系统设置</span>
             </el-dropdown-item>
-            <el-dropdown-item divided command="logout">
+            <el-dropdown-item
+              divided
+              command="logout"
+            >
               <el-icon><SwitchButton /></el-icon>
               <span>退出登录</span>
             </el-dropdown-item>

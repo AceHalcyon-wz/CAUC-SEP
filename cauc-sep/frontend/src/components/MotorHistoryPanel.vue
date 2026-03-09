@@ -3,9 +3,16 @@
     <template #header>
       <div class="card-header">
         <div class="header-left">
-          <el-icon class="header-icon"><Clock /></el-icon>
+          <el-icon class="header-icon">
+            <Clock />
+          </el-icon>
           <span class="header-title">运动历史</span>
-          <el-tag type="info" size="small">{{ motorStore.movementHistory.length }} 条记录</el-tag>
+          <el-tag
+            type="info"
+            size="small"
+          >
+            {{ motorStore.movementHistory.length }} 条记录
+          </el-tag>
         </div>
         <div class="header-actions">
           <el-button
@@ -40,7 +47,10 @@
 
     <div class="history-content">
       <!-- 历史记录列表 -->
-      <div v-if="motorStore.movementHistory.length > 0" class="history-list">
+      <div
+        v-if="motorStore.movementHistory.length > 0"
+        class="history-list"
+      >
         <el-scrollbar max-height="400px">
           <div
             v-for="record in motorStore.movementHistory"
@@ -80,7 +90,10 @@
                 <span class="detail-value">{{ record.startPosition.toFixed(3) }} mm</span>
               </div>
 
-              <div v-if="record.targetPosition !== undefined" class="detail-row">
+              <div
+                v-if="record.targetPosition !== undefined"
+                class="detail-row"
+              >
                 <span class="detail-label">
                   <el-icon><Aim /></el-icon>
                   目标位置:
@@ -88,7 +101,10 @@
                 <span class="detail-value">{{ record.targetPosition.toFixed(3) }} mm</span>
               </div>
 
-              <div v-if="record.velocity" class="detail-row">
+              <div
+                v-if="record.velocity"
+                class="detail-row"
+              >
                 <span class="detail-label">
                   <el-icon><Odometer /></el-icon>
                   运动速度:
@@ -96,7 +112,10 @@
                 <span class="detail-value">{{ record.velocity.toFixed(1) }} mm/s</span>
               </div>
 
-              <div v-if="!record.success && record.errorMessage" class="detail-row error-message">
+              <div
+                v-if="!record.success && record.errorMessage"
+                class="detail-row error-message"
+              >
                 <span class="detail-label">
                   <el-icon><Warning /></el-icon>
                   错误信息:
@@ -146,11 +165,19 @@
         />
       </div>
       <template #footer>
-        <el-button @click="exportDialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="copyToClipboard">
+        <el-button @click="exportDialogVisible = false">
+          关闭
+        </el-button>
+        <el-button
+          type="primary"
+          @click="copyToClipboard"
+        >
           复制到剪贴板
         </el-button>
-        <el-button type="success" @click="downloadAsFile">
+        <el-button
+          type="success"
+          @click="downloadAsFile"
+        >
           下载文件
         </el-button>
       </template>

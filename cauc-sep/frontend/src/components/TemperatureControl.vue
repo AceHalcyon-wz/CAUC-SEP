@@ -3,7 +3,9 @@
     <template #header>
       <div class="card-header">
         <div class="header-title">
-          <el-icon class="header-icon"><Thermometer /></el-icon>
+          <el-icon class="header-icon">
+            <Thermometer />
+          </el-icon>
           <span>温度控制面板</span>
         </div>
         <div class="header-actions">
@@ -30,8 +32,11 @@
             <el-icon><WarningFilled /></el-icon>
             紧急停止
           </el-button>
-          <div class="connection-badge" :class="connectionBadgeClass">
-            <span class="badge-dot"></span>
+          <div
+            class="connection-badge"
+            :class="connectionBadgeClass"
+          >
+            <span class="badge-dot" />
             {{ connectionStatus.text }}
           </div>
         </div>
@@ -53,8 +58,11 @@
     <div class="control-content">
       <!-- 温度状态卡片 -->
       <div class="temp-status-cards">
-        <div class="status-card status-card--current" :class="{ 'status-card--active': tempStore.isHeating }">
-          <div class="card-glow"></div>
+        <div
+          class="status-card status-card--current"
+          :class="{ 'status-card--active': tempStore.isHeating }"
+        >
+          <div class="card-glow" />
           <div class="card-content">
             <div class="card-icon">
               <el-icon><Thermometer /></el-icon>
@@ -64,18 +72,25 @@
                 <span class="temp-value mono">{{ formatTempValue(tempStore.currentTemp) }}</span>
                 <span class="temp-unit">K</span>
               </div>
-              <div class="temp-celsius mono">{{ tempStore.kelvinToCelsius(tempStore.currentTemp).toFixed(1) }}°C</div>
-              <div class="card-label">当前温度</div>
+              <div class="temp-celsius mono">
+                {{ tempStore.kelvinToCelsius(tempStore.currentTemp).toFixed(1) }}°C
+              </div>
+              <div class="card-label">
+                当前温度
+              </div>
             </div>
-            <div class="status-indicator" :class="statusIndicatorClass">
-              <span class="indicator-dot"></span>
+            <div
+              class="status-indicator"
+              :class="statusIndicatorClass"
+            >
+              <span class="indicator-dot" />
               {{ tempStore.tempStatusText }}
             </div>
           </div>
         </div>
 
         <div class="status-card status-card--target">
-          <div class="card-glow"></div>
+          <div class="card-glow" />
           <div class="card-content">
             <div class="card-icon card-icon--target">
               <el-icon><Aim /></el-icon>
@@ -85,18 +100,25 @@
                 <span class="temp-value mono">{{ formatTempValue(tempStore.targetTemp) }}</span>
                 <span class="temp-unit">K</span>
               </div>
-              <div class="temp-celsius mono">{{ tempStore.kelvinToCelsius(tempStore.targetTemp).toFixed(1) }}°C</div>
-              <div class="card-label">目标温度</div>
+              <div class="temp-celsius mono">
+                {{ tempStore.kelvinToCelsius(tempStore.targetTemp).toFixed(1) }}°C
+              </div>
+              <div class="card-label">
+                目标温度
+              </div>
             </div>
-            <div class="status-indicator" :class="tempStore.isHeating ? 'status-indicator--heating' : 'status-indicator--standby'">
-              <span class="indicator-dot"></span>
+            <div
+              class="status-indicator"
+              :class="tempStore.isHeating ? 'status-indicator--heating' : 'status-indicator--standby'"
+            >
+              <span class="indicator-dot" />
               {{ tempStore.isHeating ? '加热中' : '待机' }}
             </div>
           </div>
         </div>
 
         <div class="status-card status-card--rate">
-          <div class="card-glow"></div>
+          <div class="card-glow" />
           <div class="card-content">
             <div class="card-icon card-icon--rate">
               <el-icon><Odometer /></el-icon>
@@ -106,12 +128,19 @@
                 <span class="temp-value mono">{{ tempStore.heatingRate.toFixed(2) }}</span>
                 <span class="temp-unit">K/s</span>
               </div>
-              <div class="temp-celsius">升温速率</div>
-              <div class="card-label">实时监测</div>
+              <div class="temp-celsius">
+                升温速率
+              </div>
+              <div class="card-label">
+                实时监测
+              </div>
             </div>
             <div class="power-indicator">
               <div class="power-bar">
-                <div class="power-fill" :style="{ width: `${tempStore.outputPower}%` }"></div>
+                <div
+                  class="power-fill"
+                  :style="{ width: `${tempStore.outputPower}%` }"
+                />
               </div>
               <span class="power-text mono">{{ tempStore.outputPower.toFixed(1) }}%</span>
             </div>
@@ -125,15 +154,15 @@
           <span class="section-title">温度曲线实时显示</span>
           <div class="chart-legend">
             <span class="legend-item legend-item--current">
-              <span class="legend-dot"></span>当前温度
+              <span class="legend-dot" />当前温度
             </span>
             <span class="legend-item legend-item--target">
-              <span class="legend-dot"></span>目标温度
+              <span class="legend-dot" />目标温度
             </span>
           </div>
         </div>
         <div class="chart-container">
-          <v-chart
+          <VChart
             ref="tempChart"
             :option="chartOption"
             :autoresize="true"
@@ -146,7 +175,11 @@
       <div class="control-section">
         <div class="section-header">
           <span class="section-title">目标温度设置</span>
-          <el-tag v-if="tempValidationMessage" :type="tempValidation.valid ? 'success' : 'danger'" size="small">
+          <el-tag
+            v-if="tempValidationMessage"
+            :type="tempValidation.valid ? 'success' : 'danger'"
+            size="small"
+          >
             {{ tempValidationMessage }}
           </el-tag>
         </div>
@@ -217,7 +250,11 @@
         <div class="section-header">
           <span class="section-title">PID 参数配置</span>
           <div class="pid-status">
-            <el-tag v-if="pidValidationResult" :type="pidValidationResult.valid ? 'success' : 'warning'" size="small">
+            <el-tag
+              v-if="pidValidationResult"
+              :type="pidValidationResult.valid ? 'success' : 'warning'"
+              size="small"
+            >
               {{ pidValidationResult.valid ? '参数有效' : pidValidationResult.message }}
             </el-tag>
           </div>
@@ -276,7 +313,10 @@
             <el-icon><Check /></el-icon>
             验证参数
           </el-button>
-          <el-button class="action-btn action-btn--secondary" @click="handleResetPID">
+          <el-button
+            class="action-btn action-btn--secondary"
+            @click="handleResetPID"
+          >
             <el-icon><RefreshRight /></el-icon>
             重置默认值
           </el-button>
@@ -309,9 +349,16 @@
         <div class="section-header">
           <span class="section-title">程序控温</span>
         </div>
-        <el-tabs v-model="activeProgramTab" type="border-card" class="program-tabs">
+        <el-tabs
+          v-model="activeProgramTab"
+          type="border-card"
+          class="program-tabs"
+        >
           <!-- 程序列表 -->
-          <el-tab-pane label="程序列表" name="list">
+          <el-tab-pane
+            label="程序列表"
+            name="list"
+          >
             <div class="program-list">
               <el-table
                 :data="tempStore.programCurves"
@@ -319,19 +366,37 @@
                 class="program-table"
                 @row-click="handleSelectProgram"
               >
-                <el-table-column prop="name" label="程序名称" width="200" />
-                <el-table-column prop="segments" label="段数" width="80">
+                <el-table-column
+                  prop="name"
+                  label="程序名称"
+                  width="200"
+                />
+                <el-table-column
+                  prop="segments"
+                  label="段数"
+                  width="80"
+                >
                   <template #default="{ row }">
                     {{ row.segments ? row.segments.length : 0 }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="duration" label="总时长" width="120">
+                <el-table-column
+                  prop="duration"
+                  label="总时长"
+                  width="120"
+                >
                   <template #default="{ row }">
                     {{ calculateTotalDuration(row.segments) }}
                   </template>
                 </el-table-column>
-                <el-table-column prop="description" label="描述" />
-                <el-table-column label="操作" width="200">
+                <el-table-column
+                  prop="description"
+                  label="描述"
+                />
+                <el-table-column
+                  label="操作"
+                  width="200"
+                >
                   <template #default="{ row }">
                     <el-button
                       type="success"
@@ -353,7 +418,10 @@
               </el-table>
 
               <!-- 程序控制按钮 -->
-              <div v-if="tempStore.isProgramRunning" class="program-control">
+              <div
+                v-if="tempStore.isProgramRunning"
+                class="program-control"
+              >
                 <el-progress
                   :percentage="tempStore.programProgress"
                   :status="tempStore.programStatus === 'paused' ? 'warning' : ''"
@@ -376,7 +444,10 @@
                     <el-icon><VideoPlay /></el-icon>
                     恢复
                   </el-button>
-                  <el-button type="danger" @click="handleStopProgram">
+                  <el-button
+                    type="danger"
+                    @click="handleStopProgram"
+                  >
                     <el-icon><Close /></el-icon>
                     停止
                   </el-button>
@@ -386,8 +457,15 @@
           </el-tab-pane>
 
           <!-- 创建程序 -->
-          <el-tab-pane label="创建程序" name="create">
-            <el-form :model="programForm" label-width="120px" class="program-form">
+          <el-tab-pane
+            label="创建程序"
+            name="create"
+          >
+            <el-form
+              :model="programForm"
+              label-width="120px"
+              class="program-form"
+            >
               <el-form-item label="程序名称">
                 <el-input
                   v-model="programForm.name"
@@ -409,27 +487,54 @@
               <!-- 温度段列表 -->
               <el-form-item label="温度段">
                 <div class="segment-list">
-                  <el-table :data="programForm.segments" border style="width: 100%">
-                    <el-table-column type="index" label="序号" width="60" />
-                    <el-table-column label="段类型" width="120">
+                  <el-table
+                    :data="programForm.segments"
+                    border
+                    style="width: 100%"
+                  >
+                    <el-table-column
+                      type="index"
+                      label="序号"
+                      width="60"
+                    />
+                    <el-table-column
+                      label="段类型"
+                      width="120"
+                    >
                       <template #default="{ row }">
-                        <el-select v-model="row.type" size="small" placeholder="选择类型">
-                          <el-option label="升温段" value="heat">
+                        <el-select
+                          v-model="row.type"
+                          size="small"
+                          placeholder="选择类型"
+                        >
+                          <el-option
+                            label="升温段"
+                            value="heat"
+                          >
                             <el-icon><Top /></el-icon>
                             <span style="margin-left: 5px;">升温段</span>
                           </el-option>
-                          <el-option label="恒温段" value="hold">
+                          <el-option
+                            label="恒温段"
+                            value="hold"
+                          >
                             <el-icon><Minus /></el-icon>
                             <span style="margin-left: 5px;">恒温段</span>
                           </el-option>
-                          <el-option label="降温段" value="cool">
+                          <el-option
+                            label="降温段"
+                            value="cool"
+                          >
                             <el-icon><Bottom /></el-icon>
                             <span style="margin-left: 5px;">降温段</span>
                           </el-option>
                         </el-select>
                       </template>
                     </el-table-column>
-                    <el-table-column label="目标温度 (K)" width="150">
+                    <el-table-column
+                      label="目标温度 (K)"
+                      width="150"
+                    >
                       <template #default="{ row }">
                         <el-input-number
                           v-model="row.targetTemp"
@@ -440,7 +545,10 @@
                         />
                       </template>
                     </el-table-column>
-                    <el-table-column label="持续时间 (min)" width="150">
+                    <el-table-column
+                      label="持续时间 (min)"
+                      width="150"
+                    >
                       <template #default="{ row }">
                         <el-input-number
                           v-model="row.duration"
@@ -452,7 +560,10 @@
                         />
                       </template>
                     </el-table-column>
-                    <el-table-column label="速率 (K/min)" width="150">
+                    <el-table-column
+                      label="速率 (K/min)"
+                      width="150"
+                    >
                       <template #default="{ row }">
                         <el-input-number
                           v-model="row.rate"
@@ -464,7 +575,10 @@
                         />
                       </template>
                     </el-table-column>
-                    <el-table-column label="操作" width="120">
+                    <el-table-column
+                      label="操作"
+                      width="120"
+                    >
                       <template #default="{ $index }">
                         <el-button
                           type="danger"
@@ -493,7 +607,7 @@
               <!-- 程序预览图 -->
               <el-form-item label="程序预览">
                 <div class="preview-chart-container">
-                  <v-chart
+                  <VChart
                     :option="previewChartOption"
                     :autoresize="true"
                     class="preview-chart"
@@ -586,11 +700,18 @@
         <div class="section-header">
           <span class="section-title">历史记录管理</span>
           <div class="history-actions">
-            <el-button size="small" @click="handleFetchHistory">
+            <el-button
+              size="small"
+              @click="handleFetchHistory"
+            >
               <el-icon><Refresh /></el-icon>
               刷新历史
             </el-button>
-            <el-button size="small" type="danger" @click="handleClearHistory">
+            <el-button
+              size="small"
+              type="danger"
+              @click="handleClearHistory"
+            >
               <el-icon><Delete /></el-icon>
               清除历史
             </el-button>

@@ -231,7 +231,7 @@ export const useTemperatureStore = defineStore('temperature', () => {
   function handleWebSocketMessage(data) {
     // 响应心跳 ping 消息
     if (data.type === 'ping') {
-      ws.send({ type: 'pong', timestamp: Date.now() })
+      wsSend({ type: 'pong', timestamp: Date.now() })
       return
     }
 
@@ -864,13 +864,13 @@ export const useTemperatureStore = defineStore('temperature', () => {
     const { kp, ki, kd } = params
     const data = []
     
-    let currentTemp = tempStore.currentTemp
+    let temp = currentTemp.value
     let integral = 0
     let lastError = 0
     const dt = 0.1 // 时间步长（秒）
     
     for (let t = 0; t <= duration; t += dt) {
-      const error = targetTemp - currentTemp
+      const error = targetTemp - temp
       integral += error * dt
       const derivative = (error - lastError) / dt
       
@@ -879,14 +879,14 @@ export const useTemperatureStore = defineStore('temperature', () => {
       
       // 简化的温度变化模型（假设输出功率直接影响温度变化）
       const tempChange = output * 0.1 * dt
-      currentTemp += tempChange
+      temp += tempChange
       
       // 添加一些噪声模拟真实情况
-      currentTemp += (Math.random() - 0.5) * 0.01
+      temp += (Math.random() - 0.5) * 0.01
       
       data.push({
         time: t,
-        temperature: currentTemp,
+        temperature: temp,
         error: error,
         output: output
       })
