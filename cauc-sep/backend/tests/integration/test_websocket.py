@@ -10,8 +10,7 @@
 import asyncio
 import json
 import time
-from collections import deque
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import msgpack
 import pytest
@@ -19,19 +18,12 @@ from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.testclient import TestClient
 
 from api.websocket import (
-    AlarmEventData,
     AlarmLevel,
     BackpressureState,
-    ConnectionInfo,
     ConnectionManager,
-    DeviceStatusData,
     DeviceType,
-    ExperimentProgressData,
     MessageType,
     ProtocolType,
-    WaveformData,
-    WaveformDataPoint,
-    WebSocketMessage,
     create_alarm_message,
     create_device_status_message,
     create_experiment_progress_message,

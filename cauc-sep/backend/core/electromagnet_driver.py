@@ -24,9 +24,10 @@ import asyncio
 import logging
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from .abstract import AbstractDevice, DeviceStatus
 
@@ -278,7 +279,7 @@ class ElectromagnetDriver(AbstractDevice):
             self._scan_cancelled = True
             try:
                 await asyncio.wait_for(self._scan_task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._scan_task.cancel()
 
         # 将电流归零
@@ -587,7 +588,7 @@ class ElectromagnetDriver(AbstractDevice):
         if self._scan_task and not self._scan_task.done():
             try:
                 await asyncio.wait_for(self._scan_task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._scan_task.cancel()
                 logger.warning("Scan task cancelled due to timeout")
 

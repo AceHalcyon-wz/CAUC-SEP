@@ -16,7 +16,6 @@
 设计参考：技术设计文档第3.3章节
 """
 
-from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any

@@ -19,7 +19,7 @@ import time
 from datetime import datetime, timedelta
 
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -116,7 +116,6 @@ class TestQueryPerformance:
         yield db_path
 
         # 清理（确保所有连接已关闭）
-        import time
 
         time.sleep(0.1)  # 短暂等待确保连接释放
         if os.path.exists(db_path):
@@ -353,7 +352,7 @@ class TestQueryPerformance:
         duration_after = result_after["duration_ms"]
 
         # 记录性能对比
-        print(f"\n性能对比:")
+        print("\n性能对比:")
         print(f"  无索引: {duration_before:.2f}ms")
         print(f"  有索引: {duration_after:.2f}ms")
 

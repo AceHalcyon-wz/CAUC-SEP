@@ -8,7 +8,6 @@
 - AbstractStepper抽象类
 """
 
-import math
 
 import pytest
 

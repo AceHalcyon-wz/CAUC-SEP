@@ -33,11 +33,9 @@ from api.schemas import (
     ScanMode,
     SuccessResponse,
 )
-from core.abstract import DeviceStatus
 from core.device_registry import DeviceRegistry
 from core.device_utils import DeviceValidationError, validate_device_state
 from core.electromagnet_driver import (
-    MAX_CURRENT,
     OVERCURRENT_THRESHOLD,
     ElectromagnetDriver,
     ElectromagnetStatus,

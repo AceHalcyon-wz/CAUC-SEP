@@ -12,12 +12,11 @@ import json
 import logging
 import os
 import time
-import traceback
-from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class RetryConfig:
     backoff_factor: float = 2.0
     strategy: RecoveryStrategy = RecoveryStrategy.EXPONENTIAL_BACKOFF
     jitter: bool = True
-    retryable_exceptions: List[Type[Exception]] = field(default_factory=list)
+    retryable_exceptions: list[type[Exception]] = field(default_factory=list)
 
     def calculate_delay(self, attempt: int) -> float:
         """计算重试延迟时间。
@@ -146,7 +145,7 @@ class RetryResult:
 
     success: bool = False
     attempts: int = 0
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
     total_time: float = 0.0
     result: Any = None
 
@@ -162,7 +161,7 @@ class RetryExecutor:
         >>> result = await executor.execute(some_async_function, arg1, arg2)
     """
 
-    def __init__(self, config: Optional[RetryConfig] = None):
+    def __init__(self, config: RetryConfig | None = None):
         """初始化重试执行器。
 
         Args:
@@ -188,7 +187,7 @@ class RetryExecutor:
             RetryResult: 重试结果
         """
         start_time = time.time()
-        last_exception: Optional[Exception] = None
+        last_exception: Exception | None = None
 
         for attempt in range(1, self.config.max_retries + 1):
             self._attempt_count = attempt
@@ -248,12 +247,12 @@ class DeviceConnectionState:
 
     device_id: str
     connected: bool = False
-    last_connected_time: Optional[float] = None
-    last_error: Optional[str] = None
+    last_connected_time: float | None = None
+    last_error: str | None = None
     reconnect_count: int = 0
     state: RecoveryState = RecoveryState.IDLE
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典。
 
         Returns:
@@ -282,8 +281,8 @@ class DeviceConnectionRecovery:
 
     def __init__(
         self,
-        default_config: Optional[RetryConfig] = None,
-        state_file: Optional[str] = None,
+        default_config: RetryConfig | None = None,
+        state_file: str | None = None,
     ):
         """初始化设备连接恢复管理器。
 
@@ -301,18 +300,18 @@ class DeviceConnectionRecovery:
         self.state_file = state_file or "device_states.json"
 
         # 设备连接函数映射
-        self._connect_funcs: Dict[str, Callable] = {}
-        self._disconnect_funcs: Dict[str, Callable] = {}
-        self._health_check_funcs: Dict[str, Callable] = {}
+        self._connect_funcs: dict[str, Callable] = {}
+        self._disconnect_funcs: dict[str, Callable] = {}
+        self._health_check_funcs: dict[str, Callable] = {}
 
         # 设备状态
-        self._device_states: Dict[str, DeviceConnectionState] = {}
+        self._device_states: dict[str, DeviceConnectionState] = {}
 
         # 设备特定配置
-        self._device_configs: Dict[str, RetryConfig] = {}
+        self._device_configs: dict[str, RetryConfig] = {}
 
         # 恢复任务
-        self._recovery_tasks: Dict[str, asyncio.Task] = {}
+        self._recovery_tasks: dict[str, asyncio.Task] = {}
 
         # 运行标志
         self._running = False
@@ -326,9 +325,9 @@ class DeviceConnectionRecovery:
         self,
         device_id: str,
         connect_func: Callable,
-        disconnect_func: Optional[Callable] = None,
-        health_check_func: Optional[Callable] = None,
-        config: Optional[RetryConfig] = None,
+        disconnect_func: Callable | None = None,
+        health_check_func: Callable | None = None,
+        config: RetryConfig | None = None,
     ) -> None:
         """注册设备。
 
@@ -534,7 +533,7 @@ class DeviceConnectionRecovery:
                 logger.error(f"设备 '{device_id}' 恢复循环异常: {e}")
                 await asyncio.sleep(10.0)
 
-    def get_device_state(self, device_id: str) -> Optional[Dict[str, Any]]:
+    def get_device_state(self, device_id: str) -> dict[str, Any] | None:
         """获取设备状态。
 
         Args:
@@ -546,7 +545,7 @@ class DeviceConnectionRecovery:
         state = self._device_states.get(device_id)
         return state.to_dict() if state else None
 
-    def get_all_states(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_states(self) -> dict[str, dict[str, Any]]:
         """获取所有设备状态。
 
         Returns:
@@ -569,7 +568,7 @@ class DeviceConnectionRecovery:
         """从文件加载状态。"""
         try:
             if os.path.exists(self.state_file):
-                with open(self.state_file, "r", encoding="utf-8") as f:
+                with open(self.state_file, encoding="utf-8") as f:
                     states_data = json.load(f)
 
                 for device_id, data in states_data.items():
@@ -605,11 +604,11 @@ class WebSocketReconnectionState:
     endpoint: str = ""
     connected: bool = False
     reconnect_count: int = 0
-    last_connected_time: Optional[float] = None
-    last_error: Optional[str] = None
+    last_connected_time: float | None = None
+    last_error: str | None = None
     state: RecoveryState = RecoveryState.IDLE
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典。
 
         Returns:
@@ -639,7 +638,7 @@ class WebSocketReconnectionManager:
 
     def __init__(
         self,
-        default_config: Optional[RetryConfig] = None,
+        default_config: RetryConfig | None = None,
         heartbeat_interval: float = 30.0,
         heartbeat_timeout: float = 90.0,
     ):
@@ -661,25 +660,25 @@ class WebSocketReconnectionManager:
         self.heartbeat_timeout = heartbeat_timeout
 
         # 连接函数映射
-        self._connect_funcs: Dict[str, Callable] = {}
-        self._disconnect_funcs: Dict[str, Callable] = {}
-        self._on_message_funcs: Dict[str, Callable] = {}
-        self._on_reconnect_funcs: Dict[str, Callable] = {}
+        self._connect_funcs: dict[str, Callable] = {}
+        self._disconnect_funcs: dict[str, Callable] = {}
+        self._on_message_funcs: dict[str, Callable] = {}
+        self._on_reconnect_funcs: dict[str, Callable] = {}
 
         # 连接状态
-        self._connection_states: Dict[str, WebSocketReconnectionState] = {}
+        self._connection_states: dict[str, WebSocketReconnectionState] = {}
 
         # 连接特定配置
-        self._connection_configs: Dict[str, RetryConfig] = {}
+        self._connection_configs: dict[str, RetryConfig] = {}
 
         # 重连任务
-        self._reconnection_tasks: Dict[str, asyncio.Task] = {}
+        self._reconnection_tasks: dict[str, asyncio.Task] = {}
 
         # 心跳任务
-        self._heartbeat_tasks: Dict[str, asyncio.Task] = {}
+        self._heartbeat_tasks: dict[str, asyncio.Task] = {}
 
         # WebSocket对象
-        self._websockets: Dict[str, Any] = {}
+        self._websockets: dict[str, Any] = {}
 
         logger.info("WebSocketReconnectionManager 初始化完成")
 
@@ -687,10 +686,10 @@ class WebSocketReconnectionManager:
         self,
         connection_id: str,
         connect_func: Callable,
-        on_message_func: Optional[Callable] = None,
-        on_reconnect_func: Optional[Callable] = None,
-        disconnect_func: Optional[Callable] = None,
-        config: Optional[RetryConfig] = None,
+        on_message_func: Callable | None = None,
+        on_reconnect_func: Callable | None = None,
+        disconnect_func: Callable | None = None,
+        config: RetryConfig | None = None,
         endpoint: str = "",
     ) -> None:
         """注册WebSocket连接。
@@ -960,7 +959,7 @@ class WebSocketReconnectionManager:
                 logger.error(f"WebSocket连接 '{connection_id}' 重连循环异常: {e}")
                 await asyncio.sleep(5.0)
 
-    def get_connection_state(self, connection_id: str) -> Optional[Dict[str, Any]]:
+    def get_connection_state(self, connection_id: str) -> dict[str, Any] | None:
         """获取连接状态。
 
         Args:
@@ -972,7 +971,7 @@ class WebSocketReconnectionManager:
         state = self._connection_states.get(connection_id)
         return state.to_dict() if state else None
 
-    def get_all_states(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_states(self) -> dict[str, dict[str, Any]]:
         """获取所有连接状态。
 
         Returns:
@@ -1009,10 +1008,10 @@ class ExperimentCheckpoint:
     progress: float
     start_time: float
     checkpoint_time: float = field(default_factory=time.time)
-    data: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典。
 
         Returns:
@@ -1032,7 +1031,7 @@ class ExperimentCheckpoint:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ExperimentCheckpoint":
+    def from_dict(cls, data: dict[str, Any]) -> "ExperimentCheckpoint":
         """从字典创建检查点。
 
         Args:
@@ -1087,13 +1086,13 @@ class ExperimentStateRecovery:
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         # 活跃实验
-        self._active_experiments: Dict[int, ExperimentCheckpoint] = {}
+        self._active_experiments: dict[int, ExperimentCheckpoint] = {}
 
         # 自动保存任务
-        self._auto_save_tasks: Dict[int, asyncio.Task] = {}
+        self._auto_save_tasks: dict[int, asyncio.Task] = {}
 
         # 状态变更回调
-        self._on_state_change_callbacks: List[Callable] = []
+        self._on_state_change_callbacks: list[Callable] = []
 
         logger.info(f"ExperimentStateRecovery 初始化完成，检查点目录: {checkpoint_dir}")
 
@@ -1102,7 +1101,7 @@ class ExperimentStateRecovery:
         experiment_id: int,
         experiment_name: str,
         total_steps: int,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         auto_save: bool = True,
     ) -> None:
         """注册实验。
@@ -1146,7 +1145,7 @@ class ExperimentStateRecovery:
             )
         except RuntimeError:
             # 没有运行的事件循环，延迟创建
-            logger.debug(f"无运行事件循环，自动保存任务将在首次访问时创建")
+            logger.debug("无运行事件循环，自动保存任务将在首次访问时创建")
 
     def unregister_experiment(self, experiment_id: int) -> None:
         """注销实验。
@@ -1168,8 +1167,8 @@ class ExperimentStateRecovery:
         self,
         experiment_id: int,
         current_step: int,
-        status: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        status: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """更新实验进度。
 
@@ -1240,7 +1239,7 @@ class ExperimentStateRecovery:
             logger.error(f"保存检查点失败: {e}")
             return False
 
-    def load_checkpoint(self, experiment_id: int) -> Optional[ExperimentCheckpoint]:
+    def load_checkpoint(self, experiment_id: int) -> ExperimentCheckpoint | None:
         """加载检查点。
 
         Args:
@@ -1256,7 +1255,7 @@ class ExperimentStateRecovery:
             return None
 
         try:
-            with open(checkpoint_file, "r", encoding="utf-8") as f:
+            with open(checkpoint_file, encoding="utf-8") as f:
                 data = json.load(f)
 
             checkpoint = ExperimentCheckpoint.from_dict(data)
@@ -1292,7 +1291,7 @@ class ExperimentStateRecovery:
             logger.error(f"删除检查点失败: {e}")
             return False
 
-    def list_checkpoints(self) -> List[Dict[str, Any]]:
+    def list_checkpoints(self) -> list[dict[str, Any]]:
         """列出所有检查点。
 
         Returns:
@@ -1302,7 +1301,7 @@ class ExperimentStateRecovery:
 
         for checkpoint_file in self.checkpoint_dir.glob("experiment_*_checkpoint.json"):
             try:
-                with open(checkpoint_file, "r", encoding="utf-8") as f:
+                with open(checkpoint_file, encoding="utf-8") as f:
                     data = json.load(f)
                 checkpoints.append(data)
             except Exception as e:
@@ -1370,7 +1369,7 @@ class ExperimentStateRecovery:
         if callback in self._on_state_change_callbacks:
             self._on_state_change_callbacks.remove(callback)
 
-    def get_experiment_state(self, experiment_id: int) -> Optional[Dict[str, Any]]:
+    def get_experiment_state(self, experiment_id: int) -> dict[str, Any] | None:
         """获取实验状态。
 
         Args:
@@ -1382,7 +1381,7 @@ class ExperimentStateRecovery:
         checkpoint = self._active_experiments.get(experiment_id)
         return checkpoint.to_dict() if checkpoint else None
 
-    def get_all_states(self) -> Dict[int, Dict[str, Any]]:
+    def get_all_states(self) -> dict[int, dict[str, Any]]:
         """获取所有实验状态。
 
         Returns:
@@ -1462,9 +1461,9 @@ class ErrorRecoveryManager:
         self,
         device_id: str,
         connect_func: Callable,
-        disconnect_func: Optional[Callable] = None,
-        health_check_func: Optional[Callable] = None,
-        config: Optional[RetryConfig] = None,
+        disconnect_func: Callable | None = None,
+        health_check_func: Callable | None = None,
+        config: RetryConfig | None = None,
     ) -> None:
         """注册设备。"""
         self.device_recovery.register_device(
@@ -1484,9 +1483,9 @@ class ErrorRecoveryManager:
         self,
         connection_id: str,
         connect_func: Callable,
-        on_message_func: Optional[Callable] = None,
-        on_reconnect_func: Optional[Callable] = None,
-        config: Optional[RetryConfig] = None,
+        on_message_func: Callable | None = None,
+        on_reconnect_func: Callable | None = None,
+        config: RetryConfig | None = None,
     ) -> None:
         """注册WebSocket连接。"""
         self.websocket_recovery.register_connection(
@@ -1507,7 +1506,7 @@ class ErrorRecoveryManager:
         experiment_id: int,
         experiment_name: str,
         total_steps: int,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         auto_save: bool = True,
     ) -> None:
         """注册实验。"""
@@ -1519,8 +1518,8 @@ class ErrorRecoveryManager:
         self,
         experiment_id: int,
         current_step: int,
-        status: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        status: str | None = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """更新实验进度。"""
         self.experiment_recovery.update_progress(experiment_id, current_step, status, data)
@@ -1529,11 +1528,11 @@ class ErrorRecoveryManager:
         """保存实验检查点。"""
         return self.experiment_recovery.save_checkpoint(experiment_id)
 
-    def load_experiment_checkpoint(self, experiment_id: int) -> Optional[ExperimentCheckpoint]:
+    def load_experiment_checkpoint(self, experiment_id: int) -> ExperimentCheckpoint | None:
         """加载实验检查点。"""
         return self.experiment_recovery.load_checkpoint(experiment_id)
 
-    def get_recovery_stats(self) -> Dict[str, Any]:
+    def get_recovery_stats(self) -> dict[str, Any]:
         """获取恢复统计信息。
 
         Returns:

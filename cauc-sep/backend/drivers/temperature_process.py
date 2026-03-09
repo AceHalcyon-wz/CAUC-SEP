@@ -9,14 +9,12 @@
 
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from core.abstract import DeviceStatus
 from core.temperature_controller import (
     TemperatureController,
-    TemperatureControllerMode,
     TemperatureProgramSegment,
-    TemperatureProtectionType,
 )
 
 from .base import DriverProcessBase
@@ -80,7 +78,7 @@ class TemperatureDriverProcess(DriverProcessBase):
     def __init__(
         self,
         driver_id: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         command_queue,
         response_queue,
         heartbeat_interval: float = 10.0,
@@ -161,7 +159,7 @@ class TemperatureDriverProcess(DriverProcessBase):
             finally:
                 self.driver = None
 
-    async def handle_command(self, command: str, params: Dict[str, Any]) -> Any:
+    async def handle_command(self, command: str, params: dict[str, Any]) -> Any:
         """处理温控驱动命令。
 
         Args:

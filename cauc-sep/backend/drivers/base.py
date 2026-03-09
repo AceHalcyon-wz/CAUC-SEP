@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from multiprocessing.queues import Queue as MPQueue
-from typing import Any, Callable, Dict, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
 # 设置Windows多进程支持
 if sys.platform == "win32":
@@ -83,9 +83,9 @@ class IPCMessage:
     payload: Any = None
     timestamp: float = field(default_factory=time.time)
     source: str = "driver_process"
-    request_id: Optional[str] = None
+    request_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典。
 
         Returns:
@@ -100,7 +100,7 @@ class IPCMessage:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "IPCMessage":
+    def from_dict(cls, data: dict[str, Any]) -> "IPCMessage":
         """从字典反序列化。
 
         Args:
@@ -135,7 +135,7 @@ class DriverProcessConfig:
 
     driver_id: str
     driver_name: str
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     auto_restart: bool = True
     max_restart_count: int = 3
     restart_delay: float = 5.0
@@ -176,7 +176,7 @@ class DriverProcessBase(ABC):
     def __init__(
         self,
         driver_id: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         command_queue: MPQueue,
         response_queue: MPQueue,
         heartbeat_interval: float = 10.0,
@@ -199,7 +199,7 @@ class DriverProcessBase(ABC):
         # 状态
         self._running = False
         self._state = DriverProcessState.STOPPED
-        self._last_error: Optional[str] = None
+        self._last_error: str | None = None
         self._driver: Any = None
 
         # 设置日志
@@ -294,7 +294,7 @@ class DriverProcessBase(ABC):
         except Exception as e:
             self.logger.error(f"处理命令异常: {e}")
 
-    async def _handle_message(self, msg: IPCMessage) -> Optional[IPCMessage]:
+    async def _handle_message(self, msg: IPCMessage) -> IPCMessage | None:
         """处理IPC消息。
 
         Args:
@@ -395,7 +395,7 @@ class DriverProcessBase(ABC):
         pass
 
     @abstractmethod
-    async def handle_command(self, command: str, params: Dict[str, Any]) -> Any:
+    async def handle_command(self, command: str, params: dict[str, Any]) -> Any:
         """处理自定义命令。
 
         Args:
@@ -418,9 +418,9 @@ class DriverProcessBase(ABC):
 
 
 def create_driver_process(
-    driver_process_class: Type[DriverProcessBase],
+    driver_process_class: type[DriverProcessBase],
     driver_id: str,
-    config: Dict[str, Any],
+    config: dict[str, Any],
     command_queue: MPQueue,
     response_queue: MPQueue,
     heartbeat_interval: float = 10.0,

@@ -21,9 +21,10 @@ import logging
 import re
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -688,7 +689,7 @@ def validate_string_length(text: str, max_length: int = 10000) -> bool:
 
 
 def sanitize_filename(filename: str) -> str:
-    """
+    r"""
     清理文件名，移除危险字符。
 
     防止路径遍历攻击和文件名注入。

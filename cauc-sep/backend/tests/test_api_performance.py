@@ -12,11 +12,7 @@
 依赖：pytest, httpx
 """
 
-import os
-import tempfile
 import time
-from datetime import datetime
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -28,8 +24,6 @@ from core.profiler import (
     PerformanceProfiler,
     PerformanceReport,
     SystemMonitor,
-    get_profiler,
-    get_system_monitor,
     set_profiler,
     set_system_monitor,
 )

@@ -23,7 +23,6 @@ import zipfile
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 import aiofiles
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -817,7 +816,7 @@ class UpdateManager:
             if not manifest_file.exists():
                 raise ValueError("更新包缺少清单文件")
 
-            async with aiofiles.open(manifest_file, "r") as f:
+            async with aiofiles.open(manifest_file) as f:
                 manifest = json.loads(await f.read())
 
             # 应用文件更新
@@ -874,7 +873,7 @@ class UpdateManager:
         try:
             # 读取备份元数据
             metadata_file = backup_path / "metadata.json"
-            async with aiofiles.open(metadata_file, "r") as f:
+            async with aiofiles.open(metadata_file) as f:
                 metadata = json.loads(await f.read())
 
             # 验证完整性
@@ -954,7 +953,7 @@ class UpdateManager:
                 continue
 
             try:
-                async with aiofiles.open(metadata_file, "r") as f:
+                async with aiofiles.open(metadata_file) as f:
                     metadata = json.loads(await f.read())
 
                 backups.append(
@@ -1026,7 +1025,7 @@ class UpdateManager:
 
         history_records = []
         if history_file.exists():
-            async with aiofiles.open(history_file, "r") as f:
+            async with aiofiles.open(history_file) as f:
                 history_records = json.loads(await f.read())
 
         record = {
@@ -1061,7 +1060,7 @@ class UpdateManager:
             return UpdateHistoryResponse(total=0, records=[])
 
         try:
-            async with aiofiles.open(history_file, "r") as f:
+            async with aiofiles.open(history_file) as f:
                 history_records = json.loads(await f.read())
 
             records = [

@@ -11,19 +11,17 @@
 
 import asyncio
 import logging
-import time
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from threading import Lock, RLock
-from typing import Any, Callable, Optional
+from typing import Any
 
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import NullPool, QueuePool, StaticPool
+from sqlalchemy.pool import QueuePool, StaticPool
 
 logger = logging.getLogger(__name__)
 

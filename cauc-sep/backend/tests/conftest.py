@@ -21,7 +21,6 @@ from sqlalchemy.orm import sessionmaker
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from api import motor
 from core.abstract import DeviceStatus
 from core.analysis import PhysicsAnalyzer
 from core.data_storage import DataStorage
@@ -130,7 +129,6 @@ def clean_device_registry():
 @pytest.fixture
 def test_client(mock_dm2c):
     """创建FastAPI测试客户端。"""
-    from core.device_registry import DeviceRegistry
 
     # 确保注册表为空（已在 clean_device_registry 中清理）
 

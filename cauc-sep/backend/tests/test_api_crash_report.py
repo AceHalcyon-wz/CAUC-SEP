@@ -13,12 +13,9 @@
 依赖：pytest, httpx
 """
 
-import gzip
-import json
 import os
 import tempfile
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient

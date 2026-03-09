@@ -34,7 +34,7 @@ def test_ring_buffer_performance():
         buffer.write(data)
     write_time = (time.perf_counter() - start) * 1000
 
-    print(f"写入性能:")
+    print("写入性能:")
     print(f"  - {iterations} 次写入，每次 {len(data)} 个数据点")
     print(f"  - 总耗时: {write_time:.2f} ms")
     print(f"  - 平均每次: {write_time / iterations:.4f} ms")
@@ -49,7 +49,7 @@ def test_ring_buffer_performance():
         result = buffer.read(100)
     read_time = (time.perf_counter() - start) * 1000
 
-    print(f"\n读取性能:")
+    print("\n读取性能:")
     print(f"  - {iterations} 次读取，每次 100 个数据点")
     print(f"  - 总耗时: {read_time:.2f} ms")
     print(f"  - 平均每次: {read_time / iterations:.4f} ms")
@@ -63,7 +63,7 @@ def test_ring_buffer_performance():
         view, n = buffer.read_zero_copy(100)
     zero_copy_time = (time.perf_counter() - start) * 1000
 
-    print(f"\n零拷贝读取性能:")
+    print("\n零拷贝读取性能:")
     print(f"  - {iterations} 次读取，每次 100 个数据点")
     print(f"  - 总耗时: {zero_copy_time:.2f} ms")
     print(f"  - 平均每次: {zero_copy_time / iterations:.4f} ms")
@@ -76,7 +76,7 @@ def test_ring_buffer_performance():
         buffer.write_fast(data)
     fast_write_time = (time.perf_counter() - start) * 1000
 
-    print(f"\n快速写入性能:")
+    print("\n快速写入性能:")
     print(f"  - {iterations} 次写入，每次 {len(data)} 个数据点")
     print(f"  - 总耗时: {fast_write_time:.2f} ms")
     print(f"  - 相比普通写入提升: {(write_time - fast_write_time) / write_time * 100:.1f}%")
@@ -116,7 +116,7 @@ def test_stream_processor_performance():
         processor.process(data)
     process_time = (time.perf_counter() - start) * 1000
 
-    print(f"触发器检查性能:")
+    print("触发器检查性能:")
     print(f"  - {trigger_count} 个触发器")
     print(f"  - {iterations} 次处理")
     print(f"  - 总耗时: {process_time:.2f} ms")
@@ -125,14 +125,14 @@ def test_stream_processor_performance():
 
     # 获取性能指标
     metrics = processor.get_performance_metrics()
-    print(f"\n性能指标:")
+    print("\n性能指标:")
     print(f"  - 平均处理时间: {metrics['avg_process_time_ms']:.4f} ms")
     print(f"  - P95 处理时间: {metrics['process_p95_ms']:.4f} ms")
     print(f"  - 平均触发器检查时间: {metrics['avg_trigger_check_time_ms']:.4f} ms")
 
     # 获取背压状态
     backpressure = processor.get_backpressure_status()
-    print(f"\n背压状态:")
+    print("\n背压状态:")
     print(f"  - 启用: {backpressure['enabled']}")
     print(f"  - 激活: {backpressure['active']}")
     print(f"  - 高水位: {backpressure['high_watermark']}")
@@ -140,7 +140,7 @@ def test_stream_processor_performance():
 
     # 获取统计信息
     stats = processor.get_statistics()
-    print(f"\n统计信息:")
+    print("\n统计信息:")
     print(f"  - 总数据点: {stats['total_data_points']}")
     print(f"  - 触发器激活次数: {stats['trigger_activations']}")
     print(f"  - 吞吐量: {stats['throughput_points_per_sec']:.0f} 点/秒")
@@ -171,27 +171,27 @@ def test_rt_scheduler_stability():
             # 获取性能报告
             report = scheduler.get_performance_report()
 
-            print(f"性能报告:")
+            print("性能报告:")
             print(f"  - 运行时间: {report['uptime_seconds']:.2f} 秒")
             print(f"  - 总执行次数: {report['total_executions']}")
             print(f"  - 每秒执行次数: {report['executions_per_second']:.1f}")
-            print(f"\n执行时间统计:")
+            print("\n执行时间统计:")
             print(f"  - 平均: {report['execution_time']['avg_ms']:.3f} ms")
             print(f"  - 最大: {report['execution_time']['max_ms']:.3f} ms")
             print(f"  - 最小: {report['execution_time']['min_ms']:.3f} ms")
             print(f"  - P50: {report['execution_time']['p50_ms']:.3f} ms")
             print(f"  - P95: {report['execution_time']['p95_ms']:.3f} ms")
             print(f"  - P99: {report['execution_time']['p99_ms']:.3f} ms")
-            print(f"\n精度偏差:")
+            print("\n精度偏差:")
             print(f"  - 平均: {report['precision']['avg_error_ms']:.3f} ms")
             print(f"  - 最大: {report['precision']['max_error_ms']:.3f} ms")
-            print(f"\n可靠性:")
+            print("\n可靠性:")
             print(f"  - 错过截止时间: {report['reliability']['missed_deadlines']}")
             print(f"  - 错过率: {report['reliability']['miss_rate'] * 100:.2f}%")
 
             # 测试优雅退出
             scheduler.request_shutdown()
-            print(f"\n优雅退出测试:")
+            print("\n优雅退出测试:")
             print(f"  - 关闭请求状态: {scheduler.is_shutdown_requested()}")
 
         print("\n调度器资源已正确释放")

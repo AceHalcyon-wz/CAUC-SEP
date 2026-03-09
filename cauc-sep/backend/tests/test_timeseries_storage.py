@@ -11,7 +11,6 @@
 创建日期：2026-03-08
 """
 
-import asyncio
 import gzip
 import json
 import os

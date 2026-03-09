@@ -9,12 +9,12 @@
 
 import logging
 import time
-from typing import Any, Dict
+from typing import Any
 
 from core.abstract import DeviceStatus
 from core.dm2c_driver import LeadshineDM2C
 
-from .base import DriverProcessBase, IPCMessage, IPCMessageType
+from .base import DriverProcessBase
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class DM2CDriverProcess(DriverProcessBase):
     def __init__(
         self,
         driver_id: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         command_queue,
         response_queue,
         heartbeat_interval: float = 10.0,
@@ -154,7 +154,7 @@ class DM2CDriverProcess(DriverProcessBase):
             finally:
                 self.driver = None
 
-    async def handle_command(self, command: str, params: Dict[str, Any]) -> Any:
+    async def handle_command(self, command: str, params: dict[str, Any]) -> Any:
         """处理DM2C驱动命令。
 
         Args:

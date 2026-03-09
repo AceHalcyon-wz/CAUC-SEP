@@ -15,11 +15,10 @@
 
 import json
 import logging
-import time
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from models import (

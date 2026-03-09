@@ -18,10 +18,8 @@ import msgpack
 import pytest
 
 from api.websocket import (
-    AlarmEventData,
     AlarmLevel,
     ConnectionManager,
-    DeviceStatusData,
     DeviceType,
     MessageType,
     ProtocolType,

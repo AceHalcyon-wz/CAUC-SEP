@@ -34,7 +34,6 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from api.websocket import (
     ConnectionManager,
     DeviceType,
-    ProtocolType,
     create_device_status_message,
     parse_protocol_from_query,
 )
@@ -145,7 +144,6 @@ wsMsgpack.onmessage = (event) => {
 # 4. Python客户端示例
 # ============================================================================
 
-import asyncio
 import json
 
 import msgpack

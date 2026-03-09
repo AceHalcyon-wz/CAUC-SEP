@@ -22,9 +22,8 @@ import logging
 import os
 import time
 from collections import defaultdict
-from datetime import datetime
 from threading import Lock, RLock
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +61,7 @@ class Metric:
         name: str,
         help_text: str,
         metric_type: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ):
         """
         初始化指标。
@@ -94,7 +93,7 @@ class Metric:
         """获取指标类型。"""
         return self._metric_type
 
-    def _format_labels(self, extra_labels: Optional[dict[str, str]] = None) -> str:
+    def _format_labels(self, extra_labels: dict[str, str] | None = None) -> str:
         """
         格式化标签为Prometheus格式。
 
@@ -137,7 +136,7 @@ class Counter(Metric):
         self,
         name: str,
         help_text: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ):
         """
         初始化计数器。
@@ -198,7 +197,7 @@ class Gauge(Metric):
         self,
         name: str,
         help_text: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ):
         """
         初始化仪表盘。
@@ -281,8 +280,8 @@ class Histogram(Metric):
         self,
         name: str,
         help_text: str,
-        labels: Optional[dict[str, str]] = None,
-        buckets: Optional[tuple[float, ...]] = None,
+        labels: dict[str, str] | None = None,
+        buckets: tuple[float, ...] | None = None,
     ):
         """
         初始化直方图。
@@ -399,7 +398,7 @@ class MetricsRegistry:
                 return True
             return False
 
-    def get_metric(self, name: str) -> Optional[Metric]:
+    def get_metric(self, name: str) -> Metric | None:
         """获取指标实例。"""
         with self._lock:
             return self._metrics.get(name)
@@ -435,7 +434,7 @@ class BusinessMetricsCollector:
         storage: 数据存储实例引用
     """
 
-    def __init__(self, registry: Optional[MetricsRegistry] = None):
+    def __init__(self, registry: MetricsRegistry | None = None):
         """
         初始化收集器。
 
@@ -633,7 +632,7 @@ class BusinessMetricsCollector:
         self._experiments_running.inc()
 
         # 按实验类型记录
-        metric_name = f"experiments_started_by_type_total"
+        metric_name = "experiments_started_by_type_total"
         if metric_name not in self._labeled_metrics.get(experiment_type, {}):
             metric = Counter(
                 f"{self._registry._prefix}_{metric_name}",
@@ -676,7 +675,7 @@ class BusinessMetricsCollector:
         operation_type: str,
         duration_seconds: float,
         success: bool,
-        error_type: Optional[str] = None,
+        error_type: str | None = None,
     ) -> None:
         """
         记录设备操作。

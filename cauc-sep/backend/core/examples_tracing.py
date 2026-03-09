@@ -13,7 +13,6 @@
 
 import asyncio
 import sys
-from datetime import datetime, timedelta
 from pathlib import Path
 
 # 添加项目根目录到路径
@@ -22,9 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from tracing import (
     SpanKind,
     SpanStatus,
-    Tracer,
     get_current_span,
-    get_current_trace,
     init_tracing,
     traced,
 )
@@ -62,7 +59,7 @@ def example_basic_tracing():
 
     span1.set_status(SpanStatus.OK)
     span1.end()
-    print(f"✓ 完成步骤1: 数据验证")
+    print("✓ 完成步骤1: 数据验证")
 
     # 创建另一个子Span
     span2 = tracer.start_span(name="step2_processing")
@@ -76,7 +73,7 @@ def example_basic_tracing():
     span2.add_event("processing_complete", {"success_rate": 0.98})
     span2.set_status(SpanStatus.OK)
     span2.end()
-    print(f"✓ 完成步骤2: 数据处理")
+    print("✓ 完成步骤2: 数据处理")
 
     # 结束追踪
     tracer.end_trace(trace)

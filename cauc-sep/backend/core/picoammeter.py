@@ -21,7 +21,6 @@
 
 import asyncio
 import logging
-import math
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
@@ -599,7 +598,7 @@ class Picoammeter(AbstractDevice):
             else:
                 selected_ranges.append(self._acq_config.channels[ch].current_range)
 
-        logger.info(f"Auto-range completed for all channels")
+        logger.info("Auto-range completed for all channels")
         return selected_ranges
 
     async def _acquisition_loop(self) -> None:

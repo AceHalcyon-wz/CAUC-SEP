@@ -12,16 +12,15 @@ import asyncio
 import logging
 import multiprocessing as mp
 import signal
-import sys
 import threading
 import time
 import traceback
 from dataclasses import dataclass, field
 from enum import Enum
 from multiprocessing.queues import Queue as MPQueue
-from typing import Any, Callable, Dict, Optional, Type, TypeVar
+from typing import Any, TypeVar
 
-from .abstract import AbstractDevice, DeviceStatus
+from .abstract import AbstractDevice
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +81,9 @@ class IPCMessage:
     payload: Any = None
     timestamp: float = field(default_factory=time.time)
     source: str = "driver_manager"
-    request_id: Optional[str] = None
+    request_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典。
 
         Returns:
@@ -99,7 +98,7 @@ class IPCMessage:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "IPCMessage":
+    def from_dict(cls, data: dict[str, Any]) -> "IPCMessage":
         """从字典反序列化。
 
         Args:
@@ -133,8 +132,8 @@ class DriverProcessConfig:
     """
 
     driver_id: str
-    driver_class: Type[AbstractDevice]
-    config: Dict[str, Any] = field(default_factory=dict)
+    driver_class: type[AbstractDevice]
+    config: dict[str, Any] = field(default_factory=dict)
     auto_restart: bool = True
     max_restart_count: int = 3
     restart_delay: float = 5.0
@@ -158,13 +157,13 @@ class DriverProcessInfo:
 
     driver_id: str
     status: DriverProcessStatus = DriverProcessStatus.STOPPED
-    pid: Optional[int] = None
-    start_time: Optional[float] = None
+    pid: int | None = None
+    start_time: float | None = None
     restart_count: int = 0
-    last_heartbeat: Optional[float] = None
-    last_error: Optional[str] = None
+    last_heartbeat: float | None = None
+    last_error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典。
 
         Returns:
@@ -183,8 +182,8 @@ class DriverProcessInfo:
 
 def driver_process_entry(
     driver_id: str,
-    driver_class: Type[AbstractDevice],
-    config: Dict[str, Any],
+    driver_class: type[AbstractDevice],
+    config: dict[str, Any],
     command_queue: MPQueue,
     response_queue: MPQueue,
     heartbeat_interval: float,
@@ -214,9 +213,9 @@ def driver_process_entry(
     process_logger.info(f"驱动进程启动，PID: {mp.current_process().pid}")
 
     # 创建驱动实例
-    driver: Optional[AbstractDevice] = None
+    driver: AbstractDevice | None = None
     running = True
-    loop: Optional[asyncio.AbstractEventLoop] = None
+    loop: asyncio.AbstractEventLoop | None = None
 
     def handle_signal(signum, frame):
         """处理终止信号。"""
@@ -270,7 +269,7 @@ def driver_process_entry(
             finally:
                 driver = None
 
-    async def process_command(msg: IPCMessage) -> Optional[IPCMessage]:
+    async def process_command(msg: IPCMessage) -> IPCMessage | None:
         """处理命令消息。
 
         Args:
@@ -439,12 +438,12 @@ class DriverProcessManager:
 
     def __init__(self) -> None:
         """初始化驱动进程管理器。"""
-        self._drivers: Dict[str, DriverProcessConfig] = {}
-        self._processes: Dict[str, mp.Process] = {}
-        self._process_info: Dict[str, DriverProcessInfo] = {}
-        self._command_queues: Dict[str, MPQueue] = {}
-        self._response_queues: Dict[str, MPQueue] = {}
-        self._monitor_thread: Optional[threading.Thread] = None
+        self._drivers: dict[str, DriverProcessConfig] = {}
+        self._processes: dict[str, mp.Process] = {}
+        self._process_info: dict[str, DriverProcessInfo] = {}
+        self._command_queues: dict[str, MPQueue] = {}
+        self._response_queues: dict[str, MPQueue] = {}
+        self._monitor_thread: threading.Thread | None = None
         self._running = False
         self._lock = threading.RLock()
 
@@ -453,8 +452,8 @@ class DriverProcessManager:
     def register_driver(
         self,
         driver_id: str,
-        driver_class: Type[AbstractDevice],
-        config: Optional[Dict[str, Any]] = None,
+        driver_class: type[AbstractDevice],
+        config: dict[str, Any] | None = None,
         auto_restart: bool = True,
         max_restart_count: int = 3,
         restart_delay: float = 5.0,
@@ -701,9 +700,9 @@ class DriverProcessManager:
         self,
         driver_id: str,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         timeout: float = 30.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向驱动发送命令。
 
         Args:
@@ -773,7 +772,7 @@ class DriverProcessManager:
 
         raise RuntimeError(f"命令 '{command}' 执行超时")
 
-    def get_driver_info(self, driver_id: str) -> Dict[str, Any]:
+    def get_driver_info(self, driver_id: str) -> dict[str, Any]:
         """获取驱动信息。
 
         Args:
@@ -799,7 +798,7 @@ class DriverProcessManager:
             },
         }
 
-    def get_all_drivers_info(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_drivers_info(self) -> dict[str, dict[str, Any]]:
         """获取所有驱动信息。
 
         Returns:
@@ -925,7 +924,7 @@ class DriverProcessManager:
                     logger.info(f"准备重启心跳超时的驱动 [{driver_id}]")
                     self.restart_driver(driver_id, delay=config.restart_delay)
 
-    def start_all(self) -> Dict[str, bool]:
+    def start_all(self) -> dict[str, bool]:
         """启动所有已注册的驱动。
 
         Returns:
@@ -940,7 +939,7 @@ class DriverProcessManager:
                 results[driver_id] = False
         return results
 
-    def stop_all(self, timeout: float = 10.0) -> Dict[str, bool]:
+    def stop_all(self, timeout: float = 10.0) -> dict[str, bool]:
         """停止所有驱动进程。
 
         Args:

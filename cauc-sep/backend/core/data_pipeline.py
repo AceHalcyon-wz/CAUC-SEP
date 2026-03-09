@@ -21,10 +21,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import time
 from collections import deque
-from collections.abc import Callable, Generator
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum

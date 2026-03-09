@@ -16,8 +16,6 @@
 
 import os
 import tempfile
-from datetime import datetime
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -25,15 +23,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from api.user import (
-    ALGORITHM,
-    SECRET_KEY,
     LoginRequest,
-    TokenResponse,
-    UserResponse,
     create_access_token,
     decode_token,
     get_password_hash,
-    init_user_system,
     router,
     verify_password,
 )
@@ -179,7 +172,6 @@ class TestUserAPI:
     def test_client(self, temp_db):
         """创建测试客户端。"""
         from fastapi import FastAPI
-        from sqlalchemy.orm import sessionmaker
 
         app = FastAPI()
         app.include_router(router)
@@ -463,7 +455,6 @@ class TestUserModel:
 
     def test_user_creation(self, temp_db):
         """测试用户创建。"""
-        from sqlalchemy.orm import sessionmaker
 
         Session = sessionmaker(bind=temp_db)
         db = Session()
@@ -486,7 +477,6 @@ class TestUserModel:
 
     def test_user_preferences(self, temp_db):
         """测试用户偏好设置。"""
-        from sqlalchemy.orm import sessionmaker
 
         Session = sessionmaker(bind=temp_db)
         db = Session()

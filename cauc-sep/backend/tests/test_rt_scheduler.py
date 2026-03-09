@@ -8,9 +8,7 @@
 """
 
 import sys
-import threading
 import time
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -228,7 +226,6 @@ class TestWindowsRTScheduler:
         from core.rt_scheduler import (
             THREAD_PRIORITY_HIGHEST,
             ThreadPriorityManager,
-            WindowsRTScheduler,
         )
 
         manager = ThreadPriorityManager()

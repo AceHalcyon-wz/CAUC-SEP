@@ -26,7 +26,7 @@ from collections import deque
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from types import TracebackType
-from typing import Any, Optional
+from typing import Any
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -130,7 +130,6 @@ class SchedulerPerformanceMetrics:
         Returns:
             性能报告字典
         """
-        import numpy as np
 
         uptime_seconds = time.time() - self._start_time
 
@@ -296,7 +295,7 @@ class WinMMWrapper:
             logger.warning(f"timeEndPeriod({period_ms})返回错误码: {result}")
             return False
 
-        logger.debug(f"系统定时器精度已恢复")
+        logger.debug("系统定时器精度已恢复")
         return True
 
     def get_min_resolution(self) -> int:
@@ -744,12 +743,12 @@ class WindowsRTScheduler:
                 建议范围1-10ms，过小可能增加系统开销。
         """
         self._interval_ms = interval_ms
-        self._winmm: Optional[WinMMWrapper] = None
-        self._priority_manager: Optional[ThreadPriorityManager] = None
-        self._affinity_manager: Optional[CPUAffinityManager] = None
-        self._original_priority: Optional[int] = None
-        self._original_priority_class: Optional[int] = None
-        self._original_affinity: Optional[int] = None
+        self._winmm: WinMMWrapper | None = None
+        self._priority_manager: ThreadPriorityManager | None = None
+        self._affinity_manager: CPUAffinityManager | None = None
+        self._original_priority: int | None = None
+        self._original_priority_class: int | None = None
+        self._original_affinity: int | None = None
         self._active = False
 
         # 性能监控
@@ -1213,7 +1212,7 @@ class RealtimeContext:
         self._cpu_cores = cpu_cores
         self._interval_ms = interval_ms
         self._high_process_priority = high_process_priority
-        self._scheduler: Optional[WindowsRTScheduler] = None
+        self._scheduler: WindowsRTScheduler | None = None
 
         logger.debug(
             f"RealtimeContext初始化: priority={self._priority}, "

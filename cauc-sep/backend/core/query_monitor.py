@@ -9,18 +9,17 @@
 依赖: sqlalchemy, logging, threading
 """
 
-import asyncio
-import json
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from threading import Lock, RLock
-from typing import Any, Callable, Optional
+from typing import Any
 
-from sqlalchemy import event, text
+from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 logger = logging.getLogger(__name__)

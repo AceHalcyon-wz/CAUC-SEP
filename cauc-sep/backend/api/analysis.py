@@ -14,8 +14,6 @@
 
 import json
 import logging
-from datetime import datetime
-from io import BytesIO
 
 import numpy as np
 from fastapi import APIRouter, HTTPException, Query
@@ -27,7 +25,6 @@ from api.schemas import (
     CompareResponse,
     FitRequest,
     FitResponse,
-    HistoryQueryRequest,
     HistoryQueryResponse,
     HysteresisRequest,
     HysteresisResponse,
@@ -916,7 +913,7 @@ def _export_csv_report(
     lines = []
 
     # 报告头信息
-    lines.append(f"# 分析报告")
+    lines.append("# 分析报告")
     lines.append(f"# 实验ID: {report.experiment_id}")
     lines.append(f"# 生成时间: {report.timestamp}")
     lines.append(f"# 最佳模型: {report.best_model}")

@@ -45,7 +45,7 @@ def example_1_braunbeck_fitting():
     result = analyzer.fit_model(H, B_noisy, FitModelType.BRAUNBECK)
 
     # 显示结果
-    print(f"\n拟合结果:")
+    print("\n拟合结果:")
     print(f"  R² = {result['r_squared']:.4f}")
     print(f"  饱和磁感应强度 Bs = {result['parameters']['Bs']:.4f} T")
     print(f"  矫顽力 Hc = {result['parameters']['Hc']:.2f} A/m")
@@ -237,27 +237,27 @@ def example_4_analysis_report():
 
     # 显示报告
     print(f"\n{'='*70}")
-    print(f"分析报告")
+    print("分析报告")
     print(f"{'='*70}")
     print(f"实验ID: {report.experiment_id}")
     print(f"分析时间: {report.timestamp}")
     print(f"最佳模型: {report.best_model}")
 
-    print(f"\n磁滞回线参数:")
+    print("\n磁滞回线参数:")
     print(f"  矫顽力 Hc = {report.hysteresis_params.get('Hc', 0):.2f} A/m")
     print(f"  剩磁 Mr = {report.hysteresis_params.get('Mr', 0):.4f} T")
     print(f"  饱和磁矩 Ms = {report.hysteresis_params.get('Ms', 0):.4f}")
     print(f"  矩形比 = {report.hysteresis_params.get('squareness', 0):.4f}")
 
-    print(f"\n数据质量指标:")
+    print("\n数据质量指标:")
     for key, value in report.quality_metrics.items():
         print(f"  {key}: {value:.4f}")
 
-    print(f"\n拟合结果:")
+    print("\n拟合结果:")
     for result in report.fit_results:
         print(f"  {result.model_name}: R²={result.r_squared:.4f}, AIC={result.aic:.2f}")
 
-    print(f"\n推荐建议:")
+    print("\n推荐建议:")
     for i, rec in enumerate(report.recommendations, 1):
         print(f"  {i}. {rec}")
 

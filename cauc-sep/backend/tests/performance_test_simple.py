@@ -81,7 +81,7 @@ def test_rt_scheduler():
 
             report = scheduler.get_performance_report()
 
-            print(f"性能报告:")
+            print("性能报告:")
             print(f"  运行时间: {report['uptime_seconds']:.2f} 秒")
             print(f"  执行次数: {report['total_executions']}")
             print(f"  平均延迟: {report['execution_time']['avg_ms']:.3f} ms")

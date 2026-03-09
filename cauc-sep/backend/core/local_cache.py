@@ -13,11 +13,12 @@ import asyncio
 import logging
 import time
 from collections import OrderedDict
+from collections.abc import Callable, Hashable
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import wraps
 from threading import RLock
-from typing import Any, Callable, Generic, Hashable, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 

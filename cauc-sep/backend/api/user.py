@@ -31,9 +31,7 @@ from fastapi import (
     APIRouter,
     Depends,
     File,
-    Form,
     HTTPException,
-    Request,
     UploadFile,
     status,
 )
@@ -46,7 +44,7 @@ from sqlalchemy.orm import sessionmaker
 
 from models import Base
 from models.operation_history import VALID_OPERATION_TYPES, OperationHistory
-from models.user import DEFAULT_PREFERENCES, VALID_USER_ROLES, User
+from models.user import DEFAULT_PREFERENCES, User
 
 logger = logging.getLogger(__name__)
 

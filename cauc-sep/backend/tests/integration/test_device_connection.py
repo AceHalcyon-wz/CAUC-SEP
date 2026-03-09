@@ -10,19 +10,17 @@
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
 from core.abstract import DeviceStatus
 from core.error_recovery import (
     DeviceConnectionRecovery,
-    DeviceConnectionState,
     RecoveryState,
     RecoveryStrategy,
     RetryConfig,
     RetryExecutor,
-    RetryResult,
 )
 
 

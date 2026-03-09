@@ -24,8 +24,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 
 from api.schemas import (
     AlarmCodeResponse,
@@ -45,7 +44,7 @@ from api.schemas import (
 from core.abstract import DeviceStatus
 from core.device_registry import DeviceRegistry
 from core.device_utils import DeviceValidationError, validate_device_state
-from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps, steps_to_mm
+from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
 from middleware.audit import audit_logger
 
 logger = logging.getLogger(__name__)

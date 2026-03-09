@@ -9,19 +9,16 @@
 依赖: sqlalchemy, sqlite3
 """
 
-import json
 import logging
 import sqlite3
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from threading import Lock, RLock
 from typing import Any
 
-from sqlalchemy import create_engine, event, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import event
 
 logger = logging.getLogger(__name__)
 

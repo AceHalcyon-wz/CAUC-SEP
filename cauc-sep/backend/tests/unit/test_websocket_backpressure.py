@@ -23,7 +23,6 @@ from api.websocket import (
     ConnectionInfo,
     ConnectionManager,
     MessageType,
-    ProtocolType,
     create_backpressure_warning_message,
     create_flow_control_message,
     parse_ack_enabled_from_query,

@@ -10,15 +10,12 @@
 
 import os
 import tempfile
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
-from core.abstract import DeviceStatus
 from core.analysis import PhysicsAnalyzer
-from core.data_storage import DataStorage
-from core.dm2c_driver import LeadshineDM2C, mm_to_steps
+from core.dm2c_driver import LeadshineDM2C
 
 
 class TestExperimentSetup:
@@ -188,7 +185,7 @@ class TestExperimentDataExport:
             assert result is True
             assert os.path.exists(csv_path)
 
-            with open(csv_path, "r") as f:
+            with open(csv_path) as f:
                 lines = f.readlines()
                 assert len(lines) == 11
         finally:

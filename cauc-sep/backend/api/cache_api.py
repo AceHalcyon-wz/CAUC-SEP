@@ -20,7 +20,6 @@ from core.cache_strategy import (
     get_device_cache_manager,
     get_invalidation_manager,
     get_penetration_protector,
-    get_preloader,
 )
 from core.local_cache import get_all_local_cache_stats
 

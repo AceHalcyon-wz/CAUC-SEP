@@ -15,7 +15,6 @@
 import os
 import tempfile
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -26,7 +25,6 @@ from core.tracing import (
     TraceContext,
     Tracer,
     TraceStorage,
-    get_trace_storage,
     set_trace_storage,
 )
 

@@ -38,13 +38,13 @@
 
 import asyncio
 import logging
-import math
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 from .abstract import AbstractDevice, DeviceStatus
 

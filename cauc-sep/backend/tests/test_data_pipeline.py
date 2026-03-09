@@ -7,7 +7,6 @@
 依赖: pytest, numpy
 """
 
-import asyncio
 import threading
 import time
 from unittest.mock import MagicMock

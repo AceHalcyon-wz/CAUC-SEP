@@ -12,14 +12,13 @@
 import asyncio
 import hashlib
 import logging
-import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from functools import wraps
 from threading import Lock
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 from core.cache import RedisCacheManager, get_cache_manager
 from core.local_cache import TTLCache, get_device_config_cache, get_device_status_cache

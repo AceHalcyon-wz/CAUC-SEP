@@ -23,17 +23,17 @@
 
 import cProfile
 import functools
-import gc
 import io
 import logging
 import pstats
 import time
 import tracemalloc
+from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -375,7 +375,7 @@ class PerformanceProfiler:
 
     def __init__(self):
         """初始化性能分析器。"""
-        self._profile: Optional[cProfile.Profile] = None
+        self._profile: cProfile.Profile | None = None
         self._function_stats: dict[str, FunctionProfile] = {}
         self._call_times: dict[str, list[float]] = {}
         self._system_monitor = SystemMonitor()
@@ -574,7 +574,7 @@ class PerformanceProfiler:
 # ============================================================================
 
 
-def profile_function(name: Optional[str] = None):
+def profile_function(name: str | None = None):
     """函数性能分析装饰器。
 
     自动记录函数执行时间和性能指标。
@@ -713,13 +713,13 @@ class PerformanceReport:
             "</head>",
             "<body>",
             "    <div class='container'>",
-            f"        <h1>性能分析报告</h1>",
+            "        <h1>性能分析报告</h1>",
             f"        <p class='timestamp'>生成时间: {self._created_at.strftime('%Y-%m-%d %H:%M:%S')}</p>",
         ]
 
         # 添加各章节
         for section_name, section_data in self._sections.items():
-            html_parts.append(f"        <div class='section'>")
+            html_parts.append("        <div class='section'>")
             html_parts.append(f"            <h2>{section_name}</h2>")
 
             data = section_data.get("data", {})

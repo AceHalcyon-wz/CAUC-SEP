@@ -11,7 +11,7 @@
 依赖：typing
 """
 
-from typing import Any, Dict
+from typing import Any
 
 
 class DeviceRegistry:
@@ -32,7 +32,7 @@ class DeviceRegistry:
     """
 
     _instance = None
-    _devices: Dict[str, Any] = {}
+    _devices: dict[str, Any] = {}
 
     def __new__(cls) -> "DeviceRegistry":
         """
@@ -134,7 +134,7 @@ class DeviceRegistry:
         return cls._devices[device_id]
 
     @classmethod
-    def get_all_devices(cls) -> Dict[str, Any]:
+    def get_all_devices(cls) -> dict[str, Any]:
         """
         获取所有已注册设备。
 

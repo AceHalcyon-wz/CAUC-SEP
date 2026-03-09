@@ -12,12 +12,9 @@
 """
 
 import asyncio
-import hashlib
 import json
-import os
 import tempfile
 import zipfile
-from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -28,7 +25,6 @@ from api.update import (
     MAX_PACKAGE_SIZE_MB,
     BackupInfo,
     RollbackResponse,
-    UpdateApplyResponse,
     UpdateCheckResponse,
     UpdateManager,
     UpdatePriority,

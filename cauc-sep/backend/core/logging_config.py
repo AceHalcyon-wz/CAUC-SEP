@@ -20,9 +20,9 @@ import logging
 import os
 import shutil
 from datetime import datetime, timedelta
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class JsonFormatter(logging.Formatter):
@@ -105,7 +105,7 @@ class DeviceLogFilter(logging.Filter):
     为日志记录添加设备相关上下文信息。
     """
 
-    def __init__(self, device_id: Optional[str] = None):
+    def __init__(self, device_id: str | None = None):
         """初始化过滤器。
 
         Args:

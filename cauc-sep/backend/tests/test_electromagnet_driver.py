@@ -10,8 +10,6 @@
 """
 
 import asyncio
-import time
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
@@ -22,12 +20,9 @@ from core.electromagnet_driver import (
     MAX_FIELD,
     MAX_SCAN_RATE,
     MIN_SCAN_RATE,
-    OVERCURRENT_THRESHOLD,
-    CalibrationPoint,
     ElectromagnetDriver,
     ElectromagnetStatus,
     ScanMode,
-    ScanParameters,
 )
 
 # ==================== Fixtures ====================
@@ -215,7 +210,7 @@ class TestScanMode:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 connected_electromagnet._scan_task.cancel()
                 try:
                     await connected_electromagnet._scan_task
@@ -243,7 +238,7 @@ class TestScanMode:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 connected_electromagnet._scan_task.cancel()
                 try:
                     await connected_electromagnet._scan_task
@@ -268,7 +263,7 @@ class TestScanMode:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=15.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.IDLE
@@ -345,7 +340,7 @@ class TestScanMode:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=10.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.IDLE
@@ -368,7 +363,7 @@ class TestScanMode:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
         # 应该有进度更新
@@ -636,7 +631,7 @@ class TestBoundaryConditions:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=20.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
     @pytest.mark.asyncio
@@ -651,7 +646,7 @@ class TestBoundaryConditions:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
     @pytest.mark.asyncio
@@ -723,7 +718,7 @@ class TestIntegration:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=10.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
         # 4. 验证状态
@@ -768,7 +763,7 @@ class TestPerformance:
         if connected_electromagnet._scan_task:
             try:
                 await asyncio.wait_for(connected_electromagnet._scan_task, timeout=350.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
         assert connected_electromagnet.electromagnet_status == ElectromagnetStatus.IDLE

@@ -27,7 +27,7 @@ from sqlalchemy.orm import sessionmaker
 # 添加项目根目录到系统路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models import Base, DeviceCalibration, ExperimentConfig, OperationLog
+from models import DeviceCalibration, ExperimentConfig, OperationLog
 
 # 配置日志
 logging.basicConfig(

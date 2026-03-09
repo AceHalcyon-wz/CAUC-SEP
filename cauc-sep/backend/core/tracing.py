@@ -23,13 +23,13 @@
 import functools
 import json
 import logging
-import time
 import uuid
+from collections.abc import Callable
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -107,11 +107,11 @@ class Span:
 
     span_id: str
     trace_id: str
-    parent_span_id: Optional[str] = None
+    parent_span_id: str | None = None
     name: str = ""
     kind: SpanKind = SpanKind.INTERNAL
     start_time: datetime = field(default_factory=datetime.now)
-    end_time: Optional[datetime] = None
+    end_time: datetime | None = None
     status: SpanStatus = SpanStatus.UNSET
     attributes: dict[str, Any] = field(default_factory=dict)
     events: list[SpanEvent] = field(default_factory=list)
@@ -128,7 +128,7 @@ class Span:
     def add_event(
         self,
         name: str,
-        attributes: Optional[dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> None:
         """添加Span事件。
 
@@ -143,7 +143,7 @@ class Span:
         )
         self.events.append(event)
 
-    def set_status(self, status: SpanStatus, description: Optional[str] = None) -> None:
+    def set_status(self, status: SpanStatus, description: str | None = None) -> None:
         """设置Span状态。
 
         Args:
@@ -159,7 +159,7 @@ class Span:
         self.end_time = datetime.now()
 
     @property
-    def duration_ms(self) -> Optional[int]:
+    def duration_ms(self) -> int | None:
         """计算Span持续时间（毫秒）。
 
         Returns:
@@ -212,7 +212,7 @@ class TraceContext:
     """
 
     trace_id: str
-    root_span: Optional[Span] = None
+    root_span: Span | None = None
     spans: list[Span] = field(default_factory=list)
     baggage: dict[str, str] = field(default_factory=dict)
 
@@ -220,7 +220,7 @@ class TraceContext:
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        parent_span_id: Optional[str] = None,
+        parent_span_id: str | None = None,
     ) -> Span:
         """创建新的Span。
 
@@ -253,7 +253,7 @@ class TraceContext:
         """
         self.baggage[key] = value
 
-    def get_baggage(self, key: str) -> Optional[str]:
+    def get_baggage(self, key: str) -> str | None:
         """获取Baggage项。
 
         Args:
@@ -310,7 +310,7 @@ def generate_span_id() -> str:
 # ============================================================================
 
 
-def get_current_trace() -> Optional[TraceContext]:
+def get_current_trace() -> TraceContext | None:
     """获取当前追踪上下文。
 
     Returns:
@@ -319,7 +319,7 @@ def get_current_trace() -> Optional[TraceContext]:
     return _current_trace.get()
 
 
-def get_current_span() -> Optional[Span]:
+def get_current_span() -> Span | None:
     """获取当前Span。
 
     Returns:
@@ -328,7 +328,7 @@ def get_current_span() -> Optional[Span]:
     return _current_span.get()
 
 
-def set_current_trace(trace: Optional[TraceContext]) -> None:
+def set_current_trace(trace: TraceContext | None) -> None:
     """设置当前追踪上下文。
 
     Args:
@@ -337,7 +337,7 @@ def set_current_trace(trace: Optional[TraceContext]) -> None:
     _current_trace.set(trace)
 
 
-def set_current_span(span: Optional[Span]) -> None:
+def set_current_span(span: Span | None) -> None:
     """设置当前Span。
 
     Args:
@@ -365,7 +365,7 @@ class Tracer:
             service_name: 服务名称
         """
         self.service_name = service_name
-        self._trace_storage: Optional["TraceStorage"] = None
+        self._trace_storage: TraceStorage | None = None
 
     def set_storage(self, storage: "TraceStorage") -> None:
         """设置追踪数据存储。
@@ -379,7 +379,7 @@ class Tracer:
         self,
         name: str = "root",
         kind: SpanKind = SpanKind.SERVER,
-        attributes: Optional[dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> TraceContext:
         """开始新的追踪。
 
@@ -415,7 +415,7 @@ class Tracer:
         self,
         name: str,
         kind: SpanKind = SpanKind.INTERNAL,
-        attributes: Optional[dict[str, Any]] = None,
+        attributes: dict[str, Any] | None = None,
     ) -> Span:
         """开始新的Span。
 
@@ -450,7 +450,7 @@ class Tracer:
         set_current_span(span)
         return span
 
-    def end_trace(self, trace: Optional[TraceContext] = None) -> None:
+    def end_trace(self, trace: TraceContext | None = None) -> None:
         """结束追踪。
 
         Args:
@@ -477,7 +477,7 @@ class Tracer:
 
         logger.debug(f"[Trace] Ended trace: {trace.trace_id}")
 
-    def end_span(self, span: Optional[Span] = None) -> None:
+    def end_span(self, span: Span | None = None) -> None:
         """结束Span。
 
         Args:
@@ -509,9 +509,9 @@ class Tracer:
 
 
 def traced(
-    name: Optional[str] = None,
+    name: str | None = None,
     kind: SpanKind = SpanKind.INTERNAL,
-    attributes: Optional[dict[str, Any]] = None,
+    attributes: dict[str, Any] | None = None,
 ) -> Callable:
     """追踪装饰器。
 
@@ -661,8 +661,8 @@ class TracingMiddleware:
     def __init__(
         self,
         app,
-        tracer: Optional[Tracer] = None,
-        exclude_paths: Optional[set[str]] = None,
+        tracer: Tracer | None = None,
+        exclude_paths: set[str] | None = None,
     ):
         """初始化追踪中间件。
 
@@ -784,7 +784,7 @@ class TraceStorage:
 
     def _create_tables(self) -> None:
         """创建数据库表。"""
-        from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+        from sqlalchemy import Column, DateTime, Integer, String, Text
         from sqlalchemy.ext.declarative import declarative_base
 
         Base = declarative_base()
@@ -892,10 +892,10 @@ class TraceStorage:
 
     def query_traces(
         self,
-        service_name: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-        status: Optional[str] = None,
+        service_name: str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        status: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         """查询追踪记录。
@@ -941,7 +941,7 @@ class TraceStorage:
         finally:
             session.close()
 
-    def get_trace_detail(self, trace_id: str) -> Optional[dict[str, Any]]:
+    def get_trace_detail(self, trace_id: str) -> dict[str, Any] | None:
         """获取追踪详情。
 
         Args:
@@ -1003,8 +1003,8 @@ class TraceStorage:
 
     def get_statistics(
         self,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
     ) -> dict[str, Any]:
         """获取追踪统计信息。
 
@@ -1107,10 +1107,10 @@ class TraceDetailResponse(BaseModel):
 
     trace_id: str = Field(..., description="Trace ID")
     service_name: str = Field(..., description="服务名称")
-    root_span_name: Optional[str] = Field(None, description="根Span名称")
+    root_span_name: str | None = Field(None, description="根Span名称")
     start_time: str = Field(..., description="开始时间")
-    end_time: Optional[str] = Field(None, description="结束时间")
-    duration_ms: Optional[int] = Field(None, description="持续时间（毫秒）")
+    end_time: str | None = Field(None, description="结束时间")
+    duration_ms: int | None = Field(None, description="持续时间（毫秒）")
     status: str = Field(..., description="状态")
     span_count: int = Field(0, description="Span数量")
     spans: list[dict[str, Any]] = Field(default_factory=list, description="Span列表")
@@ -1135,7 +1135,7 @@ class TraceStatisticsResponse(BaseModel):
 tracer = Tracer(service_name="cauc-sep")
 
 # 全局追踪存储实例
-trace_storage: Optional[TraceStorage] = None
+trace_storage: TraceStorage | None = None
 
 
 def init_tracing(db_path: str = "traces.db") -> Tracer:
@@ -1160,7 +1160,7 @@ def init_tracing(db_path: str = "traces.db") -> Tracer:
     return tracer
 
 
-def get_trace_storage() -> Optional[TraceStorage]:
+def get_trace_storage() -> TraceStorage | None:
     """获取追踪存储实例。
 
     Returns:

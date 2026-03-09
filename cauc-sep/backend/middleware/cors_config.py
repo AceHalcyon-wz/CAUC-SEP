@@ -22,10 +22,10 @@ CORS安全配置模块
 import logging
 import os
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -178,7 +178,7 @@ def get_cors_config(environment: CORSEnvironment | None = None) -> CORSConfig:
 
 
 class OriginValidator:
-    """
+    r"""
     源验证器。
 
     支持精确匹配和正则表达式匹配。

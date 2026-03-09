@@ -114,8 +114,8 @@ backend/exports
 backend/device_states.json
 
 # ==================== Docker相关 ====================
-Dockerfile*
-docker-compose*.yml
+# Dockerfile* - 注释掉，Dockerfile 需要被包含在构建上下文中
+# docker-compose*.yml
 .docker
 .dockerignore
 

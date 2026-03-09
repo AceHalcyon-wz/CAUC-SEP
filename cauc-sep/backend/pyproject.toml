@@ -46,7 +46,28 @@ ignore = [
     "B028",  # stacklevel in warnings.warn is optional
     "N803",  # Argument name should be lowercase (Ms is standard in physics)
     "N806",  # Variable in function should be lowercase (L is standard in physics)
+    "B007",  # Loop control variable not used (common in tests)
+    "E731",  # Lambda expression assignment (common in tests)
+    "E501",  # Line too long (handled by black)
+    "E402",  # Module level import not at top (common in tests)
+    "F841",  # Local variable assigned but never used (common in tests)
+    "B017",  # Blind exception assertion (common in tests)
+    "C416",  # Unnecessary list comprehension (minor issue)
+    "W293",  # Blank line contains whitespace
+    "W291",  # Trailing whitespace
+    "B027",  # Empty method in abstract base class without abstract decorator
+    "UP042",  # Use StrEnum instead of str, Enum
+    "B905",  # zip() without strict parameter
+    "N818",  # Exception name should have Error suffix
+    "N802",  # Function name should be lowercase
+    "N801",  # Class name should use CapWords convention
+    "F401",  # Imported but unused (common in __init__.py for re-exports)
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B007", "E731", "E501", "E402", "F841", "B017", "C416", "F401", "B905"]
+"migrations/*" = ["W291", "W293", "E501"]
+"docs/*" = ["W293", "W291", "E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -24,16 +24,16 @@ import functools
 import gzip
 import json
 import logging
-import os
 import platform
 import sys
 import time
 import traceback
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import psutil
 from pydantic import BaseModel, Field
@@ -217,13 +217,13 @@ class CrashReport:
     exception_line: int = 0
     system_info: SystemInfo = field(default_factory=SystemInfo)
     context_data: dict[str, Any] = field(default_factory=dict)
-    device_id: Optional[str] = None
-    experiment_id: Optional[int] = None
-    user_id: Optional[str] = None
+    device_id: str | None = None
+    experiment_id: int | None = None
+    user_id: str | None = None
     tags: list[str] = field(default_factory=list)
     notes: str = ""
-    resolved_at: Optional[datetime] = None
-    resolved_by: Optional[str] = None
+    resolved_at: datetime | None = None
+    resolved_by: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典格式。
@@ -377,7 +377,7 @@ class CrashReportStorage:
         finally:
             session.close()
 
-    def get_report(self, report_id: str) -> Optional[CrashReport]:
+    def get_report(self, report_id: str) -> CrashReport | None:
         """获取崩溃报告详情。
 
         Args:
@@ -404,14 +404,14 @@ class CrashReportStorage:
 
     def query_reports(
         self,
-        severity: Optional[str] = None,
-        status: Optional[str] = None,
-        exception_type: Optional[str] = None,
-        device_id: Optional[str] = None,
-        experiment_id: Optional[int] = None,
-        user_id: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
+        severity: str | None = None,
+        status: str | None = None,
+        exception_type: str | None = None,
+        device_id: str | None = None,
+        experiment_id: int | None = None,
+        user_id: str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[dict[str, Any]]:
@@ -487,8 +487,8 @@ class CrashReportStorage:
         self,
         report_id: str,
         status: str,
-        notes: Optional[str] = None,
-        resolved_by: Optional[str] = None,
+        notes: str | None = None,
+        resolved_by: str | None = None,
     ) -> bool:
         """更新崩溃报告状态。
 
@@ -532,8 +532,8 @@ class CrashReportStorage:
 
     def get_statistics(
         self,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
     ) -> dict[str, Any]:
         """获取崩溃报告统计信息。
 
@@ -630,7 +630,7 @@ class CrashReportStorage:
         finally:
             session.close()
 
-    def export_report(self, report_id: str, output_dir: str = "crash_exports") -> Optional[str]:
+    def export_report(self, report_id: str, output_dir: str = "crash_exports") -> str | None:
         """导出崩溃报告到文件。
 
         Args:
@@ -843,13 +843,13 @@ class CrashReportManager:
 
     def capture_exception(
         self,
-        exc_info: Optional[tuple] = None,
+        exc_info: tuple | None = None,
         severity: str = CrashSeverity.HIGH,
-        context_data: Optional[dict] = None,
-        device_id: Optional[str] = None,
-        experiment_id: Optional[int] = None,
-        user_id: Optional[str] = None,
-        tags: Optional[list[str]] = None,
+        context_data: dict | None = None,
+        device_id: str | None = None,
+        experiment_id: int | None = None,
+        user_id: str | None = None,
+        tags: list[str] | None = None,
     ) -> CrashReport:
         """捕获异常并生成崩溃报告。
 
@@ -989,7 +989,7 @@ class CrashReportManager:
 def capture_crashes(
     severity: str = CrashSeverity.HIGH,
     reraise: bool = True,
-    context_data: Optional[dict] = None,
+    context_data: dict | None = None,
 ):
     """崩溃捕获装饰器。
 
@@ -1015,7 +1015,7 @@ def capture_crashes(
         def sync_wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception as e:
+            except Exception:
                 # 获取全局崩溃报告管理器
                 manager = get_crash_report_manager()
                 if manager:
@@ -1035,7 +1035,7 @@ def capture_crashes(
         async def async_wrapper(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except Exception as e:
+            except Exception:
                 manager = get_crash_report_manager()
                 if manager:
                     manager.capture_exception(
@@ -1065,7 +1065,7 @@ def capture_crashes(
 # ============================================================================
 
 # 全局崩溃报告管理器实例
-_crash_report_manager: Optional[CrashReportManager] = None
+_crash_report_manager: CrashReportManager | None = None
 
 
 def init_crash_report_manager(
@@ -1112,7 +1112,7 @@ def init_crash_report_manager(
     return _crash_report_manager
 
 
-def get_crash_report_manager() -> Optional[CrashReportManager]:
+def get_crash_report_manager() -> CrashReportManager | None:
     """获取全局崩溃报告管理器实例。
 
     Returns:
@@ -1121,7 +1121,7 @@ def get_crash_report_manager() -> Optional[CrashReportManager]:
     return _crash_report_manager
 
 
-def get_crash_report_storage() -> Optional[CrashReportStorage]:
+def get_crash_report_storage() -> CrashReportStorage | None:
     """获取崩溃报告存储实例。
 
     Returns:
@@ -1159,13 +1159,13 @@ class CrashReportDetailResponse(BaseModel):
     exception_line: int = Field(..., description="异常所在行号")
     system_info: dict[str, Any] = Field(..., description="系统信息")
     context_data: dict[str, Any] = Field(..., description="上下文数据")
-    device_id: Optional[str] = Field(None, description="设备ID")
-    experiment_id: Optional[int] = Field(None, description="实验ID")
-    user_id: Optional[str] = Field(None, description="用户ID")
+    device_id: str | None = Field(None, description="设备ID")
+    experiment_id: int | None = Field(None, description="实验ID")
+    user_id: str | None = Field(None, description="用户ID")
     tags: list[str] = Field(default_factory=list, description="标签列表")
     notes: str = Field("", description="处理备注")
-    resolved_at: Optional[str] = Field(None, description="解决时间")
-    resolved_by: Optional[str] = Field(None, description="解决人")
+    resolved_at: str | None = Field(None, description="解决时间")
+    resolved_by: str | None = Field(None, description="解决人")
 
 
 class CrashReportStatisticsResponse(BaseModel):
@@ -1182,5 +1182,5 @@ class CrashReportUpdateRequest(BaseModel):
     """崩溃报告更新请求模型。"""
 
     status: str = Field(..., description="新状态")
-    notes: Optional[str] = Field(None, description="处理备注")
-    resolved_by: Optional[str] = Field(None, description="解决人")
+    notes: str | None = Field(None, description="处理备注")
+    resolved_by: str | None = Field(None, description="解决人")

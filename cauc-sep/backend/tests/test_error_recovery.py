@@ -12,7 +12,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -462,7 +462,7 @@ class TestExperimentStateRecovery:
         assert checkpoint_file.exists()
 
         # 验证文件内容
-        with open(checkpoint_file, "r", encoding="utf-8") as f:
+        with open(checkpoint_file, encoding="utf-8") as f:
             data = json.load(f)
         assert data["experiment_id"] == 1
         assert data["current_step"] == 5

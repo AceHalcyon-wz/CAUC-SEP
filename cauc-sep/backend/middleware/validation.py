@@ -254,7 +254,7 @@ def sanitize_input(
             detected_patterns.append(pattern.pattern)
 
     if detected_patterns:
-        warnings.append(f"检测到潜在危险内容，已清理")
+        warnings.append("检测到潜在危险内容，已清理")
         logger.warning(f"XSS pattern detected in input: {detected_patterns}")
 
     return ValidationResult(

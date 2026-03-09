@@ -18,9 +18,8 @@
 import logging
 import time
 from collections import deque
-from datetime import datetime, timedelta
-from threading import Lock, RLock
-from typing import Optional
+from datetime import datetime
+from threading import RLock
 
 import psutil
 from fastapi import APIRouter, HTTPException
@@ -29,7 +28,7 @@ from pydantic import BaseModel, Field
 from core.abstract import DeviceStatus
 from core.dm2c_driver import LeadshineDM2C
 from core.electromagnet_driver import ElectromagnetDriver
-from core.metrics import BusinessMetricsCollector, get_business_metrics
+from core.metrics import get_business_metrics
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
 from core.temperature_controller import TemperatureController
@@ -90,7 +89,7 @@ class Alert(BaseModel):
     threshold: float = Field(..., description="阈值")
     timestamp: str = Field(..., description="告警时间")
     acknowledged: bool = Field(False, description="是否已确认")
-    resolved_at: Optional[str] = Field(None, description="解决时间")
+    resolved_at: str | None = Field(None, description="解决时间")
 
 
 class AlertManager:
@@ -442,7 +441,7 @@ class DeviceHealth(BaseModel):
     device_type: str = Field(..., description="设备类型")
     status: str = Field(..., description="设备状态")
     connected: bool = Field(..., description="是否已连接")
-    last_update: Optional[str] = Field(None, description="最后更新时间")
+    last_update: str | None = Field(None, description="最后更新时间")
     error_count: int = Field(0, description="错误计数")
     uptime_seconds: float = Field(0.0, description="设备运行时长")
 
@@ -456,8 +455,8 @@ class SystemHealth(BaseModel):
     uptime_seconds: float = Field(..., description="系统运行时长（秒）", ge=0)
     devices: list[DeviceHealth] = Field(default_factory=list, description="设备健康列表")
     # 新增指标
-    cpu_temperature: Optional[float] = Field(None, description="CPU温度（摄氏度）")
-    load_average: Optional[list[float]] = Field(None, description="系统负载平均值（1/5/15分钟）")
+    cpu_temperature: float | None = Field(None, description="CPU温度（摄氏度）")
+    load_average: list[float] | None = Field(None, description="系统负载平均值（1/5/15分钟）")
     network_connections: int = Field(0, description="网络连接数")
     process_count: int = Field(0, description="进程数")
     thread_count: int = Field(0, description="线程数")
@@ -535,8 +534,8 @@ class SystemResourcesResponse(BaseModel):
     network: NetworkIOStats = Field(..., description="网络IO统计")
     process: ProcessInfo = Field(..., description="当前进程信息")
     # 新增字段
-    system_load: Optional[dict] = Field(None, description="系统负载信息")
-    temperatures: Optional[dict] = Field(None, description="温度传感器信息")
+    system_load: dict | None = Field(None, description="系统负载信息")
+    temperatures: dict | None = Field(None, description="温度传感器信息")
 
 
 class AlertsResponse(BaseModel):

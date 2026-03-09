@@ -14,7 +14,6 @@
 创建日期：2026-03-07
 """
 
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -24,7 +23,6 @@ from core.temperature_controller import (
     PIDState,
     TemperatureController,
     TemperatureControllerMode,
-    TemperatureDataPoint,
     TemperatureProgramSegment,
     TemperatureProtectionConfig,
     TemperatureProtectionType,

@@ -9,7 +9,7 @@
 设计参考：技术设计文档第3.1章节
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from core.abstract import DeviceStatus
 
@@ -28,8 +28,8 @@ class DeviceValidationError(Exception):
     def __init__(
         self,
         message: str,
-        device_id: Optional[str] = None,
-        status: Optional[str] = None,
+        device_id: str | None = None,
+        status: str | None = None,
     ):
         """初始化设备验证异常。
 
@@ -125,8 +125,8 @@ def validate_device_state(device: Any, require_ready: bool = True) -> None:
 
 def create_device_error_response(
     message: str,
-    device_id: Optional[str] = None,
-    status: Optional[str] = None,
+    device_id: str | None = None,
+    status: str | None = None,
 ) -> dict[str, Any]:
     """创建设备错误响应字典。
 

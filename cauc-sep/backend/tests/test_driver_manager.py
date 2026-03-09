@@ -8,9 +8,7 @@
 """
 
 import asyncio
-import time
-from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any
 
 import pytest
 
@@ -23,14 +21,13 @@ from core.driver_manager import (
     IPCMessage,
     IPCMessageType,
     create_driver_manager,
-    driver_process_entry,
 )
 
 
 class MockDevice(AbstractDevice):
     """模拟设备类，用于测试。"""
 
-    def __init__(self, device_id: str, config: Dict[str, Any]):
+    def __init__(self, device_id: str, config: dict[str, Any]):
         """初始化模拟设备。"""
         super().__init__(device_id, config)
         self._connected = False
@@ -51,7 +48,7 @@ class MockDevice(AbstractDevice):
         self.status = DeviceStatus.DISCONNECTED
         return True
 
-    async def read_status(self) -> Dict[str, Any]:
+    async def read_status(self) -> dict[str, Any]:
         """读取状态。"""
         return {
             "device_id": self.device_id,

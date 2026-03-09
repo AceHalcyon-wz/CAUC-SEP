@@ -17,7 +17,6 @@
 
 import logging
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
@@ -46,7 +45,7 @@ class CrashReportListResponse:
 # ==================== 存储实例设置 ====================
 
 # 全局存储实例引用
-_crash_storage: Optional[CrashReportStorage] = None
+_crash_storage: CrashReportStorage | None = None
 
 
 def set_crash_storage(storage: CrashReportStorage) -> None:
@@ -82,14 +81,14 @@ def _get_storage() -> CrashReportStorage:
 
 @router.get("")
 async def list_crash_reports(
-    severity: Optional[str] = Query(None, description="严重程度过滤"),
-    status: Optional[str] = Query(None, description="状态过滤"),
-    exception_type: Optional[str] = Query(None, description="异常类型过滤"),
-    device_id: Optional[str] = Query(None, description="设备ID过滤"),
-    experiment_id: Optional[int] = Query(None, description="实验ID过滤"),
-    user_id: Optional[str] = Query(None, description="用户ID过滤"),
-    start_time: Optional[str] = Query(None, description="开始时间(ISO格式)"),
-    end_time: Optional[str] = Query(None, description="结束时间(ISO格式)"),
+    severity: str | None = Query(None, description="严重程度过滤"),
+    status: str | None = Query(None, description="状态过滤"),
+    exception_type: str | None = Query(None, description="异常类型过滤"),
+    device_id: str | None = Query(None, description="设备ID过滤"),
+    experiment_id: int | None = Query(None, description="实验ID过滤"),
+    user_id: str | None = Query(None, description="用户ID过滤"),
+    start_time: str | None = Query(None, description="开始时间(ISO格式)"),
+    end_time: str | None = Query(None, description="结束时间(ISO格式)"),
     limit: int = Query(100, ge=1, le=1000, description="返回数量限制"),
     offset: int = Query(0, ge=0, description="偏移量"),
 ):
@@ -163,8 +162,8 @@ async def list_crash_reports(
 
 @router.get("/statistics")
 async def get_crash_statistics(
-    start_time: Optional[str] = Query(None, description="开始时间(ISO格式)"),
-    end_time: Optional[str] = Query(None, description="结束时间(ISO格式)"),
+    start_time: str | None = Query(None, description="开始时间(ISO格式)"),
+    end_time: str | None = Query(None, description="结束时间(ISO格式)"),
 ):
     """
     获取崩溃报告统计信息。
@@ -248,8 +247,8 @@ async def get_crash_report(report_id: str):
 async def update_crash_report_status(
     report_id: str,
     status: str = Query(..., description="新状态"),
-    notes: Optional[str] = Query(None, description="处理备注"),
-    resolved_by: Optional[str] = Query(None, description="解决人"),
+    notes: str | None = Query(None, description="处理备注"),
+    resolved_by: str | None = Query(None, description="解决人"),
 ):
     """
     更新崩溃报告状态。

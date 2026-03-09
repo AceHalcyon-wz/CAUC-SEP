@@ -13,7 +13,6 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -35,10 +34,10 @@ router = APIRouter(
 
 @router.get("/traces", response_model=TraceListResponse)
 async def list_traces(
-    service_name: Optional[str] = Query(None, description="服务名称过滤"),
-    start_time: Optional[datetime] = Query(None, description="开始时间过滤"),
-    end_time: Optional[datetime] = Query(None, description="结束时间过滤"),
-    status: Optional[str] = Query(None, description="状态过滤 (ok/error)"),
+    service_name: str | None = Query(None, description="服务名称过滤"),
+    start_time: datetime | None = Query(None, description="开始时间过滤"),
+    end_time: datetime | None = Query(None, description="结束时间过滤"),
+    status: str | None = Query(None, description="状态过滤 (ok/error)"),
     limit: int = Query(100, ge=1, le=1000, description="返回数量限制"),
 ):
     """
@@ -122,9 +121,9 @@ async def get_trace_detail(trace_id: str):
 
 @router.get("/statistics", response_model=TraceStatisticsResponse)
 async def get_trace_statistics(
-    start_time: Optional[datetime] = Query(None, description="开始时间"),
-    end_time: Optional[datetime] = Query(None, description="结束时间"),
-    hours: Optional[int] = Query(None, ge=1, le=720, description="最近N小时"),
+    start_time: datetime | None = Query(None, description="开始时间"),
+    end_time: datetime | None = Query(None, description="结束时间"),
+    hours: int | None = Query(None, ge=1, le=720, description="最近N小时"),
 ):
     """
     获取追踪统计信息。

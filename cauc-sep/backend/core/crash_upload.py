@@ -22,12 +22,10 @@ import asyncio
 import gzip
 import json
 import logging
-import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -103,10 +101,10 @@ class UploadRecord:
     report_id: str
     status: UploadStatus = UploadStatus.PENDING
     attempts: int = 0
-    last_attempt_time: Optional[datetime] = None
-    last_error: Optional[str] = None
-    server_response: Optional[dict[str, Any]] = None
-    uploaded_at: Optional[datetime] = None
+    last_attempt_time: datetime | None = None
+    last_error: str | None = None
+    server_response: dict[str, Any] | None = None
+    uploaded_at: datetime | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """转换为字典格式。
@@ -158,7 +156,7 @@ class CrashReportUploader:
         self._upload_queue: asyncio.Queue = asyncio.Queue()
         self._upload_records: dict[str, UploadRecord] = {}
         self._running = False
-        self._upload_task: Optional[asyncio.Task] = None
+        self._upload_task: asyncio.Task | None = None
 
         logger.info(f"[CrashUploader] Initialized (enabled={config.enabled})")
 
@@ -194,7 +192,7 @@ class CrashReportUploader:
         if self._upload_task:
             try:
                 await asyncio.wait_for(self._upload_task, timeout=10.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._upload_task.cancel()
 
         logger.info("[CrashUploader] Stopped")
@@ -242,7 +240,7 @@ class CrashReportUploader:
                 # 非阻塞获取队列项
                 try:
                     item = await asyncio.wait_for(self._upload_queue.get(), timeout=1.0)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     continue
 
                 # 上传报告
@@ -398,7 +396,7 @@ class CrashReportUploader:
 
         raise last_error or Exception("Upload failed after retries")
 
-    def get_upload_status(self, report_id: str) -> Optional[dict[str, Any]]:
+    def get_upload_status(self, report_id: str) -> dict[str, Any] | None:
         """获取上传状态。
 
         Args:
@@ -450,7 +448,7 @@ class CrashReportUploader:
 # ============================================================================
 
 # 全局上传管理器实例
-_crash_uploader: Optional[CrashReportUploader] = None
+_crash_uploader: CrashReportUploader | None = None
 
 
 def init_crash_uploader(config: UploadConfig) -> CrashReportUploader:
@@ -477,7 +475,7 @@ def init_crash_uploader(config: UploadConfig) -> CrashReportUploader:
     return _crash_uploader
 
 
-def get_crash_uploader() -> Optional[CrashReportUploader]:
+def get_crash_uploader() -> CrashReportUploader | None:
     """获取全局崩溃报告上传管理器实例。
 
     Returns:

@@ -19,8 +19,7 @@ import gc
 import os
 import sys
 import warnings
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Optional
+from typing import Any
 
 
 class StartupConfig:
@@ -40,7 +39,7 @@ class StartupConfig:
         optimize_numpy: bool = True,
         preload_modules: bool = True,
         optimize_gc: bool = True,
-        thread_pool_size: Optional[int] = None,
+        thread_pool_size: int | None = None,
     ) -> None:
         """初始化启动配置。
 
@@ -354,7 +353,7 @@ class PerformanceMonitor:
     def __init__(self) -> None:
         """初始化性能监控器。"""
         self._metrics: dict[str, float] = {}
-        self._start_time: Optional[float] = None
+        self._start_time: float | None = None
 
     def start(self) -> None:
         """开始计时。"""

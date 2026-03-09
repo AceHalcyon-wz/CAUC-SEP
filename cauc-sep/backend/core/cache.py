@@ -9,17 +9,16 @@ Redis缓存管理器模块
 依赖: redis, asyncio
 """
 
-import asyncio
 import json
 import logging
 import time
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from functools import wraps
 from threading import Lock
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 

@@ -857,7 +857,6 @@ class TestAnalysisReport:
     def test_generate_report(self):
         """测试报告生成。"""
         from core.analysis import (
-            AnalysisReport,
             FitResult,
             generate_analysis_report,
         )
@@ -1132,7 +1131,7 @@ class TestFitModel:
 
     def test_fit_model_unsupported(self):
         """测试不支持的模型类型。"""
-        from core.analysis import FitModelType, PhysicsAnalyzer
+        from core.analysis import PhysicsAnalyzer
 
         analyzer = PhysicsAnalyzer()
 

@@ -57,15 +57,10 @@ from api import (
     piezo,
     temperature,
     tracing,
-    update,
     user,
 )
 from api.websocket import (
-    AlarmLevel,
-    ConnectionManager,
     DeviceType,
-    MessageType,
-    create_alarm_message,
     create_device_status_message,
     create_waveform_message,
     manager,
@@ -74,7 +69,7 @@ from core.abstract import DeviceStatus
 from core.crash_report import get_crash_report_storage, init_crash_report_manager
 from core.data_storage import DataStorage
 from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
-from core.electromagnet_driver import ElectromagnetDriver, ElectromagnetStatus
+from core.electromagnet_driver import ElectromagnetDriver
 from core.logging_config import cleanup_old_logs, get_log_stats, setup_logging
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
@@ -83,18 +78,13 @@ from core.temperature_controller import TemperatureController
 from core.tracing import TracingMiddleware, init_tracing, tracer
 from middleware.audit import AuditMiddleware, audit_logger
 from middleware.cors_config import (
-    CORSEnvironment,
     get_cors_config,
     log_cors_config,
-    setup_cors,
     validate_cors_security,
 )
-from middleware.rate_limit import RateLimitMiddleware, get_rate_limiter
+from middleware.rate_limit import RateLimitMiddleware
 from middleware.security import (
     SecurityHeadersMiddleware,
-    validate_array_length,
-    validate_device_id,
-    validate_experiment_id,
 )
 
 # ============================================================================
@@ -724,7 +714,7 @@ async def websocket_receive_loop(
                 # 非阻塞接收消息
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
                 await manager.handle_client_message(websocket, data)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
     except WebSocketDisconnect:
         pass
@@ -1052,7 +1042,7 @@ async def all_devices_websocket(websocket: WebSocket):
                 # 非阻塞接收消息
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
                 await manager.handle_client_message(websocket, data)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
 
             # 推送所有设备状态
