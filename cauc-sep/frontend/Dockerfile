@@ -21,7 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (use npm ci for reliable CI builds)
-RUN npm ci --prefer-offline --no-audit && \
+RUN npm ci --no-audit && \
     npm cache clean --force
 
 # 复制源代码
