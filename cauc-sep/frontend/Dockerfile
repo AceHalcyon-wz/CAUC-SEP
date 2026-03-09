@@ -20,8 +20,8 @@ WORKDIR /app
 # 复制package文件
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install && \
+# Install dependencies (use npm ci for reliable CI builds)
+RUN npm ci --prefer-offline --no-audit && \
     npm cache clean --force
 
 # 复制源代码
