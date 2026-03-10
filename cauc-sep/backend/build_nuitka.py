@@ -1,5 +1,5 @@
 """
-Nuitka编译脚本
+Nuitka编译脚本 - 简化版
 用于在CI/CD环境中编译CAUC-SEP后端
 """
 import os
@@ -8,208 +8,110 @@ import sys
 from pathlib import Path
 
 
+def run_command(cmd, cwd=None, check=True):
+    """运行命令并打印输出。"""
+    print(f"Running: {' '.join(cmd)}")
+    result = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=False,
+        text=True,
+        check=False,
+    )
+    if check and result.returncode != 0:
+        print(f"Command failed with exit code: {result.returncode}")
+        sys.exit(1)
+    return result
+
+
 def main():
-    print("=" * 50)
-    print("  Nuitka Compilation Script v4")
-    print("=" * 50)
+    print("=" * 60)
+    print("  CAUC-SEP Nuitka Build Script v5")
+    print("=" * 60)
     print()
 
-    try:
-        backend_dir = Path(__file__).parent.resolve()
-        print(f"Backend directory: {backend_dir}")
-        print(f"Current working directory: {os.getcwd()}")
-        os.chdir(backend_dir)
-        print(f"Changed to: {os.getcwd()}")
-        print()
+    backend_dir = Path(__file__).parent.resolve()
+    print(f"Backend directory: {backend_dir}")
+    print(f"Python: {sys.executable}")
+    print(f"Python version: {sys.version}")
+    print()
 
-        print("Python executable:", sys.executable)
-        print("Python version:", sys.version)
-        print()
+    os.chdir(backend_dir)
+    print(f"Working directory: {os.getcwd()}")
+    print()
 
-        print("Checking Nuitka installation...")
-        nuitka_check = subprocess.run(
-            [sys.executable, "-m", "nuitka", "--version"],
-            capture_output=True,
-            text=True
-        )
-        print("Nuitka version output:", nuitka_check.stdout)
-        if nuitka_check.stderr:
-            print("Nuitka version stderr:", nuitka_check.stderr)
-        print()
+    print("Step 1: Check Nuitka installation...")
+    run_command([sys.executable, "-m", "nuitka", "--version"], check=False)
+    print()
 
-        icon_path = backend_dir / "assets" / "icon.ico"
-        icon_arg = None
-        if icon_path.exists():
-            print(f"Icon found at: {icon_path}")
-            icon_arg = f"--windows-icon-from-ico={icon_path}"
-        else:
-            print(f"WARNING: Icon file not found at {icon_path}")
-            print("Proceeding without icon...")
-
-        base_args = [
-            sys.executable, "-m", "nuitka",
-            "--onefile",
-            "--windows-console-mode=disable",
-            "--output-dir=dist",
-            "--output-filename=CAUC-SEP-Backend.exe",
-        ]
-
-        if icon_arg:
-            base_args.append(icon_arg)
-
-        packages = [
-            "fastapi", "uvicorn", "pydantic", "pydantic_settings",
-            "sqlalchemy", "pymodbus", "serial", "numpy", "scipy",
-            "lmfit", "h5py", "core", "api", "middleware", "models", "drivers"
-        ]
-
-        modules = [
-            "uvicorn.logging", "uvicorn.loops", "uvicorn.loops.auto",
-            "uvicorn.protocols", "uvicorn.protocols.http", "uvicorn.protocols.http.auto",
-            "uvicorn.protocols.websockets", "uvicorn.protocols.websockets.auto",
-            "uvicorn.lifespan", "uvicorn.lifespan.on",
-            "sqlalchemy.dialects.sqlite", "sqlalchemy.pool", "sqlalchemy.engine", "sqlalchemy.orm",
-            "pydantic_core", "pydantic_settings", "pydantic_core.core_schema", "pydantic_core.validators",
-            "annotated_types",
-            "jose", "jose.jwt", "jose.jws", "jose.jwe", "jose.constants", "jose.exceptions", "jose.utils",
-            "passlib", "passlib.hash", "passlib.handlers", "passlib.handlers.bcrypt", "passlib.utils", "passlib.utils.handlers",
-            "bcrypt",
-            "multipart",
-            "starlette", "starlette.responses", "starlette.routing",
-            "starlette.middleware", "starlette.middleware.cors", "starlette.websockets",
-            "starlette.requests", "starlette.status", "starlette.exceptions",
-            "starlette.background", "starlette.datastructures", "starlette.types",
-            "httpx", "httpx._transports", "httpx._transports.default",
-            "anyio", "anyio._backends", "anyio._backends._asyncio",
-            "sniffio",
-            "h11", "h11._events", "h11._connection", "h11._state",
-            "redis", "msgpack", "aiofiles",
-            "psutil", "psutil._pswindows",
-            "lmfit.minimizer", "lmfit.model", "lmfit.parameter", "lmfit.confidence", "lmfit.printfuncs",
-            "h5py.h5", "h5py._hl", "h5py._hl.files", "h5py._hl.dataset", "h5py._hl.group", "h5py._hl.attrs",
-            "email_validator",
-            "matplotlib", "matplotlib.pyplot", "matplotlib.backends", "matplotlib.backends.backend_agg",
-        ]
-
-        nofollow = [
-            "tkinter", "unittest", "test", "tests", "pytest",
-            "PIL", "cv2", "sphinx", "docutils", "IPython", "jupyter", "notebook"
-        ]
-
-        plugins = ["pydantic", "numpy", "scipy", "anti-bloat", "matplotlib"]
-
-        for pkg in packages:
-            base_args.append(f"--include-package={pkg}")
-
-        for mod in modules:
-            base_args.append(f"--include-module={mod}")
-
-        for nf in nofollow:
-            base_args.append(f"--nofollow-import-to={nf}")
-
-        for plugin in plugins:
-            base_args.append(f"--enable-plugin={plugin}")
-
-        base_args.extend([
-            "--lto=yes",
-            "--assume-yes-for-downloads",
-            "--show-progress",
-            "--show-memory",
-            "--jobs=4",
-            "main.py"
-        ])
-
-        zig_found = False
-        zig_path = Path("C:/zig/zig.exe")
-        if zig_path.exists():
-            print("Zig compiler found at C:/zig, enabling Zig optimization")
-            os.environ["PATH"] = f"C:\\zig;{os.environ.get('PATH', '')}"
-            zig_found = True
-            base_args.append("--zig")
-        else:
-            try:
-                result = subprocess.run(
-                    ["where", "zig"],
-                    capture_output=True,
-                    text=True,
-                    shell=True
-                )
-                if result.returncode == 0:
-                    print("Zig compiler found in PATH, enabling Zig optimization")
-                    print(f"Zig location: {result.stdout.strip()}")
-                    zig_found = True
-                    base_args.append("--zig")
-                else:
-                    print("Zig compiler not found, proceeding without Zig optimization")
-            except Exception as e:
-                print(f"Error checking for Zig: {e}")
-                print("Proceeding without Zig optimization")
-
-        print()
-        print(f"Running Nuitka with {len(base_args)} arguments...")
-        print()
-        print("Command arguments:")
-        for i, arg in enumerate(base_args):
-            print(f"  [{i}] {arg}")
-        print()
-
-        print("Starting Nuitka compilation...")
-        print("=" * 50)
-        print()
-
-        result = subprocess.run(
-            base_args,
-            check=False,
-        )
-
-        print()
-        print("=" * 50)
-        print(f"Nuitka exit code: {result.returncode}")
-        print("=" * 50)
-
+    print("Step 2: Check Zig compiler...")
+    zig_exe = Path("C:/zig/zig.exe")
+    use_zig = False
+    if zig_exe.exists():
+        print(f"Zig found at: {zig_exe}")
+        run_command([str(zig_exe), "version"], check=False)
+        use_zig = True
+    else:
+        print("Zig not found at C:/zig/zig.exe")
+        result = run_command(["where", "zig"], check=False)
         if result.returncode == 0:
-            print()
-            print("=" * 50)
-            print("  Nuitka Compilation Successful!")
-            print("=" * 50)
+            use_zig = True
+    print()
 
-            exe_path = Path("dist/CAUC-SEP-Backend.exe")
-            if exe_path.exists():
-                size_mb = exe_path.stat().st_size / (1024 * 1024)
-                print(f"Output: {exe_path} ({size_mb:.2f} MB)")
+    print("Step 3: Build Nuitka command...")
+    cmd = [
+        sys.executable, "-m", "nuitka",
+        "--onefile",
+        "--windows-console-mode=disable",
+        "--output-dir=dist",
+        "--output-filename=CAUC-SEP-Backend.exe",
+        "--assume-yes-for-downloads",
+        "--show-progress",
+        "--show-memory",
+        "--jobs=4",
+        "--lto=yes",
+    ]
 
-            if "GITHUB_OUTPUT" in os.environ:
-                with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                    f.write("status=success\n")
+    if use_zig:
+        cmd.append("--zig")
+        print("Zig optimization: ENABLED")
+    else:
+        print("Zig optimization: DISABLED")
+
+    icon_path = backend_dir / "assets" / "icon.ico"
+    if icon_path.exists():
+        cmd.append(f"--windows-icon-from-ico={icon_path}")
+        print(f"Icon: {icon_path}")
+    else:
+        print("Icon: NOT FOUND (proceeding without)")
+
+    cmd.append("main.py")
+
+    print()
+    print("Step 4: Run Nuitka compilation...")
+    print(f"Command: {' '.join(cmd[:6])}... ({len(cmd)} args total)")
+    print()
+
+    result = subprocess.run(cmd, check=False)
+
+    print()
+    print("=" * 60)
+    print(f"Nuitka exit code: {result.returncode}")
+    print("=" * 60)
+
+    if result.returncode == 0:
+        exe_path = Path("dist/CAUC-SEP-Backend.exe")
+        if exe_path.exists():
+            size_mb = exe_path.stat().st_size / (1024 * 1024)
+            print(f"SUCCESS: {exe_path} ({size_mb:.2f} MB)")
         else:
-            print()
-            print("=" * 50)
-            print("  Nuitka Compilation FAILED!")
-            print(f"  Exit code: {result.returncode}")
-            print("=" * 50)
+            print("WARNING: Exit code 0 but executable not found!")
 
-            if "GITHUB_OUTPUT" in os.environ:
-                with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                    f.write("status=failed\n")
+    if "GITHUB_OUTPUT" in os.environ:
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"status={'success' if result.returncode == 0 else 'failed'}\n")
 
-            sys.exit(1)
-
-    except Exception as e:
-        print()
-        print("=" * 50)
-        print("  UNEXPECTED ERROR!")
-        print("=" * 50)
-        print(f"Error: {e}")
-        print()
-
-        import traceback
-        traceback.print_exc()
-
-        if "GITHUB_OUTPUT" in os.environ:
-            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                f.write("status=failed\n")
-
-        sys.exit(1)
+    sys.exit(result.returncode)
 
 
 if __name__ == "__main__":
