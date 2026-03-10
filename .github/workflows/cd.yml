@@ -261,48 +261,7 @@ jobs:
       - name: Build backend with Nuitka
         id: nuitka-build
         working-directory: cauc-sep/backend
-        shell: cmd
-        run: |
-          @echo off
-          echo ========================================
-          echo   Starting Nuitka Compilation
-          echo ========================================
-          echo.
-          
-          set NUITKA_CMD=python -m nuitka --onefile --windows-console-mode=disable --windows-icon-from-ico=assets/icon.ico --output-dir=dist --output-filename=CAUC-SEP-Backend.exe --include-package=fastapi --include-package=uvicorn --include-package=pydantic --include-package=pydantic_settings --include-package=sqlalchemy --include-package=pymodbus --include-package=serial --include-package=numpy --include-package=scipy --include-package=lmfit --include-package=h5py --include-package=core --include-package=api --include-package=middleware --include-package=models --include-package=drivers --include-module=uvicorn.logging --include-module=uvicorn.loops --include-module=uvicorn.loops.auto --include-module=uvicorn.protocols --include-module=uvicorn.protocols.http --include-module=uvicorn.protocols.http.auto --include-module=uvicorn.protocols.websockets --include-module=uvicorn.protocols.websockets.auto --include-module=uvicorn.lifespan --include-module=uvicorn.lifespan.on --include-module=sqlalchemy.dialects.sqlite --include-module=pydantic_core --include-module=pydantic_settings --include-module=jose --include-module=jose.jwt --include-module=jose.jws --include-module=jose.constants --include-module=passlib --include-module=passlib.hash --include-module=passlib.handlers.bcrypt --include-module=bcrypt --include-module=starlette --include-module=starlette.responses --include-module=starlette.routing --include-module=starlette.middleware --include-module=starlette.middleware.cors --include-module=starlette.websockets --include-module=redis --include-module=msgpack --include-module=aiofiles --include-module=psutil --include-module=psutil._pswindows --nofollow-import-to=tkinter --nofollow-import-to=unittest --nofollow-import-to=test --nofollow-import-to=tests --nofollow-import-to=pytest --nofollow-import-to=PIL --nofollow-import-to=cv2 --nofollow-import-to=sphinx --nofollow-import-to=docutils --nofollow-import-to=IPython --nofollow-import-to=jupyter --nofollow-import-to=notebook --enable-plugin=pydantic --enable-plugin=numpy --enable-plugin=scipy --lto=yes --assume-yes-for-downloads --show-progress --show-memory --jobs=4 main.py
-          
-          where zig >nul 2>&1
-          if %ERRORLEVEL% EQU 0 (
-            echo Zig compiler found, enabling Zig optimization
-            set NUITKA_CMD=%NUITKA_CMD% --zig
-          ) else if exist "C:\zig\zig.exe" (
-            echo Zig compiler found at C:\zig, enabling Zig optimization
-            set PATH=C:\zig;%PATH%
-            set NUITKA_CMD=%NUITKA_CMD% --zig
-          ) else (
-            echo Zig compiler not found, proceeding without Zig optimization
-          )
-          
-          echo Running Nuitka compilation...
-          %NUITKA_CMD%
-          
-          if %ERRORLEVEL% EQU 0 (
-            echo.
-            echo ========================================
-            echo   Nuitka Compilation Successful!
-            echo ========================================
-            if exist "dist\CAUC-SEP-Backend.exe" (
-              for %%F in (dist\CAUC-SEP-Backend.exe) do echo Output: dist\CAUC-SEP-Backend.exe (%%~zF bytes)
-            )
-            echo status=success >> %GITHUB_OUTPUT%
-          ) else (
-            echo.
-            echo ========================================
-            echo   Nuitka Compilation FAILED!
-            echo ========================================
-            echo status=failed >> %GITHUB_OUTPUT%
-            exit /b 1
-          )
+        run: python build_nuitka.py
 
       - name: Verify build output
         working-directory: cauc-sep/backend
