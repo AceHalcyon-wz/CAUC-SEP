@@ -50,7 +50,14 @@ def load_nuitka_config(config_path):
 
     spec = importlib.util.spec_from_file_location("nuitka_config", config_path)
     config_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(config_module)
+    
+    # 确保使用UTF-8编码读取配置文件
+    import codecs
+    with codecs.open(str(config_path), 'r', encoding='utf-8') as f:
+        config_code = f.read()
+    
+    # 使用exec执行配置代码
+    exec(compile(config_code, str(config_path), 'exec'), config_module.__dict__)
 
     if not hasattr(config_module, "nuitka_options"):
         raise AttributeError("nuitka-config.py must define 'nuitka_options'")
@@ -97,11 +104,14 @@ def build_nuitka_command(config_options, backend_dir):
 
     # 动态添加前端静态文件目录（如果存在）
     frontend_dist = backend_dir / "frontend" / "dist"
-    if frontend_dist.exists() and list(frontend_dist.iterdir()):
-        cmd.append(f"--include-data-dir={frontend_dist}=frontend/dist")
-        print(f"Added frontend dist to Nuitka command: {frontend_dist}")
-    else:
-        print("WARNING: Frontend dist not found, skipping include-data-dir")
+    try:
+        if frontend_dist.exists() and any(frontend_dist.iterdir()):
+            cmd.append(f"--include-data-dir={frontend_dist}=frontend/dist")
+            print(f"Added frontend dist to Nuitka command: {frontend_dist}")
+        else:
+            print("WARNING: Frontend dist not found or empty, skipping include-data-dir")
+    except Exception as e:
+        print(f"WARNING: Error checking frontend dist: {e}, skipping include-data-dir")
 
     cmd.append("main.py")
     return cmd
@@ -116,27 +126,31 @@ def check_frontend_dist(backend_dir):
     print()
     print("Checking frontend static files...")
 
-    if frontend_dist.exists() and list(frontend_dist.iterdir()):
-        print(f"Found frontend dist at: {frontend_dist}")
+    try:
+        if frontend_dist.exists() and any(frontend_dist.iterdir()):
+            print(f"Found frontend dist at: {frontend_dist}")
 
-        if not backend_frontend_dist.parent.exists():
-            backend_frontend_dist.parent.mkdir(parents=True, exist_ok=True)
+            if not backend_frontend_dist.parent.exists():
+                backend_frontend_dist.parent.mkdir(parents=True, exist_ok=True)
 
-        if not backend_frontend_dist.exists() or not list(backend_frontend_dist.iterdir()):
-            print("Copying frontend dist to backend directory...")
-            import shutil
+            if not backend_frontend_dist.exists() or not any(backend_frontend_dist.iterdir()):
+                print("Copying frontend dist to backend directory...")
+                import shutil
 
-            if backend_frontend_dist.exists():
-                shutil.rmtree(backend_frontend_dist)
-            shutil.copytree(frontend_dist, backend_frontend_dist)
-            print("Frontend dist copied successfully")
+                if backend_frontend_dist.exists():
+                    shutil.rmtree(backend_frontend_dist)
+                shutil.copytree(frontend_dist, backend_frontend_dist)
+                print("Frontend dist copied successfully")
+            else:
+                print("Frontend dist already present in backend directory")
+
+            return True
         else:
-            print("Frontend dist already present in backend directory")
-
-        return True
-    else:
-        print("WARNING: Frontend dist not found or empty")
-        print("Please build the frontend first: cd frontend && npm install && npm run build")
+            print("WARNING: Frontend dist not found or empty")
+            print("Please build the frontend first: cd frontend && npm install && npm run build")
+            return False
+    except Exception as e:
+        print(f"WARNING: Error checking frontend dist: {e}")
         return False
 
 
