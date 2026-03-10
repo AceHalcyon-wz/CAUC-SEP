@@ -190,11 +190,73 @@ jobs:
           restore-keys: |
             nuitka-${{ runner.os }}-
 
+      - name: Install Zig compiler
+        run: |
+          Write-Host "Installing Zig compiler for Nuitka optimization..." -ForegroundColor Cyan
+          $zigVersion = "0.11.0"
+          $zigUrl = "https://ziglang.org/download/$zigVersion/zig-windows-x86_64-$zigVersion.zip"
+          $zigZip = "$env:TEMP\zig.zip"
+          $zigDir = "C:\zig"
+          
+          Invoke-WebRequest -Uri $zigUrl -OutFile $zigZip -UseBasicParsing
+          Expand-Archive -Path $zigZip -DestinationPath "C:\" -Force
+          Rename-Item -Path "C:\zig-windows-x86_64-$zigVersion" -NewName "zig" -Force -ErrorAction SilentlyContinue
+          
+          $zigPath = "C:\zig"
+          if (Test-Path "$zigPath\zig.exe") {
+            Write-Host "Zig installed successfully at $zigPath" -ForegroundColor Green
+            Write-Host "Zig version: $(& "$zigPath\zig.exe" version)" -ForegroundColor Green
+            echo "$zigPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } else {
+            Write-Host "Warning: Zig installation may have failed, continuing without Zig optimization" -ForegroundColor Yellow
+          }
+
       - name: Build frontend
         working-directory: cauc-sep/frontend
         run: |
           npm ci
           npm run build
+
+      - name: Verify build environment
+        working-directory: cauc-sep/backend
+        run: |
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "  Build Environment Verification" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host ""
+          
+          Write-Host "Python version:" -ForegroundColor Yellow
+          python --version
+          
+          Write-Host "`nNuitka version:" -ForegroundColor Yellow
+          python -m nuitka --version
+          
+          Write-Host "`nZig compiler:" -ForegroundColor Yellow
+          $zigPath = Get-Command zig -ErrorAction SilentlyContinue
+          if ($zigPath) {
+            Write-Host "Zig found at: $($zigPath.Source)" -ForegroundColor Green
+            zig version
+          } else {
+            Write-Host "Zig not found in PATH, checking C:\zig..." -ForegroundColor Yellow
+            if (Test-Path "C:\zig\zig.exe") {
+              Write-Host "Zig found at C:\zig\zig.exe" -ForegroundColor Green
+              & "C:\zig\zig.exe" version
+              $env:PATH = "C:\zig;$env:PATH"
+              echo "C:\zig" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            } else {
+              Write-Host "Warning: Zig not found, compilation will proceed without Zig optimization" -ForegroundColor Red
+            }
+          }
+          
+          Write-Host "`nVisual Studio Build Tools:" -ForegroundColor Yellow
+          $vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vsWhere) {
+            & $vsWhere -latest -property displayName
+          } else {
+            Write-Host "vswhere not found" -ForegroundColor Yellow
+          }
+          
+          Write-Host "`n========================================" -ForegroundColor Cyan
 
       - name: Build backend with Nuitka
         id: nuitka-build
@@ -207,84 +269,105 @@ jobs:
           
           $startTime = Get-Date
           
+          $zigAvailable = $false
+          $zigPath = Get-Command zig -ErrorAction SilentlyContinue
+          if ($zigPath) {
+            $zigAvailable = $true
+            Write-Host "Zig compiler found, enabling Zig optimization" -ForegroundColor Green
+          } elseif (Test-Path "C:\zig\zig.exe") {
+            $env:PATH = "C:\zig;$env:PATH"
+            $zigAvailable = $true
+            Write-Host "Zig compiler found at C:\zig, enabling Zig optimization" -ForegroundColor Green
+          } else {
+            Write-Host "Zig compiler not found, proceeding without Zig optimization" -ForegroundColor Yellow
+          }
+          
+          $nuitkaArgs = @(
+            "--standalone",
+            "--onefile",
+            "--windows-console-mode=disable",
+            "--windows-icon-from-ico=assets/icon.ico",
+            "--output-dir=dist",
+            "--output-filename=CAUC-SEP-Backend.exe",
+            "--include-package=fastapi",
+            "--include-package=uvicorn",
+            "--include-package=pydantic",
+            "--include-package=pydantic_settings",
+            "--include-package=sqlalchemy",
+            "--include-package=pymodbus",
+            "--include-package=serial",
+            "--include-package=numpy",
+            "--include-package=scipy",
+            "--include-package=lmfit",
+            "--include-package=h5py",
+            "--include-package=core",
+            "--include-package=api",
+            "--include-package=middleware",
+            "--include-package=models",
+            "--include-package=drivers",
+            "--include-module=uvicorn.logging",
+            "--include-module=uvicorn.loops",
+            "--include-module=uvicorn.loops.auto",
+            "--include-module=uvicorn.protocols",
+            "--include-module=uvicorn.protocols.http",
+            "--include-module=uvicorn.protocols.http.auto",
+            "--include-module=uvicorn.protocols.websockets",
+            "--include-module=uvicorn.protocols.websockets.auto",
+            "--include-module=uvicorn.lifespan",
+            "--include-module=uvicorn.lifespan.on",
+            "--include-module=sqlalchemy.dialects.sqlite",
+            "--include-module=pydantic_core",
+            "--include-module=pydantic_settings",
+            "--include-module=jose",
+            "--include-module=jose.jwt",
+            "--include-module=jose.jws",
+            "--include-module=jose.constants",
+            "--include-module=passlib",
+            "--include-module=passlib.hash",
+            "--include-module=passlib.handlers.bcrypt",
+            "--include-module=bcrypt",
+            "--include-module=starlette",
+            "--include-module=starlette.responses",
+            "--include-module=starlette.routing",
+            "--include-module=starlette.middleware",
+            "--include-module=starlette.middleware.cors",
+            "--include-module=starlette.websockets",
+            "--include-module=redis",
+            "--include-module=msgpack",
+            "--include-module=aiofiles",
+            "--include-module=psutil",
+            "--include-module=psutil._pswindows",
+            "--nofollow-import-to=tkinter",
+            "--nofollow-import-to=unittest",
+            "--nofollow-import-to=test",
+            "--nofollow-import-to=tests",
+            "--nofollow-import-to=pytest",
+            "--nofollow-import-to=PIL",
+            "--nofollow-import-to=cv2",
+            "--nofollow-import-to=sphinx",
+            "--nofollow-import-to=docutils",
+            "--nofollow-import-to=IPython",
+            "--nofollow-import-to=jupyter",
+            "--nofollow-import-to=notebook",
+            "--enable-plugin=pydantic",
+            "--enable-plugin=numpy",
+            "--enable-plugin=scipy",
+            "--lto=yes",
+            "--assume-yes-for-downloads",
+            "--show-progress",
+            "--show-memory",
+            "--jobs=4",
+            "main.py"
+          )
+          
+          if ($zigAvailable) {
+            $nuitkaArgs += "--zig"
+          }
+          
+          Write-Host "Running Nuitka with $($nuitkaArgs.Count) arguments..." -ForegroundColor Cyan
+          
           try {
-            python -m nuitka `
-              --standalone `
-              --onefile `
-              --windows-console-mode=disable `
-              --windows-icon-from-ico=assets/icon.ico `
-              --output-dir=dist `
-              --output-filename=CAUC-SEP-Backend.exe `
-              --include-package=fastapi `
-              --include-package=uvicorn `
-              --include-package=pydantic `
-              --include-package=pydantic_settings `
-              --include-package=sqlalchemy `
-              --include-package=pymodbus `
-              --include-package=serial `
-              --include-package=numpy `
-              --include-package=scipy `
-              --include-package=lmfit `
-              --include-package=h5py `
-              --include-package=core `
-              --include-package=api `
-              --include-package=middleware `
-              --include-package=models `
-              --include-package=drivers `
-              --include-module=uvicorn.logging `
-              --include-module=uvicorn.loops `
-              --include-module=uvicorn.loops.auto `
-              --include-module=uvicorn.protocols `
-              --include-module=uvicorn.protocols.http `
-              --include-module=uvicorn.protocols.http.auto `
-              --include-module=uvicorn.protocols.websockets `
-              --include-module=uvicorn.protocols.websockets.auto `
-              --include-module=uvicorn.lifespan `
-              --include-module=uvicorn.lifespan.on `
-              --include-module=sqlalchemy.dialects.sqlite `
-              --include-module=pydantic_core `
-              --include-module=pydantic_settings `
-              --include-module=jose `
-              --include-module=jose.jwt `
-              --include-module=jose.jws `
-              --include-module=jose.constants `
-              --include-module=passlib `
-              --include-module=passlib.hash `
-              --include-module=passlib.handlers.bcrypt `
-              --include-module=bcrypt `
-              --include-module=starlette `
-              --include-module=starlette.responses `
-              --include-module=starlette.routing `
-              --include-module=starlette.middleware `
-              --include-module=starlette.middleware.cors `
-              --include-module=starlette.websockets `
-              --include-module=redis `
-              --include-module=msgpack `
-              --include-module=aiofiles `
-              --include-module=psutil `
-              --include-module=psutil._pswindows `
-              --nofollow-import-to=tkinter `
-              --nofollow-import-to=unittest `
-              --nofollow-import-to=test `
-              --nofollow-import-to=tests `
-              --nofollow-import-to=pytest `
-              --nofollow-import-to=PIL `
-              --nofollow-import-to=cv2 `
-              --nofollow-import-to=sphinx `
-              --nofollow-import-to=docutils `
-              --nofollow-import-to=IPython `
-              --nofollow-import-to=jupyter `
-              --nofollow-import-to=notebook `
-              --enable-plugin=pydantic `
-              --enable-plugin=numpy `
-              --enable-plugin=scipy `
-              --lto=yes `
-              --zig `
-              --assume-yes-for-downloads `
-              --show-progress `
-              --show-memory `
-              --jobs=4 `
-              main.py
+            & python -m nuitka $nuitkaArgs 2>&1
             
             $endTime = Get-Date
             $duration = $endTime - $startTime
