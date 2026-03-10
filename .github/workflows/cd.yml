@@ -147,6 +147,7 @@ jobs:
     name: Build Windows Executable (Nuitka)
     runs-on: windows-latest
     needs: build-and-push
+    timeout-minutes: 180
     if: |
       always() &&
       (startsWith(github.ref, 'refs/tags/v') ||

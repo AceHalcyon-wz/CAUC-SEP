@@ -53,11 +53,10 @@ def get_memory_optimized_jobs():
 nuitka_options = {
     "project-name": "CAUC-SEP-Backend",
     "project-description": "CAUC自旋电子器件实验平台后端服务",
-    "project-version": "0.3.0",
+    "project-version": "0.4.0",
     "project-copyright": "CAUC 2024-2026",
     "output-dir": str(project_dir / "dist"),
     "output-filename": "CAUC-SEP-Backend",
-    "onefile": True,
     "standalone": True,
     "windows-console-mode": "disable",
     "windows-icon-from-ico": (
@@ -199,8 +198,8 @@ nuitka_options = {
     "zig": True,
     "company-name": "CAUC",
     "product-name": "CAUC-SEP",
-    "file-version": "0.3.0.0",
-    "product-version": "0.3.0.0",
+    "file-version": "0.4.0.0",
+    "product-version": "0.4.0.0",
     "file-description": "CAUC自旋电子器件实验平台后端服务",
     "legal-copyright": "Copyright (C) 2024-2026 CAUC",
     "legal-trademarks": "",
