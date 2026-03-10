@@ -46,6 +46,11 @@ env:
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  ZIG_VERSION: '0.13.0'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend-lint:
@@ -77,7 +82,7 @@ jobs:
           pip install black ruff mypy isort
       
       - name: Black check
-        run: black --check --diff --color .
+        run: black --check --diff --color --line-length 100 .
       
       - name: isort check
         run: isort --check-only --diff --profile black .
@@ -310,7 +315,7 @@ jobs:
       always() &&
       (startsWith(github.ref, 'refs/tags/v') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.build_windows == 'true'))
-    timeout-minutes: 180
+    timeout-minutes: 240
     permissions:
       contents: write
     
@@ -356,7 +361,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
+          pip install nuitka ordered-set zstandard ccache
           Write-Host "Python dependencies installed" -ForegroundColor Green
       
       - name: Setup Nuitka cache
@@ -364,7 +369,9 @@ jobs:
         with:
           path: |
             ~\AppData\Local\Nuitka\Nuitka\Cache
+            ~\AppData\Local\ccache
             cauc-sep\backend\build
+            cauc-sep\backend\.build
           key: nuitka-${{ runner.os }}-${{ hashFiles('cauc-sep/backend/requirements.txt', 'cauc-sep/backend/nuitka-config.py') }}
           restore-keys: |
             nuitka-${{ runner.os }}-
@@ -372,23 +379,33 @@ jobs:
       - name: Install Zig compiler
         shell: pwsh
         run: |
-          $zigVersion = "0.11.0"
+          $zigVersion = "${{ env.ZIG_VERSION }}"
           $zigUrl = "https://ziglang.org/download/$zigVersion/zig-windows-x86_64-$zigVersion.zip"
           $zigZip = "$env:TEMP\zig.zip"
           $zigDir = "C:\zig"
           
           try {
-            Invoke-WebRequest -Uri $zigUrl -OutFile $zigZip -UseBasicParsing -TimeoutSec 60
+            Write-Host "Downloading Zig $zigVersion..." -ForegroundColor Cyan
+            Invoke-WebRequest -Uri $zigUrl -OutFile $zigZip -UseBasicParsing -TimeoutSec 120
+            
             if (Test-Path $zigDir) { Remove-Item $zigDir -Recurse -Force }
             Expand-Archive -Path $zigZip -DestinationPath "C:\" -Force
-            Rename-Item -Path "C:\zig-windows-x86_64-$zigVersion" -NewName "zig" -Force -ErrorAction SilentlyContinue
+            
+            $extractedDir = "C:\zig-windows-x86_64-$zigVersion"
+            if (Test-Path $extractedDir) {
+              Rename-Item -Path $extractedDir -NewName "zig" -Force -ErrorAction SilentlyContinue
+            }
             
             if (Test-Path "$zigDir\zig.exe") {
-              Write-Host "Zig installed: $zigDir" -ForegroundColor Green
+              Write-Host "Zig installed successfully: $zigDir" -ForegroundColor Green
               echo "$zigDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+              & "$zigDir\zig.exe" version
+            } else {
+              Write-Host "WARNING: Zig installation incomplete" -ForegroundColor Yellow
             }
           } catch {
-            Write-Host "Zig installation failed, continuing without Zig" -ForegroundColor Yellow
+            Write-Host "Zig installation failed: $_" -ForegroundColor Yellow
+            Write-Host "Continuing without Zig optimization" -ForegroundColor Yellow
           }
       
       - name: Build frontend
@@ -397,7 +414,7 @@ jobs:
         run: |
           npm ci --prefer-offline --no-audit
           npm run build
-          Write-Host "Frontend built" -ForegroundColor Green
+          Write-Host "Frontend built successfully" -ForegroundColor Green
       
       - name: Verify frontend build
         working-directory: cauc-sep/frontend
@@ -407,7 +424,19 @@ jobs:
             Write-Host "ERROR: Frontend dist not found!" -ForegroundColor Red
             exit 1
           }
-          Write-Host "Frontend dist verified" -ForegroundColor Green
+          $fileCount = (Get-ChildItem -Path "dist" -Recurse -File).Count
+          Write-Host "Frontend dist verified: $fileCount files" -ForegroundColor Green
+      
+      - name: Copy frontend to backend
+        working-directory: cauc-sep
+        shell: pwsh
+        run: |
+          $backendFrontend = "backend\frontend\dist"
+          if (-not (Test-Path $backendFrontend)) {
+            New-Item -ItemType Directory -Force -Path $backendFrontend | Out-Null
+          }
+          Copy-Item -Path "frontend\dist\*" -Destination $backendFrontend -Recurse -Force
+          Write-Host "Frontend copied to backend directory" -ForegroundColor Green
       
       - name: Build backend with Nuitka
         id: nuitka-build
@@ -415,11 +444,15 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Starting Nuitka build..." -ForegroundColor Cyan
+          Write-Host "Python: $(python --version)" -ForegroundColor Gray
+          Write-Host "Nuitka: $(python -m nuitka --version)" -ForegroundColor Gray
+          
           python build_nuitka.py
+          
           if ($LASTEXITCODE -ne 0) {
             throw "Nuitka build failed with exit code $LASTEXITCODE"
           }
-          Write-Host "Nuitka build completed" -ForegroundColor Green
+          Write-Host "Nuitka build completed successfully" -ForegroundColor Green
       
       - name: Verify build output
         working-directory: cauc-sep/backend
@@ -427,27 +460,88 @@ jobs:
         run: |
           $exePath = "dist\CAUC-SEP-Backend.exe"
           if (-not (Test-Path $exePath)) {
-            Write-Host "ERROR: Executable not found!" -ForegroundColor Red
+            Write-Host "ERROR: Executable not found at $exePath!" -ForegroundColor Red
+            Get-ChildItem -Path "dist" -Recurse | Format-Table Name, Length
             exit 1
           }
           $fileInfo = Get-Item $exePath
-          Write-Host "Build verified: $([math]::Round($fileInfo.Length / 1MB, 2)) MB" -ForegroundColor Green
+          $sizeMB = [math]::Round($fileInfo.Length / 1MB, 2)
+          Write-Host "Build verified successfully!" -ForegroundColor Green
+          Write-Host "Executable: $exePath" -ForegroundColor Cyan
+          Write-Host "Size: $sizeMB MB" -ForegroundColor Cyan
       
       - name: Create release package
         working-directory: cauc-sep
         shell: pwsh
         run: |
-          $releaseDir = "dist\CAUC-SEP"
+          $version = "${{ steps.get-version.outputs.version }}"
+          $releaseDir = "dist\CAUC-SEP-$version"
+          
+          Write-Host "Creating release package: $releaseDir" -ForegroundColor Cyan
+          
           New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
           New-Item -ItemType Directory -Force -Path "$releaseDir\frontend" | Out-Null
           New-Item -ItemType Directory -Force -Path "$releaseDir\logs" | Out-Null
           New-Item -ItemType Directory -Force -Path "$releaseDir\data" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$releaseDir\config" | Out-Null
           
           Copy-Item "backend\dist\CAUC-SEP-Backend.exe" -Destination $releaseDir -Force
           Copy-Item "frontend\dist\*" -Destination "$releaseDir\frontend" -Recurse -Force
           
-          $startBat = "@echo off", "chcp 65001 >nul", "echo Starting CAUC-SEP...", "start `"`" CAUC-SEP-Backend.exe", "timeout /t 3 /nobreak >nul", "start http://localhost:8000", "pause"
+          $startBat = @'
+@echo off
+chcp 65001 >nul
+title CAUC-SEP
+echo ========================================
+echo   CAUC-SEP 自旋电子实验平台
+echo   Version: {VERSION}
+echo ========================================
+echo.
+echo Starting backend service...
+start "" CAUC-SEP-Backend.exe
+timeout /t 3 /nobreak >nul
+echo Opening web interface...
+start http://localhost:8000
+echo.
+echo Service started. Press any key to stop...
+pause >nul
+taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
+'@ -replace '\{VERSION\}', $version
           $startBat | Out-File -FilePath "$releaseDir\start.bat" -Encoding ASCII
+          
+          $stopBat = @'
+@echo off
+echo Stopping CAUC-SEP service...
+taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
+echo Service stopped.
+pause
+'@
+          $stopBat | Out-File -FilePath "$releaseDir\stop.bat" -Encoding ASCII
+          
+          $readmeContent = @'
+# CAUC-SEP 自旋电子实验平台
+
+## 使用说明
+
+1. 双击 `start.bat` 启动服务
+2. 浏览器将自动打开 http://localhost:8000
+3. 双击 `stop.bat` 停止服务
+
+## 目录结构
+
+- `CAUC-SEP-Backend.exe` - 后端服务程序
+- `frontend/` - 前端静态文件
+- `logs/` - 日志文件目录
+- `data/` - 数据存储目录
+- `config/` - 配置文件目录
+
+## 注意事项
+
+- 首次运行可能需要允许防火墙访问
+- 如遇杀毒软件误报，请添加白名单
+- 默认端口: 8000
+'@
+          $readmeContent | Out-File -FilePath "$releaseDir\README.txt" -Encoding UTF8
           
           Write-Host "Release package created" -ForegroundColor Green
       
@@ -458,22 +552,23 @@ jobs:
           $version = "${{ steps.get-version.outputs.version }}"
           $zipPath = "CAUC-SEP-$version.zip"
           if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-          Compress-Archive -Path "CAUC-SEP" -DestinationPath $zipPath -Force
-          Write-Host "Created: $zipPath" -ForegroundColor Green
+          Compress-Archive -Path "CAUC-SEP-$version" -DestinationPath $zipPath -Force
+          $zipSize = [math]::Round((Get-Item $zipPath).Length / 1MB, 2)
+          Write-Host "Created: $zipPath ($zipSize MB)" -ForegroundColor Green
       
       - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-ZIP
           path: cauc-sep/dist/CAUC-SEP-*.zip
-          retention-days: 30
+          retention-days: 90
       
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-EXE
           path: cauc-sep/backend/dist/CAUC-SEP-Backend.exe
-          retention-days: 30
+          retention-days: 90
       
       - name: Set build status
         id: build-status
@@ -485,9 +580,16 @@ jobs:
         if: always()
         shell: pwsh
         run: |
+          $version = "${{ steps.get-version.outputs.version }}"
+          $status = "${{ job.status }}"
           echo "## Windows Build Complete (Nuitka)" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $env:GITHUB_STEP_SUMMARY
-          echo "**Status**: ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Version**: $version" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Status**: $status" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $env:GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-$version.zip" >> $env:GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-Backend.exe" >> $env:GITHUB_STEP_SUMMARY
 
   create-release:
     name: Create GitHub Release
@@ -543,18 +645,41 @@ jobs:
         id: changelog
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          cat > CHANGELOG.md << 'EOF'
+          ## 🎉 Release ${{ steps.version.outputs.version }}
+          
+          ### 📦 Downloads
+          
+          | File | Description |
+          |------|-------------|
+          | CAUC-SEP-${{ steps.version.outputs.version }}.zip | Complete package with frontend |
+          | CAUC-SEP-Backend.exe | Standalone executable |
+          
+          ### 🐳 Docker Images
+          
+          ```bash
+          docker pull ghcr.io/${{ github.repository }}-backend:${{ steps.version.outputs.version }}
+          docker pull ghcr.io/${{ github.repository }}-frontend:${{ steps.version.outputs.version }}
+          ```
+          
+          ### 📝 Changes
+          
+          EOF
+          
           if [ -n "$PREV_TAG" ]; then
-            echo "## Changes" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
             git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" >> CHANGELOG.md
           else
-            echo "## Initial Release" > CHANGELOG.md
+            echo "- Initial release" >> CHANGELOG.md
           fi
+          
           echo "" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "## Downloads" >> CHANGELOG.md
-          echo "- **CAUC-SEP-${{ steps.version.outputs.version }}.zip**: Complete package" >> CHANGELOG.md
-          echo "- **CAUC-SEP-Backend.exe**: Standalone executable" >> CHANGELOG.md
+          echo "### ⚠️ Notes" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "- Windows Defender may flag the executable as suspicious (false positive)" >> CHANGELOG.md
+          echo "- Add the executable to your antivirus whitelist if needed" >> CHANGELOG.md
+          echo "- Default port: 8000" >> CHANGELOG.md
       
       - name: Prepare release files
         id: prepare-files
@@ -570,7 +695,7 @@ jobs:
           echo "files=$FILES" >> $GITHUB_OUTPUT
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ steps.version.outputs.version }}

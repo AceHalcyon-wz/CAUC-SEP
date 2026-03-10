@@ -1,11 +1,12 @@
 """
-Nuitka打包配置文件 - 优化版v2
+Nuitka打包配置文件 - 生产级优化版v3
 
 功能：
 - 配置CAUC-SEP后端打包参数
 - 支持Windows可执行文件生成
 - 优化打包体积和启动性能
 - 24GB内存环境优化
+- 完整模块包含配置
 
 修复内容：
 - 添加认证模块(jose, passlib, bcrypt)
@@ -14,15 +15,14 @@ Nuitka打包配置文件 - 优化版v2
 - 添加数据处理子模块
 - 添加onefile模式支持
 - 添加前端静态文件包含
+- 添加缺失的uvicorn模块
+- 添加缺失的anyio模块
 
 使用方法：
-    python -m nuitka --project-dir=backend --project-config=backend/nuitka-config.py main.py
+    python build_nuitka.py
 
-或者直接运行：
-    scripts\build-nuitka.bat
-
-作者：Agent
-日期：2026-03-10
+作者：Backend Engineer Agent
+日期：2026-03-11
 """
 
 from pathlib import Path
@@ -32,12 +32,15 @@ project_dir = Path(__file__).parent
 
 def get_memory_optimized_jobs():
     """
-    根据系统内存自动计算并行任务数
+    根据系统内存自动计算并行任务数。
 
     24GB内存配置：
-    - 保留6GB给系统（优化）
-    - 每个编译进程约1.5GB（优化）
+    - 保留6GB给系统
+    - 每个编译进程约1.5GB
     - 可用18GB / 1.5GB = 12进程（保守设为6）
+
+    Returns:
+        int: 并行任务数
     """
     try:
         import psutil
@@ -50,6 +53,25 @@ def get_memory_optimized_jobs():
         return max(jobs, 2)
     except ImportError:
         return 4
+
+
+def get_frontend_dist_path():
+    """
+    动态检测前端构建产物路径。
+
+    Returns:
+        Path | None: 前端dist目录路径
+    """
+    possible_paths = [
+        project_dir / "frontend" / "dist",
+        project_dir.parent / "frontend" / "dist",
+        project_dir / "dist" / "frontend",
+    ]
+
+    for path in possible_paths:
+        if path.exists() and any(path.iterdir()):
+            return path
+    return None
 
 
 nuitka_options = {
@@ -104,6 +126,10 @@ nuitka_options = {
         "uvicorn.config",
         "uvicorn.server",
         "uvicorn.main",
+        "uvicorn.supervisors",
+        "uvicorn.supervisors.basereload",
+        "uvicorn.supervisors.statreload",
+        "uvicorn.supervisors.watchgodreload",
         "sqlalchemy.dialects.sqlite",
         "sqlalchemy.pool",
         "sqlalchemy.engine",
@@ -192,10 +218,6 @@ nuitka_options = {
         "h5py._hl.group",
         "h5py._hl.attrs",
         "email_validator",
-        "uvicorn.supervisors",
-        "uvicorn.supervisors.basereload",
-        "uvicorn.supervisors.statreload",
-        "uvicorn.supervisors.watchgodreload",
         "watchfiles",
         "watchfiles.main",
         "watchfiles.filters",
@@ -204,6 +226,17 @@ nuitka_options = {
         "opentelemetry.sdk.trace",
         "opentelemetry.sdk.resources",
         "opentelemetry.exporter.otlp",
+        "click",
+        "click.core",
+        "click.decorators",
+        "click.exceptions",
+        "click.formatting",
+        "click.parser",
+        "click.termui",
+        "click.types",
+        "click.utils",
+        "typing_extensions",
+        "typing_inspect",
     ],
     "nofollow-import-to": [
         "tkinter",
@@ -226,6 +259,12 @@ nuitka_options = {
         "dask",
         "numba",
         "cython",
+        "bokeh",
+        "plotly",
+        "black",
+        "ruff",
+        "mypy",
+        "isort",
     ],
     "prefer-source-code": [],
     "enable-plugin": [
@@ -260,7 +299,7 @@ nuitka_options = {k: v for k, v in nuitka_options.items() if v is not None and v
 
 
 if __name__ == "__main__":
-    print("Nuitka配置已加载（优化版v2）:")
+    print("Nuitka配置已加载（生产级优化版v3）:")
     print(f"  - 并行任务数: {nuitka_options.get('jobs', 4)}")
     print(f"  - 输出目录: {nuitka_options['output-dir']}")
     print(f"  - 输出文件: {nuitka_options['output-filename']}.exe")
@@ -268,3 +307,4 @@ if __name__ == "__main__":
     print(f"  - 认证模块: 已添加 (jose, passlib, bcrypt)")
     print(f"  - 数据处理: 已添加 (lmfit, h5py 子模块)")
     print(f"  - 前端静态文件: 将在build_nuitka.py中动态添加")
+    print(f"  - 前端dist路径: {get_frontend_dist_path()}")
