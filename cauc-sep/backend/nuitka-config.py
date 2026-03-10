@@ -186,7 +186,9 @@ nuitka_options = {
     "include-data-files": [
         (str(project_dir / "assets" / "icon.ico"), "assets/icon.ico"),
     ],
-    "include-data-dirs": [],
+    "include-data-dirs": [
+        (str(project_dir / "frontend" / "dist"), "frontend/dist"),
+    ],
     "assume-yes-for-downloads": True,
     "show-progress": True,
     "show-memory": True,

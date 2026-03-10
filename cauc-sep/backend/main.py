@@ -33,14 +33,46 @@ import asyncio
 import json
 import logging
 import os
+import sys
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+
+
+def get_base_path():
+    """获取应用基础路径，兼容开发环境和Nuitka打包后的可执行文件。"""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent
+    else:
+        return Path(__file__).parent.resolve()
+
+
+def get_frontend_path():
+    """获取前端静态文件路径，兼容多种运行环境。"""
+    base_path = get_base_path()
+    
+    possible_paths = [
+        base_path / "frontend" / "dist",
+        base_path / "dist" / "frontend" / "dist",
+        base_path.parent / "frontend" / "dist",
+    ]
+    
+    for path in possible_paths:
+        if path.exists() and list(path.iterdir()):
+            logger.info(f"Found frontend static files at: {path}")
+            return str(path)
+    
+    logger.warning("Frontend static files not found, checking all possible paths:")
+    for path in possible_paths:
+        logger.warning(f"  - {path}: {'EXISTS' if path.exists() else 'NOT FOUND'}")
+    
+    return None
 
 from api import (
     ammeter,
@@ -1133,8 +1165,12 @@ async def all_devices_websocket(websocket: WebSocket):
 
 
 # 静态文件服务
-if os.path.exists("frontend/dist"):
-    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
+frontend_path = get_frontend_path()
+if frontend_path:
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+    logger.info(f"Static files mounted from: {frontend_path}")
+else:
+    logger.warning("Frontend static files not found - web UI will not be available")
 
 
 if __name__ == "__main__":

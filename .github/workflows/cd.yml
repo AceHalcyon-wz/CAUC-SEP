@@ -148,16 +148,35 @@ jobs:
     runs-on: windows-latest
     needs: build-and-push
     if: |
-      startsWith(github.ref, 'refs/tags/v') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.build_windows == 'true')
+      always() &&
+      (startsWith(github.ref, 'refs/tags/v') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.build_windows == 'true'))
     permissions:
       contents: write
+
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      build_status: ${{ steps.build-status.outputs.status }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Get version
+        id: get-version
+        shell: pwsh
+        run: |
+          if ("${{ github.event.inputs.version }}" -ne "") {
+            $VERSION = "${{ github.event.inputs.version }}"
+          } elseif ($env:GITHUB_REF -match '^refs/tags/v') {
+            $VERSION = $env:GITHUB_REF -replace '^refs/tags/', ''
+          } else {
+            $VERSION = "v0.0.0-$(git rev-parse --short HEAD)"
+          }
+          echo "version=$VERSION" >> $env:GITHUB_OUTPUT
+          echo "Build version: $VERSION"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -174,10 +193,17 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: cauc-sep/backend
+        shell: pwsh
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install nuitka ordered-set zstandard
+          try {
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install nuitka ordered-set zstandard
+            Write-Host "Python dependencies installed successfully" -ForegroundColor Green
+          } catch {
+            Write-Host "Error installing Python dependencies: $_" -ForegroundColor Red
+            exit 1
+          }
 
       - name: Setup Nuitka cache
         uses: actions/cache@v4
@@ -185,12 +211,12 @@ jobs:
           path: |
             ~\AppData\Local\Nuitka\Nuitka\Cache
             cauc-sep\backend\build
-            cauc-sep\backend\dist
           key: nuitka-${{ runner.os }}-${{ hashFiles('cauc-sep/backend/requirements.txt', 'cauc-sep/backend/nuitka-config.py') }}
           restore-keys: |
             nuitka-${{ runner.os }}-
 
       - name: Install Zig compiler
+        shell: pwsh
         run: |
           Write-Host "Installing Zig compiler for Nuitka optimization..." -ForegroundColor Cyan
           $zigVersion = "0.11.0"
@@ -198,27 +224,50 @@ jobs:
           $zigZip = "$env:TEMP\zig.zip"
           $zigDir = "C:\zig"
           
-          Invoke-WebRequest -Uri $zigUrl -OutFile $zigZip -UseBasicParsing
-          Expand-Archive -Path $zigZip -DestinationPath "C:\" -Force
-          Rename-Item -Path "C:\zig-windows-x86_64-$zigVersion" -NewName "zig" -Force -ErrorAction SilentlyContinue
-          
-          $zigPath = "C:\zig"
-          if (Test-Path "$zigPath\zig.exe") {
-            Write-Host "Zig installed successfully at $zigPath" -ForegroundColor Green
-            Write-Host "Zig version: $(& "$zigPath\zig.exe" version)" -ForegroundColor Green
-            echo "$zigPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          } else {
-            Write-Host "Warning: Zig installation may have failed, continuing without Zig optimization" -ForegroundColor Yellow
+          try {
+            Invoke-WebRequest -Uri $zigUrl -OutFile $zigZip -UseBasicParsing
+            Expand-Archive -Path $zigZip -DestinationPath "C:\" -Force
+            Rename-Item -Path "C:\zig-windows-x86_64-$zigVersion" -NewName "zig" -Force -ErrorAction SilentlyContinue
+            
+            if (Test-Path "$zigDir\zig.exe") {
+              Write-Host "Zig installed successfully at $zigDir" -ForegroundColor Green
+              Write-Host "Zig version: $(& "$zigDir\zig.exe" version)" -ForegroundColor Green
+              echo "$zigDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+            } else {
+              Write-Host "Warning: Zig installation may have failed, continuing without Zig optimization" -ForegroundColor Yellow
+            }
+          } catch {
+            Write-Host "Zig installation failed: $_, continuing without Zig optimization" -ForegroundColor Yellow
           }
 
       - name: Build frontend
         working-directory: cauc-sep/frontend
+        shell: pwsh
         run: |
-          npm ci
-          npm run build
+          try {
+            Write-Host "Building frontend..." -ForegroundColor Cyan
+            npm ci
+            npm run build
+            Write-Host "Frontend built successfully" -ForegroundColor Green
+          } catch {
+            Write-Host "Frontend build failed: $_" -ForegroundColor Red
+            exit 1
+          }
+
+      - name: Verify frontend build
+        working-directory: cauc-sep/frontend
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist")) {
+            Write-Host "ERROR: Frontend dist directory not found!" -ForegroundColor Red
+            exit 1
+          }
+          Write-Host "Frontend dist directory exists, contents:" -ForegroundColor Green
+          Get-ChildItem -Path "dist" -Recurse | Select-Object -First 20 | Format-Table FullName
 
       - name: Verify build environment
         working-directory: cauc-sep/backend
+        shell: pwsh
         run: |
           Write-Host "========================================" -ForegroundColor Cyan
           Write-Host "  Build Environment Verification" -ForegroundColor Cyan
@@ -261,10 +310,28 @@ jobs:
       - name: Build backend with Nuitka
         id: nuitka-build
         working-directory: cauc-sep/backend
-        run: python build_nuitka.py
+        shell: pwsh
+        run: |
+          try {
+            Write-Host "Starting Nuitka build..." -ForegroundColor Cyan
+            python build_nuitka.py
+            if ($LASTEXITCODE -ne 0) {
+              throw "Nuitka build failed with exit code $LASTEXITCODE"
+            }
+            Write-Host "Nuitka build completed successfully" -ForegroundColor Green
+          } catch {
+            Write-Host "Nuitka build failed: $_" -ForegroundColor Red
+            Write-Host "`nDebug information:" -ForegroundColor Yellow
+            if (Test-Path "build") {
+              Write-Host "Build directory contents:"
+              Get-ChildItem -Path "build" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 30 | Format-Table FullName, Length
+            }
+            exit 1
+          }
 
       - name: Verify build output
         working-directory: cauc-sep/backend
+        shell: pwsh
         run: |
           $exePath = "dist\CAUC-SEP-Backend.exe"
           if (-not (Test-Path $exePath)) {
@@ -276,6 +343,8 @@ jobs:
             } else {
               Write-Host "dist directory does not exist!" -ForegroundColor Red
             }
+            Write-Host "`nListing backend directory:" -ForegroundColor Yellow
+            Get-ChildItem -Path "." | Format-Table Name, Length, LastWriteTime
             exit 1
           }
           
@@ -286,52 +355,99 @@ jobs:
 
       - name: Create release package
         working-directory: cauc-sep
+        shell: pwsh
         run: |
-          $releaseDir = "dist\CAUC-SEP"
-          New-Item -ItemType Directory -Force -Path $releaseDir
-          New-Item -ItemType Directory -Force -Path "$releaseDir\frontend"
-          New-Item -ItemType Directory -Force -Path "$releaseDir\logs"
-          New-Item -ItemType Directory -Force -Path "$releaseDir\data"
-          
-          Copy-Item "backend\dist\CAUC-SEP-Backend.exe" -Destination $releaseDir
-          Copy-Item "frontend\dist\*" -Destination "$releaseDir\frontend" -Recurse
-          
-          $startBat = @"
-          @echo off
-          chcp 65001 >nul
-          echo ==========================================
-          echo   CAUC-SEP 自旋电子实验平台
-          echo ==========================================
-          echo.
-          echo 正在启动服务...
-          start "" CAUC-SEP-Backend.exe
-          timeout /t 3 /nobreak >nul
-          start http://localhost:8000
-          echo 服务已启动，请勿关闭此窗口。
-          echo 按任意键停止服务...
-          pause >nul
-          taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
-          "@
-          $startBat | Out-File -FilePath "$releaseDir\start.bat" -Encoding ASCII
-          
-          $stopBat = @"
-          @echo off
-          echo 正在停止 CAUC-SEP 服务...
-          taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
-          echo 服务已停止。
-          pause
-          "@
-          $stopBat | Out-File -FilePath "$releaseDir\stop.bat" -Encoding ASCII
+          try {
+            $releaseDir = "dist\CAUC-SEP"
+            New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+            New-Item -ItemType Directory -Force -Path "$releaseDir\frontend" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$releaseDir\logs" | Out-Null
+            New-Item -ItemType Directory -Force -Path "$releaseDir\data" | Out-Null
+            
+            Write-Host "Copying backend executable..." -ForegroundColor Cyan
+            Copy-Item "backend\dist\CAUC-SEP-Backend.exe" -Destination $releaseDir -Force
+            
+            Write-Host "Copying frontend files..." -ForegroundColor Cyan
+            if (Test-Path "frontend\dist") {
+              Copy-Item "frontend\dist\*" -Destination "$releaseDir\frontend" -Recurse -Force
+            } else {
+              throw "Frontend dist directory not found"
+            }
+            
+            Write-Host "Creating startup scripts..." -ForegroundColor Cyan
+            $startBat = @"
+@echo off
+chcp 65001 >nul
+echo ==========================================
+echo   CAUC-SEP 自旋电子实验平台
+echo ==========================================
+echo.
+echo 正在启动服务...
+start "" CAUC-SEP-Backend.exe
+timeout /t 3 /nobreak >nul
+start http://localhost:8000
+echo 服务已启动，请勿关闭此窗口。
+echo 按任意键停止服务...
+pause >nul
+taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
+"@
+            $startBat | Out-File -FilePath "$releaseDir\start.bat" -Encoding ASCII
+            
+            $stopBat = @"
+@echo off
+echo 正在停止 CAUC-SEP 服务...
+taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
+echo 服务已停止。
+pause
+"@
+            $stopBat | Out-File -FilePath "$releaseDir\stop.bat" -Encoding ASCII
+            
+            Write-Host "Release package created successfully" -ForegroundColor Green
+          } catch {
+            Write-Host "Failed to create release package: $_" -ForegroundColor Red
+            exit 1
+          }
 
       - name: Create ZIP archive
         working-directory: cauc-sep/dist
+        shell: pwsh
         run: |
-          $version = "${{ needs.build-and-push.outputs.version }}"
-          Compress-Archive -Path "CAUC-SEP" -DestinationPath "CAUC-SEP-$version.zip"
+          try {
+            $version = "${{ steps.get-version.outputs.version }}"
+            $zipPath = "CAUC-SEP-$version.zip"
+            
+            if (Test-Path $zipPath) {
+              Remove-Item $zipPath -Force
+            }
+            
+            Write-Host "Creating ZIP archive: $zipPath" -ForegroundColor Cyan
+            Compress-Archive -Path "CAUC-SEP" -DestinationPath $zipPath -Force
+            
+            Write-Host "Created: $zipPath" -ForegroundColor Green
+            $zipInfo = Get-Item $zipPath
+            Write-Host "ZIP size: $([math]::Round($zipInfo.Length / 1MB, 2)) MB"
+          } catch {
+            Write-Host "Failed to create ZIP archive: $_" -ForegroundColor Red
+            exit 1
+          }
+
+      - name: Verify ZIP archive
+        working-directory: cauc-sep/dist
+        shell: pwsh
+        run: |
+          $version = "${{ steps.get-version.outputs.version }}"
+          $zipPath = "CAUC-SEP-$version.zip"
           
-          Write-Host "Created: CAUC-SEP-$version.zip"
-          $zipInfo = Get-Item "CAUC-SEP-$version.zip"
-          Write-Host "ZIP size: $([math]::Round($zipInfo.Length / 1MB, 2)) MB"
+          if (-not (Test-Path $zipPath)) {
+            Write-Host "ERROR: ZIP archive not found!" -ForegroundColor Red
+            exit 1
+          }
+          
+          Write-Host "ZIP archive verified, contents:" -ForegroundColor Green
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $zipPath).Path)
+          $zip.Entries | Select-Object -First 30 | Format-Table FullName, Length
+          $zip.Dispose()
 
       - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
@@ -347,17 +463,27 @@ jobs:
           path: cauc-sep/backend/dist/CAUC-SEP-Backend.exe
           retention-days: 30
 
-      - name: Build summary
+      - name: Set build status
+        id: build-status
+        shell: pwsh
         run: |
-          echo "## Windows Build Complete (Nuitka)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version**: ${{ needs.build-and-push.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Compiler**: Nuitka (LTO + Zig)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Artifacts**:" >> $GITHUB_STEP_SUMMARY
-          echo "- CAUC-SEP-Windows-ZIP (完整压缩包)" >> $GITHUB_STEP_SUMMARY
-          echo "- CAUC-SEP-Windows-EXE (独立可执行文件)" >> $GITHUB_STEP_SUMMARY
+          echo "status=success" >> $env:GITHUB_OUTPUT
+
+      - name: Build summary
+        if: always()
+        shell: pwsh
+        run: |
+          echo "## Windows Build Complete (Nuitka)" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.get-version.outputs.version }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Compiler**: Nuitka (LTO + Zig)" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Artifacts**:" >> $env:GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-Windows-ZIP (完整压缩包)" >> $env:GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-Windows-EXE (独立可执行文件)" >> $env:GITHUB_STEP_SUMMARY
 
   deploy-staging:
     name: Deploy to Staging
@@ -428,8 +554,11 @@ jobs:
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-and-push, deploy-production, build-windows]
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-and-push, build-windows]
+    if: |
+      always() &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     permissions:
       contents: write
 
@@ -439,17 +568,54 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "v0.0.0-$(git rev-parse --short HEAD)")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Check build-windows status
+        id: check-build-windows
+        run: |
+          if [ "${{ needs.build-windows.result }}" = "success" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "build-windows succeeded, artifacts will be included"
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "build-windows failed or was skipped, proceeding without Windows artifacts"
+          fi
+
       - name: Download ZIP artifact
+        if: steps.check-build-windows.outputs.status == 'success'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: CAUC-SEP-Windows-ZIP
           path: ./artifacts
 
       - name: Download EXE artifact
+        if: steps.check-build-windows.outputs.status == 'success'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: CAUC-SEP-Windows-EXE
           path: ./artifacts
+
+      - name: Verify downloaded artifacts
+        if: steps.check-build-windows.outputs.status == 'success'
+        run: |
+          echo "Checking artifacts directory..."
+          ls -la ./artifacts/ || echo "No artifacts found"
+          
+          if [ -d "./artifacts" ]; then
+            echo "Artifacts present:"
+            find ./artifacts -type f
+          fi
 
       - name: Generate changelog
         id: changelog
@@ -466,24 +632,50 @@ jobs:
           echo "" >> CHANGELOG.md
           echo "## Download Options" >> CHANGELOG.md
           echo "" >> CHANGELOG.md
-          echo "- **CAUC-SEP-{version}.zip**: 完整安装包（包含前端、启动脚本等）" >> CHANGELOG.md
+          echo "- **CAUC-SEP-${{ steps.version.outputs.version }}.zip**: 完整安装包（包含前端、启动脚本等）" >> CHANGELOG.md
           echo "- **CAUC-SEP-Backend.exe**: 独立可执行文件（仅后端服务）" >> CHANGELOG.md
+
+      - name: Prepare release files
+        id: prepare-files
+        run: |
+          FILES=""
+          if [ -f "artifacts/CAUC-SEP-${{ steps.version.outputs.version }}.zip" ]; then
+            FILES="$FILES artifacts/CAUC-SEP-${{ steps.version.outputs.version }}.zip"
+          else
+            ZIP_FILE=$(find artifacts -name "CAUC-SEP-*.zip" -type f 2>/dev/null | head -1)
+            if [ -n "$ZIP_FILE" ]; then
+              FILES="$FILES $ZIP_FILE"
+            fi
+          fi
+          
+          if [ -f "artifacts/CAUC-SEP-Backend.exe" ]; then
+            FILES="$FILES artifacts/CAUC-SEP-Backend.exe"
+          fi
+          
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "Files to include: $FILES"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.version.outputs.version }}
           body_path: CHANGELOG.md
           draft: false
           prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
           generate_release_notes: true
-          files: |
-            artifacts/CAUC-SEP-*.zip
-            artifacts/CAUC-SEP-Backend.exe
+          files: ${{ steps.prepare-files.outputs.files }}
 
       - name: Release notification
+        if: always()
         run: |
-          echo "## Release Created" >> $GITHUB_STEP_SUMMARY
-          echo "**Version**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Complete" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Assets**:" >> $GITHUB_STEP_SUMMARY
-          ls -la artifacts/ >> $GITHUB_STEP_SUMMARY
+          if [ -d "./artifacts" ]; then
+            echo "**Artifacts Included**:" >> $GITHUB_STEP_SUMMARY
+            ls -la artifacts/ >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "No artifacts found"
+          else
+            echo "**Note**: No Windows artifacts included (build-windows failed or skipped)" >> $GITHUB_STEP_SUMMARY
+          fi
