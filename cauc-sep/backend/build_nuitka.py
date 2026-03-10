@@ -14,17 +14,29 @@ def main():
     print("=" * 50)
     print()
 
-    backend_dir = Path(__file__).parent
+    backend_dir = Path(__file__).parent.resolve()
+    print(f"Backend directory: {backend_dir}")
     os.chdir(backend_dir)
+
+    icon_path = backend_dir / "assets" / "icon.ico"
+    if not icon_path.exists():
+        print(f"WARNING: Icon file not found at {icon_path}")
+        print("Proceeding without icon...")
+        icon_arg = None
+    else:
+        print(f"Icon found at: {icon_path}")
+        icon_arg = f"--windows-icon-from-ico={icon_path}"
 
     base_args = [
         sys.executable, "-m", "nuitka",
         "--onefile",
         "--windows-console-mode=disable",
-        "--windows-icon-from-ico=assets/icon.ico",
         "--output-dir=dist",
         "--output-filename=CAUC-SEP-Backend.exe",
     ]
+
+    if icon_arg:
+        base_args.append(icon_arg)
 
     packages = [
         "fastapi", "uvicorn", "pydantic", "pydantic_settings",
@@ -80,7 +92,7 @@ def main():
         os.environ["PATH"] = f"C:\\zig;{os.environ.get('PATH', '')}"
         base_args.append("--zig")
     else:
-        zig_in_path = subprocess.run(["where", "zig"], capture_output=True)
+        zig_in_path = subprocess.run(["where", "zig"], capture_output=True, text=True)
         if zig_in_path.returncode == 0:
             print("Zig compiler found in PATH, enabling Zig optimization")
             base_args.append("--zig")
@@ -89,8 +101,19 @@ def main():
 
     print(f"Running Nuitka with {len(base_args)} arguments...")
     print()
+    print("Command arguments:")
+    for i, arg in enumerate(base_args):
+        print(f"  [{i}] {arg}")
+    print()
 
-    result = subprocess.run(base_args)
+    try:
+        result = subprocess.run(base_args, check=False)
+    except Exception as e:
+        print(f"ERROR: Failed to run Nuitka: {e}")
+        if "GITHUB_OUTPUT" in os.environ:
+            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                f.write("status=failed\n")
+        sys.exit(1)
 
     if result.returncode == 0:
         print()
@@ -110,6 +133,7 @@ def main():
         print()
         print("=" * 50)
         print("  Nuitka Compilation FAILED!")
+        print(f"  Exit code: {result.returncode}")
         print("=" * 50)
 
         if "GITHUB_OUTPUT" in os.environ:
