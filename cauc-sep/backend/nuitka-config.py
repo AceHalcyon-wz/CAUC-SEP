@@ -190,7 +190,6 @@ nuitka_options = {
     "show-memory": True,
     "show-modules": False,
     "lto": "yes",
-    "python-flag": "no_site",
     "jobs": get_memory_optimized_jobs(),
     "company-name": "CAUC",
     "product-name": "CAUC-SEP",
