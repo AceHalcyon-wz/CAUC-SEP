@@ -21,7 +21,7 @@ import { useUpdateStore, UPDATE_STATUS } from '@/stores/update';
 export function useAutoUpdate(options = {}) {
   const {
     autoCheck = true,
-    checkInterval = 3600000,
+    checkInterval: _checkInterval = 3600000,
     channel = 'stable'
   } = options;
 

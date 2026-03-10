@@ -707,7 +707,7 @@
  * @dependencies vue, element-plus, echarts, pinia
  */
 
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAmmeterStore } from '../stores/ammeter'
 import { AMMETER } from '../config/constants'

@@ -138,7 +138,7 @@ export async function exampleWithStepProgress() {
  * 示例5: 错误处理和重试
  */
 export async function exampleWithErrorHandling() {
-  const { execute, retry, showError } = useOperationFeedback()
+  const { execute, showError } = useOperationFeedback()
 
   let attemptCount = 0
 

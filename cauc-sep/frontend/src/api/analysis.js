@@ -7,7 +7,7 @@
  * @dependencies utils/apiRequest
  */
 
-import { post, get } from '../utils/apiRequest';
+import { post } from '../utils/apiRequest';
 
 /**
  * 多模型拟合对比

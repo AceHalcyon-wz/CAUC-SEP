@@ -40,12 +40,12 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws'
  * 初始化WebSocket连接
  */
 const {
-  wsConnected,
-  pushFrequency,
-  dataLatency,
+  wsConnected: _wsConnected,
+  pushFrequency: _pushFrequency,
+  dataLatency: _dataLatency,
   connect,
   disconnect,
-  send
+  send: _send
 } = useWebSocketIntegration({
   url: WS_URL
 })
