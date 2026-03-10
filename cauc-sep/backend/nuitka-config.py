@@ -185,9 +185,6 @@ nuitka_options = {
     "include-data-files": [
         (str(project_dir / "assets" / "icon.ico"), "assets/icon.ico"),
     ],
-    "include-data-dirs": [
-        (str(project_dir / "frontend" / "dist"), "frontend/dist"),
-    ],
     "assume-yes-for-downloads": True,
     "show-progress": True,
     "show-memory": True,
@@ -195,7 +192,6 @@ nuitka_options = {
     "lto": "yes",
     "python-flag": "no_site",
     "jobs": get_memory_optimized_jobs(),
-    "zig": True,
     "company-name": "CAUC",
     "product-name": "CAUC-SEP",
     "file-version": "0.4.0.0",

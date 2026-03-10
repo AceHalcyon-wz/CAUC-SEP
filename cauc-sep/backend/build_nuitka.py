@@ -72,6 +72,37 @@ def build_nuitka_command(config_options, backend_dir):
         elif value is not None:
             cmd.append(f"--{key}={value}")
 
+    # 动态检测并添加Zig编译器支持
+    zig_found = False
+    zig_paths = [
+        Path("C:/zig/zig.exe"),
+        Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "zig" / "zig.exe",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "zig" / "zig.exe",
+    ]
+    for zig_path in zig_paths:
+        if zig_path.exists():
+            print(f"Zig compiler found at: {zig_path}")
+            cmd.append("--zig")
+            zig_found = True
+            break
+    if not zig_found:
+        # 检查PATH中是否有zig
+        import shutil
+        if shutil.which("zig"):
+            print("Zig compiler found in PATH")
+            cmd.append("--zig")
+            zig_found = True
+        else:
+            print("Zig compiler not found, proceeding without Zig optimization")
+
+    # 动态添加前端静态文件目录（如果存在）
+    frontend_dist = backend_dir / "frontend" / "dist"
+    if frontend_dist.exists() and list(frontend_dist.iterdir()):
+        cmd.append(f"--include-data-dir={frontend_dist}=frontend/dist")
+        print(f"Added frontend dist to Nuitka command: {frontend_dist}")
+    else:
+        print("WARNING: Frontend dist not found, skipping include-data-dir")
+
     cmd.append("main.py")
     return cmd
 
