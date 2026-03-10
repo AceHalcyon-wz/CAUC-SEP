@@ -1,5 +1,5 @@
 """
-Nuitka打包配置文件 - 修复版
+Nuitka打包配置文件 - 优化版v2
 
 功能：
 - 配置CAUC-SEP后端打包参数
@@ -12,6 +12,8 @@ Nuitka打包配置文件 - 修复版
 - 添加pydantic补充模块
 - 添加starlette补充模块
 - 添加数据处理子模块
+- 添加onefile模式支持
+- 添加前端静态文件包含
 
 使用方法：
     python -m nuitka --project-dir=backend --project-config=backend/nuitka-config.py main.py
@@ -58,6 +60,7 @@ nuitka_options = {
     "output-dir": str(project_dir / "dist"),
     "output-filename": "CAUC-SEP-Backend",
     "standalone": True,
+    "onefile": True,
     "windows-console-mode": "disable",
     "windows-icon-from-ico": (
         str(project_dir / "assets" / "icon.ico")
@@ -81,6 +84,7 @@ nuitka_options = {
         "middleware",
         "models",
         "drivers",
+        "migrations",
     ],
     "include-module": [
         "uvicorn.logging",
@@ -89,14 +93,22 @@ nuitka_options = {
         "uvicorn.protocols",
         "uvicorn.protocols.http",
         "uvicorn.protocols.http.auto",
+        "uvicorn.protocols.http.h11_impl",
+        "uvicorn.protocols.http.httptools_impl",
         "uvicorn.protocols.websockets",
         "uvicorn.protocols.websockets.auto",
+        "uvicorn.protocols.websockets.websockets_impl",
         "uvicorn.lifespan",
         "uvicorn.lifespan.on",
+        "uvicorn.lifespan.off",
+        "uvicorn.config",
+        "uvicorn.server",
+        "uvicorn.main",
         "sqlalchemy.dialects.sqlite",
         "sqlalchemy.pool",
         "sqlalchemy.engine",
         "sqlalchemy.orm",
+        "sqlalchemy.ext.asyncio",
         "pydantic_core",
         "pydantic_settings",
         "pydantic_core.core_schema",
@@ -109,6 +121,8 @@ nuitka_options = {
         "jose.constants",
         "jose.exceptions",
         "jose.utils",
+        "jose.backends",
+        "jose.backends.cryptography_backend",
         "passlib",
         "passlib.hash",
         "passlib.handlers",
@@ -116,6 +130,7 @@ nuitka_options = {
         "passlib.utils",
         "passlib.utils.handlers",
         "bcrypt",
+        "_bcrypt",
         "multipart",
         "starlette",
         "starlette.responses",
@@ -129,12 +144,20 @@ nuitka_options = {
         "starlette.background",
         "starlette.datastructures",
         "starlette.types",
+        "starlette.staticfiles",
+        "starlette.templating",
         "httpx",
         "httpx._transports",
         "httpx._transports.default",
+        "httpx._config",
+        "httpx._content",
+        "httpx._models",
         "anyio",
         "anyio._backends",
         "anyio._backends._asyncio",
+        "anyio.abc",
+        "anyio.from_thread",
+        "anyio.lowlevel",
         "sniffio",
         "h11",
         "h11._events",
@@ -146,10 +169,17 @@ nuitka_options = {
         "h11._abate",
         "h11._version",
         "redis",
+        "redis.asyncio",
+        "redis.asyncio.connection",
+        "redis.asyncio.client",
         "msgpack",
+        "msgpack.fallback",
         "aiofiles",
+        "aiofiles.os",
+        "aiofiles.tempfile",
         "psutil",
         "psutil._pswindows",
+        "psutil._common",
         "lmfit.minimizer",
         "lmfit.model",
         "lmfit.parameter",
@@ -162,6 +192,18 @@ nuitka_options = {
         "h5py._hl.group",
         "h5py._hl.attrs",
         "email_validator",
+        "uvicorn.supervisors",
+        "uvicorn.supervisors.basereload",
+        "uvicorn.supervisors.statreload",
+        "uvicorn.supervisors.watchgodreload",
+        "watchfiles",
+        "watchfiles.main",
+        "watchfiles.filters",
+        "opentelemetry",
+        "opentelemetry.sdk",
+        "opentelemetry.sdk.trace",
+        "opentelemetry.sdk.resources",
+        "opentelemetry.exporter.otlp",
     ],
     "nofollow-import-to": [
         "tkinter",
@@ -174,6 +216,16 @@ nuitka_options = {
         "IPython",
         "jupyter",
         "notebook",
+        "matplotlib",
+        "PIL",
+        "cv2",
+        "torch",
+        "tensorflow",
+        "pandas",
+        "polars",
+        "dask",
+        "numba",
+        "cython",
     ],
     "prefer-source-code": [],
     "enable-plugin": [
@@ -200,15 +252,19 @@ nuitka_options = {
     "legal-trademarks": "",
     "windows-uac-admin": False,
     "windows-uac-uiaccess": False,
+    "follow-imports": True,
+    "remove-output": True,
 }
 
 nuitka_options = {k: v for k, v in nuitka_options.items() if v is not None and v != [] and v != ""}
 
 
 if __name__ == "__main__":
-    print("Nuitka配置已加载（修复版）:")
+    print("Nuitka配置已加载（优化版v2）:")
     print(f"  - 并行任务数: {nuitka_options.get('jobs', 4)}")
     print(f"  - 输出目录: {nuitka_options['output-dir']}")
     print(f"  - 输出文件: {nuitka_options['output-filename']}.exe")
+    print(f"  - Onefile模式: {nuitka_options.get('onefile', False)}")
     print(f"  - 认证模块: 已添加 (jose, passlib, bcrypt)")
     print(f"  - 数据处理: 已添加 (lmfit, h5py 子模块)")
+    print(f"  - 前端静态文件: 将在build_nuitka.py中动态添加")

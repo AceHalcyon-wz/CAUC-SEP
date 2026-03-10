@@ -75,3 +75,15 @@ nuitka-*.xml
 
 # Trae IDE
 .trae/
+
+# CI/CD temporary scripts
+check_*.py
+get_*.py
+monitor_*.py
+cicd.log
+
+# Nuitka build artifacts
+*.onefile-build/
+*.standalone-build/
+backend.dist/
+backend.build/
