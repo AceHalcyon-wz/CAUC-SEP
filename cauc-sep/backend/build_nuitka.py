@@ -92,7 +92,7 @@ def check_frontend_dist(backend_dir):
             backend_frontend_dist.parent.mkdir(parents=True, exist_ok=True)
 
         if not backend_frontend_dist.exists() or not list(backend_frontend_dist.iterdir()):
-            print(f"Copying frontend dist to backend directory...")
+            print("Copying frontend dist to backend directory...")
             import shutil
 
             if backend_frontend_dist.exists():
@@ -173,14 +173,14 @@ def main():
         if result.returncode == 0:
             if exe_path.exists():
                 size_mb = exe_path.stat().st_size / (1024 * 1024)
-                print(f"SUCCESS: Build completed successfully!")
+                print("SUCCESS: Build completed successfully!")
                 print(f"  Executable: {exe_path}")
                 print(f"  Size: {size_mb:.2f} MB")
             else:
                 print(f"WARNING: Exit code 0 but executable not found at {exe_path}")
         else:
             print(f"ERROR: Build failed with exit code {result.returncode}")
-            print(f"Please check the Nuitka output above for details")
+            print("Please check the Nuitka output above for details")
         print()
 
         if "GITHUB_OUTPUT" in os.environ:
