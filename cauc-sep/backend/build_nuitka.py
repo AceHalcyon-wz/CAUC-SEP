@@ -9,16 +9,27 @@ Nuitka编译脚本 - 优化版
 """
 
 import importlib.util
+import io
 import os
 import subprocess
 import sys
 import traceback
 from pathlib import Path
 
+# Fix Windows encoding issues - force UTF-8 for stdout/stderr
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    # Also set environment variable for subprocess
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+
 
 def run_command(cmd, cwd=None, check=True, capture_output=False):
     """运行命令并打印输出。"""
-    print(f"Running: {' '.join(cmd)}")
+    try:
+        print(f"Running: {' '.join(cmd)}")
+    except UnicodeEncodeError:
+        print(f"Running: [command contains non-ASCII characters]")
     try:
         result = subprocess.run(
             cmd,
@@ -199,7 +210,12 @@ def main():
         print("Step 4: Build Nuitka command...")
         cmd = build_nuitka_command(config_options, backend_dir)
         print(f"Command built with {len(cmd)} arguments")
-        print(f"First 5 args: {' '.join(cmd[:5])}...")
+        # Safe print to avoid encoding issues on Windows
+        try:
+            first_args = " ".join(cmd[:5])
+            print(f"First 5 args: {first_args}...")
+        except UnicodeEncodeError:
+            print(f"First 5 args: [contains non-ASCII characters]")
         print()
 
         print("Step 5: Run Nuitka compilation...")
