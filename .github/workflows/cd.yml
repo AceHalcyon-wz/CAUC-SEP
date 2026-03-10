@@ -376,32 +376,11 @@ jobs:
             }
             
             Write-Host "Creating startup scripts..." -ForegroundColor Cyan
-            $startBat = @"
-@echo off
-chcp 65001 >nul
-echo ==========================================
-echo   CAUC-SEP 自旋电子实验平台
-echo ==========================================
-echo.
-echo 正在启动服务...
-start "" CAUC-SEP-Backend.exe
-timeout /t 3 /nobreak >nul
-start http://localhost:8000
-echo 服务已启动，请勿关闭此窗口。
-echo 按任意键停止服务...
-pause >nul
-taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
-"@
-            $startBat | Out-File -FilePath "$releaseDir\start.bat" -Encoding ASCII
+            $startBatContent = "@echo off", "chcp 65001 >nul", "echo ==========================================", "echo   CAUC-SEP 自旋电子实验平台", "echo ==========================================", "echo.", "echo 正在启动服务...", "start `"`" CAUC-SEP-Backend.exe", "timeout /t 3 /nobreak >nul", "start http://localhost:8000", "echo 服务已启动，请勿关闭此窗口。", "echo 按任意键停止服务...", "pause >nul", "taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1"
+            $startBatContent | Out-File -FilePath "$releaseDir\start.bat" -Encoding ASCII
             
-            $stopBat = @"
-@echo off
-echo 正在停止 CAUC-SEP 服务...
-taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1
-echo 服务已停止。
-pause
-"@
-            $stopBat | Out-File -FilePath "$releaseDir\stop.bat" -Encoding ASCII
+            $stopBatContent = "@echo off", "echo 正在停止 CAUC-SEP 服务...", "taskkill /f /im CAUC-SEP-Backend.exe >nul 2>&1", "echo 服务已停止。", "pause"
+            $stopBatContent | Out-File -FilePath "$releaseDir\stop.bat" -Encoding ASCII
             
             Write-Host "Release package created successfully" -ForegroundColor Green
           } catch {

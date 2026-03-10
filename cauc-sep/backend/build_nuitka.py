@@ -7,6 +7,7 @@ Nuitka编译脚本 - 优化版
 - 增强错误处理和诊断
 - 确保可执行文件运行时能找到前端资源
 """
+
 import importlib.util
 import os
 import subprocess
@@ -46,21 +47,21 @@ def load_nuitka_config(config_path):
     print(f"Loading configuration from: {config_path}")
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
-    
+
     spec = importlib.util.spec_from_file_location("nuitka_config", config_path)
     config_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(config_module)
-    
+
     if not hasattr(config_module, "nuitka_options"):
         raise AttributeError("nuitka-config.py must define 'nuitka_options'")
-    
+
     return config_module.nuitka_options
 
 
 def build_nuitka_command(config_options, backend_dir):
     """根据配置构建Nuitka命令。"""
     cmd = [sys.executable, "-m", "nuitka"]
-    
+
     for key, value in config_options.items():
         if isinstance(value, bool):
             if value:
@@ -70,7 +71,7 @@ def build_nuitka_command(config_options, backend_dir):
                 cmd.append(f"--{key}={item}")
         elif value is not None:
             cmd.append(f"--{key}={value}")
-    
+
     cmd.append("main.py")
     return cmd
 
@@ -80,26 +81,27 @@ def check_frontend_dist(backend_dir):
     project_root = backend_dir.parent
     frontend_dist = project_root / "frontend" / "dist"
     backend_frontend_dist = backend_dir / "frontend" / "dist"
-    
+
     print()
     print("Checking frontend static files...")
-    
+
     if frontend_dist.exists() and list(frontend_dist.iterdir()):
         print(f"Found frontend dist at: {frontend_dist}")
-        
+
         if not backend_frontend_dist.parent.exists():
             backend_frontend_dist.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if not backend_frontend_dist.exists() or not list(backend_frontend_dist.iterdir()):
             print(f"Copying frontend dist to backend directory...")
             import shutil
+
             if backend_frontend_dist.exists():
                 shutil.rmtree(backend_frontend_dist)
             shutil.copytree(frontend_dist, backend_frontend_dist)
             print("Frontend dist copied successfully")
         else:
             print("Frontend dist already present in backend directory")
-        
+
         return True
     else:
         print("WARNING: Frontend dist not found or empty")
@@ -125,7 +127,9 @@ def main():
         print()
 
         print("Step 1: Check Nuitka installation...")
-        nuitka_check = run_command([sys.executable, "-m", "nuitka", "--version"], check=False, capture_output=True)
+        nuitka_check = run_command(
+            [sys.executable, "-m", "nuitka", "--version"], check=False, capture_output=True
+        )
         if nuitka_check and nuitka_check.returncode == 0:
             print(f"Nuitka version: {nuitka_check.stdout.strip()}")
         else:
@@ -161,11 +165,11 @@ def main():
 
         print("Step 6: Build result verification...")
         print(f"Nuitka exit code: {result.returncode}")
-        
+
         output_dir = Path(config_options.get("output-dir", "dist"))
         output_filename = config_options.get("output-filename", "CAUC-SEP-Backend")
         exe_path = output_dir / f"{output_filename}.exe"
-        
+
         if result.returncode == 0:
             if exe_path.exists():
                 size_mb = exe_path.stat().st_size / (1024 * 1024)
@@ -194,12 +198,12 @@ def main():
         print(f"BUILD ERROR: {type(e).__name__}: {e}")
         print("=" * 60)
         traceback.print_exc()
-        
+
         if "GITHUB_OUTPUT" in os.environ:
             with open(os.environ["GITHUB_OUTPUT"], "a") as f:
                 f.write("status=failed\n")
                 f.write(f"error={str(e)}\n")
-        
+
         sys.exit(1)
 
 

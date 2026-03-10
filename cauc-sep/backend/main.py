@@ -56,23 +56,24 @@ def get_base_path():
 def get_frontend_path():
     """获取前端静态文件路径，兼容多种运行环境。"""
     base_path = get_base_path()
-    
+
     possible_paths = [
         base_path / "frontend" / "dist",
         base_path / "dist" / "frontend" / "dist",
         base_path.parent / "frontend" / "dist",
     ]
-    
+
     for path in possible_paths:
         if path.exists() and list(path.iterdir()):
             logger.info(f"Found frontend static files at: {path}")
             return str(path)
-    
+
     logger.warning("Frontend static files not found, checking all possible paths:")
     for path in possible_paths:
         logger.warning(f"  - {path}: {'EXISTS' if path.exists() else 'NOT FOUND'}")
-    
+
     return None
+
 
 from api import (
     ammeter,
