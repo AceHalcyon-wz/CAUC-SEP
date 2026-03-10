@@ -1,11 +1,17 @@
 """
-Nuitka打包配置文件
+Nuitka打包配置文件 - 修复版
 
 功能：
 - 配置CAUC-SEP后端打包参数
 - 支持Windows可执行文件生成
 - 优化打包体积和启动性能
 - 24GB内存环境优化
+
+修复内容：
+- 添加认证模块(jose, passlib, bcrypt)
+- 添加pydantic补充模块
+- 添加starlette补充模块
+- 添加数据处理子模块
 
 使用方法：
     python -m nuitka --project-dir=backend --project-config=backend/nuitka-config.py main.py
@@ -14,7 +20,7 @@ Nuitka打包配置文件
     scripts\build-nuitka.bat
 
 作者：Agent
-日期：2026-03-09
+日期：2026-03-10
 """
 
 from pathlib import Path
@@ -27,18 +33,18 @@ def get_memory_optimized_jobs():
     根据系统内存自动计算并行任务数
 
     24GB内存配置：
-    - 保留8GB给系统
-    - 每个编译进程约2GB
-    - 可用16GB / 2GB = 8进程（保守设为4）
+    - 保留6GB给系统（优化）
+    - 每个编译进程约1.5GB（优化）
+    - 可用18GB / 1.5GB = 12进程（保守设为6）
     """
     try:
         import psutil
 
         total_memory_gb = psutil.virtual_memory().total / (1024**3)
-        reserved_gb = 8
-        per_job_gb = 2
+        reserved_gb = 6
+        per_job_gb = 1.5
         available_gb = max(total_memory_gb - reserved_gb, 4)
-        jobs = min(int(available_gb / per_job_gb), 8)
+        jobs = min(int(available_gb / per_job_gb), 10)
         return max(jobs, 2)
     except ImportError:
         return 4
@@ -89,8 +95,28 @@ nuitka_options = {
         "uvicorn.lifespan",
         "uvicorn.lifespan.on",
         "sqlalchemy.dialects.sqlite",
+        "sqlalchemy.pool",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm",
         "pydantic_core",
         "pydantic_settings",
+        "pydantic_core.core_schema",
+        "pydantic_core.validators",
+        "annotated_types",
+        "jose",
+        "jose.jwt",
+        "jose.jws",
+        "jose.jwe",
+        "jose.constants",
+        "jose.exceptions",
+        "jose.utils",
+        "passlib",
+        "passlib.hash",
+        "passlib.handlers",
+        "passlib.handlers.bcrypt",
+        "passlib.utils",
+        "passlib.utils.handlers",
+        "bcrypt",
         "multipart",
         "starlette",
         "starlette.responses",
@@ -98,6 +124,12 @@ nuitka_options = {
         "starlette.middleware",
         "starlette.middleware.cors",
         "starlette.websockets",
+        "starlette.requests",
+        "starlette.status",
+        "starlette.exceptions",
+        "starlette.background",
+        "starlette.datastructures",
+        "starlette.types",
         "httpx",
         "httpx._transports",
         "httpx._transports.default",
@@ -119,6 +151,18 @@ nuitka_options = {
         "aiofiles",
         "psutil",
         "psutil._pswindows",
+        "lmfit.minimizer",
+        "lmfit.model",
+        "lmfit.parameter",
+        "lmfit.confidence",
+        "lmfit.printfuncs",
+        "h5py.h5",
+        "h5py._hl",
+        "h5py._hl.files",
+        "h5py._hl.dataset",
+        "h5py._hl.group",
+        "h5py._hl.attrs",
+        "email_validator",
     ],
     "nofollow-import-to": [
         "tkinter",
@@ -126,23 +170,22 @@ nuitka_options = {
         "test",
         "tests",
         "pytest",
-        "PIL",
-        "cv2",
         "sphinx",
         "docutils",
         "IPython",
         "jupyter",
         "notebook",
-        "matplotlib",
-        "matplotlib.pyplot",
     ],
     "prefer-source-code": [],
     "enable-plugin": [
         "pydantic",
         "numpy",
         "scipy",
+        "anti-bloat",
     ],
-    "include-data-files": [],
+    "include-data-files": [
+        (str(project_dir / "assets" / "icon.ico"), "assets/icon.ico"),
+    ],
     "include-data-dirs": [],
     "assume-yes-for-downloads": True,
     "show-progress": True,
@@ -165,8 +208,11 @@ nuitka_options = {
 
 nuitka_options = {k: v for k, v in nuitka_options.items() if v is not None and v != [] and v != ""}
 
+
 if __name__ == "__main__":
-    print("Nuitka配置已加载:")
+    print("Nuitka配置已加载（修复版）:")
     print(f"  - 并行任务数: {nuitka_options.get('jobs', 4)}")
     print(f"  - 输出目录: {nuitka_options['output-dir']}")
     print(f"  - 输出文件: {nuitka_options['output-filename']}.exe")
+    print(f"  - 认证模块: 已添加 (jose, passlib, bcrypt)")
+    print(f"  - 数据处理: 已添加 (lmfit, h5py 子模块)")

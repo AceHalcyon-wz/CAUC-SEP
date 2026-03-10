@@ -144,7 +144,7 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   build-windows:
-    name: Build Windows Executable
+    name: Build Windows Executable (Nuitka)
     runs-on: windows-latest
     needs: build-and-push
     if: |
@@ -177,7 +177,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install nuitka ordered-set zstandard
+
+      - name: Setup Nuitka cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\Nuitka\Nuitka\Cache
+            cauc-sep\backend\build
+            cauc-sep\backend\dist
+          key: nuitka-${{ runner.os }}-${{ hashFiles('cauc-sep/backend/requirements.txt', 'cauc-sep/backend/nuitka-config.py') }}
+          restore-keys: |
+            nuitka-${{ runner.os }}-
 
       - name: Build frontend
         working-directory: cauc-sep/frontend
@@ -185,41 +196,152 @@ jobs:
           npm ci
           npm run build
 
-      - name: Build backend with PyInstaller
+      - name: Build backend with Nuitka
+        id: nuitka-build
         working-directory: cauc-sep/backend
         run: |
-          pyinstaller main.py `
-            --name CAUC-SEP-Backend `
-            --onefile `
-            --windowed `
-            --add-data "core;core" `
-            --add-data "api;api" `
-            --add-data "middleware;middleware" `
-            --add-data "models;models" `
-            --hidden-import uvicorn.logging `
-            --hidden-import uvicorn.loops `
-            --hidden-import uvicorn.loops.auto `
-            --hidden-import uvicorn.protocols `
-            --hidden-import uvicorn.protocols.http `
-            --hidden-import uvicorn.protocols.http.auto `
-            --hidden-import uvicorn.protocols.websockets `
-            --hidden-import uvicorn.protocols.websockets.auto `
-            --hidden-import uvicorn.lifespan `
-            --hidden-import uvicorn.lifespan.on `
-            --hidden-import sqlalchemy.dialects.sqlite `
-            --hidden-import pydantic `
-            --hidden-import pydantic_core `
-            --hidden-import pydantic_settings `
-            --exclude-module matplotlib `
-            --exclude-module PIL `
-            --exclude-module tkinter `
-            --exclude-module unittest `
-            --exclude-module test `
-            --exclude-module tests `
-            --noupx `
-            --optimize 2 `
-            --noconfirm `
-            --clean
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host "  Starting Nuitka Compilation" -ForegroundColor Cyan
+          Write-Host "========================================" -ForegroundColor Cyan
+          Write-Host ""
+          
+          $startTime = Get-Date
+          
+          try {
+            python -m nuitka `
+              --standalone `
+              --onefile `
+              --windows-console-mode=disable `
+              --windows-icon-from-ico=assets/icon.ico `
+              --output-dir=dist `
+              --output-filename=CAUC-SEP-Backend.exe `
+              --include-package=fastapi `
+              --include-package=uvicorn `
+              --include-package=pydantic `
+              --include-package=pydantic_settings `
+              --include-package=sqlalchemy `
+              --include-package=pymodbus `
+              --include-package=serial `
+              --include-package=numpy `
+              --include-package=scipy `
+              --include-package=lmfit `
+              --include-package=h5py `
+              --include-package=core `
+              --include-package=api `
+              --include-package=middleware `
+              --include-package=models `
+              --include-package=drivers `
+              --include-module=uvicorn.logging `
+              --include-module=uvicorn.loops `
+              --include-module=uvicorn.loops.auto `
+              --include-module=uvicorn.protocols `
+              --include-module=uvicorn.protocols.http `
+              --include-module=uvicorn.protocols.http.auto `
+              --include-module=uvicorn.protocols.websockets `
+              --include-module=uvicorn.protocols.websockets.auto `
+              --include-module=uvicorn.lifespan `
+              --include-module=uvicorn.lifespan.on `
+              --include-module=sqlalchemy.dialects.sqlite `
+              --include-module=pydantic_core `
+              --include-module=pydantic_settings `
+              --include-module=jose `
+              --include-module=jose.jwt `
+              --include-module=jose.jws `
+              --include-module=jose.constants `
+              --include-module=passlib `
+              --include-module=passlib.hash `
+              --include-module=passlib.handlers.bcrypt `
+              --include-module=bcrypt `
+              --include-module=starlette `
+              --include-module=starlette.responses `
+              --include-module=starlette.routing `
+              --include-module=starlette.middleware `
+              --include-module=starlette.middleware.cors `
+              --include-module=starlette.websockets `
+              --include-module=redis `
+              --include-module=msgpack `
+              --include-module=aiofiles `
+              --include-module=psutil `
+              --include-module=psutil._pswindows `
+              --nofollow-import-to=tkinter `
+              --nofollow-import-to=unittest `
+              --nofollow-import-to=test `
+              --nofollow-import-to=tests `
+              --nofollow-import-to=pytest `
+              --nofollow-import-to=PIL `
+              --nofollow-import-to=cv2 `
+              --nofollow-import-to=sphinx `
+              --nofollow-import-to=docutils `
+              --nofollow-import-to=IPython `
+              --nofollow-import-to=jupyter `
+              --nofollow-import-to=notebook `
+              --enable-plugin=pydantic `
+              --enable-plugin=numpy `
+              --enable-plugin=scipy `
+              --lto=yes `
+              --zig `
+              --assume-yes-for-downloads `
+              --show-progress `
+              --show-memory `
+              --jobs=4 `
+              main.py
+            
+            $endTime = Get-Date
+            $duration = $endTime - $startTime
+            $durationStr = "{0:hh\:mm\:ss}" -f $duration
+            
+            Write-Host ""
+            Write-Host "========================================" -ForegroundColor Green
+            Write-Host "  Nuitka Compilation Successful!" -ForegroundColor Green
+            Write-Host "  Duration: $durationStr" -ForegroundColor Green
+            Write-Host "========================================" -ForegroundColor Green
+            
+            $exePath = "dist\CAUC-SEP-Backend.exe"
+            if (Test-Path $exePath) {
+              $fileInfo = Get-Item $exePath
+              $sizeMB = [math]::Round($fileInfo.Length / 1MB, 2)
+              Write-Host "Output: $exePath ($sizeMB MB)" -ForegroundColor Cyan
+              echo "exe_size=$sizeMB" >> $env:GITHUB_OUTPUT
+            }
+            
+            echo "status=success" >> $env:GITHUB_OUTPUT
+          }
+          catch {
+            Write-Host ""
+            Write-Host "========================================" -ForegroundColor Red
+            Write-Host "  Nuitka Compilation FAILED!" -ForegroundColor Red
+            Write-Host "========================================" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Error Details:" -ForegroundColor Red
+            Write-Host $_.Exception.Message -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Stack Trace:" -ForegroundColor Red
+            Write-Host $_.ScriptStackTrace -ForegroundColor Red
+            
+            echo "status=failed" >> $env:GITHUB_OUTPUT
+            exit 1
+          }
+
+      - name: Verify build output
+        working-directory: cauc-sep/backend
+        run: |
+          $exePath = "dist\CAUC-SEP-Backend.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Host "ERROR: Executable not found at $exePath" -ForegroundColor Red
+            Write-Host ""
+            Write-Host "Listing dist directory contents:" -ForegroundColor Yellow
+            if (Test-Path "dist") {
+              Get-ChildItem -Path "dist" -Recurse | Format-Table Name, Length, LastWriteTime
+            } else {
+              Write-Host "dist directory does not exist!" -ForegroundColor Red
+            }
+            exit 1
+          }
+          
+          Write-Host "Build verification passed!" -ForegroundColor Green
+          $fileInfo = Get-Item $exePath
+          Write-Host "File size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
+          Write-Host "Created: $($fileInfo.CreationTime)"
 
       - name: Create release package
         working-directory: cauc-sep
@@ -265,21 +387,36 @@ jobs:
         run: |
           $version = "${{ needs.build-and-push.outputs.version }}"
           Compress-Archive -Path "CAUC-SEP" -DestinationPath "CAUC-SEP-$version.zip"
+          
+          Write-Host "Created: CAUC-SEP-$version.zip"
+          $zipInfo = Get-Item "CAUC-SEP-$version.zip"
+          Write-Host "ZIP size: $([math]::Round($zipInfo.Length / 1MB, 2)) MB"
 
-      - name: Upload artifact
+      - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CAUC-SEP-Windows
+          name: CAUC-SEP-Windows-ZIP
           path: cauc-sep/dist/CAUC-SEP-*.zip
+          retention-days: 30
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CAUC-SEP-Windows-EXE
+          path: cauc-sep/backend/dist/CAUC-SEP-Backend.exe
           retention-days: 30
 
       - name: Build summary
         run: |
-          echo "## Windows Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## Windows Build Complete (Nuitka)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version**: ${{ needs.build-and-push.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Artifact**: CAUC-SEP-Windows" >> $GITHUB_STEP_SUMMARY
+          echo "**Compiler**: Nuitka (LTO + Zig)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifacts**:" >> $GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-Windows-ZIP (完整压缩包)" >> $GITHUB_STEP_SUMMARY
+          echo "- CAUC-SEP-Windows-EXE (独立可执行文件)" >> $GITHUB_STEP_SUMMARY
 
   deploy-staging:
     name: Deploy to Staging
@@ -361,10 +498,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download Windows artifact
+      - name: Download ZIP artifact
         uses: actions/download-artifact@v4
         with:
-          name: CAUC-SEP-Windows
+          name: CAUC-SEP-Windows-ZIP
+          path: ./artifacts
+
+      - name: Download EXE artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: CAUC-SEP-Windows-EXE
           path: ./artifacts
 
       - name: Generate changelog
@@ -378,6 +521,12 @@ jobs:
           else
             echo "## Initial Release" > CHANGELOG.md
           fi
+          echo "" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Download Options" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "- **CAUC-SEP-{version}.zip**: 完整安装包（包含前端、启动脚本等）" >> CHANGELOG.md
+          echo "- **CAUC-SEP-Backend.exe**: 独立可执行文件（仅后端服务）" >> CHANGELOG.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -388,6 +537,7 @@ jobs:
           generate_release_notes: true
           files: |
             artifacts/CAUC-SEP-*.zip
+            artifacts/CAUC-SEP-Backend.exe
 
       - name: Release notification
         run: |
