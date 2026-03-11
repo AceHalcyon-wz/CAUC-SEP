@@ -198,71 +198,24 @@ jobs:
         working-directory: cauc-sep/backend
         shell: pwsh
         run: |
-          $ErrorActionPreference = "Stop"
-          
           Write-Host "=== Python Environment Info ===" -ForegroundColor Cyan
           python --version
           pip --version
           
-          Write-Host "`n=== Configuring pip ===" -ForegroundColor Cyan
-          pip config set global.timeout 600
-          pip config set global.trusted-host "pypi.org pypi.python.org files.pythonhosted.org"
-          
           Write-Host "`n=== Upgrading pip ===" -ForegroundColor Cyan
-          python -m pip install --upgrade pip setuptools wheel --quiet
+          python -m pip install --upgrade pip setuptools wheel
           
-          Write-Host "`n=== Installing binary dependencies first ===" -ForegroundColor Cyan
-          $binaryPkgs = @(
-            "numpy>=1.26.0,<2.0.0",
-            "scipy>=1.12.0,<2.0.0",
-            "matplotlib>=3.8.0,<4.0.0",
-            "h5py>=3.10.0,<4.0.0"
-          )
-          foreach ($pkg in $binaryPkgs) {
-            Write-Host "Installing binary: $pkg" -ForegroundColor Yellow
-            pip install "$pkg" --prefer-binary --only-binary=:all: 2>&1
-            if ($LASTEXITCODE -ne 0) {
-              Write-Host "Binary install failed, trying source..." -ForegroundColor Yellow
-              pip install "$pkg" --prefer-binary 2>&1
-            }
-          }
+          Write-Host "`n=== Installing all dependencies ===" -ForegroundColor Cyan
+          pip install numpy scipy matplotlib h5py --prefer-binary
+          pip install fastapi uvicorn[standard] pymodbus pyserial lmfit sqlalchemy pydantic
+          pip install python-jose[cryptography] passlib[bcrypt] python-multipart
+          pip install psutil msgpack aiofiles redis
           
-          Write-Host "`n=== Installing remaining dependencies ===" -ForegroundColor Cyan
-          $remainingPkgs = @(
-            "fastapi>=0.109.0,<0.110.0",
-            "uvicorn[standard]>=0.27.0,<0.28.0",
-            "pymodbus>=3.5.0,<4.0.0",
-            "pyserial>=3.5,<4.0",
-            "lmfit>=1.2.0,<2.0.0",
-            "sqlalchemy>=2.0.0,<3.0.0",
-            "pydantic>=2.5.0,<3.0.0",
-            "python-jose[cryptography]>=3.3.0,<4.0.0",
-            "passlib[bcrypt]>=1.7.4,<2.0.0",
-            "python-multipart>=0.0.6,<0.1.0",
-            "psutil>=5.9.0,<6.0.0",
-            "msgpack>=1.0.7,<2.0.0",
-            "aiofiles>=23.2.0,<24.0.0",
-            "redis>=5.0.0,<6.0.0"
-          )
-          foreach ($pkg in $remainingPkgs) {
-            Write-Host "Installing: $pkg" -ForegroundColor Yellow
-            pip install "$pkg" 2>&1
-            if ($LASTEXITCODE -ne 0) {
-              Write-Host "WARNING: Failed to install $pkg, continuing..." -ForegroundColor Red
-            }
-          }
-          
-          Write-Host "`n=== Installing Nuitka and build tools ===" -ForegroundColor Cyan
-          pip install nuitka ordered-set zstandard 2>&1
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: Failed to install Nuitka" -ForegroundColor Red
-            exit 1
-          }
+          Write-Host "`n=== Installing Nuitka ===" -ForegroundColor Cyan
+          pip install nuitka ordered-set zstandard
           
           Write-Host "`n=== Verifying installed packages ===" -ForegroundColor Cyan
-          pip list --format=freeze
-          
-          Write-Host "`n=== Python dependencies installed successfully ===" -ForegroundColor Green
+          pip list
 
       - name: Setup Nuitka cache
         uses: actions/cache@v4
