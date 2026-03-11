@@ -1,11 +1,17 @@
 """
-Nuitka编译脚本 - 优化版
+Nuitka编译脚本 - 增强版v7
 用于在CI/CD环境中编译CAUC-SEP后端
 功能：
 - 读取nuitka-config.py配置
 - 自动打包前端静态文件
 - 增强错误处理和诊断
 - 确保可执行文件运行时能找到前端资源
+- 详细捕获Nuitka输出用于调试
+
+修复内容：
+- 增强错误输出捕获
+- 添加更详细的诊断信息
+- 修复可能的命令行参数问题
 """
 
 import importlib.util
@@ -16,18 +22,16 @@ import sys
 import traceback
 from pathlib import Path
 
-# Fix Windows encoding issues - force UTF-8 for stdout/stderr
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
-    # Also set environment variable for subprocess
     os.environ["PYTHONIOENCODING"] = "utf-8"
 
 
 def run_command(cmd, cwd=None, check=True, capture_output=False):
     """运行命令并打印输出。"""
     try:
-        print(f"Running: {' '.join(cmd)}")
+        print(f"Running: {' '.join(str(c) for c in cmd)}")
     except UnicodeEncodeError:
         print(f"Running: [command contains non-ASCII characters]")
     try:
@@ -62,12 +66,10 @@ def load_nuitka_config(config_path):
     spec = importlib.util.spec_from_file_location("nuitka_config", config_path)
     config_module = importlib.util.module_from_spec(spec)
     
-    # 确保使用UTF-8编码读取配置文件
     import codecs
     with codecs.open(str(config_path), 'r', encoding='utf-8') as f:
         config_code = f.read()
     
-    # 使用exec执行配置代码
     exec(compile(config_code, str(config_path), 'exec'), config_module.__dict__)
 
     if not hasattr(config_module, "nuitka_options"):
@@ -90,10 +92,9 @@ def build_nuitka_command(config_options, backend_dir):
                     cmd.append(f"--{key}={item[0]}={item[1]}")
                 else:
                     cmd.append(f"--{key}={item}")
-        elif value is not None:
+        elif value is not None and value != "":
             cmd.append(f"--{key}={value}")
 
-    # 动态检测并添加Zig编译器支持
     zig_found = False
     zig_paths = [
         Path("C:/zig/zig.exe"),
@@ -107,7 +108,6 @@ def build_nuitka_command(config_options, backend_dir):
             zig_found = True
             break
     if not zig_found:
-        # 检查PATH中是否有zig
         import shutil
         if shutil.which("zig"):
             print("Zig compiler found in PATH")
@@ -116,7 +116,6 @@ def build_nuitka_command(config_options, backend_dir):
         else:
             print("Zig compiler not found, proceeding without Zig optimization")
 
-    # 动态添加前端静态文件目录（如果存在）
     frontend_dist = backend_dir / "frontend" / "dist"
     try:
         if frontend_dist.exists() and any(frontend_dist.iterdir()):
@@ -181,7 +180,7 @@ def check_frontend_dist(backend_dir):
 
 def main():
     print("=" * 60)
-    print("  CAUC-SEP Nuitka Build Script v6 - Optimized")
+    print("  CAUC-SEP Nuitka Build Script v7 - Enhanced Error Handling")
     print("=" * 60)
     print()
 
@@ -204,6 +203,8 @@ def main():
             print(f"Nuitka version: {nuitka_check.stdout.strip()}")
         else:
             print("WARNING: Nuitka may not be installed correctly")
+            if nuitka_check:
+                print(f"  Stderr: {nuitka_check.stderr}")
         print()
 
         print("Step 2: Load nuitka-config.py...")
@@ -213,6 +214,7 @@ def main():
         print(f"  - Output dir: {config_options.get('output-dir', 'dist')}")
         print(f"  - Output file: {config_options.get('output-filename', 'CAUC-SEP-Backend')}")
         print(f"  - Onefile mode: {config_options.get('onefile', False)}")
+        print(f"  - Jobs: {config_options.get('jobs', 'default')}")
         print()
 
         print("Step 3: Prepare frontend static files...")
@@ -226,28 +228,46 @@ def main():
         print("Step 4: Build Nuitka command...")
         cmd = build_nuitka_command(config_options, backend_dir)
         print(f"Command built with {len(cmd)} arguments")
-        # Safe print to avoid encoding issues on Windows
         try:
-            first_args = " ".join(cmd[:5])
-            print(f"First 5 args: {first_args}...")
+            cmd_str = " ".join(str(c) for c in cmd[:10])
+            print(f"First 10 args: {cmd_str}...")
         except UnicodeEncodeError:
-            print(f"First 5 args: [contains non-ASCII characters]")
+            print(f"First 10 args: [contains non-ASCII characters]")
         print()
 
         print("Step 5: Run Nuitka compilation...")
         print("=" * 60)
-        result = subprocess.run(cmd, check=False)
+        print("Starting Nuitka compilation process...")
+        print("This may take several minutes...")
+        print("=" * 60)
+        
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        
+        output_lines = []
+        for line in iter(process.stdout.readline, ''):
+            print(line, end='')
+            output_lines.append(line)
+        
+        process.wait()
+        exit_code = process.returncode
+        
         print("=" * 60)
         print()
 
         print("Step 6: Build result verification...")
-        print(f"Nuitka exit code: {result.returncode}")
+        print(f"Nuitka exit code: {exit_code}")
 
         output_dir = Path(config_options.get("output-dir", "dist"))
         output_filename = config_options.get("output-filename", "CAUC-SEP-Backend")
         exe_path = output_dir / f"{output_filename}.exe"
 
-        if result.returncode == 0:
+        if exit_code == 0:
             if exe_path.exists():
                 size_mb = exe_path.stat().st_size / (1024 * 1024)
                 print("SUCCESS: Build completed successfully!")
@@ -255,19 +275,27 @@ def main():
                 print(f"  Size: {size_mb:.2f} MB")
             else:
                 print(f"WARNING: Exit code 0 but executable not found at {exe_path}")
+                print("Checking for alternative output locations...")
+                for f in output_dir.rglob("*.exe"):
+                    print(f"  Found: {f}")
         else:
-            print(f"ERROR: Build failed with exit code {result.returncode}")
+            print(f"ERROR: Build failed with exit code {exit_code}")
+            print()
+            print("Last 50 lines of output:")
+            for line in output_lines[-50:]:
+                print(f"  {line.rstrip()}")
+            print()
             print("Please check the Nuitka output above for details")
         print()
 
         if "GITHUB_OUTPUT" in os.environ:
             with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-                f.write(f"status={'success' if result.returncode == 0 else 'failed'}\n")
-                if result.returncode == 0 and exe_path.exists():
+                f.write(f"status={'success' if exit_code == 0 else 'failed'}\n")
+                if exit_code == 0 and exe_path.exists():
                     f.write(f"executable_path={exe_path}\n")
                     f.write(f"executable_size_mb={size_mb:.2f}\n")
 
-        sys.exit(result.returncode)
+        sys.exit(exit_code)
 
     except Exception as e:
         print()
