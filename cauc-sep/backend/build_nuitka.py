@@ -139,10 +139,14 @@ def check_frontend_dist(backend_dir):
 
     print()
     print("Checking frontend static files...")
+    print(f"  Project root: {project_root}")
+    print(f"  Frontend dist (expected): {frontend_dist}")
+    print(f"  Backend frontend dist: {backend_frontend_dist}")
 
     try:
         if frontend_dist.exists() and any(frontend_dist.iterdir()):
             print(f"Found frontend dist at: {frontend_dist}")
+            print(f"  Contents: {list(frontend_dist.iterdir())[:5]}")
 
             if not backend_frontend_dist.parent.exists():
                 backend_frontend_dist.parent.mkdir(parents=True, exist_ok=True)
@@ -155,16 +159,22 @@ def check_frontend_dist(backend_dir):
                     shutil.rmtree(backend_frontend_dist)
                 shutil.copytree(frontend_dist, backend_frontend_dist)
                 print("Frontend dist copied successfully")
+                print(f"  Copied files: {len(list(backend_frontend_dist.rglob('**/*'))}")
             else:
                 print("Frontend dist already present in backend directory")
 
             return True
         else:
             print("WARNING: Frontend dist not found or empty")
+            print(f"  Expected path: {frontend_dist}")
+            print(f"  Exists: {frontend_dist.exists()}")
+            print(f"  Has files: {any(frontend_dist.iterdir()) if frontend_dist.exists() else False}")
             print("Please build the frontend first: cd frontend && npm install && npm run build")
             return False
     except Exception as e:
         print(f"WARNING: Error checking frontend dist: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -206,8 +216,10 @@ def main():
 
         print("Step 3: Prepare frontend static files...")
         frontend_ready = check_frontend_dist(backend_dir)
+        print(f"Frontend ready: {frontend_ready}")
         if not frontend_ready:
             print("WARNING: Proceeding without frontend static files")
+            print("WARNING: This may cause Nuitka build to fail if frontend resources are required at runtime")
         print()
 
         print("Step 4: Build Nuitka command...")
