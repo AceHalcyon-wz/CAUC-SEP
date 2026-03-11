@@ -159,7 +159,8 @@ def check_frontend_dist(backend_dir):
                     shutil.rmtree(backend_frontend_dist)
                 shutil.copytree(frontend_dist, backend_frontend_dist)
                 print("Frontend dist copied successfully")
-                print(f"  Copied files: {len(list(backend_frontend_dist.rglob('**/*'))}")
+                copied_count = len(list(backend_frontend_dist.rglob("**/*")))
+                print(f"  Copied files: {copied_count}")
             else:
                 print("Frontend dist already present in backend directory")
 
