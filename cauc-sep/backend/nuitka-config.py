@@ -274,8 +274,8 @@ nuitka_options = {
         "anti-bloat",
     ],
     "include-data-files": [
-        (str(project_dir / "assets" / "icon.ico"), "assets/icon.ico"),
-    ],
+        (str(project_dir / "assets" / "icon.ico"), "assets/icon.ico")
+    ] if (project_dir / "assets" / "icon.ico").exists() else [],
     "assume-yes-for-downloads": True,
     "show-progress": True,
     "show-memory": True,

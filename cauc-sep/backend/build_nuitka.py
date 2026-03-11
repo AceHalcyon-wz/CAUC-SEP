@@ -86,7 +86,10 @@ def build_nuitka_command(config_options, backend_dir):
                 cmd.append(f"--{key}")
         elif isinstance(value, list):
             for item in value:
-                cmd.append(f"--{key}={item}")
+                if isinstance(item, (tuple, list)) and len(item) == 2:
+                    cmd.append(f"--{key}={item[0]}={item[1]}")
+                else:
+                    cmd.append(f"--{key}={item}")
         elif value is not None:
             cmd.append(f"--{key}={value}")
 
