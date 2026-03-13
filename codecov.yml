@@ -1,0 +1,142 @@
+# ============================================================================
+# CAUC-SEP Codecov 配置
+# ============================================================================
+#
+# 文件名: codecov.yml
+# 路径: d:\cauc-sep\codecov.yml
+# 功能: 配置测试覆盖率报告和状态检查
+# 版本: v0.3.0
+# 创建日期: 2024-01-20
+# 最后更新: 2026-03-14
+#
+# 说明:
+#   本配置文件定义了Codecov覆盖率报告的配置，包含：
+#   - 覆盖率目标配置
+#   - 状态检查配置
+#   - 注释配置
+#   - 忽略路径配置
+#   - 标志配置
+#
+# 官方文档: https://docs.codecov.com/
+# ============================================================================
+
+# ==================== Codecov 全局配置 ====================
+codecov:
+  require_ci_to_pass: true           # 要求CI通过后才上传覆盖率
+  notify:
+    wait_for_ci: true                # 等待CI完成后再发送通知
+
+# ==================== 覆盖率目标配置 ====================
+coverage:
+  precision: 2                       # 百分比精度（小数点后位数）
+  round: down                        # 舍入方式：down（向下取整）
+  range: "70...100"                  # 覆盖率范围（用于颜色显示）
+
+  # ==================== 状态检查配置 ====================
+  # 用于在PR中显示覆盖率状态
+  status:
+    # 项目整体覆盖率检查
+    # 衡量整个项目的测试覆盖率
+    project:
+      default:
+        target: 70%                  # 目标覆盖率
+        threshold: 5%                # 允许下降的阈值
+        if_ci_failed: error          # CI失败时的行为
+        informational: false         # 是否仅作为信息展示
+        only_pulls: false            # 是否仅在PR中检查
+
+      # 后端覆盖率检查
+      # 专门检查后端核心模块的覆盖率
+      backend:
+        target: 75%                  # 后端目标覆盖率（略高）
+        threshold: 5%                # 允许下降的阈值
+        flags:
+          - backend-unit             # 关联的标志
+          - backend-integration
+        paths:
+          - backend/core             # 检查的路径
+          - backend/api
+
+      # 前端覆盖率检查
+      # 专门检查前端代码的覆盖率
+      frontend:
+        target: 60%                  # 前端目标覆盖率（略低）
+        threshold: 10%               # 允许下降的阈值（前端波动较大）
+        flags:
+          - frontend
+        paths:
+          - frontend/src
+
+    # PR覆盖率变化检查
+    # 检查PR中新增代码的覆盖率
+    patch:
+      default:
+        target: 70%                  # 新增代码目标覆盖率
+        threshold: 5%                # 允许下降的阈值
+        base: auto                   # 基准分支自动检测
+        if_ci_failed: error          # CI失败时的行为
+        informational: false         # 是否仅作为信息展示
+        only_pulls: true             # 仅在PR中检查
+
+# ==================== 注释配置 ====================
+# 控制PR中的覆盖率注释
+comment:
+  layout: "reach, diff, flags, files"  # 注释布局
+  behavior: default                 # 注释行为
+  require_changes: true             # 仅在有变化时才评论
+  require_base: false               # 是否需要基准覆盖率
+  require_head: true                # 是否需要头部覆盖率
+  hide_project_coverage: false      # 是否隐藏项目覆盖率
+
+# ==================== 忽略路径配置 ====================
+# 排除不需要统计覆盖率的路径
+ignore:
+  - "**/tests/**"                   # 测试文件
+  - "**/test_*.py"                  # 测试文件
+  - "**/__pycache__/**"             # Python缓存
+  - "**/migrations/**"              # 数据库迁移
+  - "**/examples/**"                # 示例代码
+  - "**/docs/**"                    # 文档
+  - "**/node_modules/**"            # Node.js依赖
+  - "**/*.min.js"                   # 压缩JS文件
+  - "**/vendor/**"                  # 第三方库
+  - "**/dist/**"                    # 构建输出
+  - "**/build/**"                   # 构建输出
+
+# ==================== 标志配置 ====================
+# 用于区分不同类型的测试覆盖率
+flags:
+  # 后端单元测试标志
+  backend-unit:
+    paths:
+      - backend/core
+      - backend/api
+    carryforward: true              # 继承之前的覆盖率
+
+  # 后端集成测试标志
+  backend-integration:
+    paths:
+      - backend/core
+      - backend/api
+    carryforward: true
+
+  # 前端测试标志
+  frontend:
+    paths:
+      - frontend/src
+    carryforward: true
+
+# ==================== GitHub检查配置 ====================
+# 控制GitHub PR检查注解
+github_checks:
+  annotations: true                 # 启用注解
+
+# ==================== 解析器配置 ====================
+# 配置覆盖率报告解析器
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true             # 检测条件分支
+      loop: true                    # 检测循环分支
+      method: false                 # 不检测方法分支
+      macro: false                  # 不检测宏分支

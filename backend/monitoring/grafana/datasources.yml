@@ -1,0 +1,64 @@
+# ==============================================================================
+# 文件名: datasources.yml
+# 路径: backend/monitoring/grafana/
+# 功能: Grafana数据源自动配置
+# 描述: 配置Grafana启动时自动创建Prometheus数据源，实现监控数据可视化
+# 作者: CAUC-SEP运维团队
+# 创建日期: 2024-03-06
+# 最后更新: 2024-03-06
+# 依赖: Grafana 10.0+, Prometheus 2.45+
+# ==============================================================================
+#
+# 配置说明:
+# - apiVersion: API版本，固定为1
+# - datasources: 数据源配置列表
+# - name: 数据源名称，显示在Grafana中
+# - type: 数据源类型（prometheus, mysql, postgres等）
+# - access: 访问方式（proxy=通过Grafana服务器代理，direct=直接访问）
+# - url: 数据源地址
+# - isDefault: 是否为默认数据源
+# - editable: 是否允许通过UI编辑
+# - jsonData: 数据源特定配置
+#   - timeInterval: 数据采集间隔，影响查询精度
+#   - httpMethod: HTTP请求方法（POST性能更好）
+#   - manageAlerts: 是否启用Grafana告警管理
+#   - prometheusType: Prometheus类型标识
+#
+# 使用方式:
+# 1. Grafana启动时自动创建配置的数据源
+# 2. 在仪表板中可直接使用该数据源创建面板
+# 3. 无需手动配置数据源连接
+#
+# 注意事项:
+# - url中的prometheus是docker-compose中定义的服务名
+# - 生产环境建议设置 editable: false 防止误修改
+# - timeInterval应与Prometheus的scrape_interval匹配
+# ==============================================================================
+
+apiVersion: 1
+
+datasources:
+  # Prometheus数据源配置
+  # 用于查询和可视化CAUC-SEP系统的监控指标
+  - name: Prometheus                      # 数据源名称，在Grafana中显示
+    type: prometheus                      # 数据源类型：Prometheus时序数据库
+    access: proxy                         # 访问方式：通过Grafana服务器代理请求
+    url: http://prometheus:9090           # Prometheus服务地址（Docker网络内部）
+    isDefault: true                       # 设为默认数据源
+    editable: false                       # 禁止通过UI编辑（生产环境安全考虑）
+    jsonData:
+      # 数据采集最小间隔
+      # 应与Prometheus配置的scrape_interval一致或更大
+      timeInterval: "15s"
+      
+      # HTTP请求方法
+      # POST方法在处理大量标签查询时性能更好
+      httpMethod: POST
+      
+      # 启用Grafana告警管理功能
+      # 允许在Grafana中创建和管理告警规则
+      manageAlerts: true
+      
+      # Prometheus类型标识
+      # 用于区分Prometheus和其他兼容系统（如Thanos、Cortex）
+      prometheusType: Prometheus

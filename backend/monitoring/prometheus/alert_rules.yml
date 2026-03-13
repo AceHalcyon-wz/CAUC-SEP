@@ -1,0 +1,375 @@
+# ==============================================================================
+# 文件名: alert_rules.yml
+# 路径: backend/monitoring/prometheus/
+# 功能: Prometheus告警规则配置
+# 描述: 定义CAUC-SEP系统的监控告警规则，覆盖系统资源、设备状态、实验状态、
+#       API性能、存储、健康评分、WebSocket等多个监控维度
+# 作者: CAUC-SEP运维团队
+# 创建日期: 2024-03-06
+# 最后更新: 2024-03-06
+# 依赖: Prometheus 2.45+
+# ==============================================================================
+#
+# 告警规则结构说明:
+# - groups: 告警规则组列表
+#   - name: 规则组名称，用于分类管理
+#   - interval: 规则评估间隔
+#   - rules: 告警规则列表
+#     - alert: 告警名称
+#     - expr: PromQL表达式，定义触发条件
+#     - for: 持续时间，条件持续满足多久才触发告警
+#     - labels: 告警标签，用于分类和路由
+#       - severity: 严重程度（critical/warning/info）
+#       - category: 告警类别
+#     - annotations: 告警注解，包含详细描述信息
+#       - summary: 告警摘要
+#       - description: 详细描述（支持模板变量）
+#       - runbook_url: 运维手册链接
+#
+# 告警级别说明:
+# - critical: 严重告警，需要立即处理，可能影响系统可用性
+# - warning: 警告告警，需要关注，可能发展为严重问题
+# - info: 信息告警，仅供参考
+#
+# 告警类别说明:
+# - system: 系统资源告警（CPU、内存、磁盘）
+# - device: 设备状态告警
+# - experiment: 实验状态告警
+# - api: API性能告警
+# - storage: 存储告警
+# - health: 健康评分告警
+# - websocket: WebSocket连接告警
+# - alerting: 告警系统自身监控
+#
+# 使用方式:
+# 1. 在prometheus.yml中通过rule_files引用此文件
+# 2. Prometheus启动后自动加载规则
+# 3. 通过Prometheus UI查看告警状态
+# 4. 配置Alertmanager进行告警通知
+#
+# 注意事项:
+# - 修改规则后需重载Prometheus配置（POST /-/reload）
+# - 避免告警风暴，合理设置for持续时间
+# - 定期审查告警规则，删除无效规则
+# ==============================================================================
+
+groups:
+  # ==========================================================================
+  # 系统资源告警组
+  # 监控CPU、内存、磁盘等核心系统资源
+  # ==========================================================================
+  - name: system_alerts
+    interval: 30s                         # 每30秒评估一次规则
+    rules:
+      # ----------------------------------------------------------------------
+      # CPU使用率告警
+      # 分为警告级别（>80%）和严重级别（>95%）
+      # ----------------------------------------------------------------------
+      - alert: HighCPUUsage               # 告警名称
+        expr: cpu_usage_percent > 80      # 触发条件：CPU使用率超过80%
+        for: 5m                           # 持续5分钟后触发告警（避免瞬时波动）
+        labels:
+          severity: warning               # 严重程度：警告
+          category: system                # 告警类别：系统资源
+        annotations:
+          summary: "CPU使用率过高"         # 告警摘要
+          description: "CPU使用率超过80%，当前值: {{ $value }}%"  # 详细描述
+          runbook_url: "https://wiki.example.com/runbooks/high-cpu"  # 运维手册
+
+      - alert: CriticalCPUUsage
+        expr: cpu_usage_percent > 95      # 触发条件：CPU使用率超过95%
+        for: 2m                           # 持续2分钟后触发（严重问题快速响应）
+        labels:
+          severity: critical              # 严重程度：严重
+          category: system
+        annotations:
+          summary: "CPU使用率严重过高"
+          description: "CPU使用率超过95%，当前值: {{ $value }}%"
+          runbook_url: "https://wiki.example.com/runbooks/critical-cpu"
+
+      # ----------------------------------------------------------------------
+      # 内存使用率告警
+      # 监控系统内存使用情况，防止OOM
+      # ----------------------------------------------------------------------
+      - alert: HighMemoryUsage
+        expr: memory_usage_percent > 80   # 触发条件：内存使用率超过80%
+        for: 5m                           # 持续5分钟后触发
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "内存使用率过高"
+          description: "内存使用率超过80%，当前值: {{ $value }}%"
+
+      - alert: CriticalMemoryUsage
+        expr: memory_usage_percent > 95   # 触发条件：内存使用率超过95%
+        for: 2m                           # 持续2分钟后触发
+        labels:
+          severity: critical
+          category: system
+        annotations:
+          summary: "内存使用率严重过高"
+          description: "内存使用率超过95%，当前值: {{ $value }}%"
+
+      # ----------------------------------------------------------------------
+      # 磁盘使用率告警
+      # 监控磁盘空间，防止磁盘满导致服务中断
+      # ----------------------------------------------------------------------
+      - alert: HighDiskUsage
+        expr: disk_usage_percent > 85     # 触发条件：磁盘使用率超过85%
+        for: 10m                          # 持续10分钟后触发
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "磁盘使用率过高"
+          description: "磁盘使用率超过85%，当前值: {{ $value }}%"
+
+      - alert: CriticalDiskUsage
+        expr: disk_usage_percent > 95     # 触发条件：磁盘使用率超过95%
+        for: 5m                           # 持续5分钟后触发
+        labels:
+          severity: critical
+          category: system
+        annotations:
+          summary: "磁盘使用率严重过高"
+          description: "磁盘使用率超过95%，当前值: {{ $value }}%"
+
+  # ==========================================================================
+  # 设备状态告警组
+  # 监控实验设备的连接状态和运行状态
+  # ==========================================================================
+  - name: device_alerts
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------------------
+      # 设备断开告警
+      # 监控设备连接状态，及时发现断连设备
+      # ----------------------------------------------------------------------
+      - alert: DeviceDisconnected
+        expr: devices_disconnected > 0    # 触发条件：有设备断开连接
+        for: 1m                           # 持续1分钟后触发
+        labels:
+          severity: warning
+          category: device
+        annotations:
+          summary: "设备断开连接"
+          description: "有 {{ $value }} 个设备断开连接"
+
+      # ----------------------------------------------------------------------
+      # 设备错误告警
+      # 监控设备运行状态，及时发现异常设备
+      # ----------------------------------------------------------------------
+      - alert: DeviceError
+        expr: devices_error > 0           # 触发条件：有设备处于错误状态
+        for: 30s                          # 持续30秒后触发（快速响应）
+        labels:
+          severity: error
+          category: device
+        annotations:
+          summary: "设备处于错误状态"
+          description: "有 {{ $value }} 个设备处于错误状态"
+
+      # ----------------------------------------------------------------------
+      # 设备连接率告警
+      # 监控整体设备连接率，评估系统健康度
+      # ----------------------------------------------------------------------
+      - alert: LowDeviceConnectionRate
+        expr: device_connection_rate_percent < 50  # 触发条件：连接率低于50%
+        for: 5m
+        labels:
+          severity: critical
+          category: device
+        annotations:
+          summary: "设备连接率过低"
+          description: "设备连接率低于50%，当前值: {{ $value }}%"
+
+  # ==========================================================================
+  # 实验状态告警组
+  # 监控实验执行情况和成功率
+  # ==========================================================================
+  - name: experiment_alerts
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------------------
+      # 实验失败率告警
+      # 监控实验执行成功率，及时发现异常
+      # ----------------------------------------------------------------------
+      - alert: HighExperimentFailureRate
+        expr: |
+          (
+            rate(cauc_sep_experiments_failed_total[1h])
+            /
+            (rate(cauc_sep_experiments_completed_total[1h]) + rate(cauc_sep_experiments_failed_total[1h]))
+          ) > 0.1                         # 触发条件：失败率超过10%
+        for: 10m
+        labels:
+          severity: warning
+          category: experiment
+        annotations:
+          summary: "实验失败率过高"
+          description: "过去1小时内实验失败率超过10%"
+
+      # ----------------------------------------------------------------------
+      # 实验运行时间过长告警
+      # 监控长时间运行的实验，防止僵尸实验
+      # ----------------------------------------------------------------------
+      - alert: LongRunningExperiment
+        expr: cauc_sep_experiments_running > 0 and on() (time() - process_start_time_seconds) > 86400
+        for: 1h                           # 持续1小时后触发
+        labels:
+          severity: warning
+          category: experiment
+        annotations:
+          summary: "实验运行时间过长"
+          description: "有实验已运行超过24小时，请检查是否异常"
+
+  # ==========================================================================
+  # API性能告警组
+  # 监控API响应时间和错误率
+  # ==========================================================================
+  - name: api_alerts
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------------------
+      # API响应时间告警
+      # 监控API P95延迟，确保用户体验
+      # ----------------------------------------------------------------------
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95, rate(cauc_sep_api_request_duration_seconds_bucket[5m])) > 1
+        for: 5m                           # 触发条件：P95延迟超过1秒
+        labels:
+          severity: warning
+          category: api
+        annotations:
+          summary: "API响应时间过长"
+          description: "API P95响应时间超过1秒"
+
+      # ----------------------------------------------------------------------
+      # API错误率告警
+      # 监控API 5xx错误率，及时发现服务异常
+      # ----------------------------------------------------------------------
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(cauc_sep_api_requests_by_status_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(cauc_sep_api_requests_total[5m]))
+          ) > 0.05                        # 触发条件：5xx错误率超过5%
+        for: 5m
+        labels:
+          severity: critical
+          category: api
+        annotations:
+          summary: "API错误率过高"
+          description: "API 5xx错误率超过5%"
+
+  # ==========================================================================
+  # 存储告警组
+  # 监控数据库存储使用和数据增长
+  # ==========================================================================
+  - name: storage_alerts
+    interval: 1m
+    rules:
+      # ----------------------------------------------------------------------
+      # 存储使用率告警
+      # 监控数据库存储空间，防止存储满
+      # ----------------------------------------------------------------------
+      - alert: HighStorageUsage
+        expr: cauc_sep_storage_usage_percent > 80  # 触发条件：存储使用率超过80%
+        for: 10m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "存储使用率过高"
+          description: "数据库存储使用率超过80%，当前值: {{ $value }}%"
+
+      # ----------------------------------------------------------------------
+      # 数据快速增长告警
+      # 监控数据增长速率，及时发现异常数据写入
+      # ----------------------------------------------------------------------
+      - alert: RapidDataGrowth
+        expr: |
+          rate(cauc_sep_data_records_total[1h]) > 10000  # 触发条件：增长超过10000条/小时
+        for: 30m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "数据增长过快"
+          description: "数据记录增长速率超过10000条/小时"
+
+  # ==========================================================================
+  # 健康评分告警组
+  # 监控系统整体健康状态
+  # ==========================================================================
+  - name: health_alerts
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------------------
+      # 健康评分低告警
+      # 系统综合健康评分低于阈值时触发
+      # ----------------------------------------------------------------------
+      - alert: LowHealthScore
+        expr: health_score_overall < 70   # 触发条件：健康评分低于70
+        for: 5m
+        labels:
+          severity: warning
+          category: health
+        annotations:
+          summary: "系统健康评分较低"
+          description: "系统健康评分低于70，当前值: {{ $value }}"
+
+      - alert: CriticalHealthScore
+        expr: health_score_overall < 50   # 触发条件：健康评分低于50
+        for: 2m
+        labels:
+          severity: critical
+          category: health
+        annotations:
+          summary: "系统健康评分严重过低"
+          description: "系统健康评分低于50，当前值: {{ $value }}，请立即检查系统状态"
+
+  # ==========================================================================
+  # WebSocket告警组
+  # 监控WebSocket连接状态和错误
+  # ==========================================================================
+  - name: websocket_alerts
+    interval: 30s
+    rules:
+      # ----------------------------------------------------------------------
+      # WebSocket错误告警
+      # 监控WebSocket连接错误率
+      # ----------------------------------------------------------------------
+      - alert: WebSocketErrors
+        expr: rate(cauc_sep_websocket_errors_total[5m]) > 0.1  # 触发条件：错误率超过0.1次/秒
+        for: 5m
+        labels:
+          severity: warning
+          category: websocket
+        annotations:
+          summary: "WebSocket错误率过高"
+          description: "WebSocket错误率超过0.1次/秒"
+
+  # ==========================================================================
+  # 告警系统自身监控组
+  # 监控告警系统运行状态，防止告警风暴
+  # ==========================================================================
+  - name: alerting_system
+    interval: 1m
+    rules:
+      # ----------------------------------------------------------------------
+      # 活跃告警过多告警
+      # 当活跃告警数量过多时触发，提示可能存在系统问题
+      # ----------------------------------------------------------------------
+      - alert: TooManyActiveAlerts
+        expr: alerts_active > 10          # 触发条件：活跃告警超过10个
+        for: 5m
+        labels:
+          severity: warning
+          category: alerting
+        annotations:
+          summary: "活跃告警数量过多"
+          description: "当前有 {{ $value }} 个活跃告警，可能存在系统问题"

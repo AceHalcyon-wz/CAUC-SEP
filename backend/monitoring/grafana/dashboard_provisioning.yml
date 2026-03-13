@@ -1,0 +1,51 @@
+# ==============================================================================
+# 文件名: dashboard_provisioning.yml
+# 路径: backend/monitoring/grafana/
+# 功能: Grafana仪表板自动加载配置
+# 描述: 配置Grafana自动从指定目录加载仪表板JSON文件，实现仪表板的持久化管理
+# 作者: CAUC-SEP运维团队
+# 创建日期: 2024-03-06
+# 最后更新: 2024-03-06
+# 依赖: Grafana 10.0+
+# ==============================================================================
+#
+# 配置说明:
+# - apiVersion: API版本，固定为1
+# - providers: 仪表板提供者配置列表
+# - name: 提供者名称，用于标识
+# - orgId: 组织ID，默认为1
+# - folder: Grafana中的文件夹名称
+# - folderUid: 文件夹唯一标识符
+# - type: 加载类型，file表示从文件系统加载
+# - disableDeletion: 是否禁止删除仪表板
+# - updateIntervalSeconds: 扫描更新间隔（秒）
+# - allowUiUpdates: 是否允许通过UI更新仪表板
+# - options.path: 仪表板JSON文件所在目录
+#
+# 使用方式:
+# 1. 将仪表板JSON文件放入 /etc/grafana/provisioning/dashboards 目录
+# 2. Grafana启动时自动加载，每隔30秒检查更新
+# 3. 仪表板将显示在 "CAUC-SEP" 文件夹下
+#
+# 注意事项:
+# - 仪表板JSON文件需符合Grafana导出格式
+# - 修改此配置后需重启Grafana服务
+# - 生产环境建议设置 allowUiUpdates: false 防止误操作
+# ==============================================================================
+
+apiVersion: 1
+
+providers:
+  # CAUC-SEP系统仪表板提供者配置
+  - name: 'CAUC-SEP Dashboards'          # 提供者名称，显示在Grafana配置中
+    orgId: 1                              # 组织ID，默认组织
+    folder: 'CAUC-SEP'                    # 仪表板存放的文件夹名称
+    folderUid: 'cauc-sep'                 # 文件夹唯一标识符，用于API引用
+    type: file                            # 加载类型：从文件系统加载
+    disableDeletion: false                # 允许删除仪表板（false=允许删除）
+    updateIntervalSeconds: 30             # 每30秒扫描一次文件变化
+    allowUiUpdates: true                  # 允许通过Grafana UI修改仪表板
+    options:
+      # 仪表板JSON文件目录（容器内路径）
+      # 对应docker-compose.yml中的挂载点
+      path: /etc/grafana/provisioning/dashboards

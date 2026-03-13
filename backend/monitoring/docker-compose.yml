@@ -1,0 +1,293 @@
+# ==============================================================================
+# 文件名: docker-compose.yml
+# 路径: backend/monitoring/
+# 功能: Docker Compose编排配置
+# 描述: 定义CAUC-SEP监控栈的完整部署架构，包括Prometheus、Grafana、
+#       Node Exporter、cAdvisor等监控组件
+# 作者: CAUC-SEP运维团队
+# 创建日期: 2024-03-06
+# 最后更新: 2024-03-06
+# 依赖: Docker 20.10+, Docker Compose 2.0+
+# ==============================================================================
+#
+# 服务架构说明:
+# ┌─────────────────────────────────────────────────────────────────┐
+# │                    CAUC-SEP 监控栈架构                           │
+# ├─────────────────────────────────────────────────────────────────┤
+# │                                                                 │
+# │  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐       │
+# │  │   Grafana   │────▶│ Prometheus  │────▶│   Backend   │       │
+# │  │  (可视化)    │     │  (存储查询)  │     │  (业务指标)  │       │
+# │  └─────────────┘     └──────┬──────┘     └─────────────┘       │
+# │                             │                                   │
+# │              ┌──────────────┼──────────────┐                   │
+# │              ▼              ▼              ▼                   │
+# │       ┌───────────┐  ┌───────────┐  ┌───────────┐             │
+# │       │  Node     │  │  cAdvisor │  │ Alertmgr  │             │
+# │       │ Exporter  │  │ (容器监控) │  │  (告警)    │             │
+# │       │ (系统监控) │  └───────────┘  └───────────┘             │
+# │       └───────────┘                                              │
+# │                                                                 │
+# └─────────────────────────────────────────────────────────────────┘
+#
+# 服务说明:
+# - prometheus: 时序数据库，存储和查询监控指标
+# - grafana: 可视化平台，展示监控仪表板
+# - node-exporter: 系统指标采集器，采集宿主机资源数据
+# - cadvisor: 容器指标采集器，采集Docker容器资源数据
+# - alertmanager: 告警管理器，处理告警通知（可选）
+#
+# 使用方式:
+# 1. 启动服务: docker-compose up -d
+# 2. 查看状态: docker-compose ps
+# 3. 查看日志: docker-compose logs -f [service_name]
+# 4. 停止服务: docker-compose down
+# 5. 重启服务: docker-compose restart [service_name]
+#
+# 访问地址:
+# - Prometheus: http://localhost:9090
+# - Grafana: http://localhost:3000 (admin/cauc-sep-admin)
+# - Node Exporter: http://localhost:9100/metrics
+# - cAdvisor: http://localhost:8080
+#
+# 注意事项:
+# - 生产环境请修改默认密码
+# - 数据卷用于持久化存储，请定期备份
+# - 资源限制可通过 deploy.resources 配置
+# ==============================================================================
+
+version: '3.8'
+
+# ==============================================================================
+# 服务定义
+# ==============================================================================
+services:
+
+  # ============================================================================
+  # Prometheus - 时序数据库
+  # 功能: 存储监控指标数据，提供PromQL查询语言
+  # 端口: 9090 (Web UI + API)
+  # 数据保留: 30天
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:v2.45.0        # Prometheus版本
+    container_name: cauc-sep-prometheus   # 容器名称
+    restart: unless-stopped               # 重启策略：除非手动停止否则自动重启
+    
+    # 端口映射
+    ports:
+      - "9090:9090"                       # Web UI和API端口
+    
+    # 数据卷挂载
+    volumes:
+      # 配置文件（只读挂载，防止容器内修改）
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      # 数据持久化存储
+      - prometheus_data:/prometheus
+    
+    # 启动命令参数
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'        # 配置文件路径
+      - '--storage.tsdb.path=/prometheus'                     # 数据存储路径
+      - '--storage.tsdb.retention.time=30d'                   # 数据保留30天
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'                              # 启用热重载API
+      - '--web.enable-admin-api'                              # 启用管理API
+    
+    # 网络配置
+    networks:
+      - monitoring
+    
+    # 标签（用于服务发现和分类）
+    labels:
+      - "service=cauc-sep-monitoring"
+      - "component=prometheus"
+
+  # ============================================================================
+  # Grafana - 可视化平台
+  # 功能: 提供监控仪表板、告警管理、数据可视化
+  # 端口: 3000 (Web UI)
+  # 默认账号: admin / cauc-sep-admin
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:10.0.0         # Grafana版本
+    container_name: cauc-sep-grafana      # 容器名称
+    restart: unless-stopped               # 重启策略
+    
+    # 端口映射
+    ports:
+      - "3000:3000"                       # Web UI端口
+    
+    # 数据卷挂载
+    volumes:
+      # 数据持久化存储（仪表板、配置等）
+      - grafana_data:/var/lib/grafana
+      # 仪表板文件挂载
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    
+    # 环境变量配置
+    environment:
+      # ---------- 安全配置 ----------
+      - GF_SECURITY_ADMIN_USER=admin                    # 管理员用户名
+      - GF_SECURITY_ADMIN_PASSWORD=cauc-sep-admin       # 管理员密码（生产环境请修改）
+      - GF_USERS_ALLOW_SIGN_UP=false                    # 禁止用户注册
+      
+      # ---------- 服务器配置 ----------
+      - GF_SERVER_ROOT_URL=http://localhost:3000        # 服务根URL
+      - GF_SERVER_DOMAIN=localhost                      # 服务域名
+      
+      # ---------- 插件配置 ----------
+      # 安装常用插件：时钟面板、饼图面板
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+      
+      # ---------- 告警配置 ----------
+      - GF_ALERTING_ENABLED=true                        # 启用告警功能
+      
+      # ---------- 匿名访问（生产环境建议关闭） ----------
+      # - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    
+    # 网络配置
+    networks:
+      - monitoring
+    
+    # 依赖关系：需要Prometheus先启动
+    depends_on:
+      - prometheus
+    
+    # 标签
+    labels:
+      - "service=cauc-sep-monitoring"
+      - "component=grafana"
+
+  # ============================================================================
+  # Node Exporter - 系统指标采集器
+  # 功能: 采集宿主机的系统级指标（CPU、内存、磁盘、网络等）
+  # 端口: 9100 (Metrics API)
+  # 注意: 需要挂载宿主机系统目录
+  # ============================================================================
+  node-exporter:
+    image: prom/node-exporter:v1.6.0      # Node Exporter版本
+    container_name: cauc-sep-node-exporter
+    restart: unless-stopped
+    
+    # 端口映射
+    ports:
+      - "9100:9100"                       # Metrics端口
+    
+    # 挂载宿主机系统目录（只读）
+    volumes:
+      - /proc:/host/proc:ro               # 进程信息
+      - /sys:/host/sys:ro                 # 系统信息
+      - /:/rootfs:ro                      # 根文件系统
+    
+    # 启动命令参数
+    command:
+      - '--path.procfs=/host/proc'        # proc文件系统路径
+      - '--path.sysfs=/host/sys'          # sys文件系统路径
+      - '--path.rootfs=/rootfs'           # 根文件系统路径
+      # 排除不需要监控的挂载点
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    
+    # 网络配置
+    networks:
+      - monitoring
+    
+    # 标签
+    labels:
+      - "service=cauc-sep-monitoring"
+      - "component=node-exporter"
+
+  # ============================================================================
+  # cAdvisor - 容器监控
+  # 功能: 采集Docker容器的资源使用情况（CPU、内存、网络、磁盘IO）
+  # 端口: 8080 (Web UI + Metrics API)
+  # 注意: 需要特权模式和访问Docker守护进程
+  # ============================================================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0  # cAdvisor版本
+    container_name: cauc-sep-cadvisor
+    restart: unless-stopped
+    
+    # 端口映射
+    ports:
+      - "8080:8080"                       # Web UI和Metrics端口
+    
+    # 挂载Docker相关目录
+    volumes:
+      - /:/rootfs:ro                      # 根文件系统
+      - /var/run:/var/run:ro              # 运行时信息
+      - /sys:/sys:ro                      # 系统信息
+      - /var/lib/docker/:/var/lib/docker:ro  # Docker数据目录
+      - /dev/disk/:/dev/disk:ro           # 磁盘设备信息
+    
+    # 特权模式（需要访问容器运行时）
+    privileged: true
+    
+    # 设备映射
+    devices:
+      - /dev/kmsg                         # 内核消息设备
+    
+    # 网络配置
+    networks:
+      - monitoring
+    
+    # 标签
+    labels:
+      - "service=cauc-sep-monitoring"
+      - "component=cadvisor"
+
+  # ============================================================================
+  # Alertmanager - 告警管理器（可选）
+  # 功能: 处理Prometheus告警，支持去重、分组、路由、通知
+  # 端口: 9093 (Web UI + API)
+  # 状态: 已注释，需要时取消注释启用
+  # ============================================================================
+  # alertmanager:
+  #   image: prom/alertmanager:v0.25.0
+  #   container_name: cauc-sep-alertmanager
+  #   restart: unless-stopped
+  #   ports:
+  #     - "9093:9093"
+  #   volumes:
+  #     - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+  #     - alertmanager_data:/alertmanager
+  #   command:
+  #     - '--config.file=/etc/alertmanager/alertmanager.yml'
+  #     - '--storage.path=/alertmanager'
+  #   networks:
+  #     - monitoring
+  #   labels:
+  #     - "service=cauc-sep-monitoring"
+  #     - "component=alertmanager"
+
+# ==============================================================================
+# 数据卷定义
+# 用于持久化存储监控数据
+# ==============================================================================
+volumes:
+  # Prometheus数据卷
+  # 存储时序数据和配置
+  prometheus_data:
+    driver: local                         # 使用本地驱动
+  
+  # Grafana数据卷
+  # 存储仪表板、用户配置、插件等
+  grafana_data:
+    driver: local
+  
+  # Alertmanager数据卷（可选）
+  # 存储告警静默、抑制规则等
+  # alertmanager_data:
+  #   driver: local
+
+# ==============================================================================
+# 网络定义
+# 监控组件间通信网络
+# ==============================================================================
+networks:
+  monitoring:
+    driver: bridge                        # 桥接网络模式
+    name: cauc-sep-monitoring             # 网络名称

@@ -1,0 +1,119 @@
+# ============================================================================
+# CAUC-SEP 后端依赖配置
+# ============================================================================
+#
+# 文件名: requirements.txt
+# 路径: d:\cauc-sep\backend\requirements.txt
+# 功能: Python项目依赖包列表
+# 版本: v0.3.0
+# 创建日期: 2024-01-20
+# 最后更新: 2026-03-14
+#
+# 说明:
+#   本文件列出了CAUC-SEP后端所需的所有Python依赖包。
+#   使用pip安装：pip install -r requirements.txt
+#
+# 依赖分类：
+#   1. Web框架 - FastAPI及相关组件
+#   2. 硬件通信 - Modbus和串口通信
+#   3. 数据处理 - 科学计算和数据分析
+#   4. 数据库 - SQLAlchemy ORM
+#   5. 数据验证 - Pydantic模型验证
+#   6. 用户认证 - JWT和密码加密
+#   7. 系统工具 - 系统监控和文件操作
+#   8. 缓存 - Redis客户端
+# ============================================================================
+
+# ==================== Web框架 ====================
+# FastAPI: 现代高性能Web框架，支持异步
+# 官方文档: https://fastapi.tiangolo.com/
+fastapi>=0.109.0,<0.110.0
+
+# Uvicorn: ASGI服务器，支持热重载
+# 官方文档: https://www.uvicorn.org/
+uvicorn[standard]>=0.27.0,<0.28.0
+
+# ==================== 硬件通信 ====================
+# PyModbus: Modbus协议实现，支持RTU/TCP
+# 官方文档: https://pymodbus.readthedocs.io/
+pymodbus>=3.5.0,<4.0.0
+
+# PySerial: 串口通信库
+# 官方文档: https://pyserial.readthedocs.io/
+pyserial>=3.5,<4.0
+
+# ==================== 数据处理 ====================
+# NumPy: 科学计算基础库
+# 官方文档: https://numpy.org/doc/
+numpy>=1.26.0,<2.0.0
+
+# SciPy: 科学计算工具包
+# 包含信号处理、优化、统计等模块
+# 官方文档: https://docs.scipy.org/
+scipy>=1.12.0,<2.0.0
+
+# lmfit: 非线性最小二乘拟合
+# 用于曲线拟合和参数优化
+# 官方文档: https://lmfit.github.io/lmfit-py/
+lmfit>=1.2.0,<2.0.0
+
+# Matplotlib: 数据可视化库
+# 用于生成图表和图像
+# 官方文档: https://matplotlib.org/
+matplotlib>=3.8.0,<4.0.0
+
+# h5py: HDF5文件格式支持
+# 用于存储大规模科学数据
+# 官方文档: https://docs.h5py.org/
+h5py>=3.10.0,<4.0.0
+
+# ==================== 数据库 ====================
+# SQLAlchemy: Python SQL工具包和ORM
+# 官方文档: https://docs.sqlalchemy.org/
+sqlalchemy>=2.0.0,<3.0.0
+
+# ==================== 数据验证 ====================
+# Pydantic: 数据验证和设置管理
+# 使用Python类型注解进行数据验证
+# 官方文档: https://docs.pydantic.dev/
+pydantic>=2.5.0,<3.0.0
+
+# ==================== 用户认证 ====================
+# python-jose: JWT令牌处理
+# 支持JWT、JWS、JWE等
+# 官方文档: https://python-jose.readthedocs.io/
+python-jose[cryptography]>=3.3.0,<4.0.0
+
+# passlib: 密码哈希库
+# 支持bcrypt、argon2等多种哈希算法
+# 官方文档: https://passlib.readthedocs.io/
+passlib[bcrypt]>=1.7.4,<2.0.0
+
+# ==================== 工具 ====================
+# python-multipart: 表单数据解析
+# 支持文件上传和multipart表单
+python-multipart>=0.0.6,<0.1.0
+
+# ==================== 系统监控 ====================
+# psutil: 系统和进程监控
+# 获取CPU、内存、磁盘、网络等信息
+# 官方文档: https://psutil.readthedocs.io/
+psutil>=5.9.0,<6.0.0
+
+# ==================== 序列化协议 ====================
+# msgpack: 高效二进制序列化
+# 用于WebSocket数据传输优化
+# 官方文档: https://msgpack.org/
+msgpack>=1.0.7,<2.0.0
+
+# ==================== 异步文件操作 ====================
+# aiofiles: 异步文件操作
+# 支持异步读写文件
+# 官方文档: https://github.com/Tinche/aiofiles
+aiofiles>=23.2.0,<24.0.0
+
+# ==================== 缓存 ====================
+# redis: Redis Python客户端
+# 用于缓存、会话存储和消息队列
+# 官方文档: https://redis-py.readthedocs.io/
+redis>=5.0.0,<6.0.0
