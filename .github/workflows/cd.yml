@@ -152,7 +152,7 @@ jobs:
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/backend
+          context: ./backend
           push: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
@@ -179,7 +179,7 @@ jobs:
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/frontend
+          context: ./frontend
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
@@ -254,7 +254,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       # Setup Node.js environment
       - name: Setup Node.js ${{ env.NODE_VERSION }}
@@ -262,11 +262,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       # Install Python dependencies
       - name: Install Python Dependencies
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           Write-Host "=== Python Environment Info ===" -ForegroundColor Cyan
@@ -290,9 +290,9 @@ jobs:
           path: |
             ~\AppData\Local\Nuitka\Nuitka\Cache
             ~\AppData\Local\ccache
-            cauc-sep\backend\build
-            cauc-sep\backend\.build
-          key: nuitka-${{ runner.os }}-${{ hashFiles('cauc-sep/backend/requirements.txt', 'cauc-sep/backend/nuitka-config.py') }}
+            backend\build
+            backend\.build
+          key: nuitka-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/nuitka-config.py') }}
           restore-keys: |
             nuitka-${{ runner.os }}-
 
@@ -331,7 +331,7 @@ jobs:
 
       # Build frontend
       - name: Build Frontend
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
         shell: pwsh
         run: |
           npm ci --prefer-offline --no-audit
@@ -340,7 +340,7 @@ jobs:
 
       # Verify frontend build
       - name: Verify Frontend Build
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
         shell: pwsh
         run: |
           if (-not (Test-Path "dist")) {
@@ -352,7 +352,7 @@ jobs:
 
       # Copy frontend to backend directory
       - name: Copy Frontend to Backend
-        working-directory: cauc-sep
+        working-directory: .
         shell: pwsh
         run: |
           $backendFrontend = "backend\frontend\dist"
@@ -365,7 +365,7 @@ jobs:
       # Build backend with Nuitka
       - name: Nuitka Compile Backend
         id: nuitka-build
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           Write-Host "Starting Nuitka compilation..." -ForegroundColor Cyan
@@ -381,7 +381,7 @@ jobs:
 
       # Verify build output
       - name: Verify Build Output
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           $exePath = "dist\CAUC-SEP-Backend.exe"
@@ -398,7 +398,7 @@ jobs:
 
       # Create release package
       - name: Create Release Package
-        working-directory: cauc-sep
+        working-directory: .
         shell: pwsh
         run: |
           $version = "${{ steps.get-version.outputs.version }}"
@@ -479,7 +479,7 @@ jobs:
 
       # Create ZIP archive
       - name: Create ZIP Archive
-        working-directory: cauc-sep/dist
+        working-directory: dist
         shell: pwsh
         run: |
           $version = "${{ steps.get-version.outputs.version }}"
@@ -494,7 +494,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-ZIP
-          path: cauc-sep/dist/CAUC-SEP-*.zip
+          path: dist/CAUC-SEP-*.zip
           retention-days: 90  # Keep for 90 days
 
       # Upload EXE artifact
@@ -502,7 +502,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-EXE
-          path: cauc-sep/backend/dist/CAUC-SEP-Backend.exe
+          path: backend/dist/CAUC-SEP-Backend.exe
           retention-days: 90
 
       # Set build status

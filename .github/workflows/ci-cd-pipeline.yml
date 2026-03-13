@@ -107,7 +107,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/backend
+        working-directory: backend
 
     steps:
       - name: Checkout code
@@ -120,7 +120,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       - name: Install dependencies
         run: |
@@ -156,7 +156,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -167,7 +167,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -200,7 +200,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: cauc-sep/backend
+        working-directory: backend
 
     steps:
       - name: Checkout code
@@ -211,7 +211,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       - name: Install dependencies
         run: |
@@ -237,7 +237,7 @@ jobs:
         uses: codecov/codecov-action@v4
         if: always()
         with:
-          files: cauc-sep/backend/coverage-unit.xml
+          files: backend/coverage-unit.xml
           flags: backend
           name: backend-coverage
           fail_ci_if_error: false
@@ -254,7 +254,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -265,7 +265,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -280,7 +280,7 @@ jobs:
         uses: codecov/codecov-action@v4
         if: always()
         with:
-          files: cauc-sep/frontend/coverage/coverage-final.json
+          files: frontend/coverage/coverage-final.json
           flags: frontend
           name: frontend-coverage
           fail_ci_if_error: false
@@ -352,7 +352,7 @@ jobs:
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/backend
+          context: ./backend
           push: ${{ github.event_name != 'pull_request' }}  # Don't push for PR
           tags: ${{ steps.meta-backend.outputs.tags }}
           cache-from: type=gha
@@ -376,7 +376,7 @@ jobs:
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/frontend
+          context: ./frontend
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta-frontend.outputs.tags }}
           cache-from: type=gha
@@ -438,7 +438,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       # Setup Node.js environment
       - name: Setup Node.js ${{ env.NODE_VERSION }}
@@ -446,11 +446,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       # Install Python dependencies
       - name: Install Python Dependencies
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           python -m pip install --upgrade pip setuptools wheel
@@ -465,9 +465,9 @@ jobs:
           path: |
             ~\AppData\Local\Nuitka\Nuitka\Cache
             ~\AppData\Local\ccache
-            cauc-sep\backend\build
-            cauc-sep\backend\.build
-          key: nuitka-${{ runner.os }}-${{ hashFiles('cauc-sep/backend/requirements.txt', 'cauc-sep/backend/nuitka-config.py') }}
+            backend\build
+            backend\.build
+          key: nuitka-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/nuitka-config.py') }}
           restore-keys: |
             nuitka-${{ runner.os }}-
 
@@ -506,7 +506,7 @@ jobs:
 
       # Build frontend
       - name: Build Frontend
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
         shell: pwsh
         run: |
           npm ci --prefer-offline --no-audit
@@ -515,7 +515,7 @@ jobs:
 
       # Verify frontend build
       - name: Verify Frontend Build
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
         shell: pwsh
         run: |
           if (-not (Test-Path "dist")) {
@@ -527,7 +527,7 @@ jobs:
 
       # Copy frontend to backend directory
       - name: Copy Frontend to Backend
-        working-directory: cauc-sep
+        working-directory: .
         shell: pwsh
         run: |
           $backendFrontend = "backend\frontend\dist"
@@ -540,7 +540,7 @@ jobs:
       # Nuitka compile backend
       - name: Nuitka Compile Backend
         id: nuitka-build
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           Write-Host "Starting Nuitka compilation..." -ForegroundColor Cyan
@@ -556,7 +556,7 @@ jobs:
 
       # Verify build output
       - name: Verify Build Output
-        working-directory: cauc-sep/backend
+        working-directory: backend
         shell: pwsh
         run: |
           $exePath = "dist\CAUC-SEP-Backend.exe"
@@ -573,7 +573,7 @@ jobs:
 
       # Create release package
       - name: Create Release Package
-        working-directory: cauc-sep
+        working-directory: .
         shell: pwsh
         run: |
           $version = "${{ steps.get-version.outputs.version }}"
@@ -654,7 +654,7 @@ jobs:
 
       # Create ZIP archive
       - name: Create ZIP Archive
-        working-directory: cauc-sep/dist
+        working-directory: dist
         shell: pwsh
         run: |
           $version = "${{ steps.get-version.outputs.version }}"
@@ -669,7 +669,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-ZIP
-          path: cauc-sep/dist/CAUC-SEP-*.zip
+          path: dist/CAUC-SEP-*.zip
           retention-days: 90
 
       # Upload EXE artifact
@@ -677,7 +677,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CAUC-SEP-Windows-EXE
-          path: cauc-sep/backend/dist/CAUC-SEP-Backend.exe
+          path: backend/dist/CAUC-SEP-Backend.exe
           retention-days: 90
 
       # Set build status

@@ -78,7 +78,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/backend
+        working-directory: backend
 
     steps:
       # Step 1: Checkout code
@@ -93,7 +93,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'  # Enable pip cache for faster dependency installation
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -135,7 +135,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/backend
+        working-directory: backend
 
     steps:
       - name: Checkout code
@@ -146,7 +146,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-          cache-dependency-path: cauc-sep/backend/requirements*.txt
+          cache-dependency-path: backend/requirements*.txt
 
       - name: Install dependencies
         run: |
@@ -176,7 +176,7 @@ jobs:
         uses: codecov/codecov-action@v4
         if: always()  # Upload even if tests fail
         with:
-          files: cauc-sep/backend/coverage-unit.xml
+          files: backend/coverage-unit.xml
           flags: backend-unit
           name: backend-unit-coverage
           fail_ci_if_error: false
@@ -191,7 +191,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -202,7 +202,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       # Install dependencies
       # --prefer-offline: Prefer cache
@@ -233,7 +233,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: cauc-sep/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -244,7 +244,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: cauc-sep/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -260,7 +260,7 @@ jobs:
         uses: codecov/codecov-action@v4
         if: always()
         with:
-          files: cauc-sep/frontend/coverage/coverage-final.json
+          files: frontend/coverage/coverage-final.json
           flags: frontend
           name: frontend-coverage
           fail_ci_if_error: false
@@ -309,7 +309,7 @@ jobs:
       - name: Build Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/backend
+          context: ./backend
           push: false  # Don't push image in CI stage
           tags: ${{ steps.meta-backend.outputs.tags }}
           no-cache: true  # Don't use cache, ensure build reliability
@@ -328,7 +328,7 @@ jobs:
       - name: Build Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./cauc-sep/frontend
+          context: ./frontend
           push: false
           tags: ${{ steps.meta-frontend.outputs.tags }}
           no-cache: true
