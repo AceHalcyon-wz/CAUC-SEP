@@ -410,6 +410,27 @@ npm run dev
 
 完整的 API 文档可通过 Swagger UI 访问：**http://127.0.0.1:8000/docs**
 
+### 技术文档集
+
+项目文档已整合为结构化的技术文档集，位于 `docs/technical-docs/` 目录：
+
+| 章节 | 路径 | 说明 |
+|------|------|------|
+| 索引与导航 | [00-索引与导航/](docs/technical-docs/00-索引与导航/README.md) | 文档集总览与导航 |
+| 项目概述 | [01-项目概述/](docs/technical-docs/01-项目概述/) | 项目背景、技术栈、设备清单 |
+| 快速开始 | [02-快速开始/](docs/technical-docs/02-快速开始/) | 环境要求、安装配置、验证测试 |
+| 系统架构 | [03-系统架构/](docs/technical-docs/03-系统架构/) | 整体架构、后端架构、前端架构 |
+| 核心模块 | [04-核心模块/](docs/technical-docs/04-核心模块/) | 设备驱动与核心模块详解 |
+| 数据库设计 | [05-数据库设计/](docs/technical-docs/05-数据库设计/) | 数据模型与存储方案 |
+| 通信协议 | [06-通信协议/](docs/technical-docs/06-通信协议/) | Modbus/WebSocket/REST协议 |
+| API参考 | [07-API参考/](docs/technical-docs/07-API参考/) | 完整API接口文档 |
+| 前端组件 | [08-前端组件/](docs/technical-docs/08-前端组件/) | Vue组件文档 |
+| 开发指南 | [09-开发指南/](docs/technical-docs/09-开发指南/) | 开发环境与代码规范 |
+| 部署运维 | [10-部署运维/](docs/technical-docs/10-部署运维/) | 打包部署与监控告警 |
+| 用户手册 | [11-用户手册/](docs/technical-docs/11-用户手册/) | 用户操作指南 |
+| 开发者指南 | [12-开发者指南/](docs/technical-docs/12-开发者指南/) | 高级开发指南 |
+| 附录 | [附录/](docs/technical-docs/附录/) | 故障排除、更新日志、术语表 |
+
 ### 步进电机 API
 
 | 端点 | 方法 | 说明 |
@@ -628,15 +649,22 @@ cauc-sep/                                   # 项目根目录
 │   └── vite.config.js                      # Vite 配置
 │
 ├── docs/                                   # 项目文档
-│   ├── api/                                # API 文档
-│   ├── backend/                            # 后端文档
-│   ├── frontend/                           # 前端文档
-│   ├── components/                         # 组件文档
-│   ├── CAUC-SEP_技术文档_v3.0.md           # 技术文档（主文档）
-│   ├── DEVELOPER_GUIDE.md                  # 开发者指南
-│   ├── USER_MANUAL.md                      # 用户手册
-│   ├── NUITKA_BUILD_GUIDE.md               # Nuitka打包指南
-│   └── troubleshooting.md                  # 故障排除
+│   ├── technical-docs/                     # 技术文档集（新）
+│   │   ├── 00-索引与导航/                  # 文档索引
+│   │   ├── 01-项目概述/                    # 项目背景、技术栈、设备清单
+│   │   ├── 02-快速开始/                    # 环境要求、安装配置、验证测试
+│   │   ├── 03-系统架构/                    # 架构设计文档
+│   │   ├── 04-核心模块/                    # 设备驱动与核心模块
+│   │   ├── 05-数据库设计/                  # 数据模型与存储方案
+│   │   ├── 06-通信协议/                    # Modbus/WebSocket/REST协议
+│   │   ├── 07-API参考/                     # API接口文档
+│   │   ├── 08-前端组件/                    # Vue组件文档
+│   │   ├── 09-开发指南/                    # 开发环境与代码规范
+│   │   ├── 10-部署运维/                    # 打包部署与监控
+│   │   ├── 11-用户手册/                    # 用户操作指南
+│   │   ├── 12-开发者指南/                  # 高级开发指南
+│   │   └── 附录/                           # 故障排除、更新日志、术语表
+│   └── DM2C-RS556_用户手册.md              # 设备用户手册
 │
 ├── installer/                              # 安装程序
 │   └── CAUC-SEP.iss                        # Inno Setup安装脚本
