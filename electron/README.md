@@ -2,6 +2,13 @@
 
 CAUC-SEP 科学实验平台 Electron 桌面应用程序。
 
+## 版本信息
+
+- **版本**: v3.5.0
+- **更新日期**: 2026-03-15
+- **Electron**: v28+
+- **Node.js**: v20+
+
 ## 项目结构
 
 ```
@@ -9,9 +16,6 @@ electron/
 ├── src/
 │   ├── main.js          # 主进程入口
 │   └── preload.js       # 预加载脚本
-├── build/
-│   ├── entitlements.mac.plist  # macOS 权限配置
-│   └── installer.nsh           # NSIS 自定义脚本
 ├── package.json         # 项目配置
 └── electron-builder.yml # 构建配置
 ```

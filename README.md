@@ -573,43 +573,15 @@ allow_origins = ["https://your-domain.com"]
 ```
 cauc-sep/                                   # 项目根目录
 │
-├── .github/                                # GitHub 配置
-│   └── workflows/                          # CI/CD 工作流
-│       ├── ci.yml                          # 持续集成
-│       ├── cd.yml                          # 持续部署
-│       └── ci-cd-pipeline.yml              # 完整流水线
-│
 ├── assets/                                 # 资源文件
 │   ├── icons/                              # 图标资源
 │   │   ├── icon.ico                        # Windows应用图标
 │   │   └── icon.png                        # PNG格式图标
 │   └── manuals/                            # 设备手册
-│       └── 2022_10_DM2C-RS556 用户手册20221013.pdf.pdf
 │
 ├── backend/                                # Python 后端
 │   ├── api/                                # API 路由模块
-│   │   ├── motor.py                        # 电机控制 API
-│   │   ├── electromagnet.py                # 电磁铁 API
-│   │   ├── temperature.py                  # 温度控制器 API
-│   │   ├── piezo.py                        # 压电控制器 API
-│   │   ├── ammeter.py                      # 皮安表 API
-│   │   ├── analysis.py                     # 数据分析 API
-│   │   ├── device.py                       # 设备状态 API
-│   │   ├── experiment.py                   # 实验管理 API
-│   │   ├── health.py                       # 健康检查 API
-│   │   ├── websocket.py                    # WebSocket 处理
-│   │   └── ...                             # 更多API模块
-│   │
 │   ├── core/                               # 核心业务逻辑
-│   │   ├── abstract.py                     # 硬件抽象层
-│   │   ├── dm2c_driver.py                  # DM2C 驱动
-│   │   ├── analysis.py                     # 物理分析器
-│   │   ├── cache/                          # 缓存模块
-│   │   ├── device_management/              # 设备管理
-│   │   ├── logging/                        # 日志模块
-│   │   ├── monitoring/                     # 监控模块
-│   │   └── storage/                        # 数据存储
-│   │
 │   ├── devices/                            # 设备模型层
 │   ├── drivers/                            # 进程级驱动
 │   ├── middleware/                         # 中间件
@@ -618,8 +590,6 @@ cauc-sep/                                   # 项目根目录
 │   ├── monitoring/                         # 监控配置 (Grafana/Prometheus)
 │   ├── schemas/                            # Pydantic数据模型
 │   ├── tests/                              # 测试文件
-│   │   ├── integration/                    # 集成测试
-│   │   └── unit/                           # 单元测试
 │   ├── main.py                             # FastAPI 主程序
 │   ├── requirements.txt                    # Python 依赖
 │   └── pyproject.toml                      # 项目配置
@@ -628,60 +598,48 @@ cauc-sep/                                   # 项目根目录
 │   ├── src/
 │   │   ├── api/                            # API 客户端
 │   │   ├── components/                     # UI 组件
-│   │   │   ├── analysis/                   # 数据分析组件
-│   │   │   ├── common/                     # 通用组件
-│   │   │   ├── device/                     # 设备组件
-│   │   │   ├── experiment/                 # 实验组件
-│   │   │   ├── layout/                     # 布局组件
-│   │   │   └── settings/                   # 设置组件
 │   │   ├── composables/                    # 组合式函数
 │   │   ├── stores/                         # Pinia 状态管理
 │   │   ├── views/                          # 页面视图
 │   │   ├── router/                         # 路由配置
 │   │   ├── utils/                          # 工具函数
-│   │   ├── styles/                         # 样式文件
-│   │   ├── App.vue                         # 根组件
-│   │   └── main.js                         # 入口文件
+│   │   └── styles/                         # 样式文件
 │   ├── tests/                              # 前端测试
-│   │   ├── e2e/                            # E2E测试
-│   │   └── unit/                           # 单元测试
 │   ├── package.json                        # Node 依赖
 │   └── vite.config.js                      # Vite 配置
 │
-├── docs/                                   # 项目文档
-│   ├── technical-docs/                     # 技术文档集（新）
-│   │   ├── 00-索引与导航/                  # 文档索引
-│   │   ├── 01-项目概述/                    # 项目背景、技术栈、设备清单
-│   │   ├── 02-快速开始/                    # 环境要求、安装配置、验证测试
-│   │   ├── 03-系统架构/                    # 架构设计文档
-│   │   ├── 04-核心模块/                    # 设备驱动与核心模块
-│   │   ├── 05-数据库设计/                  # 数据模型与存储方案
-│   │   ├── 06-通信协议/                    # Modbus/WebSocket/REST协议
-│   │   ├── 07-API参考/                     # API接口文档
-│   │   ├── 08-前端组件/                    # Vue组件文档
-│   │   ├── 09-开发指南/                    # 开发环境与代码规范
-│   │   ├── 10-部署运维/                    # 打包部署与监控
-│   │   ├── 11-用户手册/                    # 用户操作指南
-│   │   ├── 12-开发者指南/                  # 高级开发指南
-│   │   └── 附录/                           # 故障排除、更新日志、术语表
-│   └── DM2C-RS556_用户手册.md              # 设备用户手册
+├── electron/                               # Electron 桌面应用
+│   ├── src/
+│   │   ├── main.js                         # 主进程入口
+│   │   └── preload.js                      # 预加载脚本
+│   ├── package.json                        # 项目配置
+│   └── electron-builder.yml                # 构建配置
 │
-├── installer/                              # 安装程序
-│   └── CAUC-SEP.iss                        # Inno Setup安装脚本
+├── docs/                                   # 项目文档
+│   └── technical-docs/                     # 技术文档集
+│       ├── 00-索引与导航/                  # 文档索引
+│       ├── 01-项目概述/                    # 项目背景、技术栈、设备清单
+│       ├── 02-快速开始/                    # 环境要求、安装配置
+│       ├── 03-系统架构/                    # 架构设计文档
+│       ├── 04-核心模块/                    # 设备驱动与核心模块
+│       ├── 05-数据库设计/                  # 数据模型与存储方案
+│       ├── 06-通信协议/                    # Modbus/WebSocket/REST协议
+│       ├── 07-API参考/                     # API接口文档
+│       ├── 08-前端组件/                    # Vue组件文档
+│       ├── 09-开发指南/                    # 开发环境与代码规范
+│       ├── 10-部署运维/                    # 打包部署与监控
+│       ├── 11-用户手册/                    # 用户操作指南
+│       ├── 12-开发者指南/                  # 高级开发指南
+│       └── 附录/                           # 故障排除、更新日志、术语表
 │
 ├── scripts/                                # 项目脚本
-│   ├── diagnosis/                          # 诊断脚本
-│   ├── verification/                       # 验证脚本
-│   ├── start_dev.bat                       # 开发启动脚本
-│   ├── build.bat                           # PyInstaller打包
-│   ├── build-nuitka.bat                    # Nuitka打包
-│   └── docker-*.bat                        # Docker脚本
+│   ├── add_user.py                         # 用户管理脚本
+│   ├── build-all.bat                       # 全量构建脚本
+│   ├── setup-nuitka-env.bat                # Nuitka 环境配置
+│   └── start_dev.bat                       # 开发启动脚本
 │
-├── docker-compose.yml                      # Docker 编排配置
-├── .pre-commit-config.yaml                 # Pre-commit 钩子配置
-├── codecov.yml                             # 代码覆盖率配置
+├── pyproject.toml                          # Python 项目配置
 ├── CHANGELOG.md                            # 更新日志
-├── CONTRIBUTING.md                         # 贡献指南
 └── README.md                               # 项目说明
 ```
 
