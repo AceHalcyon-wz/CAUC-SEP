@@ -13,6 +13,52 @@
 
 ---
 
+## v4.0.2 (2026-03-15)
+
+### 构建辅助文件清理
+
+#### Docker相关文件清理
+- **移除Docker部署方案**: 已放弃Docker部署，采用本地打包方案
+  - 删除 `.dockerignore` (根目录)
+  - 删除 `docker-compose.yml`
+  - 删除 `frontend/.dockerignore`
+  - 删除 `frontend/Dockerfile`
+  - 删除 `frontend/nginx.conf`
+  - 删除 `backend/Dockerfile`
+  - 删除 `backend/monitoring/docker-compose.yml`
+
+#### CI/CD相关文件清理
+- **移除GitHub Actions部署**: 已放弃CI/CD自动部署
+  - 删除 `codecov.yml`
+  - 删除 `.pre-commit-config.yaml`
+  - 删除 `CONTRIBUTING.md`
+
+#### 过时脚本清理
+- **移除Docker相关脚本**:
+  - 删除 `scripts/docker-build.bat`
+  - 删除 `scripts/docker-logs.bat`
+  - 删除 `scripts/docker-start.bat`
+  - 删除 `scripts/docker-stop.bat`
+- **移除过时检查脚本**:
+  - 删除 `scripts/lint-check.sh`
+  - 删除 `scripts/run-tests.sh`
+
+#### 其他构建辅助文件清理
+- 删除 `slib` (less命令输出文件)
+- 删除 `backend/nuitka-crash-report.xml` (崩溃报告)
+
+#### 保留的构建文件
+以下文件保留用于本地打包和开发：
+- `pyproject.toml` - Python项目配置
+- `backend/pyproject.toml` - 后端项目配置
+- `frontend/package.json` - 前端依赖配置
+- `scripts/build-all.bat` - 全量构建脚本
+- `scripts/start_dev.bat` - 开发环境启动
+- `scripts/setup-nuitka-env.bat` - Nuitka打包环境
+- `scripts/add_user.py` - 用户管理脚本
+
+---
+
 ## v4.0.1 (2026-03-15)
 
 ### 项目结构整理与优化
