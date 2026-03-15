@@ -7,10 +7,21 @@
  */
 
 /**
+ * 串口通信模式
+ * @constant {Array<{label: string, value: string}>}
+ */
+export const SERIAL_MODE_OPTIONS = [
+  { label: 'RS485模式', value: 'rs485', description: '标准Modbus RTU通信，需配置波特率和从站地址' },
+  { label: 'RS232模式', value: 'rs232', description: '使用默认设置（9600波特率，从站地址1）' }
+]
+
+/**
  * 波特率选项
  * @constant {Array<{label: string, value: number}>}
  */
 export const BAUDRATE_OPTIONS = [
+  { label: '2400', value: 2400 },
+  { label: '4800', value: 4800 },
   { label: '9600', value: 9600 },
   { label: '19200', value: 19200 },
   { label: '38400', value: 38400 },
@@ -19,6 +30,19 @@ export const BAUDRATE_OPTIONS = [
   { label: '230400', value: 230400 },
   { label: '460800', value: 460800 },
   { label: '921600', value: 921600 }
+]
+
+/**
+ * DM2C数据类型选项（Pr5.24）
+ * @constant {Array<{label: string, value: number}>}
+ */
+export const DM2C_DATA_TYPE_OPTIONS = [
+  { label: '8位数据，偶校验，2个停止位', value: 0 },
+  { label: '8位数据，奇校验，2个停止位', value: 1 },
+  { label: '8位数据，偶校验，1个停止位', value: 2 },
+  { label: '8位数据，奇校验，1个停止位', value: 3 },
+  { label: '8位数据，无校验，1个停止位', value: 4 },
+  { label: '8位数据，无校验，2个停止位', value: 5 }
 ]
 
 /**
@@ -73,15 +97,17 @@ export const DEVICE_TYPE_CONFIGS = {
     name: '电机控制器',
     icon: 'Setting',
     defaultConfig: {
-      baudrate: 115200,
+      baudrate: 38400,
       databits: 8,
       stopbits: 1,
       parity: 'N',
       flowcontrol: 'none',
       slaveId: 1,
-      timeout: 1000
+      timeout: 1000,
+      serialMode: 'rs485',
+      dataType: 4
     },
-    description: '步进电机/伺服电机控制器，支持Modbus RTU通信'
+    description: '步进电机/伺服电机控制器，支持Modbus RTU通信（RS485/RS232）'
   },
   electromagnet: {
     name: '电磁铁电源',
@@ -148,20 +174,41 @@ export const DEVICE_TYPE_CONFIGS = {
 export const CONNECTION_TEMPLATES = [
   {
     id: 'default_motor',
-    name: '默认电机配置',
+    name: '默认电机配置 (RS485)',
     deviceType: 'motor',
-    description: '适用于标准步进电机控制器',
+    description: '适用于标准步进电机控制器，RS485模式',
     config: {
       port: 'COM3',
-      baudrate: 115200,
+      baudrate: 38400,
       databits: 8,
       stopbits: 1,
       parity: 'N',
       flowcontrol: 'none',
       slaveId: 1,
-      timeout: 1000
+      timeout: 1000,
+      serialMode: 'rs485',
+      dataType: 4
     },
     isDefault: true
+  },
+  {
+    id: 'default_motor_rs232',
+    name: '默认电机配置 (RS232)',
+    deviceType: 'motor',
+    description: '适用于RS232连接，使用默认设置（9600波特率，从站地址1）',
+    config: {
+      port: 'COM3',
+      baudrate: 9600,
+      databits: 8,
+      stopbits: 1,
+      parity: 'N',
+      flowcontrol: 'none',
+      slaveId: 1,
+      timeout: 1000,
+      serialMode: 'rs232',
+      dataType: 4
+    },
+    isDefault: false
   },
   {
     id: 'default_electromagnet',
@@ -418,7 +465,9 @@ export function importConfigFromJSON(jsonString) {
 }
 
 export default {
+  SERIAL_MODE_OPTIONS,
   BAUDRATE_OPTIONS,
+  DM2C_DATA_TYPE_OPTIONS,
   DATABITS_OPTIONS,
   STOPBITS_OPTIONS,
   PARITY_OPTIONS,

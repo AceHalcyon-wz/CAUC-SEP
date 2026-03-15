@@ -716,8 +716,8 @@
 
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Link, Connection, Document, InfoFilled, DataLine, Timer, Odometer,
+import {
+  Link, Connection, Document, InfoFilled, DataLine, Timer,
   Check, Close, CircleClose, Plus, Upload, Download, Monitor, Bell
 } from '@element-plus/icons-vue'
 import { useDevicesStore } from '@/stores/devices'
@@ -921,14 +921,11 @@ function getDeviceTypeName(deviceType) {
 /**
  * 处理测试成功
  */
-function handleTestSuccess(result) {
+function handleTestSuccess(_result) {
   ElMessage.success('连接测试成功')
 }
 
-/**
- * 处理测试失败
- */
-function handleTestFailed(result) {
+function handleTestFailed(_result) {
   ElMessage.error('连接测试失败，请查看诊断信息')
 }
 

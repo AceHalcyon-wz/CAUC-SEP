@@ -64,6 +64,7 @@ def get_frontend_path():
     base_path = get_base_path()
 
     possible_paths = [
+        base_path / "static",
         base_path / "frontend" / "dist",
         base_path / "dist" / "frontend" / "dist",
         base_path.parent / "frontend" / "dist",
@@ -79,6 +80,25 @@ def get_frontend_path():
         logger.warning(f"  - {path}: {'EXISTS' if path.exists() else 'NOT FOUND'}")
 
     return None
+
+
+def open_browser(url: str, delay: float = 1.5):
+    """延迟启动浏览器打开指定URL。
+
+    Args:
+        url: 要打开的URL
+        delay: 延迟秒数，等待服务器启动
+    """
+    import threading
+    import webbrowser
+
+    def _open():
+        time.sleep(delay)
+        logger.info(f"Opening browser: {url}")
+        webbrowser.open(url)
+
+    thread = threading.Thread(target=_open, daemon=True)
+    thread.start()
 
 
 from api import (
@@ -100,16 +120,17 @@ from api import (
 )
 from api.websocket import DeviceType, create_device_status_message, create_waveform_message, manager
 from core.abstract import DeviceStatus
-from core.crash_report import get_crash_report_storage, init_crash_report_manager
-from core.data_storage import DataStorage
+from core.logging.crash_report import get_crash_report_storage, init_crash_report_manager
+from core.storage.data_storage import DataStorage
 from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
 from core.electromagnet_driver import ElectromagnetDriver
-from core.logging_config import cleanup_old_logs, get_log_stats, setup_logging
+from core.logging.logging_config import cleanup_old_logs, get_log_stats, setup_logging
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
-from core.static_files import check_dependencies, get_db_path, get_system_info, optimize_startup
+from core.startup_config import check_dependencies, get_system_info, optimize_startup
+from core.static_files import get_db_path
 from core.temperature_controller import TemperatureController
-from core.tracing import TracingMiddleware, init_tracing, tracer
+from core.monitoring.tracing import TracingMiddleware, init_tracing, tracer
 from middleware.audit import AuditMiddleware, audit_logger
 from middleware.cors_config import get_cors_config, log_cors_config, validate_cors_security
 from middleware.rate_limit import RateLimitMiddleware
@@ -221,7 +242,7 @@ async def lifespan(app: FastAPI):
 
     # 初始化缓存系统
     from core.cache import RedisConfig, init_cache_manager
-    from core.local_cache import start_all_cache_cleanup_tasks
+    from core.cache.local_cache import start_all_cache_cleanup_tasks
 
     cache_manager = init_cache_manager(
         config=RedisConfig(
@@ -352,7 +373,7 @@ async def lifespan(app: FastAPI):
 
     # 停止缓存系统
     from core.cache import get_cache_manager
-    from core.local_cache import stop_all_cache_cleanup_tasks
+    from core.cache.local_cache import stop_all_cache_cleanup_tasks
 
     await stop_all_cache_cleanup_tasks()
     logger.info("Local cache cleanup tasks stopped")
@@ -1183,5 +1204,13 @@ else:
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("Starting server...")
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    host = "127.0.0.1"
+    port = 8000
+    url = f"http://{host}:{port}"
+
+    logger.info(f"Starting CAUC-SEP server on {url}...")
+
+    if getattr(sys, "frozen", False):
+        open_browser(url, delay=2.0)
+
+    uvicorn.run(app, host=host, port=port, log_level="info")

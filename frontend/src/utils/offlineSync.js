@@ -9,7 +9,7 @@
 
 import axios from 'axios'
 import { getOfflineStorage } from './offlineStorage'
-import { getOfflineQueue, OperationPriority, OperationStatus } from './offlineQueue'
+import { getOfflineQueue, OperationPriority } from './offlineQueue'
 
 /**
  * 同步状态枚举

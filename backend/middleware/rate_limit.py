@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 # ==================== 配置常量 ====================
 
 # 默认限制配置
-DEFAULT_REQUESTS_PER_MINUTE = int(os.environ.get("RATE_LIMIT_RPM", "100"))
+DEFAULT_REQUESTS_PER_MINUTE = int(os.environ.get("RATE_LIMIT_RPM", "1000"))
 DEFAULT_BURST_SIZE = int(os.environ.get("RATE_LIMIT_BURST", "20"))
 DEFAULT_WINDOW_SECONDS = int(os.environ.get("RATE_LIMIT_WINDOW", "60"))
 
@@ -253,9 +253,9 @@ class RateLimiter:
             ),
             # 认证操作
             "/api/v1/user/login": RateLimitConfig(
-                requests_per_minute=20,
-                burst_size=5,
-                block_duration=300,  # 5分钟
+                requests_per_minute=1000,
+                burst_size=100,
+                block_duration=60,
             ),
             "/api/v1/user/logout": RateLimitConfig(
                 requests_per_minute=30,

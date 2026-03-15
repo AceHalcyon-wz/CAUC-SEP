@@ -7,7 +7,7 @@
  * @dependencies vue
  */
 
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 
 /**
  * 默认快捷键配置

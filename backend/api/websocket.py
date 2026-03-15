@@ -1035,7 +1035,7 @@ class ConnectionManager:
         """
         connection_info = self._connection_info.get(websocket)
         if not connection_info:
-            logger.error("Connection not found in connection_info")
+            logger.debug("Connection not found in connection_info (may have been disconnected)")
             return False
 
         backpressure_state = connection_info.backpressure_state

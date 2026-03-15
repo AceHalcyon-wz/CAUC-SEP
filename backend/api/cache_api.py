@@ -40,13 +40,13 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from core.cache import get_cache_manager
-from core.cache_strategy import (
+from core.cache.cache_strategy import (
     get_all_cache_stats,
     get_device_cache_manager,
     get_invalidation_manager,
     get_penetration_protector,
 )
-from core.local_cache import get_all_local_cache_stats
+from core.cache.local_cache import get_all_local_cache_stats
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ async def cleanup_local_cache() -> dict[str, Any]:
     Returns:
         dict: 清理结果
     """
-    from core.local_cache import (
+    from core.cache.local_cache import (
         get_device_config_cache,
         get_device_status_cache,
         get_user_session_cache,
@@ -333,7 +333,7 @@ async def clear_all_cache() -> dict[str, Any]:
     Returns:
         dict: 操作结果
     """
-    from core.local_cache import (
+    from core.cache.local_cache import (
         get_device_config_cache,
         get_device_status_cache,
         get_user_session_cache,

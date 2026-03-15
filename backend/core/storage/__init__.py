@@ -44,15 +44,26 @@
 """
 
 from .data_storage import DataStorage
-from .database import DatabaseManager, get_db_session
+from .database import (
+    DatabaseConnectionPool,
+    DatabasePoolManager,
+    get_pool_manager,
+    get_default_pool,
+    init_database_pool,
+    create_pool,
+)
 from .timeseries_storage import TimeSeriesStorage
 from .data_pipeline import DataPipeline
 from .index_optimizer import IndexOptimizer
 
 __all__ = [
     "DataStorage",
-    "DatabaseManager",
-    "get_db_session",
+    "DatabaseConnectionPool",
+    "DatabasePoolManager",
+    "get_pool_manager",
+    "get_default_pool",
+    "init_database_pool",
+    "create_pool",
     "TimeSeriesStorage",
     "DataPipeline",
     "IndexOptimizer",

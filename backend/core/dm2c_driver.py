@@ -483,6 +483,84 @@ REG_HOME_SPEED_LOW = 0x0282  # Pr8.02: 回零速度（低速）
 REG_HOME_OFFSET = 0x0283  # Pr8.03: 回零偏移
 REG_HOME_DIRECTION = 0x0284  # Pr8.04: 回零方向
 
+
+# 通信参数寄存器地址（Pr5组）- 用于在线修改通信参数
+REG_485_BAUDRATE = 0x01BD  # Pr5.22: 485波特率 (0-6: 2400-115200)
+REG_485_ID = 0x01BF  # Pr5.23: 485从站地址 (0-127)
+REG_485_DATA_TYPE = 0x01C1  # Pr5.24: 485数据类型选择 (0-5: 数据位/校验位/停止位组合)
+REG_485_CMD_WORD = 0x01C3  # Pr5.25: 485控制命令字
+REG_485_BIT_DELAY = 0x01C4  # Pr5.26: 485通讯位延时
+
+
+# 软件限位寄存器地址（Pr8组）- 用于驱动器内部软件限位
+REG_SOFT_LIMIT_POS_H = 0x6006  # Pr8.06: 正限位高位
+REG_SOFT_LIMIT_POS_L = 0x6007  # Pr8.07: 正限位低位
+REG_SOFT_LIMIT_NEG_H = 0x6008  # Pr8.08: 负限位高位
+REG_SOFT_LIMIT_NEG_L = 0x6009  # Pr8.09: 负限位低位
+
+
+# 波特率映射表（Pr5.22值 -> 实际波特率）
+BAUDRATE_MAP = {
+    0: 2400,
+    1: 4800,
+    2: 9600,
+    3: 19200,
+    4: 38400,
+    5: 57600,
+    6: 115200,
+}
+
+# 波特率反向映射表（实际波特率 -> Pr5.22值）
+BAUDRATE_REVERSE_MAP = {v: k for k, v in BAUDRATE_MAP.items()}
+
+
+# 数据类型映射表（Pr5.24值 -> 数据位/校验位/停止位组合）
+# 0: 8位数据，偶校验，2个停止位
+# 1: 8位数据，奇校验，2个停止位
+# 2: 8位数据，偶校验，1个停止位
+# 3: 8位数据，奇校验，1个停止位
+# 4: 8位数据，无校验，1个停止位
+# 5: 8位数据，无校验，2个停止位
+DATA_TYPE_MAP = {
+    0: {"bytesize": 8, "parity": "E", "stopbits": 2},
+    1: {"bytesize": 8, "parity": "O", "stopbits": 2},
+    2: {"bytesize": 8, "parity": "E", "stopbits": 1},
+    3: {"bytesize": 8, "parity": "O", "stopbits": 1},
+    4: {"bytesize": 8, "parity": "N", "stopbits": 1},
+    5: {"bytesize": 8, "parity": "N", "stopbits": 2},
+}
+
+
+class SerialMode(Enum):
+    """
+    串口通信模式枚举。
+
+    Attributes:
+        RS485: RS485模式，需要配置波特率、从站地址等参数
+        RS232: RS232模式，使用默认设置，无需配置从站地址
+    """
+
+    RS485 = "rs485"
+    RS232 = "rs232"
+
+
+@dataclass
+class CommunicationConfig:
+    """
+    通信配置数据类。
+
+    Attributes:
+        baudrate: 波特率 (2400-115200)
+        slave_id: 从站地址 (0-127)
+        data_type: 数据类型 (0-5)
+        serial_mode: 串口模式 (RS485/RS232)
+    """
+
+    baudrate: int = 38400
+    slave_id: int = 1
+    data_type: int = 4  # 默认：8位数据，无校验，1个停止位
+    serial_mode: SerialMode = SerialMode.RS485
+
 # 回零模式定义
 HOME_MODE_SINGLE_LIMIT = 0  # 单边限位回零
 HOME_MODE_DOUBLE_LIMIT = 1  # 双边限位回零
@@ -539,14 +617,33 @@ class LeadshineDM2C(AbstractStepper):
             config: 配置字典
                 - port: 串口号 (默认 "COM1")
                 - slave_id: 从站地址 (默认 1)
-                - baudrate: 波特率 (默认 115200)
+                - baudrate: 波特率 (默认 38400，RS232模式忽略此参数)
                 - steps_per_mm: 每毫米步数 (默认 1600)
+                - serial_mode: 串口模式 ("rs485" 或 "rs232"，默认 "rs485")
         """
         super().__init__(device_id, config)
         self.client: ModbusSerialClient | None = None
-        self.slave_id = config.get("slave_id", 1)
+
+        # 解析串口模式
+        serial_mode_str = config.get("serial_mode", "rs485").lower()
+        self.serial_mode = (
+            SerialMode.RS232 if serial_mode_str == "rs232" else SerialMode.RS485
+        )
+
+        # RS232模式使用默认设置
+        if self.serial_mode == SerialMode.RS232:
+            self.slave_id = 1  # RS232模式固定从站地址为1
+            self.baudrate = 9600  # RS232模式默认波特率9600
+            logger.info(
+                f"DM2C {device_id} initialized in RS232 mode "
+                f"(port={config.get('port', 'COM1')}, using default settings)"
+            )
+        else:
+            # RS485模式使用配置参数
+            self.slave_id = config.get("slave_id", 1)
+            self.baudrate = config.get("baudrate", 38400)
+
         self.port = config.get("port", "COM1")
-        self.baudrate = config.get("baudrate", 115200)
         self.steps_per_mm = config.get("steps_per_mm", DEFAULT_STEPS_PER_MM)
 
         # 状态
@@ -556,7 +653,23 @@ class LeadshineDM2C(AbstractStepper):
         # 软件限位配置
         self.limit_config = SoftwareLimitConfig()
 
-        logger.info(f"DM2C {device_id} initialized (port={self.port}, slave={self.slave_id})")
+        # 仿真模式标志（当pymodbus不可用时自动启用）
+        self._simulation = not PYMODBUS_AVAILABLE
+
+        logger.info(
+            f"DM2C {device_id} initialized (port={self.port}, slave={self.slave_id}, "
+            f"baudrate={self.baudrate}, mode={self.serial_mode.value})"
+        )
+
+    @property
+    def simulation(self) -> bool:
+        """
+        获取仿真模式状态。
+
+        Returns:
+            bool: 是否处于仿真模式
+        """
+        return self._simulation
 
     async def connect(self) -> bool:
         """
@@ -564,6 +677,10 @@ class LeadshineDM2C(AbstractStepper):
 
         Returns:
             bool: 连接是否成功
+
+        Note:
+            RS232模式使用默认设置（9600波特率，从站地址1）
+            RS485模式使用配置的波特率和从站地址
         """
         if not PYMODBUS_AVAILABLE:
             logger.warning("pymodbus not available, running in simulation mode")
@@ -573,18 +690,40 @@ class LeadshineDM2C(AbstractStepper):
         try:
             self.status = DeviceStatus.CONNECTING
 
+            # 根据串口模式选择连接参数
+            if self.serial_mode == SerialMode.RS232:
+                # RS232模式：使用默认设置（根据DM2C-RS556用户手册V1.8）
+                # RS232通讯无需选择波特率和设备号，使用默认设置即可
+                connect_baudrate = 9600
+                connect_parity = "N"
+                connect_stopbits = 1
+                logger.info(
+                    f"Connecting in RS232 mode with default settings "
+                    f"(baudrate={connect_baudrate}, parity={connect_parity}, stopbits={connect_stopbits})"
+                )
+            else:
+                # RS485模式：使用配置参数
+                connect_baudrate = self.baudrate
+                # 根据数据类型确定校验位和停止位
+                data_type_config = DATA_TYPE_MAP.get(4, {"parity": "N", "stopbits": 1})
+                connect_parity = data_type_config["parity"]
+                connect_stopbits = data_type_config["stopbits"]
+
             self.client = ModbusSerialClient(
                 port=self.port,
-                baudrate=self.baudrate,
+                baudrate=connect_baudrate,
                 bytesize=8,
-                parity="E",
-                stopbits=1,
+                parity=connect_parity,
+                stopbits=connect_stopbits,
                 timeout=1,
             )
 
             if self.client.connect():
                 self.status = DeviceStatus.READY
-                logger.info(f"DM2C {self.device_id} connected on {self.port}")
+                logger.info(
+                    f"DM2C {self.device_id} connected on {self.port} "
+                    f"(mode={self.serial_mode.value}, baudrate={connect_baudrate})"
+                )
                 return True
             else:
                 self.status = DeviceStatus.ERROR
@@ -2270,6 +2409,447 @@ class LeadshineDM2C(AbstractStepper):
         except Exception as e:
             logger.error(f"Unexpected error writing register: {e}")
             return False
+
+    # ==================== RS232专用通信模式功能 ====================
+
+    async def connect_rs232(self, port: str) -> bool:
+        """
+        使用RS232模式连接驱动器。
+
+        根据DM2C-RS556用户手册V1.8，RS232通讯无需选择波特率和设备号，
+        使用默认设置即可。
+
+        Args:
+            port: 串口号（如 "COM3"）
+
+        Returns:
+            bool: 连接是否成功
+
+        Note:
+            RS232模式默认设置：
+            - 波特率：9600
+            - 从站地址：1
+            - 数据位：8位
+            - 校验位：无
+            - 停止位：1位
+        """
+        self.port = port
+        self.serial_mode = SerialMode.RS232
+        self.slave_id = 1
+        self.baudrate = 9600
+
+        logger.info(f"Connecting in RS232 mode on {port} with default settings")
+        return await self.connect()
+
+    def get_serial_mode(self) -> SerialMode:
+        """
+        获取当前串口通信模式。
+
+        Returns:
+            SerialMode: 当前串口模式（RS485或RS232）
+        """
+        return self.serial_mode
+
+    def is_rs232_mode(self) -> bool:
+        """
+        检查是否为RS232模式。
+
+        Returns:
+            bool: 是否为RS232模式
+        """
+        return self.serial_mode == SerialMode.RS232
+
+    # ==================== 在线修改通信参数功能 ====================
+
+    async def read_communication_config(self) -> CommunicationConfig:
+        """
+        读取当前通信参数配置。
+
+        读取Pr5.22-Pr5.24寄存器获取当前通信参数。
+
+        Returns:
+            CommunicationConfig: 通信配置对象
+
+        Note:
+            寄存器映射：
+            - Pr5.22 (0x01BD): 波特率 (0-6)
+            - Pr5.23 (0x01BF): 从站地址 (0-127)
+            - Pr5.24 (0x01C1): 数据类型 (0-5)
+        """
+        if not PYMODBUS_AVAILABLE:
+            return CommunicationConfig()
+
+        try:
+            baudrate_val = await self._read_register(REG_485_BAUDRATE)
+            slave_id_val = await self._read_register(REG_485_ID)
+            data_type_val = await self._read_register(REG_485_DATA_TYPE)
+
+            config = CommunicationConfig(
+                baudrate=BAUDRATE_MAP.get(baudrate_val, 38400),
+                slave_id=slave_id_val if slave_id_val >= 0 else 1,
+                data_type=data_type_val if 0 <= data_type_val <= 5 else 4,
+                serial_mode=self.serial_mode,
+            )
+
+            logger.info(
+                f"Communication config read: baudrate={config.baudrate}, "
+                f"slave_id={config.slave_id}, data_type={config.data_type}"
+            )
+            return config
+
+        except Exception as e:
+            logger.error(f"Failed to read communication config: {e}")
+            return CommunicationConfig()
+
+    async def write_communication_config(
+        self,
+        baudrate: int | None = None,
+        slave_id: int | None = None,
+        data_type: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        在线修改通信参数。
+
+        写入Pr5.22-Pr5.24寄存器修改通信参数。
+        注意：波特率修改仅在当前波特率为9600时生效。
+
+        Args:
+            baudrate: 波特率 (2400, 4800, 9600, 19200, 38400, 57600, 115200)
+            slave_id: 从站地址 (0-127)
+            data_type: 数据类型 (0-5)
+                - 0: 8位数据，偶校验，2个停止位
+                - 1: 8位数据，奇校验，2个停止位
+                - 2: 8位数据，偶校验，1个停止位
+                - 3: 8位数据，奇校验，1个停止位
+                - 4: 8位数据，无校验，1个停止位（默认）
+                - 5: 8位数据，无校验，2个停止位
+
+        Returns:
+            Dict[str, Any]: 包含各参数写入结果和警告信息
+
+        Warning:
+            根据DM2C-RS556用户手册V1.8，波特率只能在当前波特率为9600时在线修改。
+            修改后需要保存参数到EEPROM并重新上电才能生效。
+
+        Example:
+            >>> result = await driver.write_communication_config(
+            ...     baudrate=115200,
+            ...     slave_id=2,
+            ...     data_type=4
+            ... )
+            >>> if result["success"]:
+            ...     print("Config updated, please save and restart")
+        """
+        results = {
+            "success": True,
+            "baudrate": None,
+            "slave_id": None,
+            "data_type": None,
+            "warnings": [],
+            "errors": [],
+        }
+
+        if not PYMODBUS_AVAILABLE:
+            logger.info("[SIMULATION] Communication config updated")
+            return results
+
+        try:
+            # 检查当前波特率是否为9600（只有9600下才能修改波特率）
+            current_baudrate_val = await self._read_register(REG_485_BAUDRATE)
+            if current_baudrate_val != 2:  # 2 = 9600
+                warning_msg = (
+                    f"当前波特率不是9600 (当前值: {current_baudrate_val})，"
+                    "波特率修改可能不会生效。请在9600波特率下修改。"
+                )
+                results["warnings"].append(warning_msg)
+                logger.warning(warning_msg)
+
+            # 写入波特率
+            if baudrate is not None:
+                if baudrate not in BAUDRATE_REVERSE_MAP:
+                    error_msg = f"无效的波特率: {baudrate}，有效值: {list(BAUDRATE_REVERSE_MAP.keys())}"
+                    results["errors"].append(error_msg)
+                    results["success"] = False
+                else:
+                    baudrate_val = BAUDRATE_REVERSE_MAP[baudrate]
+                    if await self._write_register(REG_485_BAUDRATE, baudrate_val):
+                        results["baudrate"] = baudrate
+                        logger.info(f"Baudrate set to {baudrate} (value: {baudrate_val})")
+                    else:
+                        results["errors"].append("波特率写入失败")
+                        results["success"] = False
+
+            # 写入从站地址
+            if slave_id is not None:
+                if not 0 <= slave_id <= 127:
+                    error_msg = f"无效的从站地址: {slave_id}，有效范围: 0-127"
+                    results["errors"].append(error_msg)
+                    results["success"] = False
+                else:
+                    if await self._write_register(REG_485_ID, slave_id):
+                        results["slave_id"] = slave_id
+                        logger.info(f"Slave ID set to {slave_id}")
+                    else:
+                        results["errors"].append("从站地址写入失败")
+                        results["success"] = False
+
+            # 写入数据类型
+            if data_type is not None:
+                if not 0 <= data_type <= 5:
+                    error_msg = f"无效的数据类型: {data_type}，有效范围: 0-5"
+                    results["errors"].append(error_msg)
+                    results["success"] = False
+                else:
+                    if await self._write_register(REG_485_DATA_TYPE, data_type):
+                        results["data_type"] = data_type
+                        logger.info(f"Data type set to {data_type}")
+                    else:
+                        results["errors"].append("数据类型写入失败")
+                        results["success"] = False
+
+            if results["success"] and (baudrate or slave_id is not None or data_type is not None):
+                results["warnings"].append(
+                    "通信参数已修改，请调用 save_parameters() 保存到EEPROM，"
+                    "并重新上电使参数生效。"
+                )
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to write communication config: {e}")
+            results["errors"].append(str(e))
+            results["success"] = False
+            return results
+
+    async def get_supported_baudrates(self) -> list[int]:
+        """
+        获取支持的波特率列表。
+
+        Returns:
+            List[int]: 支持的波特率列表
+        """
+        return list(BAUDRATE_MAP.values())
+
+    async def get_supported_data_types(self) -> dict[int, str]:
+        """
+        获取支持的数据类型列表。
+
+        Returns:
+            Dict[int, str]: 数据类型代码到描述的映射
+        """
+        return {
+            0: "8位数据，偶校验，2个停止位",
+            1: "8位数据，奇校验，2个停止位",
+            2: "8位数据，偶校验，1个停止位",
+            3: "8位数据，奇校验，1个停止位",
+            4: "8位数据，无校验，1个停止位",
+            5: "8位数据，无校验，2个停止位",
+        }
+
+    # ==================== 软件限位寄存器写入功能 ====================
+
+    async def read_driver_soft_limits(self) -> dict[str, Any]:
+        """
+        读取驱动器内部软件限位设置。
+
+        读取Pr8.06-Pr8.09寄存器获取驱动器内部软件限位值。
+
+        Returns:
+            Dict[str, Any]: 包含正负限位信息
+                - positive_limit: 正向限位（步数）
+                - negative_limit: 负向限位（步数）
+                - positive_limit_mm: 正向限位（毫米）
+                - negative_limit_mm: 负向限位（毫米）
+
+        Note:
+            寄存器映射：
+            - Pr8.06 (0x6006): 正限位高位
+            - Pr8.07 (0x6007): 正限位低位
+            - Pr8.08 (0x6008): 负限位高位
+            - Pr8.09 (0x6009): 负限位低位
+
+            软件限位为32位有符号整数，由高16位和低16位组成。
+        """
+        if not PYMODBUS_AVAILABLE:
+            return {
+                "positive_limit": 0,
+                "negative_limit": 0,
+                "positive_limit_mm": 0.0,
+                "negative_limit_mm": 0.0,
+            }
+
+        try:
+            pos_h = await self._read_register(REG_SOFT_LIMIT_POS_H)
+            pos_l = await self._read_register(REG_SOFT_LIMIT_POS_L)
+            neg_h = await self._read_register(REG_SOFT_LIMIT_NEG_H)
+            neg_l = await self._read_register(REG_SOFT_LIMIT_NEG_L)
+
+            # 组合32位有符号整数
+            positive_limit = (pos_h << 16) | pos_l
+            negative_limit = (neg_h << 16) | neg_l
+
+            # 处理负数
+            if positive_limit >= 0x80000000:
+                positive_limit -= 0x100000000
+            if negative_limit >= 0x80000000:
+                negative_limit -= 0x100000000
+
+            return {
+                "positive_limit": positive_limit,
+                "negative_limit": negative_limit,
+                "positive_limit_mm": steps_to_mm(positive_limit, self.steps_per_mm),
+                "negative_limit_mm": steps_to_mm(negative_limit, self.steps_per_mm),
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to read driver soft limits: {e}")
+            return {
+                "positive_limit": 0,
+                "negative_limit": 0,
+                "positive_limit_mm": 0.0,
+                "negative_limit_mm": 0.0,
+            }
+
+    async def write_driver_soft_limits(
+        self,
+        positive_limit_mm: float | None = None,
+        negative_limit_mm: float | None = None,
+        positive_limit_steps: int | None = None,
+        negative_limit_steps: int | None = None,
+    ) -> dict[str, Any]:
+        """
+        写入驱动器内部软件限位。
+
+        写入Pr8.06-Pr8.09寄存器设置驱动器内部软件限位。
+        可以使用毫米或步数作为单位。
+
+        Args:
+            positive_limit_mm: 正向限位（毫米），与positive_limit_steps二选一
+            negative_limit_mm: 负向限位（毫米），与negative_limit_steps二选一
+            positive_limit_steps: 正向限位（步数），优先于positive_limit_mm
+            negative_limit_steps: 负向限位（步数），优先于negative_limit_mm
+
+        Returns:
+            Dict[str, Any]: 包含写入结果
+
+        Note:
+            软件限位在回零时无效。
+            修改后需要保存参数到EEPROM才能永久生效。
+
+        Example:
+            >>> # 使用毫米设置
+            >>> result = await driver.write_driver_soft_limits(
+            ...     positive_limit_mm=100.0,
+            ...     negative_limit_mm=-100.0
+            ... )
+            >>> # 使用步数设置
+            >>> result = await driver.write_driver_soft_limits(
+            ...     positive_limit_steps=160000,
+            ...     negative_limit_steps=-160000
+            ... )
+        """
+        results = {
+            "success": True,
+            "positive_limit": None,
+            "negative_limit": None,
+            "errors": [],
+        }
+
+        if not PYMODBUS_AVAILABLE:
+            logger.info("[SIMULATION] Driver soft limits updated")
+            return results
+
+        try:
+            # 计算正向限位步数
+            if positive_limit_steps is not None:
+                pos_limit = positive_limit_steps
+            elif positive_limit_mm is not None:
+                pos_limit = mm_to_steps(positive_limit_mm, self.steps_per_mm)
+            else:
+                pos_limit = None
+
+            # 计算负向限位步数
+            if negative_limit_steps is not None:
+                neg_limit = negative_limit_steps
+            elif negative_limit_mm is not None:
+                neg_limit = mm_to_steps(negative_limit_mm, self.steps_per_mm)
+            else:
+                neg_limit = None
+
+            # 写入正向限位
+            if pos_limit is not None:
+                # 处理负数（转换为无符号32位）
+                if pos_limit < 0:
+                    pos_limit = pos_limit & 0xFFFFFFFF
+
+                pos_h = (pos_limit >> 16) & 0xFFFF
+                pos_l = pos_limit & 0xFFFF
+
+                result_h = await self._write_register(REG_SOFT_LIMIT_POS_H, pos_h)
+                result_l = await self._write_register(REG_SOFT_LIMIT_POS_L, pos_l)
+
+                if result_h and result_l:
+                    results["positive_limit"] = pos_limit
+                    logger.info(f"Positive soft limit set to {pos_limit} steps")
+                else:
+                    results["errors"].append("正向限位写入失败")
+                    results["success"] = False
+
+            # 写入负向限位
+            if neg_limit is not None:
+                # 处理负数（转换为无符号32位）
+                if neg_limit < 0:
+                    neg_limit = neg_limit & 0xFFFFFFFF
+
+                neg_h = (neg_limit >> 16) & 0xFFFF
+                neg_l = neg_limit & 0xFFFF
+
+                result_h = await self._write_register(REG_SOFT_LIMIT_NEG_H, neg_h)
+                result_l = await self._write_register(REG_SOFT_LIMIT_NEG_L, neg_l)
+
+                if result_h and result_l:
+                    results["negative_limit"] = neg_limit
+                    logger.info(f"Negative soft limit set to {neg_limit} steps")
+                else:
+                    results["errors"].append("负向限位写入失败")
+                    results["success"] = False
+
+            if results["success"]:
+                logger.info(
+                    "Driver soft limits updated. Call save_parameters() to persist to EEPROM."
+                )
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Failed to write driver soft limits: {e}")
+            results["errors"].append(str(e))
+            results["success"] = False
+            return results
+
+    async def sync_soft_limits_to_driver(self) -> bool:
+        """
+        将本地软件限位配置同步到驱动器。
+
+        将self.limit_config中的软件限位值写入驱动器寄存器。
+
+        Returns:
+            bool: 是否成功
+
+        Example:
+            >>> driver.set_soft_limits(100.0, -100.0)
+            >>> await driver.sync_soft_limits_to_driver()
+        """
+        if not self.limit_config.enable:
+            logger.warning("Soft limits are not enabled, skipping sync")
+            return False
+
+        result = await self.write_driver_soft_limits(
+            positive_limit_mm=self.limit_config.positive_limit,
+            negative_limit_mm=self.limit_config.negative_limit,
+        )
+
+        return result["success"]
 
 
 # 向后兼容：保留旧类名

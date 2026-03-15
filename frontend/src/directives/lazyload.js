@@ -6,7 +6,7 @@
  * @date 2024-03-08
  */
 
-import { createApp, h, defineComponent, ref, onMounted, onUnmounted } from 'vue'
+import { h, defineComponent, ref, onMounted, onUnmounted } from 'vue'
 
 /**
  * IntersectionObserver实例（全局共享）

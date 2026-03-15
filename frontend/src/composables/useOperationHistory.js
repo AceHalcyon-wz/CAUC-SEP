@@ -7,7 +7,7 @@
  * @dependencies vue
  */
 
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 /**
  * 操作类型枚举
@@ -588,14 +588,10 @@ export function useOperationHistory(options = {}) {
       // 保留可撤销的记录
       if (keepUndoable && currentIndex.value >= 0) {
         const undoableOps = history.value.slice(0, currentIndex.value + 1)
-        const removedOps = history.value.filter(op =>
-          !filtered.includes(op) && !undoableOps.includes(op)
-        )
-        filtered = [...undoableOps, ...filtered.filter(op => !undoableOps.includes(op))]
-        // 移除不在filtered中的记录
         history.value = history.value.filter(op =>
           filtered.includes(op) || undoableOps.includes(op)
         )
+        filtered = [...undoableOps, ...filtered.filter(op => !undoableOps.includes(op))]
       } else {
         history.value = filtered
       }
@@ -678,7 +674,6 @@ export function useOperationHistory(options = {}) {
         imported = JSON.parse(data)
       } else if (format === 'csv') {
         const lines = data.split('\n')
-        const headers = lines[0].split(',')
         for (let i = 1; i < lines.length; i++) {
           const values = lines[i].split(',')
           imported.push({

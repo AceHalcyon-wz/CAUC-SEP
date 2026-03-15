@@ -18,12 +18,19 @@
 导出组件：
     - TracingMiddleware: 链路追踪中间件
     - init_tracing: 初始化追踪系统
-    - record_span: 记录追踪跨度
     - tracer: 全局追踪器实例
-    - Profiler: 性能分析器
+    - Tracer: 追踪器类
+    - traced: 追踪装饰器
+    - get_trace_storage: 获取追踪存储实例
+    - PerformanceProfiler: 性能分析器
     - profile_function: 函数性能分析装饰器
+    - get_profiler: 获取分析器实例
+    - SystemMonitor: 系统监控器
+    - get_system_monitor: 获取系统监控器
     - MetricsCollector: 指标收集器
+    - get_metrics_collector: 获取指标收集器
     - QueryMonitor: 查询监控器
+    - get_query_monitor: 获取查询监控器
 
 依赖：
     - opentelemetry: 分布式追踪SDK（可选）
@@ -32,41 +39,88 @@
     - typing: 类型注解支持
 
 使用示例：
-    >>> from backend.core.monitoring import init_tracing, record_span, Profiler
+    >>> from backend.core.monitoring import init_tracing, traced, PerformanceProfiler
     >>> 
     >>> # 初始化追踪
-    >>> init_tracing(service_name="cauc-sep-backend")
-    >>> 
-    >>> # 记录追踪跨度
-    >>> with record_span("operation_name"):
-    ...     # 执行操作
-    ...     pass
+    >>> tracer = init_tracing(service_name="cauc-sep-backend")
     >>> 
     >>> # 性能分析
     >>> profiler = get_profiler()
-    >>> profiler.start()
+    >>> profiler.start_profiling()
 """
 
 from .tracing import (
     TracingMiddleware,
     init_tracing,
-    record_span,
     tracer,
+    Tracer,
+    traced,
+    get_trace_storage,
 )
-from .profiler import Profiler, profile_function, get_profiler
-from .metrics import MetricsCollector, get_metrics_collector
-from .query_monitor import QueryMonitor, get_query_monitor
+from .profiler import (
+    PerformanceProfiler,
+    profile_function,
+    get_profiler,
+    SystemMonitor,
+    get_system_monitor,
+)
+from .metrics import (
+    Metric,
+    MetricType,
+    Counter,
+    Gauge,
+    Histogram,
+    MetricsRegistry,
+    BusinessMetricsCollector,
+    default_registry,
+    business_metrics,
+    get_business_metrics,
+)
+from .query_monitor import (
+    QueryMetric,
+    QueryStatistics,
+    QueryPerformanceMonitor,
+    setup_query_monitoring,
+    QueryPerformanceTracker,
+    track_query_performance,
+    get_query_monitor,
+    init_query_monitor,
+    record_query,
+    get_slow_queries,
+    get_query_statistics,
+)
 
 __all__ = [
     "TracingMiddleware",
     "init_tracing",
-    "record_span",
     "tracer",
-    "Profiler",
+    "Tracer",
+    "traced",
+    "get_trace_storage",
+    "PerformanceProfiler",
     "profile_function",
     "get_profiler",
-    "MetricsCollector",
-    "get_metrics_collector",
-    "QueryMonitor",
+    "SystemMonitor",
+    "get_system_monitor",
+    "Metric",
+    "MetricType",
+    "Counter",
+    "Gauge",
+    "Histogram",
+    "MetricsRegistry",
+    "BusinessMetricsCollector",
+    "default_registry",
+    "business_metrics",
+    "get_business_metrics",
+    "QueryMetric",
+    "QueryStatistics",
+    "QueryPerformanceMonitor",
+    "setup_query_monitoring",
+    "QueryPerformanceTracker",
+    "track_query_performance",
     "get_query_monitor",
+    "init_query_monitor",
+    "record_query",
+    "get_slow_queries",
+    "get_query_statistics",
 ]

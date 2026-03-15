@@ -46,7 +46,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from core.abstract import DeviceStatus
-from core.data_storage import DataStorage
+from core.storage.data_storage import DataStorage
 from core.dm2c_driver import DI_FUNCTIONS, DO_FUNCTIONS, LeadshineDM2C
 from core.electromagnet_driver import ElectromagnetDriver
 from core.picoammeter import Picoammeter
@@ -241,6 +241,184 @@ async def list_devices():
     return {
         "count": len(devices),
         "devices": devices,
+    }
+
+
+@router.get("/status")
+async def get_all_devices_status():
+    """
+    获取所有设备状态
+
+    为前端devices.js store提供统一的状态查询接口。
+    返回所有设备的聚合状态信息。
+
+    Returns:
+        dict: 所有设备状态，包含devices列表和system_status
+    """
+    devices = []
+    error_count = 0
+    connected_count = 0
+
+    # 步进电机
+    if dm2c:
+        try:
+            status_data = await dm2c.read_status()
+            is_connected = dm2c.status != DeviceStatus.DISCONNECTED
+            if is_connected:
+                connected_count += 1
+            if dm2c.status == DeviceStatus.ERROR:
+                error_count += 1
+            devices.append({
+                "device_id": dm2c.device_id,
+                "device_type": "motor",
+                "status": dm2c.status.value,
+                "connected": is_connected,
+                "simulation": getattr(dm2c, 'simulation', True),
+                "details": status_data,
+            })
+        except Exception as e:
+            logger.error(f"Failed to get dm2c status: {e}")
+            devices.append({
+                "device_id": "stepper_01",
+                "device_type": "motor",
+                "status": "error",
+                "connected": False,
+                "simulation": True,
+                "error": str(e),
+            })
+            error_count += 1
+
+    # 电磁铁
+    if electromagnet_driver:
+        try:
+            status_data = await electromagnet_driver.read_status()
+            is_connected = status_data.get("connected", False)
+            if is_connected:
+                connected_count += 1
+            if status_data.get("electromagnet_status") == "error":
+                error_count += 1
+            devices.append({
+                "device_id": electromagnet_driver.device_id,
+                "device_type": "electromagnet",
+                "status": status_data.get("electromagnet_status", "unknown"),
+                "connected": is_connected,
+                "simulation": status_data.get("simulation", True),
+                "details": status_data,
+            })
+        except Exception as e:
+            logger.error(f"Failed to get electromagnet status: {e}")
+            devices.append({
+                "device_id": "electromagnet_01",
+                "device_type": "electromagnet",
+                "status": "error",
+                "connected": False,
+                "simulation": True,
+                "error": str(e),
+            })
+            error_count += 1
+
+    # 温控系统
+    if temp_controller:
+        try:
+            status_data = await temp_controller.read_status()
+            is_connected = status_data.get("connected", False)
+            if is_connected:
+                connected_count += 1
+            if status_data.get("status") == "error":
+                error_count += 1
+            devices.append({
+                "device_id": temp_controller.device_id,
+                "device_type": "temperature",
+                "status": status_data.get("status", "unknown"),
+                "connected": is_connected,
+                "simulation": status_data.get("simulation_mode", True),
+                "details": status_data,
+            })
+        except Exception as e:
+            logger.error(f"Failed to get temperature controller status: {e}")
+            devices.append({
+                "device_id": "temp_controller_01",
+                "device_type": "temperature",
+                "status": "error",
+                "connected": False,
+                "simulation": True,
+                "error": str(e),
+            })
+            error_count += 1
+
+    # 压电陶瓷控制器
+    if piezo_controller:
+        try:
+            status_data = await piezo_controller.read_status()
+            is_connected = True
+            connected_count += 1
+            if status_data.get("status") == "error":
+                error_count += 1
+            devices.append({
+                "device_id": piezo_controller.device_id,
+                "device_type": "piezo",
+                "status": status_data.get("status", "unknown"),
+                "connected": is_connected,
+                "simulation": getattr(piezo_controller, 'simulation', True),
+                "details": status_data,
+            })
+        except Exception as e:
+            logger.error(f"Failed to get piezo controller status: {e}")
+            devices.append({
+                "device_id": "piezo_01",
+                "device_type": "piezo",
+                "status": "error",
+                "connected": False,
+                "simulation": True,
+                "error": str(e),
+            })
+            error_count += 1
+
+    # 微电流计
+    if picoammeter:
+        try:
+            status_data = await picoammeter.read_status()
+            is_connected = picoammeter.status != DeviceStatus.DISCONNECTED
+            if is_connected:
+                connected_count += 1
+            if picoammeter.status == DeviceStatus.ERROR:
+                error_count += 1
+            devices.append({
+                "device_id": picoammeter.device_id,
+                "device_type": "ammeter",
+                "status": status_data.get("status", "unknown"),
+                "connected": is_connected,
+                "simulation": status_data.get("simulation", True),
+                "details": status_data,
+            })
+        except Exception as e:
+            logger.error(f"Failed to get picoammeter status: {e}")
+            devices.append({
+                "device_id": "picoammeter_01",
+                "device_type": "ammeter",
+                "status": "error",
+                "connected": False,
+                "simulation": True,
+                "error": str(e),
+            })
+            error_count += 1
+
+    # 计算系统状态
+    if connected_count == 0:
+        system_status = "offline"
+    elif error_count > 0:
+        system_status = "error"
+    elif connected_count < len(devices):
+        system_status = "warning"
+    else:
+        system_status = "normal"
+
+    return {
+        "devices": devices,
+        "system_status": system_status,
+        "connected_count": connected_count,
+        "total_count": len(devices),
+        "error_count": error_count,
     }
 
 

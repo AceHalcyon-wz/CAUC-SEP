@@ -58,7 +58,7 @@ from pydantic import BaseModel, Field
 from core.abstract import DeviceStatus
 from core.dm2c_driver import LeadshineDM2C
 from core.electromagnet_driver import ElectromagnetDriver
-from core.metrics import get_business_metrics
+from core.monitoring.metrics import get_business_metrics
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
 from core.static_files import get_db_path

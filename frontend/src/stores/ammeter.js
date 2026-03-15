@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDeviceBase } from '../composables/useDeviceBase'
 import { useWebSocket } from '../composables/useWebSocket'
-import { request, get, post } from '../utils/apiRequest'
+import { get, post } from '../utils/apiRequest'
 import { WS_BASE_URL } from '../config/api'
 
 export const useAmmeterStore = defineStore('ammeter', () => {
@@ -28,12 +28,12 @@ export const useAmmeterStore = defineStore('ammeter', () => {
     alarmMessage,
     wsConnected,
     loading,
-    canControl: baseCanControl,
+    canControl: _baseCanControl,
     showError,
     clearAlarm,
     setLoading,
     resetState,
-    updateStatus
+    _updateStatus
   } = useDeviceBase('ammeter')
 
   // ==================== 微电流采集特有状态 ====================

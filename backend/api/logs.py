@@ -42,7 +42,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from core.data_storage import DataStorage
+from core.storage.data_storage import DataStorage
 from middleware.audit import audit_logger
 from models import AuditLog
 

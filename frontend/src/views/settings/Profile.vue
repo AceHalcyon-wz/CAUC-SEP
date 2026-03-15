@@ -1046,7 +1046,7 @@ watch(
 // 监听偏好设置变化
 watch(
   () => userStore.preferences,
-  (newPreferences) => {
+  (_newPreferences) => {
     initPreferencesForm()
   },
   { deep: true }

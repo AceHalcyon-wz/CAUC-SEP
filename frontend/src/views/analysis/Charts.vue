@@ -55,7 +55,7 @@
         v-if="viewMode === 'analysis'"
         key="analysis"
       >
-        <DataAnalysis />
+        <DataAnalysisComponent />
       </div>
 
       <!-- 高级图表视图 -->
@@ -588,7 +588,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
-import { DataAnalysis, ChartAnalysis } from '@/components/analysis'
+import { DataAnalysis as DataAnalysisComponent, ChartAnalysis } from '@/components/analysis'
 import {
   PieChart,
   Plus,
@@ -597,7 +597,7 @@ import {
   List,
   TrendCharts,
   Setting,
-  DataAnalysis as DataAnalysisIcon,
+  DataAnalysis,
   DataLine,
   Coin,
   Upload,

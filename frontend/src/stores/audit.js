@@ -174,7 +174,7 @@ export const useAuditStore = defineStore('audit', () => {
       }
     })
 
-    const result = await get('/logs/query', queryParams, {
+    const result = await get('/api/v1/logs/query', queryParams, {
       onError: (msg) => {
         errorMessage.value = msg
         console.error('Failed to fetch logs:', msg)

@@ -51,8 +51,8 @@ from api.schemas import (
     TemperatureSetpointRequest,
     TemperatureStatusResponse,
 )
-from core.device_registry import DeviceRegistry
-from core.device_utils import DeviceValidationError, validate_device_state
+from core.device_management.device_registry import DeviceRegistry
+from core.device_management.device_utils import DeviceValidationError, validate_device_state
 from core.temperature_controller import TemperatureController, TemperatureProgramSegment
 
 logger = logging.getLogger(__name__)

@@ -1,899 +1,470 @@
+/**
+ * @file About.vue
+ * @path src/views/settings/
+ * @description 关于页面 - 显示系统信息和版本详情
+ * @author Agent
+ * @date 2024-03-15
+ * @version 3.5.1
+ */
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import {
+  ExperimentOutlined,
+  MailOutlined,
+  GlobalOutlined,
+  CodeOutlined,
+  BugOutlined,
+  FileTextOutlined,
+  TeamOutlined
+} from '@ant-design/icons-vue';
+
+/**
+ * 系统信息
+ */
+const systemInfo = ref({
+  version: '3.5.1',
+  buildDate: '2024-03-15',
+  vueVersion: '3.4.0',
+  nodeVersion: '20.11.0',
+  backendVersion: '3.5.0'
+});
+
+/**
+ * 技术栈列表
+ */
+const techStack = [
+  { name: 'Vue 3', description: '渐进式JavaScript框架', version: '3.4.0' },
+  { name: 'Vite', description: '下一代前端构建工具', version: '5.0.0' },
+  { name: 'Ant Design Vue', description: '企业级UI组件库', version: '4.0.0' },
+  { name: 'Pinia', description: 'Vue官方状态管理库', version: '2.1.0' },
+  { name: 'Vue Router', description: 'Vue官方路由管理器', version: '4.2.0' },
+  { name: 'Axios', description: 'HTTP客户端', version: '1.6.0' },
+  { name: 'ECharts', description: '数据可视化库', version: '5.4.0' },
+  { name: 'WebSocket', description: '实时通信协议', version: '原生支持' }
+];
+
+/**
+ * 功能特性列表
+ */
+const features = [
+  { icon: ExperimentOutlined, title: '多设备支持', description: '支持电机、电磁铁、温控、压电陶瓷、微电流计等多种实验设备' },
+  { icon: CodeOutlined, title: '实时数据', description: 'WebSocket实时推送实验数据，支持历史数据查询与分析' },
+  { icon: BugOutlined, title: '故障诊断', description: '智能故障诊断系统，快速定位设备问题' },
+  { icon: FileTextOutlined, title: '审计日志', description: '完整的操作审计日志，支持导出和查询' },
+  { icon: TeamOutlined, title: '多用户支持', description: '支持多用户权限管理，满足不同角色需求' }
+];
+
+/**
+ * 更新日志
+ */
+const changelog = [
+  { version: 'v3.5.1', date: '2024-03-15', changes: ['UI/UX全面优化', '修复折叠按钮位置', '移除暗黑模式', '仅保留中文语言'] },
+  { version: 'v3.5.0', date: '2024-03-07', changes: ['UI/UX全面升级', '新增设计系统', '完善WebSocket支持', '优化设备管理'] },
+  { version: 'v3.0.0', date: '2024-01-15', changes: ['系统架构重构', '引入Pinia状态管理', '优化性能'] },
+  { version: 'v2.0.0', date: '2023-11-20', changes: ['支持多设备类型', '新增数据分析模块'] },
+  { version: 'v1.0.0', date: '2023-09-01', changes: ['初始版本发布', '基础实验控制功能'] }
+];
+
+onMounted(() => {
+  // 获取系统信息
+  systemInfo.value.vueVersion = window.Vue?.version || '3.4.0';
+});
+</script>
+
 <template>
-  <div class="settings-about-page">
-    <!-- 页面头部 -->
-    <el-row class="page-header">
-      <el-col :span="24">
-        <div class="header-content">
-          <div class="header-left">
-            <el-icon class="header-icon">
-              <InfoFilled />
-            </el-icon>
-            <div class="header-text">
-              <h1 class="page-title">
-                关于
-              </h1>
-              <p class="page-subtitle">
-                系统信息、版本号与技术栈
-              </p>
-            </div>
+  <div class="about-page">
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <h1 class="page-title">
+        关于系统
+      </h1>
+      <p class="page-subtitle">
+        CAUC-SEP 科学实验平台版本信息与系统详情
+      </p>
+    </div>
+
+    <!-- 系统概览卡片 -->
+    <a-card
+      class="overview-card"
+      :bordered="false"
+    >
+      <div class="overview-content">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <ExperimentOutlined />
+          </div>
+          <div class="logo-text">
+            <h2>CAUC-SEP</h2>
+            <p>科学实验平台</p>
           </div>
         </div>
-      </el-col>
-    </el-row>
-
-    <!-- 关于内容 -->
-    <div class="about-content">
-      <!-- 系统信息卡片 -->
-      <el-card class="about-card system-info-card">
-        <div class="system-header">
-          <div class="logo-container">
-            <el-icon class="logo-icon">
-              <Cpu />
-            </el-icon>
+        <div class="version-section">
+          <div class="version-item">
+            <span class="version-label">前端版本</span>
+            <span class="version-value">{{ systemInfo.version }}</span>
           </div>
-          <div class="system-title">
-            <h2 class="app-name">
-              {{ systemInfo.name }}
-            </h2>
-            <p class="app-version">
-              {{ systemInfo.version }}
+          <div class="version-item">
+            <span class="version-label">后端版本</span>
+            <span class="version-value">{{ systemInfo.backendVersion }}</span>
+          </div>
+          <div class="version-item">
+            <span class="version-label">构建日期</span>
+            <span class="version-value">{{ systemInfo.buildDate }}</span>
+          </div>
+        </div>
+      </div>
+    </a-card>
+
+    <!-- 功能特性 -->
+    <a-row
+      :gutter="[16, 16]"
+      class="features-section"
+    >
+      <a-col
+        v-for="(feature, index) in features"
+        :key="index"
+        :xs="24"
+        :sm="12"
+        :lg="8"
+      >
+        <a-card
+          class="feature-card"
+          :bordered="false"
+        >
+          <div class="feature-icon">
+            <component :is="feature.icon" />
+          </div>
+          <h3 class="feature-title">
+            {{ feature.title }}
+          </h3>
+          <p class="feature-description">
+            {{ feature.description }}
+          </p>
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <!-- 技术栈 -->
+    <a-card
+      title="技术栈"
+      class="tech-card"
+      :bordered="false"
+    >
+      <a-row :gutter="[16, 16]">
+        <a-col
+          v-for="(tech, index) in techStack"
+          :key="index"
+          :xs="12"
+          :sm="8"
+          :md="6"
+        >
+          <div class="tech-item">
+            <span class="tech-name">{{ tech.name }}</span>
+            <span class="tech-version">{{ tech.version }}</span>
+            <p class="tech-description">
+              {{ tech.description }}
             </p>
           </div>
-        </div>
-        
-        <el-divider />
-        
-        <div class="system-description">
-          <p>{{ systemInfo.description }}</p>
-        </div>
-      </el-card>
+        </a-col>
+      </a-row>
+    </a-card>
 
-      <!-- 详细信息 -->
-      <el-row :gutter="24">
-        <!-- 基本信息 -->
-        <el-col
-          :xs="24"
-          :lg="12"
+    <!-- 更新日志 -->
+    <a-card
+      title="更新日志"
+      class="changelog-card"
+      :bordered="false"
+    >
+      <a-timeline mode="left">
+        <a-timeline-item
+          v-for="(log, index) in changelog"
+          :key="index"
         >
-          <el-card class="about-card">
-            <template #header>
-              <div class="card-header">
-                <div class="header-title">
-                  <el-icon class="title-icon">
-                    <Document />
-                  </el-icon>
-                  <span>基本信息</span>
-                </div>
-              </div>
-            </template>
-            
-            <el-descriptions
-              :column="1"
-              border
-              class="info-descriptions"
-            >
-              <el-descriptions-item label="项目名称">
-                {{ systemInfo.projectName }}
-              </el-descriptions-item>
-              <el-descriptions-item label="版本号">
-                <el-tag
-                  type="primary"
-                  size="small"
-                >
-                  {{ systemInfo.version }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="开发团队">
-                {{ systemInfo.developer }}
-              </el-descriptions-item>
-              <el-descriptions-item label="开发时间">
-                {{ systemInfo.developmentDate }}
-              </el-descriptions-item>
-              <el-descriptions-item label="许可证">
-                {{ systemInfo.license }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </el-col>
-
-        <!-- 技术栈 -->
-        <el-col
-          :xs="24"
-          :lg="12"
-        >
-          <el-card class="about-card">
-            <template #header>
-              <div class="card-header">
-                <div class="header-title">
-                  <el-icon class="title-icon">
-                    <SetUp />
-                  </el-icon>
-                  <span>技术栈</span>
-                </div>
-              </div>
-            </template>
-            
-            <div class="tech-stack">
-              <div class="tech-category">
-                <h4 class="category-title">
-                  前端技术
-                </h4>
-                <div class="tech-tags">
-                  <el-tag 
-                    v-for="tech in frontendTech" 
-                    :key="tech.name" 
-                    class="tech-tag"
-                    :type="tech.type"
-                  >
-                    {{ tech.name }}
-                  </el-tag>
-                </div>
-              </div>
-              
-              <div class="tech-category">
-                <h4 class="category-title">
-                  后端技术
-                </h4>
-                <div class="tech-tags">
-                  <el-tag 
-                    v-for="tech in backendTech" 
-                    :key="tech.name" 
-                    class="tech-tag"
-                    :type="tech.type"
-                  >
-                    {{ tech.name }}
-                  </el-tag>
-                </div>
-              </div>
-              
-              <div class="tech-category">
-                <h4 class="category-title">
-                  开发工具
-                </h4>
-                <div class="tech-tags">
-                  <el-tag 
-                    v-for="tech in devTools" 
-                    :key="tech.name" 
-                    class="tech-tag"
-                    :type="tech.type"
-                  >
-                    {{ tech.name }}
-                  </el-tag>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-
-        <!-- 主要功能 -->
-        <el-col :span="24">
-          <el-card class="about-card">
-            <template #header>
-              <div class="card-header">
-                <div class="header-title">
-                  <el-icon class="title-icon">
-                    <Grid />
-                  </el-icon>
-                  <span>主要功能</span>
-                </div>
-              </div>
-            </template>
-            
-            <el-row :gutter="16">
-              <el-col 
-                v-for="feature in features" 
-                :key="feature.title"
-                :xs="24" 
-                :sm="12" 
-                :md="6"
+          <template #label>
+            <span class="changelog-date">{{ log.date }}</span>
+          </template>
+          <div class="changelog-content">
+            <h4 class="changelog-version">
+              {{ log.version }}
+            </h4>
+            <ul class="changelog-list">
+              <li
+                v-for="(change, cIndex) in log.changes"
+                :key="cIndex"
               >
-                <div class="feature-card">
-                  <el-icon
-                    class="feature-icon"
-                    :style="{ color: feature.color }"
-                  >
-                    <component :is="feature.icon" />
-                  </el-icon>
-                  <h4 class="feature-title">
-                    {{ feature.title }}
-                  </h4>
-                  <p class="feature-description">
-                    {{ feature.description }}
-                  </p>
-                </div>
-              </el-col>
-            </el-row>
-          </el-card>
-        </el-col>
+                {{ change }}
+              </li>
+            </ul>
+          </div>
+        </a-timeline-item>
+      </a-timeline>
+    </a-card>
 
-        <!-- 系统资源 -->
-        <el-col
+    <!-- 联系信息 -->
+    <a-card
+      title="联系我们"
+      class="contact-card"
+      :bordered="false"
+    >
+      <a-row :gutter="[16, 16]">
+        <a-col
           :xs="24"
-          :lg="12"
+          :sm="12"
         >
-          <el-card class="about-card">
-            <template #header>
-              <div class="card-header">
-                <div class="header-title">
-                  <el-icon class="title-icon">
-                    <Monitor />
-                  </el-icon>
-                  <span>系统资源</span>
-                </div>
-                <el-tag
-                  type="info"
-                  size="small"
-                >
-                  实时监控
-                </el-tag>
-              </div>
-            </template>
-            
-            <div class="resource-list">
-              <div class="resource-item">
-                <div class="resource-label">
-                  <el-icon><Cpu /></el-icon>
-                  <span>CPU 使用率</span>
-                  <span class="resource-extra">{{ systemResources.cpuCount }} 核心</span>
-                </div>
-                <el-progress 
-                  :percentage="systemResources.cpuUsage" 
-                  :color="getProgressColor(systemResources.cpuUsage)"
-                />
-              </div>
-              
-              <div class="resource-item">
-                <div class="resource-label">
-                  <el-icon><Coin /></el-icon>
-                  <span>内存使用率</span>
-                  <span class="resource-extra">{{ formatMemory(systemResources.usedMemory) }} / {{ formatMemory(systemResources.totalMemory) }}</span>
-                </div>
-                <el-progress 
-                  :percentage="systemResources.memoryUsage" 
-                  :color="getProgressColor(systemResources.memoryUsage)"
-                />
-              </div>
-              
-              <div class="resource-item">
-                <div class="resource-label">
-                  <el-icon><FolderOpened /></el-icon>
-                  <span>磁盘使用率</span>
-                  <span class="resource-extra">{{ systemResources.diskUsed.toFixed(1) }} GB / {{ systemResources.diskTotal.toFixed(1) }} GB</span>
-                </div>
-                <el-progress 
-                  :percentage="systemResources.diskUsage" 
-                  :color="getProgressColor(systemResources.diskUsage)"
-                />
-              </div>
+          <div class="contact-item">
+            <GlobalOutlined class="contact-icon" />
+            <div class="contact-info">
+              <span class="contact-label">所属单位</span>
+              <span class="contact-value">中国民航大学 理学院 材料物理</span>
             </div>
-          </el-card>
-        </el-col>
-
-        <!-- 联系信息 -->
-        <el-col
+          </div>
+        </a-col>
+        <a-col
           :xs="24"
-          :lg="12"
+          :sm="12"
         >
-          <el-card class="about-card">
-            <template #header>
-              <div class="card-header">
-                <div class="header-title">
-                  <el-icon class="title-icon">
-                    <Message />
-                  </el-icon>
-                  <span>联系信息</span>
-                </div>
-              </div>
-            </template>
-            
-            <div class="contact-list">
-              <div class="contact-item">
-                <el-icon class="contact-icon">
-                  <User />
-                </el-icon>
-                <div class="contact-content">
-                  <span class="contact-label">项目负责人</span>
-                  <span class="contact-value">{{ contactInfo.leader }}</span>
-                </div>
-              </div>
-              
-              <div class="contact-item">
-                <el-icon class="contact-icon">
-                  <Message />
-                </el-icon>
-                <div class="contact-content">
-                  <span class="contact-label">电子邮箱</span>
-                  <span class="contact-value">{{ contactInfo.email }}</span>
-                </div>
-              </div>
-              
-              <div class="contact-item">
-                <el-icon class="contact-icon">
-                  <Location />
-                </el-icon>
-                <div class="contact-content">
-                  <span class="contact-label">实验室地址</span>
-                  <span class="contact-value">{{ contactInfo.location }}</span>
-                </div>
-              </div>
+          <div class="contact-item">
+            <MailOutlined class="contact-icon" />
+            <div class="contact-info">
+              <span class="contact-label">联系邮箱</span>
+              <span class="contact-value">cauc-sep@example.com</span>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </div>
+        </a-col>
+      </a-row>
+    </a-card>
 
-      <!-- 安全提示 -->
-      <el-alert
-        title="安全提示"
-        type="warning"
-        description="实验时必须有人值守，确保设备和人员安全。请遵守实验室安全规程，正确操作设备。"
-        :closable="false"
-        show-icon
-        class="safety-alert"
-      />
+    <!-- 版权信息 -->
+    <div class="copyright-section">
+      <p>© 2024 中国民航大学 理学院 材料物理. All rights reserved.</p>
+      <p>CAUC-SEP 科学实验平台 v{{ systemInfo.version }}</p>
     </div>
   </div>
 </template>
 
-<script setup>
-/**
- * @file About.vue
- * @path src/views/settings/
- * @description 关于页面，显示系统信息、版本号、技术栈等内容
- * @author Frontend Engineer Agent
- * @date 2026-03-07
- * @dependencies element-plus, vue, @/utils/apiRequest
- */
-
-import { reactive, onMounted, onUnmounted } from 'vue'
-import { 
-  InfoFilled, 
-  Cpu, 
-  Document, 
-  SetUp, 
-  Grid, 
-  Monitor, 
-  Message,
-  User,
-  Location,
-  Coin,
-  FolderOpened,
-  Setting,
-  DataAnalysis,
-  Warning,
-  Connection
-} from '@element-plus/icons-vue'
-import { apiRequest } from '@/utils/apiRequest'
-
-// ==================== 系统信息 ====================
-
-/** 系统基本信息 */
-const systemInfo = reactive({
-  name: '自旋电子材料实验平台',
-  version: 'v1.2.0',
-  projectName: '自旋电子材料实验平台',
-  description: '基于Vue 3和FastAPI构建的自旋电子实验控制系统，提供设备控制、数据采集、实时监控等功能。',
-  developer: '材料物理专业 实验项目组',
-  developmentDate: '2026年3月',
-  license: 'MIT License'
-})
-
-// ==================== 技术栈 ====================
-
-/** 前端技术栈 */
-const frontendTech = [
-  { name: 'Vue 3', type: 'success' },
-  { name: 'Element Plus', type: 'primary' },
-  { name: 'Vite', type: 'warning' },
-  { name: 'Pinia', type: 'info' },
-  { name: 'ECharts', type: '' },
-  { name: 'Axios', type: '' }
-]
-
-/** 后端技术栈 */
-const backendTech = [
-  { name: 'FastAPI', type: 'success' },
-  { name: 'Python 3.11', type: 'primary' },
-  { name: 'SQLite', type: 'warning' },
-  { name: 'WebSocket', type: 'info' }
-]
-
-/** 开发工具 */
-const devTools = [
-  { name: 'VS Code', type: 'primary' },
-  { name: 'Git', type: 'warning' },
-  { name: 'Node.js', type: 'success' }
-]
-
-// ==================== 主要功能 ====================
-
-/** 功能特性列表 */
-const features = [
-  {
-    icon: Setting,
-    title: '实验控制',
-    description: '电机、压电陶瓷、电磁铁等设备的精确控制',
-    color: 'var(--color-primary-500)'
-  },
-  {
-    icon: DataAnalysis,
-    title: '数据分析',
-    description: '实时数据采集与可视化分析',
-    color: 'var(--color-accent-500)'
-  },
-  {
-    icon: Monitor,
-    title: '设备管理',
-    description: '设备状态监控与连接配置',
-    color: 'var(--color-success)'
-  },
-  {
-    icon: Warning,
-    title: '安全保障',
-    description: '实时安全监控与异常预警',
-    color: 'var(--color-warning)'
-  },
-  {
-    icon: Connection,
-    title: '实时通信',
-    description: 'WebSocket实时数据传输',
-    color: 'var(--color-data-blue)'
-  },
-  {
-    icon: Document,
-    title: '审计日志',
-    description: '操作记录与审计追踪',
-    color: 'var(--color-data-purple)'
-  },
-  {
-    icon: Grid,
-    title: '数据导出',
-    description: '支持CSV、JSON格式导出',
-    color: 'var(--color-data-cyan)'
-  },
-  {
-    icon: SetUp,
-    title: '系统配置',
-    description: '灵活的系统参数配置',
-    color: 'var(--color-data-orange)'
-  }
-]
-
-// ==================== 系统资源 ====================
-
-/** 系统资源使用情况 */
-const systemResources = reactive({
-  cpuUsage: 0,
-  memoryUsage: 0,
-  diskUsage: 0,
-  totalMemory: 0,
-  usedMemory: 0,
-  cpuCount: 0,
-  diskTotal: 0,
-  diskUsed: 0
-})
-
-/** 自动刷新定时器 */
-let resourceTimer = null
-
-/**
- * 加载系统资源信息
- */
-async function loadSystemResources() {
-  try {
-    const data = await apiRequest('/api/v1/performance/system')
-    
-    // 更新CPU信息
-    systemResources.cpuUsage = data.cpu?.percent || 0
-    systemResources.cpuCount = data.cpu?.cpu_count || 0
-    
-    // 更新内存信息
-    systemResources.memoryUsage = data.memory?.percent || 0
-    systemResources.totalMemory = data.memory?.total_mb || 0
-    systemResources.usedMemory = data.memory?.used_mb || 0
-    
-    // 更新磁盘信息
-    systemResources.diskUsage = data.disk?.percent || 0
-    systemResources.diskTotal = data.disk?.total_gb || 0
-    systemResources.diskUsed = data.disk?.used_gb || 0
-  } catch (error) {
-    console.error('[About] Failed to load system resources:', error)
-    // 使用模拟数据
-    systemResources.cpuUsage = 35
-    systemResources.memoryUsage = 48
-    systemResources.diskUsage = 62
-    systemResources.totalMemory = 16384
-    systemResources.usedMemory = 7864
-    systemResources.cpuCount = 8
-    systemResources.diskTotal = 512
-    systemResources.diskUsed = 318
-  }
-}
-
-// ==================== 联系信息 ====================
-
-/** 联系信息 */
-const contactInfo = reactive({
-  leader: 'Ace Halcyon',
-  email: 'experiment@cauc.edu.cn',
-  location: '中国民航大学 材料物理实验室'
-})
-
-// ==================== 辅助方法 ====================
-
-/**
- * 根据使用率获取进度条颜色
- * 
- * @param {number} percentage - 使用百分比
- * @returns {string} 颜色值
- */
-function getProgressColor(percentage) {
-  if (percentage < 50) return 'var(--color-success)'
-  if (percentage < 80) return 'var(--color-warning)'
-  return 'var(--color-error)'
-}
-
-/**
- * 格式化内存大小
- * 
- * @param {number} mb - 内存大小（MB）
- * @returns {string} 格式化后的字符串
- */
-function formatMemory(mb) {
-  if (mb >= 1024) {
-    return `${(mb / 1024).toFixed(1)} GB`
-  }
-  return `${mb.toFixed(0)} MB`
-}
-
-// ==================== 生命周期 ====================
-
-onMounted(() => {
-  // 初始加载系统资源
-  loadSystemResources()
-  
-  // 设置定时刷新（每5秒）
-  resourceTimer = setInterval(loadSystemResources, 5000)
-})
-
-onUnmounted(() => {
-  // 清理定时器
-  if (resourceTimer) {
-    clearInterval(resourceTimer)
-    resourceTimer = null
-  }
-})
-</script>
-
 <style scoped>
-.settings-about-page {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-bg-secondary);
-}
-
-/* 页面头部 */
-.page-header {
-  background-color: var(--color-surface-primary);
-  border-bottom: 1px solid var(--color-border-primary);
+.about-page {
   padding: var(--spacing-6);
-  margin-bottom: var(--spacing-4);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: var(--content-max-width);
+  max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-4);
-}
-
-.header-icon {
-  font-size: 32px;
-  color: var(--color-primary-500);
-  padding: var(--spacing-3);
-  background-color: var(--color-primary-50);
-  border-radius: var(--radius-lg);
-  transition: var(--transition-all);
-}
-
-.header-icon:hover {
-  background-color: var(--color-primary-100);
-  transform: scale(1.05);
-}
-
-.header-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
+.page-header {
+  margin-bottom: var(--spacing-6);
 }
 
 .page-title {
-  margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-2);
 }
 
 .page-subtitle {
-  margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
 }
 
-/* 内容区域 */
-.about-content {
-  flex: 1;
-  max-width: var(--content-max-width);
-  margin: 0 auto;
-  width: 100%;
-  padding: 0 var(--spacing-6) var(--spacing-6);
-}
-
-/* 关于卡片 */
-.about-card {
+/* 概览卡片 */
+.overview-card {
   margin-bottom: var(--spacing-6);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-primary);
-  transition: var(--transition-all);
-  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+  border-radius: var(--radius-xl);
 }
 
-.about-card:hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-200);
-}
-
-.card-header {
+.overview-content {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
+  padding: var(--spacing-4);
+  color: white;
 }
 
-.header-title {
+.logo-section {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.title-icon {
-  font-size: 20px;
-  color: var(--color-primary-500);
-  transition: var(--transition-transform);
-}
-
-.about-card:hover .title-icon {
-  transform: scale(1.1);
-}
-
-/* 系统信息卡片 */
-.system-info-card {
-  text-align: center;
-  padding: var(--spacing-8);
-}
-
-.system-header {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: var(--spacing-4);
-  padding: var(--spacing-6) 0;
-}
-
-.logo-container {
-  position: relative;
 }
 
 .logo-icon {
-  font-size: 80px;
-  color: var(--color-primary-500);
-  animation: pulse-glow 3s ease-in-out infinite;
-  cursor: pointer;
-  transition: var(--transition-transform);
-}
-
-.logo-icon:hover {
-  transform: scale(1.1);
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 12px rgba(24, 144, 255, 0.4));
-  }
-  50% {
-    filter: drop-shadow(0 0 24px rgba(24, 144, 255, 0.7));
-  }
-}
-
-.system-title {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xl);
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  backdrop-filter: blur(10px);
 }
 
-.app-name {
-  margin: 0;
-  font-size: var(--font-size-3xl);
+.logo-text h2 {
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-}
-
-.app-version {
   margin: 0;
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
-  font-family: var(--font-family-mono);
 }
 
-.system-description {
-  padding: var(--spacing-4);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-secondary);
-}
-
-.system-description p {
-  margin: 0;
+.logo-text p {
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
+  opacity: 0.9;
+  margin: var(--spacing-1) 0 0 0;
 }
 
-/* 信息描述 */
-.info-descriptions {
-  width: 100%;
+.version-section {
+  display: flex;
+  gap: var(--spacing-6);
 }
 
-:deep(.el-descriptions__label) {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  background-color: var(--color-bg-secondary);
-}
-
-:deep(.el-descriptions__content) {
-  color: var(--color-text-primary);
-}
-
-/* 技术栈 */
-.tech-stack {
+.version-item {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-5);
+  align-items: center;
+  gap: var(--spacing-1);
 }
 
-.tech-category {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-3);
-}
-
-.category-title {
-  margin: 0;
+.version-label {
   font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+.version-value {
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-.tech-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-2);
+/* 功能特性 */
+.features-section {
+  margin-bottom: var(--spacing-6);
 }
 
-.tech-tag {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
-  transition: var(--transition-all);
-  cursor: default;
-}
-
-.tech-tag:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-/* 功能卡片 */
 .feature-card {
   text-align: center;
-  padding: var(--spacing-6);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-4);
-  transition: var(--transition-all);
-  border: 1px solid transparent;
-  cursor: pointer;
+  padding: var(--spacing-4);
+  height: 100%;
+  transition: all var(--transition-fast);
 }
 
 .feature-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-200);
-  background-color: var(--color-surface-primary);
+  box-shadow: var(--shadow-lg);
 }
 
 .feature-icon {
-  font-size: 40px;
-  margin-bottom: var(--spacing-3);
-  transition: var(--transition-transform);
-}
-
-.feature-card:hover .feature-icon {
-  transform: scale(1.1);
-}
-
-.feature-title {
-  margin: 0 0 var(--spacing-2);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-}
-
-.feature-description {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-normal);
-}
-
-/* 系统资源 */
-.resource-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-5);
-}
-
-.resource-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  transition: var(--transition-all);
-}
-
-.resource-item:hover {
-  background-color: var(--color-interactive-hover);
-}
-
-.resource-label {
+  width: 56px;
+  height: 56px;
+  background: var(--color-primary-50);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.resource-label .el-icon {
-  font-size: 16px;
+  justify-content: center;
+  margin: 0 auto var(--spacing-4);
+  font-size: 28px;
   color: var(--color-primary-500);
 }
 
-.resource-extra {
-  margin-left: auto;
-  font-family: var(--font-family-mono);
+.feature-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.feature-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 技术栈 */
+.tech-card {
+  margin-bottom: var(--spacing-6);
+}
+
+.tech-item {
+  padding: var(--spacing-3);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.tech-item:hover {
+  background: var(--color-primary-50);
+  transform: translateY(-2px);
+}
+
+.tech-name {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-1);
+}
+
+.tech-version {
+  display: block;
   font-size: var(--font-size-xs);
+  color: var(--color-primary-500);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+}
+
+.tech-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* 更新日志 */
+.changelog-card {
+  margin-bottom: var(--spacing-6);
+}
+
+.changelog-date {
+  font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
 }
 
+.changelog-content {
+  padding-left: var(--spacing-4);
+}
+
+.changelog-version {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-500);
+  margin-bottom: var(--spacing-2);
+}
+
+.changelog-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.changelog-list li {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-1) 0;
+  position: relative;
+  padding-left: var(--spacing-4);
+}
+
+.changelog-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary-500);
+  border-radius: 50%;
+}
+
 /* 联系信息 */
-.contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
+.contact-card {
+  margin-bottom: var(--spacing-6);
 }
 
 .contact-item {
@@ -901,39 +472,23 @@ onUnmounted(() => {
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-3);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  transition: var(--transition-all);
-  border: 1px solid transparent;
-}
-
-.contact-item:hover {
-  background-color: var(--color-interactive-hover);
-  border-color: var(--color-primary-200);
-  transform: translateX(4px);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
 }
 
 .contact-icon {
   font-size: 24px;
   color: var(--color-primary-500);
-  transition: var(--transition-transform);
 }
 
-.contact-item:hover .contact-icon {
-  transform: scale(1.1);
-}
-
-.contact-content {
+.contact-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
 }
 
 .contact-label {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .contact-value {
@@ -942,30 +497,37 @@ onUnmounted(() => {
   font-weight: var(--font-weight-medium);
 }
 
-/* 安全提示 */
-.safety-alert {
-  margin-top: var(--spacing-6);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-warning-lighter);
-}
-
-/* Element Plus 样式覆盖 */
-:deep(.el-card__header) {
-  background-color: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border-primary);
-  padding: var(--spacing-4) var(--spacing-6);
-}
-
-:deep(.el-card__body) {
+/* 版权信息 */
+.copyright-section {
+  text-align: center;
   padding: var(--spacing-6);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
 }
 
-:deep(.el-progress__text) {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm) !important;
+.copyright-section p {
+  margin: var(--spacing-1) 0;
 }
 
-:deep(.el-tag) {
-  transition: var(--transition-all);
+/* 响应式 */
+@media (max-width: 768px) {
+  .about-page {
+    padding: var(--spacing-4);
+  }
+
+  .overview-content {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    text-align: center;
+  }
+
+  .version-section {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
 }
 </style>

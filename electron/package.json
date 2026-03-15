@@ -1,0 +1,102 @@
+{
+  "name": "cauc-sep",
+  "version": "3.5.0",
+  "description": "CAUC-SEP 科学实验平台桌面应用程序",
+  "main": "src/main.js",
+  "type": "module",
+  "author": "CAUC-SEP Team",
+  "license": "MIT",
+  "homepage": "https://github.com/cauc/sep",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron-log": "^5.1.2",
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "extends": null,
+    "appId": "com.cauc.sep",
+    "productName": "CAUC-SEP",
+    "copyright": "Copyright © 2024 CAUC-SEP Team",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend/main.dist",
+        "to": "backend/main.dist",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "resources/frontend",
+        "to": "frontend",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "../assets/icons/icon.ico",
+      "artifactName": "${productName}-${version}-${arch}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "../assets/icons/icon.ico",
+      "uninstallerIcon": "../assets/icons/icon.ico",
+      "installerHeaderIcon": "../assets/icons/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "CAUC-SEP 科学实验平台",
+      "include": "build/installer.nsh",
+      "deleteAppDataOnUninstall": false,
+      "displayLanguageSelector": false,
+      "installerLanguages": ["zh_CN", "en_US"],
+      "language": "2052"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "../assets/icons/icon.png",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "../assets/icons",
+      "category": "Science",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "publish": null
+  }
+}

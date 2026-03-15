@@ -8,7 +8,7 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 /**
  * 设备类型枚举
@@ -776,7 +776,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
       const row = [formatTimestamp(timestamp, config.dateFormat)]
 
       Object.entries(filteredData.value).forEach(([deviceId, deviceData]) => {
-        Object.entries(deviceData).forEach(([channelId, channelData]) => {
+        Object.entries(deviceData).forEach(([_channelId, channelData]) => {
           const dataPoint = channelData.find(d => d.timestamp === timestamp)
           row.push(dataPoint ? dataPoint.value.toFixed(config.decimalPlaces) : '')
         })

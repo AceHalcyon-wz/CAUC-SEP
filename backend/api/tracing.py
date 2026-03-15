@@ -39,7 +39,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Query
 
-from core.tracing import (
+from core.monitoring.tracing import (
     TraceDetailResponse,
     TraceListResponse,
     TraceStatisticsResponse,

@@ -55,6 +55,12 @@ from fastapi import APIRouter, Depends
 
 from api.schemas import (
     AlarmCodeResponse,
+    CommunicationConfigReadResponse,
+    CommunicationConfigRequest,
+    CommunicationConfigResponse,
+    DriverSoftLimitReadResponse,
+    DriverSoftLimitRequest,
+    DriverSoftLimitResponse,
     ErrorCode,
     ErrorResponse,
     HomeRequest,
@@ -65,12 +71,15 @@ from api.schemas import (
     MoveResponse,
     PRPathConfigRequest,
     PRPathTriggerRequest,
+    SerialModeRequest,
     StatusWordResponse,
     SuccessResponse,
+    SupportedBaudratesResponse,
+    SupportedDataTypesResponse,
 )
 from core.abstract import DeviceStatus
-from core.device_registry import DeviceRegistry
-from core.device_utils import DeviceValidationError, validate_device_state
+from core.device_management.device_registry import DeviceRegistry
+from core.device_management.device_utils import DeviceValidationError, validate_device_state
 from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
 from middleware.audit import audit_logger
 
@@ -169,6 +178,9 @@ def get_dm2c() -> LeadshineDM2C:
             detail="请检查系统启动日志，确认驱动器初始化成功",
         )
     return DeviceRegistry.get_device(DM2C_DEVICE_ID)
+
+
+get_dm2c_driver = get_dm2c  # Alias for backward compatibility
 
 
 def set_dm2c(instance: LeadshineDM2C) -> None:
@@ -909,3 +921,320 @@ async def read_alarm_code(driver: LeadshineDM2C = Depends(get_dm2c)):
         alarm_code=alarm_code,
         alarm_text=ALARM_CODES.get(alarm_code, "未知故障"),
     )
+
+
+# ==================== RS232专用通信模式API ====================
+
+
+@router.post(
+    "/serial_mode",
+    response_model=SuccessResponse,
+    summary="切换串口通信模式",
+    description="切换RS485/RS232通信模式，RS232模式使用默认设置",
+)
+async def set_serial_mode(
+    request: SerialModeRequest,
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> SuccessResponse:
+    """
+    切换串口通信模式。
+
+    Args:
+        request: 串口模式请求
+            - mode: 'rs485' 或 'rs232'
+            - port: 串口号
+
+    Returns:
+        SuccessResponse: 操作结果
+
+    Note:
+        RS232模式使用默认设置：
+        - 波特率：9600
+        - 从站地址：1
+        - 数据位：8位
+        - 校验位：无
+        - 停止位：1位
+    """
+    log_motor_operation("set_serial_mode", mode=request.mode, port=request.port)
+
+    if request.mode.lower() == "rs232":
+        success = await driver.connect_rs232(request.port)
+        if success:
+            return SuccessResponse(
+                success=True,
+                message=f"已切换到RS232模式并连接到 {request.port}",
+            )
+        else:
+            raise MotorAPIException(
+                ErrorCode.DEVICE_ERROR,
+                f"RS232模式连接失败: {request.port}",
+            )
+    else:
+        driver.serial_mode = driver.serial_mode.__class__.RS485
+        driver.port = request.port
+        success = await driver.connect()
+        if success:
+            return SuccessResponse(
+                success=True,
+                message=f"已切换到RS485模式并连接到 {request.port}",
+            )
+        else:
+            raise MotorAPIException(
+                ErrorCode.DEVICE_ERROR,
+                f"RS485模式连接失败: {request.port}",
+            )
+
+
+@router.get(
+    "/serial_mode",
+    response_model=dict[str, str],
+    summary="获取当前串口通信模式",
+    description="返回当前串口通信模式（RS485或RS232）",
+)
+async def get_serial_mode(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> dict[str, str]:
+    """
+    获取当前串口通信模式。
+
+    Returns:
+        Dict[str, str]: 包含当前串口模式信息
+    """
+    log_motor_operation("get_serial_mode", result="success")
+    return {
+        "mode": driver.serial_mode.value,
+        "is_rs232": driver.is_rs232_mode(),
+    }
+
+
+# ==================== 通信参数配置API ====================
+
+
+@router.get(
+    "/communication/config",
+    response_model=CommunicationConfigReadResponse,
+    summary="读取通信参数配置",
+    description="读取当前Modbus通信参数（Pr5.22-Pr5.24）",
+)
+async def read_communication_config(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> CommunicationConfigReadResponse:
+    """
+    读取当前通信参数配置。
+
+    Returns:
+        CommunicationConfigReadResponse: 当前通信参数
+
+    Note:
+        寄存器映射：
+        - Pr5.22: 波特率
+        - Pr5.23: 从站地址
+        - Pr5.24: 数据类型
+    """
+    log_motor_operation("read_communication_config", result="success")
+    config = await driver.read_communication_config()
+    return CommunicationConfigReadResponse(
+        baudrate=config.baudrate,
+        slave_id=config.slave_id,
+        data_type=config.data_type,
+        serial_mode=config.serial_mode.value,
+    )
+
+
+@router.post(
+    "/communication/config",
+    response_model=CommunicationConfigResponse,
+    summary="修改通信参数配置",
+    description="在线修改Modbus通信参数（Pr5.22-Pr5.24），注意波特率只能在9600下修改",
+)
+async def write_communication_config(
+    request: CommunicationConfigRequest,
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> CommunicationConfigResponse:
+    """
+    在线修改通信参数。
+
+    Args:
+        request: 通信参数配置请求
+
+    Returns:
+        CommunicationConfigResponse: 配置结果
+
+    Warning:
+        波特率只能在当前波特率为9600时在线修改。
+        修改后需要保存参数到EEPROM并重新上电才能生效。
+    """
+    log_motor_operation(
+        "write_communication_config",
+        baudrate=request.baudrate,
+        slave_id=request.slave_id,
+        data_type=request.data_type,
+    )
+
+    result = await driver.write_communication_config(
+        baudrate=request.baudrate,
+        slave_id=request.slave_id,
+        data_type=request.data_type,
+    )
+
+    return CommunicationConfigResponse(
+        success=result["success"],
+        baudrate=result.get("baudrate"),
+        slave_id=result.get("slave_id"),
+        data_type=result.get("data_type"),
+        warnings=result.get("warnings", []),
+        errors=result.get("errors", []),
+    )
+
+
+@router.get(
+    "/communication/baudrates",
+    response_model=SupportedBaudratesResponse,
+    summary="获取支持的波特率列表",
+    description="返回驱动器支持的所有波特率选项",
+)
+async def get_supported_baudrates(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> SupportedBaudratesResponse:
+    """
+    获取支持的波特率列表。
+
+    Returns:
+        SupportedBaudratesResponse: 支持的波特率列表
+    """
+    baudrates = await driver.get_supported_baudrates()
+    return SupportedBaudratesResponse(baudrates=baudrates)
+
+
+@router.get(
+    "/communication/data_types",
+    response_model=SupportedDataTypesResponse,
+    summary="获取支持的数据类型列表",
+    description="返回驱动器支持的所有数据类型（校验位/停止位组合）",
+)
+async def get_supported_data_types(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> SupportedDataTypesResponse:
+    """
+    获取支持的数据类型列表。
+
+    Returns:
+        SupportedDataTypesResponse: 数据类型代码到描述的映射
+    """
+    data_types = await driver.get_supported_data_types()
+    return SupportedDataTypesResponse(data_types=data_types)
+
+
+# ==================== 驱动器软件限位API ====================
+
+
+@router.get(
+    "/driver_soft_limit",
+    response_model=DriverSoftLimitReadResponse,
+    summary="读取驱动器软件限位",
+    description="读取驱动器内部软件限位设置（Pr8.06-Pr8.09）",
+)
+async def read_driver_soft_limit(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> DriverSoftLimitReadResponse:
+    """
+    读取驱动器内部软件限位设置。
+
+    Returns:
+        DriverSoftLimitReadResponse: 当前软件限位配置
+
+    Note:
+        寄存器映射：
+        - Pr8.06: 正限位高位
+        - Pr8.07: 正限位低位
+        - Pr8.08: 负限位高位
+        - Pr8.09: 负限位低位
+    """
+    log_motor_operation("read_driver_soft_limit", result="success")
+    limits = await driver.read_driver_soft_limits()
+    return DriverSoftLimitReadResponse(
+        positive_limit=limits["positive_limit"],
+        negative_limit=limits["negative_limit"],
+        positive_limit_mm=limits["positive_limit_mm"],
+        negative_limit_mm=limits["negative_limit_mm"],
+    )
+
+
+@router.post(
+    "/driver_soft_limit",
+    response_model=DriverSoftLimitResponse,
+    summary="设置驱动器软件限位",
+    description="设置驱动器内部软件限位（Pr8.06-Pr8.09）",
+)
+async def write_driver_soft_limit(
+    request: DriverSoftLimitRequest,
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> DriverSoftLimitResponse:
+    """
+    设置驱动器内部软件限位。
+
+    Args:
+        request: 软件限位配置请求
+
+    Returns:
+        DriverSoftLimitResponse: 配置结果
+
+    Note:
+        软件限位在回零时无效。
+        修改后需要保存参数到EEPROM才能永久生效。
+    """
+    log_motor_operation(
+        "write_driver_soft_limit",
+        positive_limit_mm=request.positive_limit_mm,
+        negative_limit_mm=request.negative_limit_mm,
+        positive_limit_steps=request.positive_limit_steps,
+        negative_limit_steps=request.negative_limit_steps,
+    )
+
+    result = await driver.write_driver_soft_limits(
+        positive_limit_mm=request.positive_limit_mm,
+        negative_limit_mm=request.negative_limit_mm,
+        positive_limit_steps=request.positive_limit_steps,
+        negative_limit_steps=request.negative_limit_steps,
+    )
+
+    return DriverSoftLimitResponse(
+        success=result["success"],
+        positive_limit=result.get("positive_limit"),
+        negative_limit=result.get("negative_limit"),
+        errors=result.get("errors", []),
+    )
+
+
+@router.post(
+    "/driver_soft_limit/sync",
+    response_model=SuccessResponse,
+    summary="同步软件限位到驱动器",
+    description="将本地软件限位配置同步写入驱动器寄存器",
+)
+async def sync_soft_limits_to_driver(
+    driver: LeadshineDM2C = Depends(get_dm2c_driver),
+) -> SuccessResponse:
+    """
+    将本地软件限位配置同步到驱动器。
+
+    Returns:
+        SuccessResponse: 操作结果
+
+    Note:
+        将self.limit_config中的软件限位值写入驱动器寄存器。
+    """
+    log_motor_operation("sync_soft_limits_to_driver", result="started")
+
+    success = await driver.sync_soft_limits_to_driver()
+
+    if success:
+        return SuccessResponse(
+            success=True,
+            message="软件限位已同步到驱动器，请调用保存参数API持久化到EEPROM",
+        )
+    else:
+        raise MotorAPIException(
+            ErrorCode.DEVICE_ERROR,
+            "软件限位同步失败，请检查是否已启用软限位",
+        )

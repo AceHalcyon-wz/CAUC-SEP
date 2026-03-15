@@ -17,13 +17,13 @@
       </div>
       <div class="header-right">
         <el-tag
-          type="info"
+          :type="connectionStatusType"
           effect="dark"
           size="large"
           class="status-indicator"
         >
           <el-icon><Cpu /></el-icon>
-          精密控制
+          {{ connectionStatusText }}
         </el-tag>
       </div>
     </div>
@@ -79,7 +79,7 @@
                   当前电压
                 </div>
                 <div class="status-value mono">
-                  {{ currentVoltage.toFixed(2) }} V
+                  {{ store.currentVoltage.toFixed(2) }} V
                 </div>
               </div>
               <div class="status-item">
@@ -87,27 +87,30 @@
                   当前位移
                 </div>
                 <div class="status-value mono highlight">
-                  {{ currentDisplacement.toFixed(3) }} nm
+                  {{ store.currentDisplacement.toFixed(3) }} nm
                 </div>
               </div>
               <div class="status-item">
                 <div class="status-label">
-                  工作模式
+                  控制模式
                 </div>
                 <el-tag
-                  :type="workModeType"
+                  :type="controlModeType"
                   size="small"
                 >
-                  {{ workModeText }}
+                  {{ controlModeText }}
                 </el-tag>
               </div>
               <div class="status-item">
                 <div class="status-label">
-                  温度
+                  校准状态
                 </div>
-                <div class="status-value mono">
-                  {{ currentTemp.toFixed(1) }} C
-                </div>
+                <el-tag
+                  :type="calibrationStatusType"
+                  size="small"
+                >
+                  {{ calibrationStatusText }}
+                </el-tag>
               </div>
             </div>
           </el-collapse-transition>
@@ -142,15 +145,18 @@
                 size="small"
               >
                 <el-descriptions-item label="校准系数">
-                  <span class="mono">{{ calibrationFactor.toFixed(4) }} nm/V</span>
+                  <span class="mono">{{ calibrationCoefficient }}</span>
                 </el-descriptions-item>
-                <el-descriptions-item label="线性度">
+                <el-descriptions-item label="R² 拟合度">
                   <el-tag
-                    :type="linearityType"
+                    :type="r2StatusType"
                     size="small"
                   >
-                    {{ linearityPercent }}%
+                    {{ r2Value }}
                   </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="校准点数">
+                  {{ calibrationPointCount }}
                 </el-descriptions-item>
                 <el-descriptions-item label="上次校准">
                   {{ lastCalibrationDate }}
@@ -164,6 +170,78 @@
                   </el-tag>
                 </el-descriptions-item>
               </el-descriptions>
+
+              <!-- 校准数据导出按钮 -->
+              <div class="export-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  :disabled="!store.isCalibrated"
+                  @click="exportCalibrationCSV"
+                >
+                  <el-icon><Download /></el-icon>
+                  导出CSV
+                </el-button>
+                <el-button
+                  type="success"
+                  size="small"
+                  :disabled="!store.isCalibrated"
+                  @click="exportCalibrationJSON"
+                >
+                  <el-icon><Document /></el-icon>
+                  导出JSON
+                </el-button>
+              </div>
+            </div>
+          </el-collapse-transition>
+        </el-card>
+
+        <!-- 快捷操作卡片 - 可折叠 -->
+        <el-card class="actions-card">
+          <template #header>
+            <div
+              class="card-header"
+              @click="toggleActionsPanel"
+            >
+              <div class="header-left-section">
+                <el-icon class="header-icon">
+                  <Operation />
+                </el-icon>
+                <span class="header-title">快捷操作</span>
+              </div>
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': actionsCollapsed }"
+              >
+                <ArrowDown />
+              </el-icon>
+            </div>
+          </template>
+          <el-collapse-transition>
+            <div
+              v-show="!actionsCollapsed"
+              class="quick-actions"
+            >
+              <el-button
+                type="warning"
+                size="large"
+                :loading="store.loading.zero"
+                :disabled="!store.canControl"
+                @click="handleZero"
+              >
+                <el-icon><RefreshLeft /></el-icon>
+                归零
+              </el-button>
+              <el-button
+                type="danger"
+                size="large"
+                :loading="store.loading.maxExtend"
+                :disabled="!store.canControl"
+                @click="handleMaxExtend"
+              >
+                <el-icon><TopRight /></el-icon>
+                最大伸展
+              </el-button>
             </div>
           </el-collapse-transition>
         </el-card>
@@ -216,35 +294,32 @@
  * @description 压电陶瓷控制页面，提供电压控制、校准和数据可视化功能
  * @author Agent
  * @date 2024-03-07
+ * @dependencies pinia, stores/piezo, components/experiment/piezo
  */
 
-import { ref, computed } from 'vue'
-import { Cpu, DataLine, SetUp, InfoFilled } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import {
+  Cpu,
+  DataLine,
+  SetUp,
+  InfoFilled,
+  ArrowDown,
+  Download,
+  Document,
+  Operation,
+  RefreshLeft,
+  TopRight
+} from '@element-plus/icons-vue'
 import { PiezoControl } from '@/components/experiment/piezo'
+import { usePiezoStore } from '@/stores/piezo'
+import { ElMessage } from 'element-plus'
 
-/** 当前电压 */
-const currentVoltage = ref(0)
+// ==================== Store 引入 ====================
 
-/** 当前位移 */
-const currentDisplacement = ref(0)
+/** 压电陶瓷控制器Store */
+const store = usePiezoStore()
 
-/** 当前温度 */
-const currentTemp = ref(25.0)
-
-/** 校准系数 */
-const calibrationFactor = ref(12.5)
-
-/** 线性度百分比 */
-const linearityPercent = ref(99.2)
-
-/** 上次校准日期 */
-const lastCalibrationDate = ref('2024-03-01')
-
-/** 校准状态 */
-const calibrationStatus = ref('valid')
-
-/** 工作模式 */
-const workMode = ref('manual')
+// ==================== 面板折叠状态 ====================
 
 /** 状态面板折叠状态 */
 const statusCollapsed = ref(false)
@@ -252,67 +327,123 @@ const statusCollapsed = ref(false)
 /** 校准面板折叠状态 */
 const calibrationCollapsed = ref(false)
 
+/** 操作面板折叠状态 */
+const actionsCollapsed = ref(false)
+
 /** 提示面板折叠状态 */
 const tipsCollapsed = ref(false)
 
-/** 工作模式文本 */
-const workModeText = computed(() => {
-  const modeMap = {
-    manual: '手动控制',
-    scan: '扫描模式',
-    program: '程序控制'
-  }
-  return modeMap[workMode.value] || '未知'
+// ==================== 计算属性 ====================
+
+/** 连接状态文本 */
+const connectionStatusText = computed(() => {
+  if (store.isConnecting) return '连接中...'
+  if (store.isConnected) return '已连接'
+  return '未连接'
 })
 
-/** 工作模式标签类型 */
-const workModeType = computed(() => {
-  const typeMap = {
-    manual: 'primary',
-    scan: 'success',
-    program: 'warning'
-  }
-  return typeMap[workMode.value] || 'info'
-})
-
-/** 线性度标签类型 */
-const linearityType = computed(() => {
-  if (linearityPercent.value >= 99) return 'success'
-  if (linearityPercent.value >= 95) return 'warning'
+/** 连接状态标签类型 */
+const connectionStatusType = computed(() => {
+  if (store.isConnecting) return 'warning'
+  if (store.isConnected) return 'success'
   return 'danger'
+})
+
+/** 控制模式文本 */
+const controlModeText = computed(() => {
+  const modeMap = {
+    voltage: '电压控制',
+    displacement: '位移控制'
+  }
+  return modeMap[store.controlMode] || '未知'
+})
+
+/** 控制模式标签类型 */
+const controlModeType = computed(() => {
+  const typeMap = {
+    voltage: 'primary',
+    displacement: 'success'
+  }
+  return typeMap[store.controlMode] || 'info'
 })
 
 /** 校准状态文本 */
 const calibrationStatusText = computed(() => {
   const statusMap = {
-    valid: '有效',
-    expired: '已过期',
-    pending: '待校准'
+    idle: '未校准',
+    calibrating: '校准中',
+    completed: '已校准',
+    error: '校准错误'
   }
-  return statusMap[calibrationStatus.value] || '未知'
+
+  if (store.isCalibrated) {
+    return '已校准'
+  }
+  return statusMap[store.calibrationStatus] || '未知'
 })
 
 /** 校准状态标签类型 */
 const calibrationStatusType = computed(() => {
-  const typeMap = {
-    valid: 'success',
-    expired: 'danger',
-    pending: 'warning'
-  }
-  return typeMap[calibrationStatus.value] || 'info'
+  if (store.isCalibrated) return 'success'
+  if (store.calibrationStatus === 'calibrating') return 'warning'
+  if (store.calibrationStatus === 'error') return 'danger'
+  return 'info'
 })
+
+/** 校准系数显示 */
+const calibrationCoefficient = computed(() => {
+  if (!store.isCalibrated || !store.calibrationData.coefficients) {
+    return '未校准'
+  }
+
+  const coef = store.calibrationData.coefficients
+  if (coef.type === 'linear') {
+    return `${coef.a.toFixed(4)} nm/V + ${coef.b.toFixed(4)}`
+  }
+  return '多项式拟合'
+})
+
+/** R²值 */
+const r2Value = computed(() => {
+  const r2 = store.calculateR2()
+  return r2.toFixed(4)
+})
+
+/** R²状态类型 */
+const r2StatusType = computed(() => {
+  const r2 = store.calculateR2()
+  if (r2 >= 0.99) return 'success'
+  if (r2 >= 0.95) return 'warning'
+  return 'danger'
+})
+
+/** 校准点数 */
+const calibrationPointCount = computed(() => {
+  return store.calibrationData.points.length
+})
+
+/** 上次校准日期 */
+const lastCalibrationDate = computed(() => {
+  const timestamp = store.calibrationData.lastCalibrated
+  if (!timestamp) return '从未校准'
+
+  const date = new Date(timestamp)
+  return date.toLocaleString('zh-CN')
+})
+
+// ==================== 数据 ====================
 
 /** 操作提示 */
 const operationTips = [
   {
     title: '电压范围',
     type: 'info',
-    description: '工作电压范围: 0-150V，请勿超出范围'
+    description: `工作电压范围: ${store.voltageLimits.min}-${store.voltageLimits.max}V，请勿超出范围`
   },
   {
-    title: '温度控制',
+    title: '位移控制',
     type: 'warning',
-    description: '温度变化会影响位移精度，建议恒温环境'
+    description: '位移控制模式需要先完成校准，确保校准系数准确'
   },
   {
     title: '校准周期',
@@ -320,6 +451,8 @@ const operationTips = [
     description: '建议每30天进行一次校准以确保精度'
   }
 ]
+
+// ==================== 方法 ====================
 
 /**
  * 切换状态面板折叠状态
@@ -336,11 +469,70 @@ function toggleCalibrationPanel() {
 }
 
 /**
+ * 切换操作面板折叠状态
+ */
+function toggleActionsPanel() {
+  actionsCollapsed.value = !actionsCollapsed.value
+}
+
+/**
  * 切换提示面板折叠状态
  */
 function toggleTipsPanel() {
   tipsCollapsed.value = !tipsCollapsed.value
 }
+
+/**
+ * 导出校准数据为CSV
+ */
+function exportCalibrationCSV() {
+  store.downloadCalibrationFile('csv', `calibration_${Date.now()}`)
+  ElMessage.success('校准数据已导出为CSV格式')
+}
+
+/**
+ * 导出校准数据为JSON
+ */
+function exportCalibrationJSON() {
+  store.downloadCalibrationFile('json', `calibration_${Date.now()}`)
+  ElMessage.success('校准数据已导出为JSON格式')
+}
+
+/**
+ * 处理归零操作
+ */
+async function handleZero() {
+  const success = await store.zero()
+  if (success) {
+    ElMessage.success('归零成功')
+  }
+}
+
+/**
+ * 处理最大伸展操作
+ */
+async function handleMaxExtend() {
+  const success = await store.maxExtend()
+  if (success) {
+    ElMessage.success('最大伸展完成')
+  }
+}
+
+// ==================== 生命周期 ====================
+
+/**
+ * 组件挂载时初始化
+ */
+onMounted(() => {
+  store.init()
+})
+
+/**
+ * 组件卸载时清理资源
+ */
+onUnmounted(() => {
+  store.cleanup()
+})
 </script>
 
 <style scoped lang="scss">
@@ -446,6 +638,7 @@ function toggleTipsPanel() {
 .control-card,
 .status-card,
 .calibration-card,
+.actions-card,
 .tips-card {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -457,6 +650,7 @@ function toggleTipsPanel() {
 .control-card:hover,
 .status-card:hover,
 .calibration-card:hover,
+.actions-card:hover,
 .tips-card:hover {
   box-shadow: var(--shadow-lg);
 }
@@ -555,6 +749,28 @@ function toggleTipsPanel() {
   font-family: var(--font-family-mono);
 }
 
+/* ==================== 导出操作按钮 ==================== */
+.export-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-border-primary);
+}
+
+/* ==================== 快捷操作 ==================== */
+.quick-actions {
+  display: flex;
+  gap: var(--spacing-4);
+  justify-content: center;
+  padding: var(--spacing-4);
+}
+
+.quick-actions .el-button {
+  flex: 1;
+  max-width: 150px;
+}
+
 /* ==================== 提示 ==================== */
 .tip-alert {
   margin-bottom: var(--spacing-3);
@@ -614,14 +830,28 @@ function toggleTipsPanel() {
   .status-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .status-value {
     font-size: var(--font-size-lg);
   }
-  
+
   .status-indicator {
     padding: var(--spacing-1) var(--spacing-3);
     font-size: var(--font-size-xs);
+  }
+
+  .quick-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quick-actions .el-button {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .export-actions {
+    flex-direction: column;
   }
 }
 </style>

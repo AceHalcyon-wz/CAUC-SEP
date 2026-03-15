@@ -17,14 +17,17 @@
 
 导出组件：
     - DeviceRegistry: 设备注册表
-    - get_device_registry: 获取设备注册表实例
-    - DriverManager: 驱动管理器
-    - get_driver_manager: 获取驱动管理器实例
-    - RTScheduler: 实时调度器
-    - get_rt_scheduler: 获取调度器实例
-    - validate_device_config: 验证设备配置
-    - get_device_type: 获取设备类型
-    - format_device_status: 格式化设备状态
+    - DriverProcessManager: 驱动进程管理器
+    - create_driver_manager: 创建驱动管理器实例
+    - WindowsRTScheduler: Windows实时调度器
+    - RealtimeContext: 实时执行上下文
+    - high_precision_timer: 高精度定时器
+    - check_realtime_capability: 检查系统实时能力
+    - set_realtime_priority: 设置实时优先级
+    - bind_to_cpu_core: 绑定CPU核心
+    - DeviceValidationError: 设备验证异常
+    - validate_device_state: 验证设备状态
+    - create_device_error_response: 创建设备错误响应
 
 依赖：
     - asyncio: 异步IO支持
@@ -33,35 +36,41 @@
 
 使用示例：
     >>> from backend.core.device_management import (
-    ...     DeviceRegistry, DriverManager, validate_device_config
+    ...     DeviceRegistry, DriverProcessManager, validate_device_state
     ... )
     >>> 
     >>> # 验证设备配置
-    >>> config = {"device_id": "stepper_1", "type": "stepper"}
-    >>> is_valid = validate_device_config(config)
-    >>> 
-    >>> # 注册设备
-    >>> registry = get_device_registry()
-    >>> await registry.register(device)
+    >>> registry = DeviceRegistry()
+    >>> await registry.register("motor_1", motor_instance)
 """
 
-from .device_registry import DeviceRegistry, get_device_registry
-from .driver_manager import DriverManager, get_driver_manager
-from .rt_scheduler import RTScheduler, get_rt_scheduler
+from .device_registry import DeviceRegistry
+from .driver_manager import DriverProcessManager, create_driver_manager
+from .rt_scheduler import (
+    WindowsRTScheduler,
+    RealtimeContext,
+    high_precision_timer,
+    check_realtime_capability,
+    set_realtime_priority,
+    bind_to_cpu_core,
+)
 from .device_utils import (
-    validate_device_config,
-    get_device_type,
-    format_device_status,
+    DeviceValidationError,
+    validate_device_state,
+    create_device_error_response,
 )
 
 __all__ = [
     "DeviceRegistry",
-    "get_device_registry",
-    "DriverManager",
-    "get_driver_manager",
-    "RTScheduler",
-    "get_rt_scheduler",
-    "validate_device_config",
-    "get_device_type",
-    "format_device_status",
+    "DriverProcessManager",
+    "create_driver_manager",
+    "WindowsRTScheduler",
+    "RealtimeContext",
+    "high_precision_timer",
+    "check_realtime_capability",
+    "set_realtime_priority",
+    "bind_to_cpu_core",
+    "DeviceValidationError",
+    "validate_device_state",
+    "create_device_error_response",
 ]

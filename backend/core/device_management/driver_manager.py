@@ -20,7 +20,7 @@ from enum import Enum
 from multiprocessing.queues import Queue as MPQueue
 from typing import Any, TypeVar
 
-from .abstract import AbstractDevice
+from ..abstract import AbstractDevice
 
 logger = logging.getLogger(__name__)
 

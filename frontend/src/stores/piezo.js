@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDeviceBase } from '../composables/useDeviceBase'
 import { useWebSocket } from '../composables/useWebSocket'
-import { request, get, post, del } from '../utils/apiRequest'
+import { get, post, del } from '../utils/apiRequest'
 import { WS_BASE_URL } from '../config/api'
 
 export const usePiezoStore = defineStore('piezo', () => {
@@ -28,12 +28,12 @@ export const usePiezoStore = defineStore('piezo', () => {
     alarmMessage,
     wsConnected,
     loading,
-    canControl: baseCanControl,
+    canControl: _baseCanControl,
     showError,
     clearAlarm,
     setLoading,
     resetState,
-    updateStatus
+    _updateStatus
   } = useDeviceBase('piezo')
 
   // ==================== 压电陶瓷特有状态 ====================
@@ -231,7 +231,7 @@ export const usePiezoStore = defineStore('piezo', () => {
    * @returns {Promise<Object|null>} 状态数据或null
    */
   async function fetchStatus() {
-    const result = await get('/api/piezo/status', null, {
+    const result = await get('/api/v1/piezo/status', null, {
       onError: (msg) => {
         console.error('Failed to fetch piezo status:', msg)
         isConnected.value = false
@@ -261,7 +261,7 @@ export const usePiezoStore = defineStore('piezo', () => {
   async function connect() {
     isConnecting.value = true
 
-    const result = await post('/api/piezo/connect', null, {
+    const result = await post('/api/v1/piezo/connect', null, {
       onError: (msg) => showError('连接错误: ' + msg)
     })
 

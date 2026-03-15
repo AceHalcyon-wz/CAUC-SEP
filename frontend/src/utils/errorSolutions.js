@@ -1232,7 +1232,7 @@ export function inferErrorType(message) {
  * @param {Object} context - 错误上下文
  * @returns {string} 严重程度
  */
-export function inferErrorSeverity(error, context = {}) {
+export function inferErrorSeverity(error, _context = {}) {
   // 如果错误已指定严重程度，直接返回
   if (error?.severity) return error.severity
   

@@ -38,7 +38,7 @@ const {
 // ==================== 响应式状态 ====================
 
 const testResults = ref([])
-const undoCountdown = ref(0)
+const _undoCountdown = ref(0)
 
 // ==================== 测试方法 ====================
 

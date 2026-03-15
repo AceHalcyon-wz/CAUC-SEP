@@ -36,7 +36,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from core.data_storage import DataStorage
+from core.storage.data_storage import DataStorage
 from middleware.security import sanitize_dict, sanitize_string
 
 logger = logging.getLogger(__name__)
@@ -229,17 +229,29 @@ class AuditLogger:
             if re.match(pattern, path):
                 return info
 
-        # 默认分类
+        # 默认分类（必须使用有效类别: device, experiment, system, calibration, config）
         if path.startswith("/api/v1/device") or path.startswith("/api/device"):
-            return {"operation_type": "device_query", "category": "query"}
+            return {"operation_type": "device_query", "category": "device"}
         elif path.startswith("/api/v1/motor") or path.startswith("/api/motor"):
-            return {"operation_type": "motor_operation", "category": "motor"}
+            return {"operation_type": "motor_operation", "category": "device"}
         elif path.startswith("/api/v1/experiment") or path.startswith("/api/experiment"):
             return {"operation_type": "experiment_operation", "category": "experiment"}
         elif path.startswith("/api/v1/analysis") or path.startswith("/api/analysis"):
-            return {"operation_type": "data_analysis", "category": "analysis"}
+            return {"operation_type": "data_analysis", "category": "experiment"}
+        elif path.startswith("/api/v1/user") or path.startswith("/api/user"):
+            return {"operation_type": "user_operation", "category": "system"}
+        elif path.startswith("/api/v1/logs") or path.startswith("/api/logs"):
+            return {"operation_type": "logs_query", "category": "system"}
+        elif path.startswith("/api/v1/health") or path.startswith("/api/health"):
+            return {"operation_type": "health_check", "category": "system"}
+        elif path.startswith("/api/v1/performance") or path.startswith("/api/performance"):
+            return {"operation_type": "performance_query", "category": "system"}
+        elif path.startswith("/api/v1/tracing") or path.startswith("/api/tracing"):
+            return {"operation_type": "tracing_query", "category": "system"}
+        elif path.startswith("/api/v1/cache") or path.startswith("/api/cache"):
+            return {"operation_type": "cache_operation", "category": "config"}
         else:
-            return {"operation_type": "api_request", "category": "general"}
+            return {"operation_type": "api_request", "category": "system"}
 
     def _extract_device_id(self, path: str, params: dict | None) -> str | None:
         """

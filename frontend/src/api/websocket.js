@@ -1,370 +1,279 @@
 /**
  * @file websocket.js
  * @path src/api/
- * @description WebSocket连接管理API接口封装
+ * @description WebSocket API接口封装
  * @author Agent
- * @date 2024-03-14
- * @dependencies utils/apiRequest
+ * @date 2024-03-15
  */
 
-import { get, post } from '../utils/apiRequest';
+const WS_BASE_URL = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000/ws';
 
 /**
- * WebSocket连接状态枚举
- * @enum {string}
+ * WebSocket连接管理类
  */
-export const WebSocketState = {
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  DISCONNECTED: 'disconnected',
-  ERROR: 'error',
-  RECONNECTING: 'reconnecting'
-};
-
-/**
- * 获取WebSocket连接状态
- *
- * @returns {Promise<Object|null>} WebSocket连接状态信息
- */
-export async function getWebSocketStatus() {
-  const result = await get('/api/v1/websocket/status', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Get status error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 获取WebSocket连接URL
- *
- * @param {Object} params - 连接参数
- * @param {string} [params.channel] - 订阅通道
- * @returns {Promise<Object|null>} 连接URL信息
- */
-export async function getWebSocketUrl(params = {}) {
-  const result = await get('/api/v1/websocket/url', params, {
-    onError: (msg) => console.error('[WebSocketAPI] Get URL error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 订阅数据通道
- *
- * @param {Object} params - 订阅参数
- * @param {string} params.channel - 通道名称
- * @param {Object} [params.filters] - 数据过滤条件
- * @returns {Promise<Object|null>} 订阅结果
- */
-export async function subscribeChannel(params) {
-  const result = await post('/api/v1/websocket/subscribe', params, {
-    onError: (msg) => console.error('[WebSocketAPI] Subscribe error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 取消订阅数据通道
- *
- * @param {Object} params - 取消订阅参数
- * @param {string} params.channel - 通道名称
- * @returns {Promise<boolean>} 是否取消成功
- */
-export async function unsubscribeChannel(params) {
-  const result = await post('/api/v1/websocket/unsubscribe', params, {
-    onError: (msg) => console.error('[WebSocketAPI] Unsubscribe error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 获取已订阅的通道列表
- *
- * @returns {Promise<Object|null>} 已订阅通道列表
- */
-export async function getSubscribedChannels() {
-  const result = await get('/api/v1/websocket/channels', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Get channels error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 获取可用的数据通道列表
- *
- * @returns {Promise<Object|null>} 可用通道列表
- */
-export async function getAvailableChannels() {
-  const result = await get('/api/v1/websocket/channels/available', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Get available channels error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 发送WebSocket消息
- *
- * @param {Object} params - 消息参数
- * @param {string} params.channel - 目标通道
- * @param {string} params.type - 消息类型
- * @param {Object} params.payload - 消息内容
- * @returns {Promise<boolean>} 是否发送成功
- */
-export async function sendWebSocketMessage(params) {
-  const result = await post('/api/v1/websocket/send', params, {
-    onError: (msg) => console.error('[WebSocketAPI] Send message error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 获取WebSocket连接历史
- *
- * @param {Object} params - 查询参数
- * @param {number} [params.limit=10] - 返回记录数量
- * @returns {Promise<Object|null>} 连接历史记录
- */
-export async function getConnectionHistory(params = {}) {
-  const result = await get('/api/v1/websocket/history', params, {
-    onError: (msg) => console.error('[WebSocketAPI] Get history error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 重连WebSocket
- *
- * @returns {Promise<Object|null>} 重连结果
- */
-export async function reconnectWebSocket() {
-  const result = await post('/api/v1/websocket/reconnect', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Reconnect error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 关闭WebSocket连接
- *
- * @returns {Promise<boolean>} 是否关闭成功
- */
-export async function closeWebSocket() {
-  const result = await post('/api/v1/websocket/close', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Close error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 获取WebSocket配置
- *
- * @returns {Promise<Object|null>} WebSocket配置
- */
-export async function getWebSocketConfig() {
-  const result = await get('/api/v1/websocket/config', null, {
-    onError: (msg) => console.error('[WebSocketAPI] Get config error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 更新WebSocket配置
- *
- * @param {Object} config - 配置参数
- * @param {number} [config.heartbeat_interval] - 心跳间隔（毫秒）
- * @param {number} [config.reconnect_delay] - 重连延迟（毫秒）
- * @param {number} [config.max_reconnect_attempts] - 最大重连次数
- * @returns {Promise<Object|null>} 更新后的配置
- */
-export async function updateWebSocketConfig(config) {
-  const result = await post('/api/v1/websocket/config', config, {
-    onError: (msg) => console.error('[WebSocketAPI] Update config error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 获取通道统计信息
- *
- * @param {string} channel - 通道名称
- * @returns {Promise<Object|null>} 统计信息
- */
-export async function getChannelStatistics(channel) {
-  const result = await get(`/api/v1/websocket/channel/${channel}/statistics`, null, {
-    onError: (msg) => console.error('[WebSocketAPI] Get channel statistics error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 清除通道缓冲区
- *
- * @param {string} channel - 通道名称
- * @returns {Promise<boolean>} 是否清除成功
- */
-export async function clearChannelBuffer(channel) {
-  const result = await post(`/api/v1/websocket/channel/${channel}/clear`, null, {
-    onError: (msg) => console.error('[WebSocketAPI] Clear buffer error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 创建WebSocket客户端管理器
- *
- * @param {Object} options - 客户端选项
- * @param {string} options.url - WebSocket服务器URL
- * @param {Function} [options.onMessage] - 消息回调
- * @param {Function} [options.onOpen] - 连接打开回调
- * @param {Function} [options.onClose] - 连接关闭回调
- * @param {Function} [options.onError] - 错误回调
- * @param {number} [options.reconnectInterval=3000] - 重连间隔
- * @param {number} [options.maxReconnectAttempts=5] - 最大重连次数
- * @returns {Object} WebSocket客户端管理器实例
- */
-export function createWebSocketManager(options) {
-  const {
-    url,
-    onMessage,
-    onOpen,
-    onClose,
-    onError,
-    reconnectInterval = 3000,
-    maxReconnectAttempts = 5
-  } = options;
-
-  let ws = null;
-  let reconnectAttempts = 0;
-  let isManualClose = false;
-  let messageQueue = [];
-
-  /**
-   * 连接WebSocket
-   */
-  function connect() {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      console.warn('[WebSocketManager] Already connected');
-      return;
-    }
-
-    isManualClose = false;
-    ws = new WebSocket(url);
-
-    ws.onopen = () => {
-      console.log('[WebSocketManager] Connected');
-      reconnectAttempts = 0;
-
-      // 发送队列中的消息
-      while (messageQueue.length > 0) {
-        const message = messageQueue.shift();
-        ws.send(JSON.stringify(message));
-      }
-
-      if (onOpen) onOpen();
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (onMessage) onMessage(data);
-      } catch (error) {
-        console.error('[WebSocketManager] Parse message error:', error);
-      }
-    };
-
-    ws.onclose = (event) => {
-      console.log('[WebSocketManager] Closed:', event.code, event.reason);
-
-      if (onClose) onClose(event);
-
-      // 自动重连
-      if (!isManualClose && reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++;
-        console.log(`[WebSocketManager] Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`);
-        setTimeout(connect, reconnectInterval);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('[WebSocketManager] Error:', error);
-      if (onError) onError(error);
-    };
+export class WebSocketClient {
+  constructor() {
+    this.ws = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 3000;
+    this.listeners = new Map();
+    this.heartbeatInterval = null;
+    this.isManualClose = false;
   }
 
   /**
-   * 断开连接
+   * 建立WebSocket连接
+   *
+   * @param {string} [url] - WebSocket URL
+   * @returns {Promise<void>}
    */
-  function disconnect() {
-    isManualClose = true;
-    if (ws) {
-      ws.close();
-      ws = null;
+  connect(url = WS_BASE_URL) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.ws = new WebSocket(url);
+        this.isManualClose = false;
+
+        this.ws.onopen = () => {
+          console.log('[WebSocket] Connected');
+          this.reconnectAttempts = 0;
+          this.startHeartbeat();
+          this.emit('connected');
+          resolve();
+        };
+
+        this.ws.onmessage = (event) => {
+          this.handleMessage(event.data);
+        };
+
+        this.ws.onerror = (error) => {
+          console.error('[WebSocket] Error:', error);
+          this.emit('error', error);
+          reject(error);
+        };
+
+        this.ws.onclose = () => {
+          console.log('[WebSocket] Disconnected');
+          this.stopHeartbeat();
+          this.emit('disconnected');
+
+          if (!this.isManualClose) {
+            this.attemptReconnect();
+          }
+        };
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * 断开WebSocket连接
+   */
+  disconnect() {
+    this.isManualClose = true;
+    this.stopHeartbeat();
+
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  /**
+   * 尝试重新连接
+   *
+   * @private
+   */
+  attemptReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('[WebSocket] Max reconnect attempts reached');
+      this.emit('reconnect_failed');
+      return;
+    }
+
+    this.reconnectAttempts++;
+    console.log(`[WebSocket] Reconnecting... Attempt ${this.reconnectAttempts}`);
+    this.emit('reconnecting', this.reconnectAttempts);
+
+    setTimeout(() => {
+      this.connect().catch(() => {
+        // 连接失败，将在onclose中再次尝试
+      });
+    }, this.reconnectDelay);
+  }
+
+  /**
+   * 启动心跳检测
+   *
+   * @private
+   */
+  startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.send({ type: 'ping', timestamp: Date.now() });
+      }
+    }, 30000);
+  }
+
+  /**
+   * 停止心跳检测
+   *
+   * @private
+   */
+  stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
   }
 
   /**
    * 发送消息
    *
-   * @param {Object} message - 消息内容
+   * @param {Object} data - 要发送的数据
    */
-  function send(message) {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(message));
+  send(data) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
     } else {
-      // 连接未就绪，加入队列
-      messageQueue.push(message);
-      console.warn('[WebSocketManager] Connection not ready, message queued');
+      console.warn('[WebSocket] Cannot send, connection not open');
     }
   }
 
   /**
-   * 获取连接状态
+   * 处理收到的消息
    *
-   * @returns {string} 连接状态
+   * @private
+   * @param {string} data - 收到的数据
    */
-  function getState() {
-    if (!ws) return WebSocketState.DISCONNECTED;
-
-    switch (ws.readyState) {
-      case WebSocket.CONNECTING:
-        return WebSocketState.CONNECTING;
-      case WebSocket.OPEN:
-        return WebSocketState.CONNECTED;
-      case WebSocket.CLOSING:
-      case WebSocket.CLOSED:
-        return WebSocketState.DISCONNECTED;
-      default:
-        return WebSocketState.DISCONNECTED;
+  handleMessage(data) {
+    try {
+      const message = JSON.parse(data);
+      this.emit(message.type, message);
+    } catch (error) {
+      console.error('[WebSocket] Failed to parse message:', error);
     }
   }
 
   /**
-   * 检查是否已连接
+   * 订阅消息
    *
-   * @returns {boolean} 是否已连接
+   * @param {string} event - 事件类型
+   * @param {Function} callback - 回调函数
    */
-  function isConnected() {
-    return ws && ws.readyState === WebSocket.OPEN;
+  on(event, callback) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event).push(callback);
   }
 
-  return {
-    connect,
-    disconnect,
-    send,
-    getState,
-    isConnected
-  };
+  /**
+   * 取消订阅
+   *
+   * @param {string} event - 事件类型
+   * @param {Function} callback - 回调函数
+   */
+  off(event, callback) {
+    if (this.listeners.has(event)) {
+      const callbacks = this.listeners.get(event);
+      const index = callbacks.indexOf(callback);
+      if (index > -1) {
+        callbacks.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * 触发事件
+   *
+   * @private
+   * @param {string} event - 事件类型
+   * @param {*} data - 事件数据
+   */
+  emit(event, data) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error('[WebSocket] Error in event listener:', error);
+        }
+      });
+    }
+  }
+
+  /**
+   * 订阅设备状态更新
+   *
+   * @param {string} deviceId - 设备ID
+   */
+  subscribeDeviceStatus(deviceId) {
+    this.send({
+      type: 'subscribe',
+      channel: 'device_status',
+      device_id: deviceId
+    });
+  }
+
+  /**
+   * 取消订阅设备状态更新
+   *
+   * @param {string} deviceId - 设备ID
+   */
+  unsubscribeDeviceStatus(deviceId) {
+    this.send({
+      type: 'unsubscribe',
+      channel: 'device_status',
+      device_id: deviceId
+    });
+  }
+
+  /**
+   * 订阅波形数据
+   *
+   * @param {string} deviceId - 设备ID
+   * @param {string} [dataType] - 数据类型
+   */
+  subscribeWaveform(deviceId, dataType = 'current') {
+    this.send({
+      type: 'subscribe',
+      channel: 'waveform',
+      device_id: deviceId,
+      data_type: dataType
+    });
+  }
+
+  /**
+   * 取消订阅波形数据
+   *
+   * @param {string} deviceId - 设备ID
+   */
+  unsubscribeWaveform(deviceId) {
+    this.send({
+      type: 'unsubscribe',
+      channel: 'waveform',
+      device_id: deviceId
+    });
+  }
+
+  /**
+   * 设置推送频率
+   *
+   * @param {string} mode - 频率模式 ('fast' | 'normal' | 'slow')
+   * @param {number} [interval] - 自定义间隔(ms)
+   */
+  setPushFrequency(mode, interval) {
+    this.send({
+      type: 'frequency_update',
+      mode: mode,
+      interval: interval
+    });
+  }
 }
+
+// 创建单例实例
+export const wsClient = new WebSocketClient();
+
+export default wsClient;

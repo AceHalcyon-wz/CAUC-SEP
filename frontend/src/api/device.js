@@ -1,62 +1,18 @@
 /**
  * @file device.js
  * @path src/api/
- * @description 设备控制相关API接口封装
+ * @description 设备管理API接口封装
  * @author Agent
- * @date 2024-03-14
+ * @date 2024-03-15
  * @dependencies utils/apiRequest
  */
 
 import { get, post, put, del } from '../utils/apiRequest';
 
 /**
- * 获取设备连接状态
+ * 获取设备列表
  *
- * @returns {Promise<Object|null>} 设备连接状态信息
- */
-export async function getConnectionStatus() {
-  const result = await get('/api/v1/device/connection/status', null, {
-    onError: (msg) => console.error('[DeviceAPI] Get connection status error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 连接设备
- *
- * @param {Object} params - 连接参数
- * @param {string} params.device_type - 设备类型
- * @param {string} params.port - 端口号
- * @param {number} [params.baud_rate=9600] - 波特率
- * @returns {Promise<Object|null>} 连接结果
- */
-export async function connectDevice(params) {
-  const result = await post('/api/v1/device/connection/connect', params, {
-    onError: (msg) => console.error('[DeviceAPI] Connect device error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 断开设备连接
- *
- * @param {string} deviceId - 设备ID
- * @returns {Promise<boolean>} 是否断开成功
- */
-export async function disconnectDevice(deviceId) {
-  const result = await post('/api/v1/device/connection/disconnect', { device_id: deviceId }, {
-    onError: (msg) => console.error('[DeviceAPI] Disconnect device error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 获取所有设备列表
- *
- * @returns {Promise<Object|null>} 设备列表
+ * @returns {Promise<Array|null>} 设备列表
  */
 export async function getDeviceList() {
   const result = await get('/api/v1/device/list', null, {
@@ -67,21 +23,7 @@ export async function getDeviceList() {
 }
 
 /**
- * 获取设备详情
- *
- * @param {string} deviceId - 设备ID
- * @returns {Promise<Object|null>} 设备详情
- */
-export async function getDeviceDetail(deviceId) {
-  const result = await get(`/api/v1/device/${deviceId}`, null, {
-    onError: (msg) => console.error('[DeviceAPI] Get device detail error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 获取设备状态
+ * 获取指定设备状态
  *
  * @param {string} deviceId - 设备ID
  * @returns {Promise<Object|null>} 设备状态
@@ -95,115 +37,150 @@ export async function getDeviceStatus(deviceId) {
 }
 
 /**
- * 更新设备配置
+ * 连接设备
  *
  * @param {string} deviceId - 设备ID
- * @param {Object} config - 配置参数
- * @returns {Promise<Object|null>} 更新结果
+ * @param {Object} params - 连接参数
+ * @returns {Promise<Object|null>} 连接结果
  */
-export async function updateDeviceConfig(deviceId, config) {
-  const result = await put(`/api/v1/device/${deviceId}/config`, config, {
-    onError: (msg) => console.error('[DeviceAPI] Update device config error:', msg)
+export async function connectDevice(deviceId, params) {
+  const result = await post(`/api/v1/device/${deviceId}/connect`, params, {
+    onError: (msg) => console.error('[DeviceAPI] Connect device error:', msg)
   });
 
   return result.success ? result.data : null;
 }
 
 /**
- * 扫描可用设备
- *
- * @param {Object} params - 扫描参数
- * @param {string} [params.device_type] - 设备类型过滤
- * @returns {Promise<Object|null>} 扫描结果
- */
-export async function scanDevices(params = {}) {
-  const result = await post('/api/v1/device/scan', params, {
-    onError: (msg) => console.error('[DeviceAPI] Scan devices error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 获取设备诊断信息
+ * 断开设备连接
  *
  * @param {string} deviceId - 设备ID
- * @returns {Promise<Object|null>} 诊断信息
+ * @returns {Promise<boolean>} 是否断开成功
  */
-export async function getDeviceDiagnostics(deviceId) {
-  const result = await get(`/api/v1/device/${deviceId}/diagnostics`, null, {
-    onError: (msg) => console.error('[DeviceAPI] Get diagnostics error:', msg)
-  });
-
-  return result.success ? result.data : null;
-}
-
-/**
- * 重启设备
- *
- * @param {string} deviceId - 设备ID
- * @returns {Promise<boolean>} 是否重启成功
- */
-export async function restartDevice(deviceId) {
-  const result = await post(`/api/v1/device/${deviceId}/restart`, null, {
-    onError: (msg) => console.error('[DeviceAPI] Restart device error:', msg)
+export async function disconnectDevice(deviceId) {
+  const result = await post(`/api/v1/device/${deviceId}/disconnect`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Disconnect device error:', msg)
   });
 
   return result.success;
 }
 
 /**
- * 获取PR路径配置
+ * 获取DI功能代码列表
  *
- * @returns {Promise<Object|null>} PR路径配置
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise<Object|null>} DI功能代码列表
  */
-export async function getPRPathConfig() {
-  const result = await get('/api/v1/device/pr-path/config', null, {
-    onError: (msg) => console.error('[DeviceAPI] Get PR path config error:', msg)
+export async function getDIFunctions(deviceId) {
+  const result = await get(`/api/v1/device/${deviceId}/io/di/functions`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DI functions error:', msg)
   });
 
   return result.success ? result.data : null;
 }
 
 /**
- * 保存PR路径配置
+ * 获取DO功能代码列表
  *
- * @param {Object} config - PR路径配置
- * @returns {Promise<boolean>} 是否保存成功
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise<Object|null>} DO功能代码列表
  */
-export async function savePRPathConfig(config) {
-  const result = await post('/api/v1/device/pr-path/config', config, {
-    onError: (msg) => console.error('[DeviceAPI] Save PR path config error:', msg)
-  });
-
-  return result.success;
-}
-
-/**
- * 执行PR路径
- *
- * @param {Object} params - 执行参数
- * @param {string} params.path_id - 路径ID
- * @param {number} [params.speed=1] - 执行速度倍率
- * @returns {Promise<Object|null>} 执行结果
- */
-export async function executePRPath(params) {
-  const result = await post('/api/v1/device/pr-path/execute', params, {
-    onError: (msg) => console.error('[DeviceAPI] Execute PR path error:', msg)
+export async function getDOFunctions(deviceId) {
+  const result = await get(`/api/v1/device/${deviceId}/io/do/functions`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DO functions error:', msg)
   });
 
   return result.success ? result.data : null;
 }
 
 /**
- * 停止PR路径执行
+ * 配置DI端口功能
  *
- * @returns {Promise<boolean>} 是否停止成功
+ * @param {string} deviceId - 设备ID
+ * @param {Object} params - 配置参数
+ * @param {number} params.di_number - DI端口号
+ * @param {number} params.function_code - 功能代码
+ * @returns {Promise<boolean>} 是否配置成功
  */
-export async function stopPRPath() {
-  const result = await post('/api/v1/device/pr-path/stop', null, {
-    onError: (msg) => console.error('[DeviceAPI] Stop PR path error:', msg)
+export async function configureDI(deviceId, params) {
+  const result = await post(`/api/v1/device/${deviceId}/io/di/configure`, params, {
+    onError: (msg) => console.error('[DeviceAPI] Configure DI error:', msg)
   });
 
   return result.success;
+}
+
+/**
+ * 配置DO端口功能
+ *
+ * @param {string} deviceId - 设备ID
+ * @param {Object} params - 配置参数
+ * @param {number} params.do_number - DO端口号
+ * @param {number} params.function_code - 功能代码
+ * @returns {Promise<boolean>} 是否配置成功
+ */
+export async function configureDO(deviceId, params) {
+  const result = await post(`/api/v1/device/${deviceId}/io/do/configure`, params, {
+    onError: (msg) => console.error('[DeviceAPI] Configure DO error:', msg)
+  });
+
+  return result.success;
+}
+
+/**
+ * 读取所有DI端口状态
+ *
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise<Object|null>} DI端口状态
+ */
+export async function getDIStatus(deviceId) {
+  const result = await get(`/api/v1/device/${deviceId}/io/di/status`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DI status error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 读取所有DO端口状态
+ *
+ * @param {string} deviceId - 设备ID
+ * @returns {Promise<Object|null>} DO端口状态
+ */
+export async function getDOStatus(deviceId) {
+  const result = await get(`/api/v1/device/${deviceId}/io/do/status`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DO status error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 读取指定DI端口配置
+ *
+ * @param {string} deviceId - 设备ID
+ * @param {number} diNumber - DI端口号
+ * @returns {Promise<Object|null>} DI端口配置
+ */
+export async function getDIConfig(deviceId, diNumber) {
+  const result = await get(`/api/v1/device/${deviceId}/io/di/${diNumber}/config`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DI config error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 读取指定DO端口配置
+ *
+ * @param {string} deviceId - 设备ID
+ * @param {number} doNumber - DO端口号
+ * @returns {Promise<Object|null>} DO端口配置
+ */
+export async function getDOConfig(deviceId, doNumber) {
+  const result = await get(`/api/v1/device/${deviceId}/io/do/${doNumber}/config`, null, {
+    onError: (msg) => console.error('[DeviceAPI] Get DO config error:', msg)
+  });
+
+  return result.success ? result.data : null;
 }

@@ -7,9 +7,9 @@
  * @dependencies vue, msgpack-lite
  */
 
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import msgpack from 'msgpack-lite'
-import { usePushFrequency, PUSH_MODE, FREQUENCY_PRESETS } from './usePushFrequency'
+import { usePushFrequency, PUSH_MODE } from './usePushFrequency'
 
 /**
  * WebSocket连接状态枚举
@@ -173,7 +173,6 @@ export function useWebSocket(options = {}) {
     enableAutoSync = true,
     // 新增配置选项
     reconnectStrategy = ReconnectStrategy.EXPONENTIAL,
-    connectionTimeout = 10000,
     enableMessageDedup = true,
     dedupWindowMs = 5000,
     maxDedupCacheSize = 1000,
@@ -214,7 +213,7 @@ export function useWebSocket(options = {}) {
   /** 当前使用的协议类型 */
   const currentProtocol = ref(ProtocolType.JSON)
   /** 服务器支持的协议类型 */
-  const serverProtocol = ref(null)
+  const _serverProtocol = ref(null)
   /** 协议是否受支持（MessagePack） */
   const protocolSupported = computed(() => {
     return currentProtocol.value === ProtocolType.MSGPACK
@@ -1404,7 +1403,7 @@ export function useWebSocket(options = {}) {
       updateConnectionState(ConnectionState.RECONNECT_FAILED)
       
       // 记录重连失败错误
-      const errorInfo = classifyError(
+      const _errorInfo = classifyError(
         new Error(`已达到最大重连次数 ${maxReconnectAttempts}`),
         WSErrorType.RECONNECT_FAILED,
         { attempts: reconnectAttempts.value }

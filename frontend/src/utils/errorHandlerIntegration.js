@@ -8,7 +8,7 @@
  */
 
 import { useErrorHandler, setupGlobalErrorHandler } from '../composables/useErrorHandler'
-import { initOfflineStorage, getOfflineStorage } from './offlineStorage'
+import { initOfflineStorage } from './offlineStorage'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
 
 /**

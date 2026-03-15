@@ -550,176 +550,111 @@ allow_origins = ["https://your-domain.com"]
 ## 项目结构
 
 ```
-cauc-sep/
-├── .github/                        # GitHub 配置
-│   └── workflows/                  # CI/CD 工作流
-│       ├── ci.yml                  # 持续集成
-│       └── cd.yml                  # 持续部署
-├── backend/                        # Python 后端
-│   ├── api/                        # API 路由模块
-│   │   ├── motor.py                # 电机控制 API
-│   │   ├── electromagnet.py        # 电磁铁 API
-│   │   ├── temperature.py          # 温度控制器 API
-│   │   ├── piezo.py                # 压电控制器 API
-│   │   ├── ammeter.py              # 皮安表 API
-│   │   ├── analysis.py             # 数据分析 API
-│   │   ├── device.py               # 设备状态 API
-│   │   ├── experiment.py           # 实验管理 API
-│   │   ├── logs.py                 # 日志 API
-│   │   ├── websocket.py            # WebSocket 处理
-│   │   ├── schemas.py              # Pydantic 数据模型
-│   │   ├── health.py               # 健康检查 API
-│   │   ├── performance.py          # 性能监控 API
-│   │   ├── tracing.py              # 链路追踪 API
-│   │   ├── crash_report.py         # 崩溃报告 API
-│   │   ├── update.py               # 更新管理 API
-│   │   └── user.py                 # 用户管理 API
-│   ├── core/                       # 核心业务逻辑
-│   │   ├── abstract.py             # 硬件抽象层
-│   │   ├── dm2c_driver.py          # DM2C 驱动
-│   │   ├── electromagnet_driver.py # 电磁铁驱动
-│   │   ├── temperature_controller.py # 温控器驱动
-│   │   ├── piezo_controller.py     # 压电控制器驱动
-│   │   ├── picoammeter.py          # 皮安表驱动
-│   │   ├── data_storage.py         # 数据存储
-│   │   ├── device_registry.py      # 设备注册表
-│   │   ├── device_utils.py         # 设备工具函数
-│   │   ├── analysis.py             # 物理分析器
-│   │   ├── cache.py                # 缓存模块
-│   │   ├── tracing.py              # 链路追踪
-│   │   ├── metrics.py              # 指标收集
-│   │   ├── profiler.py             # 性能分析器
-│   │   ├── error_recovery.py       # 错误恢复
-│   │   └── rt_scheduler.py         # 实时调度器
-│   ├── drivers/                    # 进程级驱动
-│   │   ├── base.py                 # 驱动基类
-│   │   ├── dm2c_process.py         # DM2C 进程驱动
-│   │   ├── electromagnet_process.py # 电磁铁进程驱动
-│   │   └── temperature_process.py  # 温控进程驱动
-│   ├── middleware/                 # 中间件
-│   │   ├── security.py             # 安全中间件
-│   │   ├── audit.py                # 审计日志中间件
-│   │   ├── rate_limit.py           # 速率限制
-│   │   ├── cors_config.py          # CORS 配置
-│   │   ├── jwt_auth.py             # JWT 认证
-│   │   └── validation.py           # 请求验证
-│   ├── migrations/                 # 数据库迁移
-│   │   ├── sql/                    # SQL 迁移脚本
-│   │   │   ├── 001_add_calibration_logs_configs.sql
-│   │   │   ├── 002_add_constraints_indexes.sql
-│   │   │   └── 003_optimize_indexes_performance.sql
-│   │   ├── add_calibration_logs_configs.py
-│   │   ├── add_constraints_indexes.py
-│   │   └── optimize_indexes.py
-│   ├── models/                     # 数据模型
-│   │   ├── operation_history.py    # 操作历史模型
-│   │   └── user.py                 # 用户模型
-│   ├── monitoring/                 # 监控配置
-│   │   ├── grafana/                # Grafana 仪表盘
-│   │   │   └── dashboards/         # 仪表盘配置
-│   │   └── prometheus/             # Prometheus 配置
-│   ├── tests/                      # 测试文件
-│   │   ├── integration/            # 集成测试
-│   │   ├── unit/                   # 单元测试
-│   │   └── test_*.py               # 各模块测试
-│   ├── docs/                       # 后端文档
-│   ├── main.py                     # FastAPI 主程序
-│   ├── requirements.txt            # Python 依赖
-│   ├── requirements-test.txt       # 测试依赖
-│   ├── pyproject.toml              # 项目配置
-│   ├── pytest.ini                  # Pytest 配置
-│   └── mypy.ini                    # MyPy 类型检查配置
-├── frontend/                       # Vue3 前端
+cauc-sep/                                   # 项目根目录
+│
+├── .github/                                # GitHub 配置
+│   └── workflows/                          # CI/CD 工作流
+│       ├── ci.yml                          # 持续集成
+│       ├── cd.yml                          # 持续部署
+│       └── ci-cd-pipeline.yml              # 完整流水线
+│
+├── assets/                                 # 资源文件
+│   ├── icons/                              # 图标资源
+│   │   ├── icon.ico                        # Windows应用图标
+│   │   └── icon.png                        # PNG格式图标
+│   └── manuals/                            # 设备手册
+│       └── 2022_10_DM2C-RS556 用户手册20221013.pdf.pdf
+│
+├── backend/                                # Python 后端
+│   ├── api/                                # API 路由模块
+│   │   ├── motor.py                        # 电机控制 API
+│   │   ├── electromagnet.py                # 电磁铁 API
+│   │   ├── temperature.py                  # 温度控制器 API
+│   │   ├── piezo.py                        # 压电控制器 API
+│   │   ├── ammeter.py                      # 皮安表 API
+│   │   ├── analysis.py                     # 数据分析 API
+│   │   ├── device.py                       # 设备状态 API
+│   │   ├── experiment.py                   # 实验管理 API
+│   │   ├── health.py                       # 健康检查 API
+│   │   ├── websocket.py                    # WebSocket 处理
+│   │   └── ...                             # 更多API模块
+│   │
+│   ├── core/                               # 核心业务逻辑
+│   │   ├── abstract.py                     # 硬件抽象层
+│   │   ├── dm2c_driver.py                  # DM2C 驱动
+│   │   ├── analysis.py                     # 物理分析器
+│   │   ├── cache/                          # 缓存模块
+│   │   ├── device_management/              # 设备管理
+│   │   ├── logging/                        # 日志模块
+│   │   ├── monitoring/                     # 监控模块
+│   │   └── storage/                        # 数据存储
+│   │
+│   ├── devices/                            # 设备模型层
+│   ├── drivers/                            # 进程级驱动
+│   ├── middleware/                         # 中间件
+│   ├── migrations/                         # 数据库迁移
+│   ├── models/                             # 数据模型
+│   ├── monitoring/                         # 监控配置 (Grafana/Prometheus)
+│   ├── schemas/                            # Pydantic数据模型
+│   ├── tests/                              # 测试文件
+│   │   ├── integration/                    # 集成测试
+│   │   └── unit/                           # 单元测试
+│   ├── main.py                             # FastAPI 主程序
+│   ├── requirements.txt                    # Python 依赖
+│   └── pyproject.toml                      # 项目配置
+│
+├── frontend/                               # Vue3 前端
 │   ├── src/
-│   │   ├── api/                    # API 客户端
-│   │   │   ├── analysis.js         # 分析 API
-│   │   │   └── update.js           # 更新 API
-│   │   ├── components/             # UI 组件
-│   │   │   ├── layout/             # 布局组件
-│   │   │   │   ├── Sidebar.vue
-│   │   │   │   ├── StatusBar.vue
-│   │   │   │   └── Topbar.vue
-│   │   │   ├── MotorControl.vue          # 电机控制
-│   │   │   ├── PRPathConfig.vue          # PR 路径配置
-│   │   │   ├── ElectromagnetControl.vue  # 电磁铁控制
-│   │   │   ├── TemperatureControl.vue    # 温度控制
-│   │   │   ├── PiezoControl.vue          # 压电控制
-│   │   │   ├── AmmeterControl.vue        # 皮安表控制
-│   │   │   ├── DataAnalysis.vue          # 数据分析
-│   │   │   ├── ExperimentPanel.vue       # 实验管理
-│   │   │   ├── DeviceStatusMonitor.vue   # 设备状态监控
-│   │   │   ├── SafetyPanel.vue           # 安全面板
-│   │   │   ├── AuditLog.vue              # 审计日志
-│   │   │   └── ...                       # 更多组件
-│   │   ├── stores/                 # Pinia 状态管理
-│   │   │   ├── motor.js
-│   │   │   ├── electromagnet.js
-│   │   │   ├── temperature.js
-│   │   │   ├── piezo.js
-│   │   │   ├── ammeter.js
-│   │   │   ├── experiment.js
-│   │   │   ├── devices.js
-│   │   │   ├── audit.js
-│   │   │   ├── user.js
-│   │   │   ├── settings.js
-│   │   │   └── update.js
-│   │   ├── composables/            # 组合式函数
-│   │   │   ├── useWebSocket.js     # WebSocket 连接
-│   │   │   ├── useDeviceBase.js    # 设备基础逻辑
-│   │   │   ├── useErrorHandler.js  # 错误处理
-│   │   │   ├── useProgress.js      # 进度管理
-│   │   │   └── ...                 # 更多组合式函数
-│   │   ├── views/                  # 页面视图
-│   │   │   ├── analysis/           # 分析页面
-│   │   │   ├── device/             # 设备页面
-│   │   │   ├── experiment/         # 实验页面
-│   │   │   ├── settings/           # 设置页面
-│   │   │   └── Layout.vue          # 布局视图
-│   │   ├── router/                 # 路由配置
-│   │   │   ├── index.js
-│   │   │   └── lazy.js             # 懒加载配置
-│   │   ├── utils/                  # 工具函数
-│   │   │   ├── apiRequest.js
-│   │   │   ├── chartUtils.js
-│   │   │   ├── validation.js
-│   │   │   └── offlineSync.js      # 离线同步
-│   │   ├── config/                 # 配置文件
-│   │   │   ├── api.js
-│   │   │   └── constants.js
-│   │   ├── styles/                 # 样式文件
-│   │   │   ├── design-tokens.css
-│   │   │   ├── global.css
-│   │   │   └── layout.css
-│   │   ├── directives/             # Vue 指令
-│   │   ├── App.vue                 # 根组件
-│   │   └── main.js                 # 入口文件
-│   ├── e2e/                        # E2E 测试
-│   ├── docs/                       # 前端文档
-│   ├── index.html
-│   ├── package.json                # Node 依赖
-│   ├── vite.config.js              # Vite 配置
-│   └── vitest.config.js            # Vitest 配置
-├── scripts/                        # 脚本
-│   ├── start_dev.bat               # 开发启动脚本
-│   ├── build.bat                   # 打包脚本
-│   ├── docker-build.bat            # Docker 构建
-│   ├── docker-start.bat            # Docker 启动
-│   └── run-tests.sh                # 测试运行脚本
-├── docs/                           # 项目文档
-│   ├── api/                        # API 文档
-│   ├── components/                 # 组件文档
-│   ├── CAUC-SEP_技术文档_v3.0.md
-│   ├── DEVELOPER_GUIDE.md
-│   ├── USER_MANUAL.md
-│   └── troubleshooting.md
-├── .github/                        # GitHub 配置
-│   └── workflows/                  # CI/CD 工作流
-├── docker-compose.yml              # Docker 编排配置
-├── .pre-commit-config.yaml         # Pre-commit 钩子配置
-├── codecov.yml                     # 代码覆盖率配置
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── README.md
+│   │   ├── api/                            # API 客户端
+│   │   ├── components/                     # UI 组件
+│   │   │   ├── analysis/                   # 数据分析组件
+│   │   │   ├── common/                     # 通用组件
+│   │   │   ├── device/                     # 设备组件
+│   │   │   ├── experiment/                 # 实验组件
+│   │   │   ├── layout/                     # 布局组件
+│   │   │   └── settings/                   # 设置组件
+│   │   ├── composables/                    # 组合式函数
+│   │   ├── stores/                         # Pinia 状态管理
+│   │   ├── views/                          # 页面视图
+│   │   ├── router/                         # 路由配置
+│   │   ├── utils/                          # 工具函数
+│   │   ├── styles/                         # 样式文件
+│   │   ├── App.vue                         # 根组件
+│   │   └── main.js                         # 入口文件
+│   ├── tests/                              # 前端测试
+│   │   ├── e2e/                            # E2E测试
+│   │   └── unit/                           # 单元测试
+│   ├── package.json                        # Node 依赖
+│   └── vite.config.js                      # Vite 配置
+│
+├── docs/                                   # 项目文档
+│   ├── api/                                # API 文档
+│   ├── backend/                            # 后端文档
+│   ├── frontend/                           # 前端文档
+│   ├── components/                         # 组件文档
+│   ├── CAUC-SEP_技术文档_v3.0.md           # 技术文档（主文档）
+│   ├── DEVELOPER_GUIDE.md                  # 开发者指南
+│   ├── USER_MANUAL.md                      # 用户手册
+│   ├── NUITKA_BUILD_GUIDE.md               # Nuitka打包指南
+│   └── troubleshooting.md                  # 故障排除
+│
+├── installer/                              # 安装程序
+│   └── CAUC-SEP.iss                        # Inno Setup安装脚本
+│
+├── scripts/                                # 项目脚本
+│   ├── diagnosis/                          # 诊断脚本
+│   ├── verification/                       # 验证脚本
+│   ├── start_dev.bat                       # 开发启动脚本
+│   ├── build.bat                           # PyInstaller打包
+│   ├── build-nuitka.bat                    # Nuitka打包
+│   └── docker-*.bat                        # Docker脚本
+│
+├── docker-compose.yml                      # Docker 编排配置
+├── .pre-commit-config.yaml                 # Pre-commit 钩子配置
+├── codecov.yml                             # 代码覆盖率配置
+├── CHANGELOG.md                            # 更新日志
+├── CONTRIBUTING.md                         # 贡献指南
+└── README.md                               # 项目说明
 ```
 
 > **注意**: 项目已清理所有 `__pycache__/` 目录、`.pyc` 编译文件、备份文件（如 `.bak`、`.backup`、`.orig`）和临时文件，保持代码仓库整洁。

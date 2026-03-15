@@ -17,13 +17,13 @@
       </div>
       <div class="header-right">
         <el-tag
-          type="warning"
+          :type="isConnected ? 'success' : 'danger'"
           effect="dark"
           size="large"
           class="status-indicator"
         >
           <el-icon><Opportunity /></el-icon>
-          高功率设备
+          {{ isConnected ? '已连接' : '未连接' }}
         </el-tag>
       </div>
     </div>
@@ -79,7 +79,7 @@
                   当前电流
                 </div>
                 <div class="status-value mono">
-                  {{ currentCurrent.toFixed(2) }} A
+                  {{ formattedCurrent }}
                 </div>
               </div>
               <div class="status-item">
@@ -87,7 +87,7 @@
                   磁场强度
                 </div>
                 <div class="status-value mono highlight">
-                  {{ currentField.toFixed(3) }} T
+                  {{ formattedField }}
                 </div>
               </div>
               <div class="status-item">
@@ -103,14 +103,143 @@
               </div>
               <div class="status-item">
                 <div class="status-label">
-                  线圈温度
+                  设备状态
                 </div>
-                <div
-                  class="status-value mono"
-                  :class="{ 'warning': coilTemp > 50 }"
+                <el-tag
+                  :type="deviceStatusType"
+                  size="small"
                 >
-                  {{ coilTemp.toFixed(1) }} C
+                  {{ deviceStatusText }}
+                </el-tag>
+              </div>
+            </div>
+          </el-collapse-transition>
+        </el-card>
+
+        <!-- 扫描控制卡片 - 可折叠 -->
+        <el-card class="scan-card">
+          <template #header>
+            <div
+              class="card-header"
+              @click="toggleScanPanel"
+            >
+              <div class="header-left-section">
+                <el-icon class="header-icon">
+                  <DataLine />
+                </el-icon>
+                <span class="header-title">扫描控制</span>
+              </div>
+              <el-icon
+                class="collapse-icon"
+                :class="{ 'is-collapsed': scanCollapsed }"
+              >
+                <ArrowDown />
+              </el-icon>
+            </div>
+          </template>
+          <el-collapse-transition>
+            <div v-show="!scanCollapsed">
+              <!-- 扫描进度 -->
+              <div
+                v-if="isScanning"
+                class="scan-progress-section"
+              >
+                <div class="scan-progress-header">
+                  <span class="scan-status-text">{{ scanStatusText }}</span>
+                  <span class="scan-progress-text">{{ scanProgressPercent }}%</span>
                 </div>
+                <el-progress
+                  :percentage="scanStatus.progress"
+                  :status="scanProgressStatus"
+                  :stroke-width="12"
+                  class="scan-progress-bar"
+                />
+                <div class="scan-info-row">
+                  <span>当前步: {{ scanStatus.currentStep }} / {{ scanStatus.totalSteps }}</span>
+                  <span v-if="estimatedRemainingTime > 0">
+                    剩余时间: {{ formatRemainingTime(estimatedRemainingTime) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- 扫描控制按钮 -->
+              <div class="scan-controls">
+                <el-button
+                  type="primary"
+                  :disabled="!canControl || isScanning"
+                  :loading="loading.startScan"
+                  @click="handleStartScan"
+                >
+                  <el-icon><VideoPlay /></el-icon>
+                  开始扫描
+                </el-button>
+                <el-button
+                  type="danger"
+                  :disabled="!isScanning"
+                  :loading="loading.stopScan"
+                  @click="handleStopScan"
+                >
+                  <el-icon><VideoPause /></el-icon>
+                  停止扫描
+                </el-button>
+                <el-button
+                  v-if="isScanning && !isPaused"
+                  type="warning"
+                  @click="handlePauseScan"
+                >
+                  <el-icon><Pause /></el-icon>
+                  暂停
+                </el-button>
+                <el-button
+                  v-if="isScanning && isPaused"
+                  type="success"
+                  @click="handleResumeScan"
+                >
+                  <el-icon><CaretRight /></el-icon>
+                  恢复
+                </el-button>
+              </div>
+
+              <!-- 数据导出按钮 -->
+              <div class="export-section">
+                <el-button
+                  type="info"
+                  :disabled="scanData.current.length === 0"
+                  @click="handleExportData"
+                >
+                  <el-icon><Download /></el-icon>
+                  导出扫描数据 (CSV)
+                </el-button>
+                <el-button
+                  type="default"
+                  :disabled="scanData.current.length === 0"
+                  @click="handleClearData"
+                >
+                  <el-icon><Delete /></el-icon>
+                  清除数据
+                </el-button>
+              </div>
+
+              <!-- 数据点统计 -->
+              <div
+                v-if="scanData.current.length > 0"
+                class="data-stats"
+              >
+                <el-descriptions
+                  :column="3"
+                  size="small"
+                  border
+                >
+                  <el-descriptions-item label="数据点数">
+                    {{ scanData.current.length }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="电流范围">
+                    {{ scanDataCurrentRange }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="磁场范围">
+                    {{ scanDataFieldRange }}
+                  </el-descriptions-item>
+                </el-descriptions>
               </div>
             </div>
           </el-collapse-transition>
@@ -201,32 +330,63 @@
  * @description 电磁铁控制页面，提供电流设置、扫描模式和校准功能
  * @author Agent
  * @date 2024-03-07
+ * @dependencies stores/electromagnet, vue
  */
 
-import { ref, computed } from 'vue'
-import { Opportunity, Aim, Warning, InfoFilled } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import {
+  Opportunity,
+  Aim,
+  Warning,
+  InfoFilled,
+  DataLine,
+  VideoPlay,
+  VideoPause,
+  CaretRight,
+  Download,
+  Delete,
+  ArrowDown
+} from '@element-plus/icons-vue'
 import { ElectromagnetControl } from '@/components/experiment/electromagnet'
+import { useElectromagnetStore } from '@/stores/electromagnet'
+import { ElMessage } from 'element-plus'
 
-/** 当前电流 */
-const currentCurrent = ref(0)
+// ============ Store 实例化 ============
 
-/** 当前磁场强度 */
-const currentField = ref(0)
+const store = useElectromagnetStore()
 
-/** 线圈温度 */
-const coilTemp = ref(25.0)
+// ============ 从 Store 解构状态 ============
 
-/** 工作模式 */
-const workMode = ref('manual')
+const {
+  isConnected,
+  canControl,
+  status,
+  loading,
+  scanStatus,
+  scanData,
+  isScanning,
+  isPaused,
+  estimatedRemainingTime,
+  scanProgressPercent,
+  formattedCurrent,
+  formattedField
+} = store
+
+// ============ 本地 UI 状态 ============
 
 /** 状态面板折叠状态 */
 const statusCollapsed = ref(false)
+
+/** 扫描面板折叠状态 */
+const scanCollapsed = ref(false)
 
 /** 警告面板折叠状态 */
 const warningCollapsed = ref(false)
 
 /** 提示面板折叠状态 */
 const tipsCollapsed = ref(false)
+
+// ============ 计算属性 ============
 
 /** 工作模式文本 */
 const workModeText = computed(() => {
@@ -235,7 +395,7 @@ const workModeText = computed(() => {
     scan: '扫描模式',
     program: '程序控制'
   }
-  return modeMap[workMode.value] || '未知'
+  return modeMap[scanStatus.value.mode] || '手动控制'
 })
 
 /** 工作模式标签类型 */
@@ -245,7 +405,67 @@ const workModeType = computed(() => {
     scan: 'success',
     program: 'warning'
   }
-  return typeMap[workMode.value] || 'info'
+  return typeMap[scanStatus.value.mode] || 'primary'
+})
+
+/** 设备状态文本 */
+const deviceStatusText = computed(() => {
+  const statusMap = {
+    ready: '就绪',
+    running: '运行中',
+    scanning: '扫描中',
+    paused: '已暂停',
+    error: '错误',
+    disconnected: '未连接',
+    emergency_stop: '急停',
+    overcurrent: '过流保护'
+  }
+  return statusMap[status] || status
+})
+
+/** 设备状态标签类型 */
+const deviceStatusType = computed(() => {
+  const typeMap = {
+    ready: 'success',
+    running: 'primary',
+    scanning: 'warning',
+    paused: 'info',
+    error: 'danger',
+    disconnected: 'info',
+    emergency_stop: 'danger',
+    overcurrent: 'danger'
+  }
+  return typeMap[status] || 'info'
+})
+
+/** 扫描状态文本 */
+const scanStatusText = computed(() => {
+  if (isPaused.value) return '扫描已暂停'
+  if (isScanning.value) return '扫描进行中'
+  return '扫描未开始'
+})
+
+/** 扫描进度条状态 */
+const scanProgressStatus = computed(() => {
+  if (isPaused.value) return ''
+  if (scanStatus.value.progress >= 100) return 'success'
+  return ''
+})
+
+/** 扫描数据电流范围 */
+const scanDataCurrentRange = computed(() => {
+  if (scanData.value.current.length === 0) return '-'
+  const min = Math.min(...scanData.value.current)
+  const max = Math.max(...scanData.value.current)
+  return `${min.toFixed(2)} ~ ${max.toFixed(2)} A`
+})
+
+/** 扫描数据磁场范围 */
+const scanDataFieldRange = computed(() => {
+  if (scanData.value.field.length === 0) return '-'
+  const min = Math.min(...scanData.value.field)
+  const max = Math.max(...scanData.value.field)
+  return `${min.toFixed(2)} ~ ${max.toFixed(2)} mT`
 })
 
 /** 安全警告 */
@@ -267,25 +487,34 @@ const operationTips = [
   {
     title: '电流范围',
     type: 'info',
-    description: '工作电流范围: 0-10A，请勿超出范围'
-  },
-  {
-    title: '温度监控',
-    type: 'warning',
-    description: '线圈温度超过60C时请立即停止工作'
+    description: `工作电流范围: ${store.currentLimits.min}A ~ ${store.currentLimits.max}A，请勿超出范围`
   },
   {
     title: '扫描模式',
     type: 'success',
     description: '扫描模式下请确保样品已正确放置'
+  },
+  {
+    title: '数据导出',
+    type: 'info',
+    description: '扫描完成后可导出CSV格式数据用于后续分析'
   }
 ]
+
+// ============ 方法 ============
 
 /**
  * 切换状态面板折叠状态
  */
 function toggleStatusPanel() {
   statusCollapsed.value = !statusCollapsed.value
+}
+
+/**
+ * 切换扫描面板折叠状态
+ */
+function toggleScanPanel() {
+  scanCollapsed.value = !scanCollapsed.value
 }
 
 /**
@@ -301,6 +530,93 @@ function toggleWarningPanel() {
 function toggleTipsPanel() {
   tipsCollapsed.value = !tipsCollapsed.value
 }
+
+/**
+ * 格式化剩余时间
+ * @param {number} seconds - 秒数
+ * @returns {string} 格式化后的时间字符串
+ */
+function formatRemainingTime(seconds) {
+  if (seconds < 60) {
+    return `${Math.ceil(seconds)}秒`
+  }
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.ceil(seconds % 60)
+  return `${minutes}分${remainingSeconds}秒`
+}
+
+/**
+ * 开始扫描
+ */
+async function handleStartScan() {
+  const success = await store.startScan()
+  if (success) {
+    ElMessage.success('扫描已开始')
+  }
+}
+
+/**
+ * 停止扫描
+ */
+async function handleStopScan() {
+  const success = await store.stopScan()
+  if (success) {
+    ElMessage.success('扫描已停止')
+  }
+}
+
+/**
+ * 暂停扫描
+ */
+async function handlePauseScan() {
+  const success = await store.pauseScan()
+  if (success) {
+    ElMessage.info('扫描已暂停')
+  }
+}
+
+/**
+ * 恢复扫描
+ */
+async function handleResumeScan() {
+  const success = await store.resumeScan()
+  if (success) {
+    ElMessage.success('扫描已恢复')
+  }
+}
+
+/**
+ * 导出扫描数据
+ */
+function handleExportData() {
+  const csvContent = store.exportScanData()
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  link.href = URL.createObjectURL(blob)
+  link.download = `electromagnet_scan_${timestamp}.csv`
+  link.click()
+  URL.revokeObjectURL(link.href)
+  ElMessage.success('数据导出成功')
+}
+
+/**
+ * 清除扫描数据
+ */
+function handleClearData() {
+  store.clearScanData()
+  ElMessage.success('扫描数据已清除')
+}
+
+// ============ 生命周期 ============
+
+onMounted(() => {
+  store.init()
+})
+
+onUnmounted(() => {
+  store.cleanup()
+})
 </script>
 
 <style scoped lang="scss">
@@ -405,6 +721,7 @@ function toggleTipsPanel() {
 /* ==================== 卡片样式 ==================== */
 .control-card,
 .status-card,
+.scan-card,
 .warning-card,
 .tips-card {
   border-radius: var(--radius-lg);
@@ -416,6 +733,7 @@ function toggleTipsPanel() {
 
 .control-card:hover,
 .status-card:hover,
+.scan-card:hover,
 .warning-card:hover,
 .tips-card:hover {
   box-shadow: var(--shadow-lg);
@@ -521,6 +839,64 @@ function toggleTipsPanel() {
 
 .mono {
   font-family: var(--font-family-mono);
+}
+
+/* ==================== 扫描控制卡片 ==================== */
+.scan-progress-section {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.scan-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.scan-status-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.scan-progress-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-500);
+}
+
+.scan-progress-bar {
+  margin-bottom: var(--spacing-2);
+}
+
+.scan-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.scan-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.export-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.data-stats {
+  margin-top: var(--spacing-3);
 }
 
 /* ==================== 警告和提示 ==================== */

@@ -762,7 +762,6 @@ export function getLargeDataOptimization(dataLength) {
  */
 export function getLargeDataChartConfig(dataLength) {
   const isLargeData = dataLength > SAMPLING_CONFIG.PROGRESSIVE_THRESHOLD;
-  const isMediumData = dataLength > 1000 && dataLength <= SAMPLING_CONFIG.PROGRESSIVE_THRESHOLD;
   
   return {
     // 动画配置：小数据量启用动画，大数据量禁用

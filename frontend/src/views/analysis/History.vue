@@ -472,12 +472,11 @@
  * @date 2024-03-07
  */
 
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
 import {
   Clock,
-  Search,
   Download,
   List,
   TrendCharts,
@@ -494,7 +493,6 @@ import { HistoryQuery } from '@/components/analysis'
 import { VirtualScrollList } from '@/components/common'
 import { useExperimentStore } from '@/stores/experiment'
 import { get, post } from '@/utils/apiRequest'
-import { API_BASE } from '@/config/api'
 
 // ==================== 组合式函数调用 ====================
 

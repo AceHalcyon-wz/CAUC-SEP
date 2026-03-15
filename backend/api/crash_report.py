@@ -45,7 +45,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 
-from core.crash_report import (
+from core.logging.crash_report import (
     CrashReportStorage,
     CrashSeverity,
     CrashStatus,

@@ -130,16 +130,19 @@ export const useUserStore = defineStore('user', () => {
   /**
    * 用户登录
    *
-   * @param {string} username - 用户名
-   * @param {string} password - 密码
+   * @param {Object} credentials - 登录凭据
+   * @param {string} credentials.username - 用户名
+   * @param {string} credentials.password - 密码
    * @returns {Promise<Object>} 登录结果
    */
-  async function login(username, password) {
+  async function login(credentials) {
     loading.value = true
     errorMessage.value = ''
 
+    const { username, password } = credentials
+
     try {
-      const result = await post('/user/login', {
+      const result = await post('/api/v1/user/login', {
         username,
         password
       }, {
@@ -149,12 +152,17 @@ export const useUserStore = defineStore('user', () => {
       })
 
       if (result.success && result.data) {
-        // 保存令牌
-        token.value = result.data.token
-        localStorage.setItem('auth_token', result.data.token)
+        // 保存令牌 (API返回access_token)
+        const accessToken = result.data.access_token || result.data.token
+        token.value = accessToken
+        localStorage.setItem('auth_token', accessToken)
 
         // 设置用户信息
-        currentUser.value = result.data.user
+        currentUser.value = result.data.user || {
+          id: result.data.user_id,
+          username: username,
+          role: result.data.role || 'user'
+        }
 
         // 记录登录操作
         recordOperation({
@@ -171,7 +179,7 @@ export const useUserStore = defineStore('user', () => {
 
         return {
           success: true,
-          user: result.data.user
+          user: currentUser.value
         }
       }
 
@@ -209,7 +217,7 @@ export const useUserStore = defineStore('user', () => {
       })
 
       // 调用后端登出接口
-      await post('/user/logout', null, {
+      await post('/api/v1/user/logout', null, {
         onError: (msg) => {
           console.warn('[User] Logout API error:', msg)
         }
@@ -240,7 +248,7 @@ export const useUserStore = defineStore('user', () => {
     errorMessage.value = ''
 
     try {
-      const result = await get('/user/me', null, {
+      const result = await get('/api/v1/user/me', null, {
         onError: (msg) => {
           errorMessage.value = msg
           // 令牌无效时清除用户数据
@@ -280,7 +288,7 @@ export const useUserStore = defineStore('user', () => {
     errorMessage.value = ''
 
     try {
-      const result = await put('/user/profile', data, {
+      const result = await put('/api/v1/user/profile', data, {
         onError: (msg) => {
           errorMessage.value = msg
         }
@@ -335,7 +343,7 @@ export const useUserStore = defineStore('user', () => {
     errorMessage.value = ''
 
     try {
-      const result = await post('/user/password', {
+      const result = await post('/api/v1/user/password', {
         old_password: oldPassword,
         new_password: newPassword
       }, {
@@ -390,7 +398,7 @@ export const useUserStore = defineStore('user', () => {
     loading.value = true
 
     try {
-      const result = await get('/user/preferences', null, {
+      const result = await get('/api/v1/user/preferences', null, {
         onError: (msg) => {
           console.warn('[User] Fetch preferences error:', msg)
         }
@@ -426,7 +434,7 @@ export const useUserStore = defineStore('user', () => {
     errorMessage.value = ''
 
     try {
-      const result = await put('/user/preferences', newPreferences, {
+      const result = await put('/api/v1/user/preferences', newPreferences, {
         onError: (msg) => {
           errorMessage.value = msg
         }
@@ -526,7 +534,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     try {
-      const result = await get('/user/history', queryParams, {
+      const result = await get('/api/v1/user/history', queryParams, {
         onError: (msg) => {
           console.warn('[User] Fetch operation history error:', msg)
         }

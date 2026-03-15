@@ -215,3 +215,138 @@ export async function clearMotorErrors(motorId = 'default') {
 
   return result.success;
 }
+
+// ==================== RS232专用通信模式API ====================
+
+/**
+ * 设置串口通信模式
+ *
+ * @param {Object} params - 模式参数
+ * @param {string} params.mode - 串口模式 ('rs485' | 'rs232')
+ * @param {string} params.port - 串口号
+ * @returns {Promise<Object|null>} 设置结果
+ */
+export async function setSerialMode(params) {
+  const result = await post('/api/v1/motor/serial_mode', params, {
+    onError: (msg) => console.error('[MotorAPI] Set serial mode error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 获取当前串口通信模式
+ *
+ * @returns {Promise<Object|null>} 当前串口模式信息
+ */
+export async function getSerialMode() {
+  const result = await get('/api/v1/motor/serial_mode', null, {
+    onError: (msg) => console.error('[MotorAPI] Get serial mode error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+// ==================== 通信参数配置API ====================
+
+/**
+ * 读取通信参数配置
+ *
+ * @returns {Promise<Object|null>} 当前通信参数配置
+ */
+export async function getCommunicationConfig() {
+  const result = await get('/api/v1/motor/communication/config', null, {
+    onError: (msg) => console.error('[MotorAPI] Get communication config error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 修改通信参数配置
+ *
+ * @param {Object} params - 通信参数
+ * @param {number} [params.baudrate] - 波特率
+ * @param {number} [params.slave_id] - 从站地址
+ * @param {number} [params.data_type] - 数据类型
+ * @returns {Promise<Object|null>} 配置结果
+ */
+export async function setCommunicationConfig(params) {
+  const result = await post('/api/v1/motor/communication/config', params, {
+    onError: (msg) => console.error('[MotorAPI] Set communication config error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 获取支持的波特率列表
+ *
+ * @returns {Promise<Object|null>} 支持的波特率列表
+ */
+export async function getSupportedBaudrates() {
+  const result = await get('/api/v1/motor/communication/baudrates', null, {
+    onError: (msg) => console.error('[MotorAPI] Get baudrates error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 获取支持的数据类型列表
+ *
+ * @returns {Promise<Object|null>} 支持的数据类型列表
+ */
+export async function getSupportedDataTypes() {
+  const result = await get('/api/v1/motor/communication/data_types', null, {
+    onError: (msg) => console.error('[MotorAPI] Get data types error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+// ==================== 驱动器软件限位API ====================
+
+/**
+ * 读取驱动器软件限位
+ *
+ * @returns {Promise<Object|null>} 当前软件限位配置
+ */
+export async function getDriverSoftLimit() {
+  const result = await get('/api/v1/motor/driver_soft_limit', null, {
+    onError: (msg) => console.error('[MotorAPI] Get driver soft limit error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 设置驱动器软件限位
+ *
+ * @param {Object} params - 软件限位参数
+ * @param {number} [params.positive_limit_mm] - 正向限位(mm)
+ * @param {number} [params.negative_limit_mm] - 负向限位(mm)
+ * @param {number} [params.positive_limit_steps] - 正向限位(步数)
+ * @param {number} [params.negative_limit_steps] - 负向限位(步数)
+ * @returns {Promise<Object|null>} 设置结果
+ */
+export async function setDriverSoftLimit(params) {
+  const result = await post('/api/v1/motor/driver_soft_limit', params, {
+    onError: (msg) => console.error('[MotorAPI] Set driver soft limit error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}
+
+/**
+ * 同步软件限位到驱动器
+ *
+ * @returns {Promise<Object|null>} 同步结果
+ */
+export async function syncSoftLimitsToDriver() {
+  const result = await post('/api/v1/motor/driver_soft_limit/sync', null, {
+    onError: (msg) => console.error('[MotorAPI] Sync soft limits error:', msg)
+  });
+
+  return result.success ? result.data : null;
+}

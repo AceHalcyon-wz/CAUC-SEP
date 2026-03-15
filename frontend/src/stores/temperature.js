@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDeviceBase } from '../composables/useDeviceBase'
 import { useWebSocket } from '../composables/useWebSocket'
-import { request, get, post, del } from '../utils/apiRequest'
+import { get, post, del } from '../utils/apiRequest'
 import { WS_BASE_URL } from '../config/api'
 
 export const useTemperatureStore = defineStore('temperature', () => {
@@ -29,7 +29,7 @@ export const useTemperatureStore = defineStore('temperature', () => {
     clearAlarm,
     setLoading,
     resetState,
-    updateStatus
+    _updateStatus
   } = useDeviceBase('temperature')
 
   // ============ 温度特有状态 ============
@@ -287,7 +287,7 @@ export const useTemperatureStore = defineStore('temperature', () => {
    * @returns {Promise<Object|null>} 温度状态数据
    */
   async function fetchStatus() {
-    const result = await get('/temperature/status', null, {
+    const result = await get('/api/v1/temperature/status', null, {
       onError: (msg) => {
         console.error('Failed to fetch temperature status:', msg)
         isConnected.value = false

@@ -483,7 +483,7 @@
  * @date 2026-03-08
  */
 
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   UserFilled,
@@ -493,11 +493,9 @@ import {
   RefreshLeft,
   Delete
 } from '@element-plus/icons-vue'
-import { useUserStore, USER_ROLES } from '@/stores/user'
+import { useUserStore } from '@/stores/user'
 
-// ==================== Store ====================
-
-const userStore = useUserStore()
+const _userStore = useUserStore()
 
 // ==================== 响应式状态 ====================
 
@@ -926,7 +924,7 @@ function formatDateTime(datetime) {
 /**
  * 权限是否禁用
  */
-function isPermissionDisabled(key) {
+function isPermissionDisabled(_key) {
   if (currentUser.value?.role === 'admin') {
     return true // 管理员拥有所有权限
   }

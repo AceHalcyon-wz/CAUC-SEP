@@ -47,8 +47,7 @@ import { useOperationStore, OPERATION_STATUS, OPERATION_TYPE, ERROR_TYPE } from 
 export function useOperationFeedback(options = {}) {
   const {
     defaultType = OPERATION_TYPE.CUSTOM,
-    defaultUndoWindow = 10000,
-    autoNotify = true
+    defaultUndoWindow = 10000
   } = options
 
   // 获取操作Store
@@ -398,7 +397,7 @@ export function useOperationFeedback(options = {}) {
    * @returns {Promise<Object>} 执行结果
    */
   async function executeWithConfirm(config) {
-    const { title, confirmMessage, action } = config
+    const { title, action } = config
 
     // 这里应该调用确认对话框组件
     // 简化实现，直接执行

@@ -49,7 +49,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -68,8 +68,8 @@ SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "cauc-sep-jwt-secret-key-change-in
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-# 密码哈希配置
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Bcrypt rounds (cost factor)
+BCRYPT_ROUNDS = 12
 
 # 数据库配置
 DB_PATH = str(get_db_path("experiments.db"))
@@ -224,8 +224,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
     Returns:
         bool: 密码是否匹配
+
+    Note:
+        bcrypt有72字节限制，超长密码会先进行SHA256预哈希处理
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    import hashlib
+
+    password_bytes = plain_password.encode("utf-8")
+    if len(password_bytes) > 72:
+        password_bytes = hashlib.sha256(password_bytes).hexdigest().encode("utf-8")
+
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode("utf-8")
+
+    return bcrypt.checkpw(password_bytes, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
@@ -237,8 +249,19 @@ def get_password_hash(password: str) -> str:
 
     Returns:
         str: 哈希密码
+
+    Note:
+        bcrypt有72字节限制，超长密码会先进行SHA256预哈希处理
     """
-    return pwd_context.hash(password)
+    import hashlib
+
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > 72:
+        password_bytes = hashlib.sha256(password_bytes).hexdigest().encode("utf-8")
+
+    salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode("utf-8")
 
 
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
@@ -349,7 +372,7 @@ def create_default_admin():
         if existing_user:
             return
 
-        # 创建默认管理员
+        # 创建默认管理员 (admin / admin123)
         admin = User(
             username="admin",
             email="admin@cauc-sep.local",
@@ -358,8 +381,20 @@ def create_default_admin():
             preferences=json.dumps(DEFAULT_PREFERENCES, ensure_ascii=False),
         )
         db.add(admin)
+
+        # 创建默认用户 (123456 / 123456)
+        default_user = User(
+            username="123456",
+            email="user@cauc-sep.local",
+            password_hash=get_password_hash("123456"),
+            role="user",
+            preferences=json.dumps(DEFAULT_PREFERENCES, ensure_ascii=False),
+        )
+        db.add(default_user)
+
         db.commit()
         logger.info("Default admin user created: admin / admin123")
+        logger.info("Default user created: 123456 / 123456")
     except Exception as e:
         logger.error(f"Failed to create default admin: {e}")
         db.rollback()

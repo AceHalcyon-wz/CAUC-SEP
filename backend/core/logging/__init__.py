@@ -58,7 +58,12 @@ from .crash_report import (
     get_crash_report_storage,
     init_crash_report_manager,
 )
-from .crash_upload import CrashUploader, upload_crash_report
+from .crash_upload import (
+    CrashReportUploader,
+    upload_crash_report,
+    init_crash_uploader,
+    get_crash_uploader,
+)
 
 __all__ = [
     "setup_logging",
@@ -67,6 +72,8 @@ __all__ = [
     "CrashReportManager",
     "get_crash_report_storage",
     "init_crash_report_manager",
-    "CrashUploader",
+    "CrashReportUploader",
     "upload_crash_report",
+    "init_crash_uploader",
+    "get_crash_uploader",
 ]

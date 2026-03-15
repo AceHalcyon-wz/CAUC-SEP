@@ -1,460 +1,337 @@
 /**
  * @file index.js
  * @path src/router/
- * @description 自旋电子实验平台路由配置，支持懒加载和预加载
+ * @description 路由配置 - IDE风格优化版（支持预加载、骨架屏、快速切换）
  * @author Agent
- * @date 2024-03-08
- * @dependencies vue-router
+ * @date 2024-03-15
+ * @version 3.6.0
  */
 
 import { createRouter, createWebHistory } from 'vue-router'
-import { 
-  lazyRoute, 
-  preloadRoute, 
-  PreloadStrategy, 
-  preloadByStrategy 
-} from './lazy'
 
-/**
- * 路由配置
- * 
- * 结构说明：
- * - 使用路由懒加载优化首屏性能
- * - 嵌套路由实现模块化布局
- * - 默认重定向到实验控制模块
- * - 支持路由预加载策略
- */
+const LayoutIDE = () => import('../views/LayoutIDE.vue')
+
+const DeviceStatus = () => import('../views/device/Status.vue')
+const MotorControl = () => import('../views/experiment/MotorControl.vue')
+const ElectromagnetControl = () => import('../views/experiment/ElectromagnetControl.vue')
+const TemperatureControl = () => import('../views/experiment/TemperatureControl.vue')
+const PiezoControl = () => import('../views/experiment/PiezoControl.vue')
+const AmmeterControl = () => import('../views/experiment/AmmeterControl.vue')
+const RealtimeAnalysis = () => import('../views/analysis/Realtime.vue')
+const HistoryAnalysis = () => import('../views/analysis/History.vue')
+const ChartsAnalysis = () => import('../views/analysis/Charts.vue')
+const SettingsAudit = () => import('../views/settings/Audit.vue')
+const SettingsConfig = () => import('../views/settings/Config.vue')
+const SettingsProfile = () => import('../views/settings/Profile.vue')
+const SettingsAbout = () => import('../views/settings/About.vue')
+const SettingsPerformance = () => import('../views/settings/Performance.vue')
+const UserManagement = () => import('../views/settings/UserManagement.vue')
+const DeviceConnection = () => import('../views/device/Connection.vue')
+const DevicePRPath = () => import('../views/device/PRPath.vue')
+const SafetyPanel = () => import('../views/experiment/SafetyPanel.vue')
+const NotFound = () => import('../views/NotFound.vue')
+
 const routes = [
-  // 根路径重定向
   {
     path: '/',
-    redirect: '/experiment/motor'
-  },
-
-  // ==================== 实验控制模块 ====================
-  {
-    path: '/experiment',
-    component: () => import('@/views/Layout.vue'),
-    meta: {
-      title: '实验控制',
-      icon: 'Setting',
-      preload: true // 标记为预加载模块
-    },
+    component: LayoutIDE,
+    redirect: '/device/status',
     children: [
       {
-        path: '',
-        redirect: '/experiment/motor'
-      },
-      {
-        path: 'motor',
-        name: 'ExperimentMotor',
-        component: lazyRoute(() => import('@/views/experiment/MotorControl.vue'), {
-          preload: true,
-          preloadDelay: 1000
-        }),
-        meta: {
-          title: '电机控制',
-          icon: 'Connection',
-          breadcrumb: ['实验控制', '电机控制'],
-          preload: true,
-          preloadPriority: 3 // 高优先级
-        }
-      },
-      {
-        path: 'piezo',
-        name: 'ExperimentPiezo',
-        component: lazyRoute(() => import('@/views/experiment/PiezoControl.vue'), {
-          preload: true,
-          preloadDelay: 2000
-        }),
-        meta: {
-          title: '压电陶瓷',
-          icon: 'Grid',
-          breadcrumb: ['实验控制', '压电陶瓷'],
-          preload: true,
-          preloadPriority: 2
-        }
-      },
-      {
-        path: 'electromagnet',
-        name: 'ExperimentElectromagnet',
-        component: lazyRoute(() => import('@/views/experiment/ElectromagnetControl.vue')),
-        meta: {
-          title: '电磁铁',
-          icon: 'Cpu',
-          breadcrumb: ['实验控制', '电磁铁']
-        }
-      },
-      {
-        path: 'safety',
-        name: 'ExperimentSafety',
-        component: lazyRoute(() => import('@/views/experiment/SafetyPanel.vue')),
-        meta: {
-          title: '安全面板',
-          icon: 'Warning',
-          breadcrumb: ['实验控制', '安全面板']
-        }
-      },
-      {
-        path: 'temperature',
-        name: 'ExperimentTemperature',
-        component: lazyRoute(() => import('@/views/experiment/TemperatureControl.vue'), {
-          preload: true,
-          preloadDelay: 3000
-        }),
-        meta: {
-          title: '温度控制',
-          icon: 'Sunny',
-          breadcrumb: ['实验控制', '温度控制'],
-          preload: true,
-          preloadPriority: 1
-        }
-      },
-      {
-        path: 'ammeter',
-        name: 'ExperimentAmmeter',
-        component: lazyRoute(() => import('@/views/experiment/AmmeterControl.vue')),
-        meta: {
-          title: '微电流',
-          icon: 'Aim',
-          breadcrumb: ['实验控制', '微电流']
-        }
-      }
-    ]
-  },
-
-  // ==================== 设备管理模块 ====================
-  {
-    path: '/device',
-    component: () => import('@/views/Layout.vue'),
-    meta: {
-      title: '设备管理',
-      icon: 'Monitor',
-      preload: true
-    },
-    children: [
-      {
-        path: '',
-        redirect: '/device/status'
-      },
-      {
-        path: 'status',
+        path: 'device/status',
         name: 'DeviceStatus',
-        component: lazyRoute(() => import('@/views/device/Status.vue'), {
-          preload: true,
-          preloadDelay: 1500
-        }),
+        component: DeviceStatus,
         meta: {
           title: '设备状态',
-          icon: 'DataBoard',
-          breadcrumb: ['设备管理', '设备状态'],
+          icon: 'DashboardOutlined',
           preload: true,
-          preloadPriority: 3
+          skeleton: 'default'
         }
       },
       {
-        path: 'connection',
+        path: 'device/connection',
         name: 'DeviceConnection',
-        component: lazyRoute(() => import('@/views/device/Connection.vue')),
+        component: DeviceConnection,
         meta: {
-          title: '连接配置',
-          icon: 'Link',
-          breadcrumb: ['设备管理', '连接配置']
+          title: '设备连接',
+          icon: 'LinkOutlined',
+          skeleton: 'default'
         }
       },
       {
-        path: 'pr-path',
+        path: 'device/prpath',
         name: 'DevicePRPath',
-        component: lazyRoute(() => import('@/views/device/PRPath.vue')),
+        component: DevicePRPath,
         meta: {
-          title: 'PR路径配置',
-          icon: 'Route',
-          breadcrumb: ['设备管理', 'PR路径配置']
+          title: 'PR路径',
+          icon: 'NodeIndexOutlined',
+          skeleton: 'default'
         }
-      }
-    ]
-  },
+      },
 
-  // ==================== 数据分析模块 ====================
-  {
-    path: '/analysis',
-    component: () => import('@/views/Layout.vue'),
-    meta: {
-      title: '数据分析',
-      icon: 'DataAnalysis',
-      preload: true
-    },
-    children: [
       {
-        path: '',
-        redirect: '/analysis/realtime'
-      },
-      {
-        path: 'realtime',
-        name: 'AnalysisRealtime',
-        component: lazyRoute(() => import('@/views/analysis/Realtime.vue'), {
-          preload: true,
-          preloadDelay: 2000
-        }),
+        path: 'experiment/motor',
+        name: 'MotorControl',
+        component: MotorControl,
         meta: {
-          title: '实时数据',
-          icon: 'TrendCharts',
-          breadcrumb: ['数据分析', '实时数据'],
+          title: '电机控制',
+          icon: 'ThunderboltOutlined',
           preload: true,
-          preloadPriority: 2
+          skeleton: 'control'
+        }
+      },
+
+      {
+        path: 'experiment/electromagnet',
+        name: 'ElectromagnetControl',
+        component: ElectromagnetControl,
+        meta: {
+          title: '电磁铁控制',
+          icon: 'AimOutlined',
+          preload: true,
+          skeleton: 'control'
+        }
+      },
+
+      {
+        path: 'experiment/temperature',
+        name: 'TemperatureControl',
+        component: TemperatureControl,
+        meta: {
+          title: '温度控制',
+          icon: 'FireOutlined',
+          preload: true,
+          skeleton: 'control'
+        }
+      },
+
+      {
+        path: 'experiment/piezo',
+        name: 'PiezoControl',
+        component: PiezoControl,
+        meta: {
+          title: '压电陶瓷',
+          icon: 'CompressOutlined',
+          preload: true,
+          skeleton: 'control'
+        }
+      },
+
+      {
+        path: 'experiment/ammeter',
+        name: 'AmmeterControl',
+        component: AmmeterControl,
+        meta: {
+          title: '微电流计',
+          icon: 'LineChartOutlined',
+          preload: true,
+          skeleton: 'control'
+        }
+      },
+
+      {
+        path: 'experiment/safety',
+        name: 'SafetyPanel',
+        component: SafetyPanel,
+        meta: {
+          title: '安全面板',
+          icon: 'SafetyOutlined',
+          skeleton: 'default'
+        }
+      },
+
+      {
+        path: 'analysis/realtime',
+        name: 'RealtimeAnalysis',
+        component: RealtimeAnalysis,
+        meta: {
+          title: '实时分析',
+          icon: 'LineChartOutlined',
+          preload: true,
+          skeleton: 'analysis'
         }
       },
       {
-        path: 'history',
-        name: 'AnalysisHistory',
-        component: lazyRoute(() => import('@/views/analysis/History.vue')),
+        path: 'analysis/history',
+        name: 'HistoryAnalysis',
+        component: HistoryAnalysis,
         meta: {
-          title: '历史数据',
-          icon: 'Clock',
-          breadcrumb: ['数据分析', '历史数据']
+          title: '历史查询',
+          icon: 'HistoryOutlined',
+          skeleton: 'analysis'
         }
       },
       {
-        path: 'charts',
-        name: 'AnalysisCharts',
-        component: lazyRoute(() => import('@/views/analysis/Charts.vue')),
+        path: 'analysis/charts',
+        name: 'ChartsAnalysis',
+        component: ChartsAnalysis,
         meta: {
           title: '图表分析',
-          icon: 'PieChart',
-          breadcrumb: ['数据分析', '图表分析']
+          icon: 'BarChartOutlined',
+          skeleton: 'analysis'
         }
-      }
-    ]
-  },
-
-  // ==================== 系统设置模块 ====================
-  {
-    path: '/settings',
-    component: () => import('@/views/Layout.vue'),
-    meta: {
-      title: '系统设置',
-      icon: 'Tools'
-    },
-    children: [
-      {
-        path: '',
-        redirect: '/settings/audit'
       },
+
       {
-        path: 'audit',
+        path: 'settings/audit',
         name: 'SettingsAudit',
-        component: lazyRoute(() => import('@/views/settings/Audit.vue')),
+        component: SettingsAudit,
         meta: {
           title: '审计日志',
-          icon: 'Document',
-          breadcrumb: ['系统设置', '审计日志']
+          icon: 'FileTextOutlined',
+          skeleton: 'settings'
         }
       },
       {
-        path: 'users',
-        name: 'SettingsUsers',
-        component: lazyRoute(() => import('@/views/settings/UserManagement.vue')),
-        meta: {
-          title: '用户管理',
-          icon: 'UserFilled',
-          breadcrumb: ['系统设置', '用户管理']
-        }
-      },
-      {
-        path: 'config',
+        path: 'settings/config',
         name: 'SettingsConfig',
-        component: lazyRoute(() => import('@/views/settings/Config.vue')),
+        component: SettingsConfig,
         meta: {
           title: '系统配置',
-          icon: 'Setting',
-          breadcrumb: ['系统设置', '系统配置']
+          icon: 'SettingOutlined',
+          skeleton: 'settings'
         }
       },
       {
-        path: 'about',
-        name: 'SettingsAbout',
-        component: lazyRoute(() => import('@/views/settings/About.vue')),
-        meta: {
-          title: '关于',
-          icon: 'InfoFilled',
-          breadcrumb: ['系统设置', '关于']
-        }
-      },
-      {
-        path: 'profile',
+        path: 'settings/profile',
         name: 'SettingsProfile',
-        component: lazyRoute(() => import('@/views/settings/Profile.vue')),
+        component: SettingsProfile,
         meta: {
-          title: '个人中心',
-          icon: 'User',
-          breadcrumb: ['系统设置', '个人中心']
+          title: '个人资料',
+          icon: 'UserOutlined',
+          skeleton: 'settings'
         }
       },
       {
-        path: 'performance',
+        path: 'settings/about',
+        name: 'SettingsAbout',
+        component: SettingsAbout,
+        meta: {
+          title: '关于系统',
+          icon: 'InfoCircleOutlined',
+          skeleton: 'default'
+        }
+      },
+      {
+        path: 'settings/performance',
         name: 'SettingsPerformance',
-        component: lazyRoute(() => import('@/views/settings/Performance.vue')),
+        component: SettingsPerformance,
         meta: {
-          title: '性能分析',
-          icon: 'DataAnalysis',
-          breadcrumb: ['系统设置', '性能分析']
-        }
-      }
-    ]
-  },
-
-  // ==================== 测试页面 ====================
-  {
-    path: '/test',
-    component: () => import('@/views/Layout.vue'),
-    meta: {
-      title: '测试',
-      icon: 'Test'
-    },
-    children: [
-      {
-        path: '',
-        name: 'TestLayout',
-        component: lazyRoute(() => import('@/views/test/TestLayout.vue')),
-        meta: {
-          title: '布局测试',
-          breadcrumb: ['测试', '布局测试']
+          title: '性能监控',
+          icon: 'DashboardOutlined',
+          skeleton: 'default'
         }
       },
       {
-        path: 'operation-feedback',
-        name: 'TestOperationFeedback',
-        component: lazyRoute(() => import('@/views/test/OperationFeedbackTest.vue')),
+        path: 'settings/user-management',
+        name: 'UserManagement',
+        component: UserManagement,
         meta: {
-          title: '操作反馈测试',
-          breadcrumb: ['测试', '操作反馈测试']
+          title: '用户管理',
+          icon: 'TeamOutlined',
+          skeleton: 'list'
         }
       }
     ]
   },
 
-  // ==================== 404 页面 ====================
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/Login.vue'),
+    meta: {
+      title: '登录',
+      public: true
+    }
+  },
+
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: lazyRoute(() => import('@/views/NotFound.vue')),
+    component: NotFound,
     meta: {
       title: '页面未找到'
     }
   }
 ]
 
-/**
- * 创建路由实例
- */
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    } else {
-      return { top: 0 }
-    }
+  scrollBehavior() {
+    return { top: 0 }
   }
 })
 
-/**
- * 全局路由守卫
- * 
- * 设置页面标题、面包屑，并同步布局Store状态
- * 支持路由预加载和加载状态管理
- */
-router.beforeEach(async (to, from, next) => {
-  // 设置页面标题
-  const title = to.meta?.title || '自旋电子实验平台'
-  document.title = `${title} - 自旋电子实验平台`
-  
-  // 设置加载状态
-  import('@/stores/layout').then(({ useLayoutStore }) => {
-    const layoutStore = useLayoutStore()
-    layoutStore.setRouteLoading(true)
-    layoutStore.setActiveByPath(to.path)
-  }).catch(err => {
-    console.warn('[Router] Failed to sync layout store:', err)
-  })
-  
-  next()
-})
+const componentCache = new Map()
+const preloadQueue = []
+let isPreloading = false
 
 /**
- * 路由后置守卫
- * 用于页面切换后的清理工作和预加载
+ * 预加载组件
  */
-router.afterEach((to, from) => {
-  // 清除加载状态
-  import('@/stores/layout').then(({ useLayoutStore }) => {
-    const layoutStore = useLayoutStore()
-    layoutStore.setRouteLoading(false)
-  }).catch(err => {
-    console.warn('[Router] Failed to clear loading state:', err)
-  })
-  
-  // 预加载相邻路由
-  preloadAdjacentRoutes(to)
-})
-
-/**
- * 预加载相邻路由
- * 
- * @param {Object} currentRoute - 当前路由对象
- */
-function preloadAdjacentRoutes(currentRoute) {
-  // 获取当前路由的所有兄弟路由
-  const parentPath = currentRoute.matched[currentRoute.matched.length - 1]?.path
-  const currentName = currentRoute.name
-  
-  if (!parentPath || !currentName) return
-  
-  // 查找同级路由
-  const siblingRoutes = routes.find(r => r.path === parentPath)?.children || []
-  const currentIndex = siblingRoutes.findIndex(r => r.name === currentName)
-  
-  if (currentIndex === -1) return
-  
-  // 预加载下一个路由
-  if (currentIndex < siblingRoutes.length - 1) {
-    const nextRoute = siblingRoutes[currentIndex + 1]
-    if (nextRoute?.meta?.preload && nextRoute.component) {
-      preloadRoute(nextRoute.name, nextRoute.component, {
-        priority: nextRoute.meta.preloadPriority || 1,
-        delay: 1000
-      })
-    }
+function preloadComponent(component) {
+  if (typeof component === 'function' && !componentCache.has(component)) {
+    const promise = component()
+    componentCache.set(component, promise)
+    return promise
   }
-  
-  // 预加载上一个路由（优先级较低）
-  if (currentIndex > 0) {
-    const prevRoute = siblingRoutes[currentIndex - 1]
-    if (prevRoute?.meta?.preload && prevRoute.component) {
-      preloadRoute(prevRoute.name, prevRoute.component, {
-        priority: (prevRoute.meta.preloadPriority || 1) - 1,
-        delay: 2000
-      })
-    }
-  }
+  return Promise.resolve()
 }
 
 /**
- * 初始化路由预加载
- * 在应用启动时预加载常用路由
+ * 处理预加载队列
  */
-export function initRoutePreload() {
-  // 预加载常用路由
-  const commonRoutes = [
-    { name: 'ExperimentMotor', loader: () => import('@/views/experiment/MotorControl.vue'), priority: 3 },
-    { name: 'DeviceStatus', loader: () => import('@/views/device/Status.vue'), priority: 2 },
-    { name: 'AnalysisRealtime', loader: () => import('@/views/analysis/Realtime.vue'), priority: 2 }
-  ]
-  
-  commonRoutes.forEach(({ name, loader, priority }) => {
-    preloadRoute(name, loader, { priority, delay: 3000 })
-  })
+function processPreloadQueue() {
+  if (isPreloading || preloadQueue.length === 0) return
+
+  isPreloading = true
+  const component = preloadQueue.shift()
+
+  preloadComponent(component)
+    .catch(() => {})
+    .finally(() => {
+      isPreloading = false
+      if (preloadQueue.length > 0) {
+        requestIdleCallback(processPreloadQueue, { timeout: 100 })
+      }
+    })
 }
+
+/**
+ * 添加到预加载队列
+ */
+function queuePreload(component) {
+  if (component && !preloadQueue.includes(component)) {
+    preloadQueue.push(component)
+    requestIdleCallback(processPreloadQueue, { timeout: 100 })
+  }
+}
+
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title ? `${to.meta.title} - CAUC-SEP` : 'CAUC-SEP'
+
+  const token = localStorage.getItem('auth_token')
+  if (!to.meta.public && !token) {
+    next('/login')
+  } else {
+    next()
+  }
+})
+
+router.afterEach((to) => {
+  const currentRoute = routes[0].children.find(r => r.path === to.path.replace('/', ''))
+  if (currentRoute && currentRoute.component) {
+    preloadComponent(currentRoute.component)
+  }
+
+  setTimeout(() => {
+    routes[0].children.forEach(route => {
+      if (route.meta?.preload && route.component) {
+        queuePreload(route.component)
+      }
+    })
+  }, 1000)
+})
 
 export default router

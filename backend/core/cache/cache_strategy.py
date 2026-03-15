@@ -20,8 +20,8 @@ from functools import wraps
 from threading import Lock
 from typing import Any, TypeVar
 
-from core.cache import RedisCacheManager, get_cache_manager
-from core.local_cache import TTLCache, get_device_config_cache, get_device_status_cache
+from .cache import RedisCacheManager, get_cache_manager
+from .local_cache import TTLCache, get_device_config_cache, get_device_status_cache
 
 logger = logging.getLogger(__name__)
 

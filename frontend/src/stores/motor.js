@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDeviceBase } from '../composables/useDeviceBase'
 import { useWebSocket } from '../composables/useWebSocket'
-import { request, get, post } from '../utils/apiRequest'
+import { get, post } from '../utils/apiRequest'
 import { WS_BASE_URL } from '../config/api'
 
 export const useMotorStore = defineStore('motor', () => {
@@ -28,12 +28,12 @@ export const useMotorStore = defineStore('motor', () => {
     alarmMessage,
     wsConnected,
     loading,
-    canControl: baseCanControl,
+    canControl: _baseCanControl,
     showError,
     clearAlarm,
     setLoading,
     resetState,
-    updateStatus
+    _updateStatus
   } = useDeviceBase('motor')
 
   // ==================== 电机特有状态 ====================
@@ -203,7 +203,7 @@ export const useMotorStore = defineStore('motor', () => {
    * @returns {Promise<Object|null>} 状态数据或null
    */
   async function fetchStatus() {
-    const result = await get('/motor/status', null, {
+    const result = await get('/api/v1/motor/status', null, {
       onError: (msg) => {
         console.error('Failed to fetch status:', msg)
         isConnected.value = false
@@ -551,7 +551,7 @@ export const useMotorStore = defineStore('motor', () => {
    * @returns {Promise<Object|null>} 平滑结果
    */
   async function smoothSignal(data) {
-    const result = await post('/analysis/smooth', data, {
+    const result = await post('/api/v1/analysis/smooth', data, {
       onLoading: setLoading,
       loadingKey: 'smooth',
       onError: (msg) => showError('信号平滑错误: ' + msg)

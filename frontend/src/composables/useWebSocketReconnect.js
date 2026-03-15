@@ -7,7 +7,7 @@
  * @dependencies vue
  */
 
-import { ref, computed, watch, onUnmounted, readonly } from 'vue'
+import { ref, computed, onUnmounted, readonly } from 'vue'
 
 /**
  * 重连策略枚举

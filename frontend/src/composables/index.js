@@ -4,10 +4,14 @@
  * @description 组合式函数统一导出文件
  * @author Agent
  * @date 2024-03-07
+ * @version 3.5.1
  */
 
 // 错误处理相关
 export { useErrorHandler, setupGlobalErrorHandler } from './useErrorHandler'
+
+// 加载状态管理
+export { useLoading, createLoadingStore } from './useLoading'
 export {
   ERROR_TYPES,
   ERROR_SEVERITY,

@@ -11,7 +11,7 @@
 
 from typing import Any
 
-from core.abstract import DeviceStatus
+from ..abstract import DeviceStatus
 
 
 class DeviceValidationError(Exception):
@@ -76,7 +76,7 @@ def validate_device_state(device: Any, require_ready: bool = True) -> None:
             - BUSY: 设备正在运行中（仅当 require_ready=True 时）
 
     Example:
-        >>> from core.abstract import DeviceStatus
+        >>> from ..abstract import DeviceStatus
         >>> class MockDevice:
         ...     def __init__(self):
         ...         self.status = DeviceStatus.READY

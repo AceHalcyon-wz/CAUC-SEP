@@ -56,8 +56,8 @@ from api.schemas import (
     ScanMode,
     SuccessResponse,
 )
-from core.device_registry import DeviceRegistry
-from core.device_utils import DeviceValidationError, validate_device_state
+from core.device_management.device_registry import DeviceRegistry
+from core.device_management.device_utils import DeviceValidationError, validate_device_state
 from core.electromagnet_driver import (
     OVERCURRENT_THRESHOLD,
     ElectromagnetDriver,

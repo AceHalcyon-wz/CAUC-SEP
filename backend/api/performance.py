@@ -39,7 +39,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 
-from core.profiler import (
+from core.monitoring.profiler import (
     FunctionProfileResponse,
     MemorySnapshotResponse,
     PerformanceMetricsResponse,

@@ -8,7 +8,7 @@
  * @dependencies vue, ../utils/offlineStorage
  */
 
-import { ref, computed, readonly, watch } from 'vue'
+import { ref, computed, readonly } from 'vue'
 import {
   matchSolution,
   ERROR_TYPES,

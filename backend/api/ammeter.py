@@ -42,8 +42,8 @@ from api.schemas import (
     AmmeterStatusResponse,
     SuccessResponse,
 )
-from core.device_registry import DeviceRegistry
-from core.device_utils import DeviceValidationError, validate_device_state
+from core.device_management.device_registry import DeviceRegistry
+from core.device_management.device_utils import DeviceValidationError, validate_device_state
 from core.picoammeter import ChannelData, CurrentRange, FilterType, Picoammeter
 
 logger = logging.getLogger(__name__)

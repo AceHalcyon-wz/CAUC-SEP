@@ -4,12 +4,15 @@
  * @description 通用组件统一导出
  * @author Agent
  * @date 2024-03-14
+ * @version 3.5.2
  */
 
 export { default as ErrorDisplay } from './ErrorDisplay.vue'
 export { default as ErrorSolution } from './ErrorSolution.vue'
+export { default as GlobalLoading } from './GlobalLoading.vue'
 export { default as OperationFeedback } from './OperationFeedback.vue'
 export { default as OperationProgress } from './OperationProgress.vue'
+export { default as PageSkeleton } from './PageSkeleton.vue'
 export { default as RouteLoading } from './RouteLoading.vue'
 export { default as ShortcutHelp } from './ShortcutHelp.vue'
 export { default as UpdateNotification } from './UpdateNotification.vue'

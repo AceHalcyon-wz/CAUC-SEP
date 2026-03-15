@@ -1026,7 +1026,7 @@ async def query_history_data(
     try:
         from datetime import datetime
 
-        from core.data_storage import DataStorage
+        from core.storage.data_storage import DataStorage
 
         # 获取存储实例
         storage = DataStorage()
@@ -1207,7 +1207,7 @@ async def compare_datasets(request: CompareRequest):
         HTTPException: 对比失败时抛出400错误
     """
     try:
-        from core.data_storage import DataStorage
+        from core.storage.data_storage import DataStorage
 
         storage = DataStorage()
 

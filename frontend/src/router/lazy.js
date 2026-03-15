@@ -6,8 +6,7 @@
  * @date 2024-03-08
  */
 
-import { defineAsyncComponent, h } from 'vue'
-import { ElLoading } from 'element-plus'
+import { defineAsyncComponent } from 'vue'
 
 /**
  * 已加载的组件缓存

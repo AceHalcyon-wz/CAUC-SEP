@@ -29,6 +29,12 @@ from schemas.common import (
 )
 from schemas.motor import (
     AlarmCodeResponse,
+    CommunicationConfigReadResponse,
+    CommunicationConfigRequest,
+    CommunicationConfigResponse,
+    DriverSoftLimitReadResponse,
+    DriverSoftLimitRequest,
+    DriverSoftLimitResponse,
     HomeRequest,
     JogRequest,
     LimitConfigRequest,
@@ -37,7 +43,10 @@ from schemas.motor import (
     MotorStatusResponse,
     PRPathConfigRequest,
     PRPathTriggerRequest,
+    SerialModeRequest,
     StatusWordResponse,
+    SupportedBaudratesResponse,
+    SupportedDataTypesResponse,
 )
 from schemas.device import DeviceInfo
 from schemas.experiment import ExperimentInfo, ExperimentRequest
@@ -126,6 +135,15 @@ __all__ = [
     "StatusWordResponse",
     "AlarmCodeResponse",
     "MotorStatusResponse",
+    "SerialModeRequest",
+    "CommunicationConfigRequest",
+    "CommunicationConfigResponse",
+    "CommunicationConfigReadResponse",
+    "DriverSoftLimitRequest",
+    "DriverSoftLimitResponse",
+    "DriverSoftLimitReadResponse",
+    "SupportedBaudratesResponse",
+    "SupportedDataTypesResponse",
     "DeviceInfo",
     "ExperimentRequest",
     "ExperimentInfo",

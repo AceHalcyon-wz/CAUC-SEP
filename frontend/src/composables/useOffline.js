@@ -7,10 +7,10 @@
  * @dependencies vue, ../utils/offlineStorage, ../utils/offlineQueue, ../utils/offlineSync, ./useOnlineStatus
  */
 
-import { ref, computed, watch, onMounted, onUnmounted, readonly } from 'vue'
-import { initOfflineStorage, getOfflineStorage } from '../utils/offlineStorage'
-import { initOfflineQueue, getOfflineQueue, OperationPriority, OperationStatus } from '../utils/offlineQueue'
-import { initOfflineSync, getOfflineSync, SyncStatus, SyncStrategy } from '../utils/offlineSync'
+import { ref, computed, onMounted, onUnmounted, readonly } from 'vue'
+import { initOfflineStorage } from '../utils/offlineStorage'
+import { initOfflineQueue, OperationPriority, OperationStatus } from '../utils/offlineQueue'
+import { initOfflineSync, SyncStatus, SyncStrategy } from '../utils/offlineSync'
 import { useOnlineStatus } from './useOnlineStatus'
 
 /**
@@ -151,7 +151,7 @@ export function useOffline(options = {}) {
    */
   function setupCallbacks() {
     // 队列变更回调
-    queue.onQueueChange = async (event) => {
+    queue.onQueueChange = async (_event) => {
       await updateStats()
     }
 
@@ -168,7 +168,7 @@ export function useOffline(options = {}) {
     }
 
     // 同步错误回调
-    sync.onSyncError = (error) => {
+    sync.onSyncError = (_error) => {
       syncStatus.value = SyncStatus.FAILED
     }
 

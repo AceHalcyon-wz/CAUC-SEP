@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.abstract import DeviceStatus
 from core.analysis import PhysicsAnalyzer
-from core.data_storage import DataStorage
+from core.storage.data_storage import DataStorage
 from core.dm2c_driver import LeadshineDM2C
 from main import app
 from models import Base
@@ -115,7 +115,7 @@ def sample_signal_data():
 @pytest.fixture(autouse=True)
 def clean_device_registry():
     """自动清理设备注册表（每个测试前后）。"""
-    from core.device_registry import DeviceRegistry
+    from core.device_management.device_registry import DeviceRegistry
 
     # 测试前清空注册表
     DeviceRegistry.clear()

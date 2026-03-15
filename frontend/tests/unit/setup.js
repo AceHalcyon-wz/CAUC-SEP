@@ -126,8 +126,6 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
-);
-
 /**
  * Mock IntersectionObserver API
  * 
@@ -140,8 +138,6 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
-
-);
 
 /**
  * Mock navigator.connection API

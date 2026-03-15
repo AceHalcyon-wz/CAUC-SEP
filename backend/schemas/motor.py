@@ -283,3 +283,178 @@ class MotorStatusResponse(BaseModel):
     limit_positive: float
     limit_negative: float
     connected: bool
+
+
+class SerialModeRequest(BaseModel):
+    """
+    串口模式请求。
+
+    用于切换串口通信模式（RS485/RS232）。
+
+    Attributes:
+        mode: 串口模式，'rs485' 或 'rs232'
+        port: 串口号（如 'COM3'）
+
+    Note:
+        RS232模式使用默认设置：
+        - 波特率：9600
+        - 从站地址：1
+        - 数据位：8位
+        - 校验位：无
+        - 停止位：1位
+    """
+
+    mode: str = Field(..., description="串口模式 (rs485 或 rs232)")
+    port: str = Field(..., description="串口号 (如 COM3)")
+
+
+class CommunicationConfigRequest(BaseModel):
+    """
+    通信参数配置请求。
+
+    用于在线修改Modbus通信参数。
+
+    Attributes:
+        baudrate: 波特率 (2400, 4800, 9600, 19200, 38400, 57600, 115200)
+        slave_id: 从站地址 (0-127)
+        data_type: 数据类型 (0-5)
+            - 0: 8位数据，偶校验，2个停止位
+            - 1: 8位数据，奇校验，2个停止位
+            - 2: 8位数据，偶校验，1个停止位
+            - 3: 8位数据，奇校验，1个停止位
+            - 4: 8位数据，无校验，1个停止位（默认）
+            - 5: 8位数据，无校验，2个停止位
+
+    Warning:
+        波特率只能在当前波特率为9600时在线修改。
+        修改后需要保存参数到EEPROM并重新上电才能生效。
+    """
+
+    baudrate: int | None = Field(None, description="波特率")
+    slave_id: int | None = Field(None, description="从站地址 (0-127)", ge=0, le=127)
+    data_type: int | None = Field(None, description="数据类型 (0-5)", ge=0, le=5)
+
+
+class CommunicationConfigResponse(BaseModel):
+    """
+    通信参数配置响应。
+
+    返回通信参数配置结果。
+
+    Attributes:
+        success: 是否成功
+        baudrate: 设置的波特率
+        slave_id: 设置的从站地址
+        data_type: 设置的数据类型
+        warnings: 警告信息列表
+        errors: 错误信息列表
+    """
+
+    success: bool
+    baudrate: int | None = None
+    slave_id: int | None = None
+    data_type: int | None = None
+    warnings: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+
+
+class CommunicationConfigReadResponse(BaseModel):
+    """
+    通信参数读取响应。
+
+    返回当前通信参数配置。
+
+    Attributes:
+        baudrate: 当前波特率
+        slave_id: 当前从站地址
+        data_type: 当前数据类型
+        serial_mode: 当前串口模式
+    """
+
+    baudrate: int
+    slave_id: int
+    data_type: int
+    serial_mode: str
+
+
+class DriverSoftLimitRequest(BaseModel):
+    """
+    驱动器软件限位配置请求。
+
+    用于设置驱动器内部的软件限位。
+
+    Attributes:
+        positive_limit_mm: 正向限位(mm)
+        negative_limit_mm: 负向限位(mm)
+        positive_limit_steps: 正向限位(步数)，优先于positive_limit_mm
+        negative_limit_steps: 负向限位(步数)，优先于negative_limit_mm
+
+    Note:
+        软件限位在回零时无效。
+        修改后需要保存参数到EEPROM才能永久生效。
+    """
+
+    positive_limit_mm: float | None = Field(None, description="正向限位(mm)")
+    negative_limit_mm: float | None = Field(None, description="负向限位(mm)")
+    positive_limit_steps: int | None = Field(None, description="正向限位(步数)")
+    negative_limit_steps: int | None = Field(None, description="负向限位(步数)")
+
+
+class DriverSoftLimitResponse(BaseModel):
+    """
+    驱动器软件限位响应。
+
+    返回驱动器软件限位配置结果。
+
+    Attributes:
+        success: 是否成功
+        positive_limit: 正向限位(步数)
+        negative_limit: 负向限位(步数)
+        errors: 错误信息列表
+    """
+
+    success: bool
+    positive_limit: int | None = None
+    negative_limit: int | None = None
+    errors: list[str] = Field(default_factory=list)
+
+
+class DriverSoftLimitReadResponse(BaseModel):
+    """
+    驱动器软件限位读取响应。
+
+    返回当前驱动器软件限位配置。
+
+    Attributes:
+        positive_limit: 正向限位(步数)
+        negative_limit: 负向限位(步数)
+        positive_limit_mm: 正向限位(mm)
+        negative_limit_mm: 负向限位(mm)
+    """
+
+    positive_limit: int
+    negative_limit: int
+    positive_limit_mm: float
+    negative_limit_mm: float
+
+
+class SupportedBaudratesResponse(BaseModel):
+    """
+    支持的波特率列表响应。
+
+    Attributes:
+        baudrates: 支持的波特率列表
+    """
+
+    baudrates: list[int]
+
+
+class SupportedDataTypesResponse(BaseModel):
+    """
+    支持的数据类型列表响应。
+
+    Attributes:
+        data_types: 数据类型代码到描述的映射
+    """
+
+    data_types: dict[int, str]

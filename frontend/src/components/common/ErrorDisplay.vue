@@ -567,7 +567,7 @@ const errorIcon = computed(() => {
     Lock,
     Warning,
     Monitor,
-    Time,
+    Timer,
     Document
   }
   return iconMap[iconName] || Warning

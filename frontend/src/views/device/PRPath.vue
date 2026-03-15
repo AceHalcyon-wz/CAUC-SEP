@@ -748,7 +748,7 @@ function selectPath(pathNum) {
  * @param {number} pathNum - 路径编号
  * @returns {boolean} 是否已配置
  */
-function isPathConfigured(pathNum) {
+function isPathConfigured(_pathNum) {
   // TODO: 实际判断逻辑
   return false
 }
@@ -805,7 +805,7 @@ function handlePathPointsUpdate(points) {
  * 
  * @param {Array} points - 要保存的路径点
  */
-async function handleSavePathPoints(points) {
+async function handleSavePathPoints(_points) {
   // TODO: 保存到后端
   ElMessage.success('路径配置已保存')
 }

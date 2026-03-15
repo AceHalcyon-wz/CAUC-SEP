@@ -132,6 +132,26 @@
                         {{ connectionStatus.text }}
                       </el-tag>
                     </div>
+                    <div class="status-item">
+                      <span class="status-label">运行状态</span>
+                      <el-tag
+                        :type="motorStatusType"
+                        size="large"
+                        effect="plain"
+                      >
+                        {{ motorStore.status || '未知' }}
+                      </el-tag>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">限位状态</span>
+                      <el-tag
+                        :type="motorStore.limitStatusType"
+                        size="large"
+                        effect="plain"
+                      >
+                        {{ motorStore.limitStatus }}
+                      </el-tag>
+                    </div>
                   </div>
                 </div>
 
@@ -151,11 +171,19 @@
                           <el-icon class="tooltip-icon"><QuestionFilled /></el-icon>
                         </el-tooltip>
                       </span>
-                      <span class="status-value highlight">--</span>
+                      <span class="status-value highlight">{{ motorStore.positionSteps || '--' }}</span>
                     </div>
                     <div class="status-item">
                       <span class="status-label">实际位置</span>
-                      <span class="status-value">--</span>
+                      <span class="status-value highlight">{{ formatPosition(motorStore.positionMm) }} mm</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">正向限位</span>
+                      <span class="status-value">{{ motorStore.limits.positive_mm }} mm</span>
+                    </div>
+                    <div class="status-item">
+                      <span class="status-label">负向限位</span>
+                      <span class="status-value">{{ motorStore.limits.negative_mm }} mm</span>
                     </div>
                   </div>
                 </div>
@@ -168,19 +196,15 @@
                   <div class="status-items">
                     <div class="status-item">
                       <span class="status-label">
-                        目标速度
+                        当前速度
                         <el-tooltip
-                          content="单位：RPM"
+                          content="单位：mm/s"
                           placement="top"
                         >
                           <el-icon class="tooltip-icon"><QuestionFilled /></el-icon>
                         </el-tooltip>
                       </span>
-                      <span class="status-value highlight">--</span>
-                    </div>
-                    <div class="status-item">
-                      <span class="status-label">实际速度</span>
-                      <span class="status-value">--</span>
+                      <span class="status-value highlight">{{ motorStore.velocity || 0 }} mm/s</span>
                     </div>
                   </div>
                 </div>
@@ -235,7 +259,8 @@
  * @path src/views/experiment/
  * @description 电机控制页面，集成连接控制、运动控制、位置监测和实验记录功能
  * @author Agent
- * @date 2024-03-07
+ * @date 2024-03-15
+ * @version 3.5.1
  */
 
 import { ref, computed } from 'vue'
@@ -273,7 +298,29 @@ const connectionStatus = computed(() => {
   }
 })
 
+/**
+ * 电机状态类型
+ */
+const motorStatusType = computed(() => {
+  const statusMap = {
+    'ready': 'success',
+    'running': 'primary',
+    'error': 'danger',
+    'emergency_stop': 'danger',
+    'disconnected': 'info'
+  }
+  return statusMap[motorStore.status] || 'info'
+})
+
 // ==================== 方法 ====================
+
+/**
+ * 格式化位置显示
+ */
+function formatPosition(value) {
+  if (value === undefined || value === null) return '--'
+  return Number(value).toFixed(3)
+}
 
 /**
  * 切换状态面板折叠状态
@@ -295,8 +342,7 @@ function toggleChartPanel() {
 async function handleRefresh() {
   refreshing.value = true
   try {
-    // TODO: 调用后端 API 刷新数据
-    await motorStore.refreshStatus()
+    await motorStore.fetchStatus()
     ElMessage.success('数据已刷新')
   } catch (error) {
     ElMessage.error(`刷新失败：${error.message}`)
@@ -308,9 +354,44 @@ async function handleRefresh() {
 /**
  * 导出数据
  */
-function handleExport() {
-  // TODO: 实现导出功能
-  ElMessage.info('导出功能开发中')
+async function handleExport() {
+  try {
+    // 准备导出数据
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      device: 'motor',
+      status: {
+        connected: motorStore.isConnected,
+        status: motorStore.status,
+        position_steps: motorStore.positionSteps,
+        position_mm: motorStore.positionMm,
+        velocity: motorStore.velocity,
+        limits: motorStore.limits,
+        limit_status: motorStore.limitStatus
+      },
+      position_history: motorStore.positionHistory.slice(-100),
+      movement_history: motorStore.movementHistory.slice(-50)
+    }
+
+    // 转换为JSON字符串
+    const jsonStr = JSON.stringify(exportData, null, 2)
+    
+    // 创建下载链接
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `motor-data-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    ElMessage.success('数据导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error(`导出失败：${error.message}`)
+  }
 }
 </script>
 
@@ -397,131 +478,96 @@ function handleExport() {
   transition: var(--transition-all);
 }
 
-.status-indicator:hover {
-  transform: scale(1.05);
-  box-shadow: var(--shadow-md);
-}
-
-/* 操作按钮 */
 .action-btn {
-  transition: var(--transition-all);
-  font-weight: var(--font-weight-medium);
-}
-
-.action-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.action-btn:active:not(:disabled) {
-  transform: translateY(0);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
 }
 
 /* ==================== 主内容区域 ==================== */
 .main-content {
   flex: 1;
+  padding: var(--spacing-6);
   max-width: var(--content-max-width);
   margin: 0 auto;
   width: 100%;
-  padding: var(--spacing-6);
 }
 
-/* ==================== 卡片通用样式 ==================== */
-:deep(.el-card) {
-  border-radius: var(--radius-lg);
-  border: none;
-  margin-bottom: var(--spacing-5);
-  transition: var(--transition-all);
+/* 控制卡片通用样式 */
+.control-card,
+.monitor-card {
+  margin-bottom: var(--spacing-4);
 }
 
-:deep(.el-card:hover) {
-  box-shadow: var(--shadow-lg);
-}
-
-:deep(.el-card__header) {
-  background-color: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border-primary);
-  padding: var(--spacing-4) var(--spacing-6);
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition-all);
-}
-
-:deep(.el-card__header:hover) {
-  background-color: var(--color-bg-tertiary);
+/* ==================== 状态卡片 ==================== */
+.status-card {
+  margin-bottom: var(--spacing-4);
+  
+  :deep(.el-card__header) {
+    padding: 0;
+    border-bottom: none;
+  }
+  
+  :deep(.el-card__body) {
+    padding: var(--spacing-4);
+  }
 }
 
 .card-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  align-items: center;
+  padding: var(--spacing-4) var(--spacing-5);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-primary);
+  cursor: pointer;
+  transition: var(--transition-all);
+  
+  &:hover {
+    background-color: var(--color-interactive-hover);
+  }
 }
 
 .header-left-section {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
-/* 折叠图标 */
 .collapse-icon {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-tertiary);
-  transition: var(--transition-transform);
-}
-
-.collapse-icon.is-collapsed {
-  transform: rotate(-90deg);
-}
-
-/* ==================== 控制卡片 ==================== */
-.control-card,
-.monitor-card {
-  :deep(.el-card__body) {
-    padding: var(--spacing-6);
+  transition: transform 0.3s ease;
+  
+  &.is-collapsed {
+    transform: rotate(-90deg);
   }
 }
 
-/* ==================== 状态卡片 ==================== */
-.status-card {
-  :deep(.el-card__body) {
-    padding: var(--spacing-6);
-  }
-}
-
+/* 状态网格 */
 .status-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-6);
 }
 
 .status-group {
-  padding: var(--spacing-5);
-  background-color: var(--color-bg-tertiary);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--color-primary-500);
-  transition: var(--transition-all);
-}
-
-.status-group:hover {
-  background-color: var(--color-bg-quaternary);
-  transform: translateX(4px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
 }
 
 .status-group-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-3);
+  color: var(--color-text-secondary);
   padding-bottom: var(--spacing-2);
-  border-bottom: 2px solid var(--color-primary-500);
+  border-bottom: 1px solid var(--color-border-primary);
 }
 
 .status-items {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-3);
 }
 
@@ -530,11 +576,6 @@ function handleExport() {
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-2) 0;
-  border-bottom: 1px solid var(--color-border-secondary);
-}
-
-.status-item:last-child {
-  border-bottom: none;
 }
 
 .status-label {
@@ -546,189 +587,62 @@ function handleExport() {
 }
 
 .tooltip-icon {
+  font-size: 14px;
   color: var(--color-text-tertiary);
   cursor: help;
-  transition: var(--transition-colors);
-}
-
-.tooltip-icon:hover {
-  color: var(--color-primary-500);
 }
 
 .status-value {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
   font-family: var(--font-family-mono);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
   
   &.highlight {
     color: var(--color-primary-500);
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-lg);
-  }
-  
-  &.warning {
-    color: var(--color-warning);
+    font-weight: var(--font-weight-semibold);
   }
 }
 
 /* ==================== 图表卡片 ==================== */
 .chart-card {
+  :deep(.el-card__header) {
+    padding: 0;
+    border-bottom: none;
+  }
+  
   :deep(.el-card__body) {
     padding: var(--spacing-4);
   }
 }
 
 .chart-container {
-  height: 300px;
-  width: 100%;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-/* ==================== 参数表单 ==================== */
-.params-form {
-  padding: var(--spacing-2);
-}
-
-.form-unit {
-  margin-left: var(--spacing-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-/* ==================== 控制按钮 ==================== */
-.control-buttons {
-  display: grid;
-  gap: var(--spacing-3);
-}
-
-.control-btn {
-  width: 100%;
-  height: 48px;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  transition: var(--transition-all);
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-}
-
-/* ==================== 点动控制 ==================== */
-.jog-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.jog-direction {
-  display: flex;
-  justify-content: center;
-}
-
-.jog-btn {
-  width: 100%;
-  height: 48px;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  transition: var(--transition-all);
-}
-
-.jog-btn:hover:not(:disabled) {
-  transform: scale(1.02);
-}
-
-.jog-form {
-  padding: var(--spacing-2);
-}
-
-/* ==================== 限位状态 ==================== */
-.limit-status {
-  display: grid;
-  gap: var(--spacing-3);
-}
-
-.limit-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-2);
-  background-color: var(--color-bg-tertiary);
-  border-radius: var(--radius-sm);
-  transition: var(--transition-all);
-}
-
-.limit-item:hover {
-  background-color: var(--color-bg-quaternary);
-}
-
-.limit-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  height: 320px;
 }
 
 /* ==================== 响应式设计 ==================== */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .page-header {
-    padding: var(--spacing-5);
+    padding: var(--spacing-4);
   }
-
+  
   .header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-4);
   }
-
+  
   .header-right {
     width: 100%;
-    justify-content: flex-start;
     flex-wrap: wrap;
   }
-
-  .main-content {
-    padding: var(--spacing-5);
-  }
-}
-
-@media (max-width: 768px) {
-  .page-header {
-    padding: var(--spacing-4);
-  }
-
-  .page-title {
-    font-size: var(--font-size-xl);
-  }
-
+  
   .main-content {
     padding: var(--spacing-4);
   }
   
   .status-grid {
     grid-template-columns: 1fr;
-    gap: var(--spacing-4);
-  }
-  
-  .control-buttons {
-    grid-template-columns: 1fr;
-  }
-  
-  .status-group {
-    padding: var(--spacing-4);
-  }
-  
-  .header-right {
-    gap: var(--spacing-2);
-  }
-  
-  .status-indicator {
-    padding: var(--spacing-1) var(--spacing-3);
-    font-size: var(--font-size-xs);
   }
 }
 </style>

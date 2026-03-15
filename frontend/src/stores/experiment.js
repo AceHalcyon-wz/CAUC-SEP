@@ -11,7 +11,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useDeviceBase } from '../composables/useDeviceBase'
 import { useWebSocket } from '../composables/useWebSocket'
-import { request, get, post } from '../utils/apiRequest'
+import { get, post } from '../utils/apiRequest'
 import { WS_BASE_URL } from '../config/api'
 
 export const useExperimentStore = defineStore('experiment', () => {
@@ -29,7 +29,7 @@ export const useExperimentStore = defineStore('experiment', () => {
     clearAlarm,
     setLoading,
     resetState,
-    updateStatus
+    _updateStatus
   } = useDeviceBase('experiment')
 
   // ==================== 实验特有状态 ====================
