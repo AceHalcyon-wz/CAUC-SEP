@@ -5,6 +5,25 @@
 本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.2] - 2026-03-15
+
+### 变更
+
+- **项目结构优化**: 清理废弃的Docker和CI/CD相关文件
+  - 移除Docker部署方案（`.dockerignore`, `docker-compose.yml`, `Dockerfile`等）
+  - 移除CI/CD配置（`codecov.yml`, `.pre-commit-config.yaml`, `CONTRIBUTING.md`）
+  - 清理过时脚本（Docker脚本、lint-check.sh、run-tests.sh）
+  - 移除临时文件（`slib`, `nuitka-crash-report.xml`）
+- **文档更新**: 同步更新所有README文件和项目目录结构文档
+- **保留构建方案**: 本地Nuitka打包 + Electron桌面应用
+
+### 移除
+
+- Docker相关文件（已放弃Docker部署）
+- GitHub Actions CI/CD配置（已放弃自动部署）
+- Pre-commit钩子配置
+- Codecov覆盖率配置
+
 ## [0.3.1] - 2026-03-14
 
 ### 新增

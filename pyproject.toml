@@ -5,9 +5,9 @@
 # 文件名: pyproject.toml
 # 路径: d:\cauc-sep\pyproject.toml
 # 功能: 项目根配置文件，统一管理代码质量工具配置
-# 版本: v0.3.0
+# 版本: v0.3.2
 # 创建日期: 2024-01-20
-# 最后更新: 2026-03-14
+# 最后更新: 2026-03-15
 #
 # 说明:
 #   本配置文件遵循 PEP 518 规范，包含以下内容：
@@ -31,7 +31,7 @@
 # ==================== 项目元数据 ====================
 [project]
 name = "cauc-sep"
-version = "0.3.0"
+version = "0.3.2"
 description = "CAUC-SEP 自旋电子器件实验平台 - 多设备集成控制系统"
 readme = "README.md"
 requires-python = ">=3.11"

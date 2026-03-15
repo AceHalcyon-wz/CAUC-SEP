@@ -23,7 +23,7 @@ $RECYCLE.BIN/
 .Trash-*
 
 # ==================== IDE 和编辑器 ====================
-# VSCode
+# VSCode (个人配置不应提交)
 .vscode/
 *.code-workspace
 
