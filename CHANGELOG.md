@@ -5,6 +5,30 @@
 本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.4] - 2026-03-18
+
+### 变更
+
+- **测试目录重整**: 清理冗余测试文件，优化测试结构
+  - 删除根目录 `tests/` 临时调试目录（Playwright 调试脚本）
+  - 删除 `frontend/tests/e2e/example.spec.js` 框架验证示例
+  - 删除 `frontend/tests/e2e/electron.example.spec.js` Electron 测试示例
+  - 删除 `frontend/tests/e2e/verify-*.js` 环境验证脚本
+  - 删除 `frontend/tests/unit/test_boundary_conditions.js` 重复边界测试
+  - 删除 `frontend/tests/unit/test_exception_scenarios.js` 重复异常测试
+- **文档更新**: 同步更新测试指南和项目目录结构文档
+
+### 移除
+
+- `tests/` 根目录临时调试测试目录
+- `frontend/tests/e2e/example.spec.js` 示例测试文件
+- `frontend/tests/e2e/electron.example.spec.js` Electron 示例测试
+- `frontend/tests/e2e/verify-config.js` 配置验证脚本
+- `frontend/tests/e2e/verify-e2e-tests.js` E2E 验证脚本
+- `frontend/tests/e2e/verify-setup.js` 环境验证脚本
+- `frontend/tests/unit/test_boundary_conditions.js` 边界条件测试
+- `frontend/tests/unit/test_exception_scenarios.js` 异常场景测试
+
 ## [0.3.3] - 2026-03-18
 
 ### 新增
