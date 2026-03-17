@@ -5,6 +5,38 @@
 本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.3] - 2026-03-18
+
+### 新增
+
+- **API响应处理工具**: 新增 `unwrapResponse` 工具函数
+  - 解决前端组件对 API 响应数据结构的错误访问问题
+  - apiRequest 返回格式: `{success: boolean, data?: any, message?: string}`
+  - 相关文件: `frontend/src/utils/apiRequest.js`, `frontend/src/utils/request.js`
+
+### 变更
+
+- **前端依赖升级**: Vue 3.5 + Element Plus 兼容性修复
+  - Element Plus: 2.9.7 → 2.13.5
+  - Element Plus 2.13.0 才正式支持 Vue 3.5
+  - 修复 `TabNavRenderer` 渲染错误导致的微电流计页面空白问题
+
+### 修复
+
+- **微电流计页面空白**: 解决 Vue 3.5.13 与 Element Plus 2.9.7 兼容性问题
+  - 相关文件: `frontend/src/components/experiment/ammeter/AmmeterControl.vue`
+  - 相关文件: `frontend/src/components/experiment/ammeter/AmmeterWaveform.vue`
+- **硬件监控实时刷新**: 实现系统资源数据实时更新
+  - 添加 1 秒间隔自动刷新定时器
+  - 修复 CPU、内存、磁盘使用率显示为 0% 的问题
+  - 相关文件: `frontend/src/views/settings/Performance.vue`
+- **用户管理页面加载**: 解决用户列表无法加载的问题
+  - 使用 `unwrapResponse` 正确解包分页数据
+  - 相关文件: `frontend/src/views/settings/UserManagement.vue`
+- **ECharts 配置**: 修复 yAxis 回调函数空值访问问题
+  - 使用可选链操作符 `?.` 安全访问属性
+  - 相关文件: `frontend/src/components/experiment/ammeter/AmmeterWaveform.vue`
+
 ## [0.3.2] - 2026-03-15
 
 ### 变更
