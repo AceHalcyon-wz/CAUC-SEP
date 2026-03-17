@@ -21,7 +21,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.crash_report import router, set_crash_storage
-from core.crash_report import CrashReport, CrashReportStorage, CrashSeverity, CrashStatus
+from core.logging.crash_report import CrashReport, CrashReportStorage, CrashSeverity, CrashStatus
 
 
 class TestCrashReportAPI:

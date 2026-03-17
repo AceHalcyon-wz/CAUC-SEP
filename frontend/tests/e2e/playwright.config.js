@@ -133,6 +133,14 @@ export default defineConfig({
         isMobile: true,
       },
     },
+    {
+      /** Electron应用测试（仅在启用时运行） */
+      name: 'electron',
+      testMatch: '**/*.electron.spec.{js,ts}',
+      use: {
+        // Electron测试不使用浏览器配置
+      },
+    },
   ],
   
   /**

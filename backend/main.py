@@ -118,13 +118,14 @@ from api import (
     tracing,
     user,
 )
-from api.websocket import DeviceType, create_device_status_message, create_waveform_message, manager
+from api.websocket import DeviceType, ProtocolType, create_device_status_message, create_waveform_message, manager
 from core.abstract import DeviceStatus
 from core.logging.crash_report import get_crash_report_storage, init_crash_report_manager
 from core.storage.data_storage import DataStorage
 from core.dm2c_driver import ALARM_CODES, LeadshineDM2C, mm_to_steps
 from core.electromagnet_driver import ElectromagnetDriver
 from core.logging.logging_config import cleanup_old_logs, get_log_stats, setup_logging
+from core.logging_config import setup_logging as setup_structlog_logging, get_logger as get_structlog_logger
 from core.picoammeter import Picoammeter
 from core.piezo_controller import PiezoController
 from core.startup_config import check_dependencies, get_system_info, optimize_startup
@@ -460,11 +461,22 @@ app.include_router(temperature.router)
 app.include_router(piezo.router)
 app.include_router(logs.router)
 app.include_router(user.router)
-app.include_router(tracing.router)  # 链路追踪API
-app.include_router(crash_report.router)  # 崩溃报告API
+app.include_router(tracing.router)  # 链路追踪 API
+app.include_router(crash_report.router)  # 崩溃报告 API
 app.include_router(health.router)
-app.include_router(performance.router)  # 性能分析API
-app.include_router(cache_api.router)  # 缓存管理API
+app.include_router(performance.router)  # 性能分析 API
+app.include_router(cache_api.router)  # 缓存管理 API
+
+# 静态文件服务（在 API 路由之后）
+# 注意：我们不挂载静态文件服务在根路径，以避免拦截 WebSocket 请求
+# 前端将通过开发服务器直接提供，或者单独部署
+frontend_path = get_frontend_path()
+if frontend_path:
+    logger.info(f"Frontend static files found at: {frontend_path}")
+    logger.info("Note: Static file serving is disabled to avoid WebSocket conflicts")
+    logger.info("Use frontend development server or deploy frontend separately")
+else:
+    logger.warning("Frontend static files not found - web UI will not be available")
 
 
 @app.get("/")
@@ -769,6 +781,39 @@ async def websocket_receive_loop(
         pass
     except Exception as e:
         logger.debug(f"[{device_type}] Receive loop ended: {e}")
+
+
+@app.websocket("/ws")
+async def general_websocket(websocket: WebSocket):
+    """通用 WebSocket 端点。
+
+    提供统一的WebSocket连接入口，支持：
+    - 心跳检测
+    - 连接状态管理
+    - 设备状态订阅
+    
+    客户端可通过发送消息来订阅特定设备或频道。
+    """
+    client_ip = get_client_ip(websocket)
+    connection_id = await manager.connect(websocket, endpoint="/ws", client_ip=client_ip)
+    logger.info(f"[WS-{connection_id}] General WebSocket client connected from {client_ip}")
+
+    receive_task = asyncio.create_task(websocket_receive_loop(websocket, "general"))
+
+    try:
+        while True:
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
+                await manager.handle_client_message(websocket, data)
+            except TimeoutError:
+                pass
+    except WebSocketDisconnect:
+        logger.info(f"[WS-{connection_id}] General WebSocket client disconnected")
+    except Exception as e:
+        logger.error(f"[WS-{connection_id}] General WebSocket error: {e}")
+    finally:
+        receive_task.cancel()
+        manager.disconnect(websocket)
 
 
 @app.websocket("/ws/motor")
@@ -1081,7 +1126,12 @@ async def all_devices_websocket(websocket: WebSocket):
     支持心跳检测和推送频率控制。
     """
     client_ip = get_client_ip(websocket)
-    connection_id = await manager.connect(websocket, endpoint="/ws/devices", client_ip=client_ip)
+    
+    connection_id = await manager.connect(
+        websocket, 
+        endpoint="/ws/devices", 
+        client_ip=client_ip
+    )
     logger.info(f"[WS-{connection_id}] All devices WebSocket client connected from {client_ip}")
 
     try:
@@ -1190,15 +1240,6 @@ async def all_devices_websocket(websocket: WebSocket):
         logger.error(f"[WS-{connection_id}] All devices WebSocket error: {e}")
     finally:
         manager.disconnect(websocket)
-
-
-# 静态文件服务
-frontend_path = get_frontend_path()
-if frontend_path:
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
-    logger.info(f"Static files mounted from: {frontend_path}")
-else:
-    logger.warning("Frontend static files not found - web UI will not be available")
 
 
 if __name__ == "__main__":

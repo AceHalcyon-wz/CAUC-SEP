@@ -1,0 +1,468 @@
+{
+  "summary": {
+    "total": 57,
+    "passed": 49,
+    "failed": 6,
+    "skipped": 2,
+    "duration_seconds": 143.98,
+    "pass_rate": "86.0%"
+  },
+  "results": [
+    {
+      "category": "登录页面",
+      "test_name": "页面加载",
+      "status": "PASS",
+      "message": "登录页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:50:54.618931"
+    },
+    {
+      "category": "登录页面",
+      "test_name": "登录模式按钮",
+      "status": "PASS",
+      "message": "发现 3 个登录模式按钮",
+      "details": {},
+      "timestamp": "2026-03-16T12:50:54.623879"
+    },
+    {
+      "category": "登录页面",
+      "test_name": "账号选择卡片",
+      "status": "PASS",
+      "message": "发现 2 个账号卡片",
+      "details": {},
+      "timestamp": "2026-03-16T12:50:54.626309"
+    },
+    {
+      "category": "登录页面",
+      "test_name": "快速登录功能",
+      "status": "PASS",
+      "message": "登录成功，已跳转到主页",
+      "details": {},
+      "timestamp": "2026-03-16T12:50:56.706440"
+    },
+    {
+      "category": "三栏布局",
+      "test_name": "侧边栏显示",
+      "status": "PASS",
+      "message": "侧边栏可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:00.302743"
+    },
+    {
+      "category": "三栏布局",
+      "test_name": "顶部栏显示",
+      "status": "PASS",
+      "message": "顶部栏可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:00.305598"
+    },
+    {
+      "category": "三栏布局",
+      "test_name": "主内容区显示",
+      "status": "PASS",
+      "message": "主内容区可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:00.308120"
+    },
+    {
+      "category": "三栏布局",
+      "test_name": "侧边栏折叠功能",
+      "status": "SKIP",
+      "message": "未找到折叠按钮",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:00.311090"
+    },
+    {
+      "category": "顶部栏",
+      "test_name": "连接状态指示器",
+      "status": "PASS",
+      "message": "状态: 系统离线",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:03.505816"
+    },
+    {
+      "category": "顶部栏",
+      "test_name": "全屏切换按钮",
+      "status": "SKIP",
+      "message": "未找到全屏按钮",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:03.509973"
+    },
+    {
+      "category": "顶部栏",
+      "test_name": "通知按钮",
+      "status": "PASS",
+      "message": "通知按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:03.513462"
+    },
+    {
+      "category": "顶部栏",
+      "test_name": "用户菜单",
+      "status": "PASS",
+      "message": "用户菜单包含 3 个选项",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:05.621058"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "菜单项数量",
+      "status": "FAIL",
+      "message": "菜单项数量不足: 0",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:08.785869"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "导航到设备状态",
+      "status": "PASS",
+      "message": "成功导航到 /device/status",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:11.955187"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "导航到设备连接",
+      "status": "PASS",
+      "message": "成功导航到 /device/connection",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:15.197578"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "导航到电机控制",
+      "status": "PASS",
+      "message": "成功导航到 /experiment/motor",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:25.277288"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "导航到实时分析",
+      "status": "PASS",
+      "message": "成功导航到 /analysis/realtime",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:35.391680"
+    },
+    {
+      "category": "侧边栏导航",
+      "test_name": "导航到审计日志",
+      "status": "PASS",
+      "message": "成功导航到 /settings/audit",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:42.114606"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "页面标题",
+      "status": "PASS",
+      "message": "标题: 设备状态",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:45.514833"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "快速操作卡片",
+      "status": "PASS",
+      "message": "发现 4 个快速操作卡片",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:45.517411"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "刷新状态按钮",
+      "status": "PASS",
+      "message": "刷新状态按钮可点击",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:47.209232"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "告警管理按钮",
+      "status": "PASS",
+      "message": "告警管理按钮可点击",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:47.786729"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "导出报告按钮",
+      "status": "PASS",
+      "message": "导出报告按钮可点击",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:48.665065"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "历史记录按钮",
+      "status": "PASS",
+      "message": "历史记录按钮可点击",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:49.264851"
+    },
+    {
+      "category": "设备状态页面",
+      "test_name": "设备状态仪表板",
+      "status": "PASS",
+      "message": "仪表板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:49.270698"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "连接控制面板",
+      "status": "PASS",
+      "message": "连接控制面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.692504"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "连接设备按钮",
+      "status": "PASS",
+      "message": "连接按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.698288"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "断开连接按钮",
+      "status": "PASS",
+      "message": "断开按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.703378"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "急停按钮",
+      "status": "PASS",
+      "message": "急停按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.709554"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "绝对定位按钮",
+      "status": "PASS",
+      "message": "绝对定位按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.714204"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "回零按钮",
+      "status": "PASS",
+      "message": "回零按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.719179"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "JOG按钮",
+      "status": "PASS",
+      "message": "发现 2 个JOG按钮",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.723032"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "位置输入框",
+      "status": "PASS",
+      "message": "位置输入框可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.729519"
+    },
+    {
+      "category": "电机控制页面",
+      "test_name": "应用限位按钮",
+      "status": "PASS",
+      "message": "应用限位按钮可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:51:59.734583"
+    },
+    {
+      "category": "电磁铁控制页面",
+      "test_name": "页面标题",
+      "status": "FAIL",
+      "message": "页面标题不可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:04.037860"
+    },
+    {
+      "category": "电磁铁控制页面",
+      "test_name": "控制面板",
+      "status": "FAIL",
+      "message": "控制面板不可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:04.040284"
+    },
+    {
+      "category": "温度控制页面",
+      "test_name": "页面标题",
+      "status": "PASS",
+      "message": "页面标题可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:09.399147"
+    },
+    {
+      "category": "温度控制页面",
+      "test_name": "控制面板",
+      "status": "PASS",
+      "message": "控制面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:09.402398"
+    },
+    {
+      "category": "压电陶瓷页面",
+      "test_name": "页面标题",
+      "status": "PASS",
+      "message": "页面标题可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:12.797942"
+    },
+    {
+      "category": "微电流计页面",
+      "test_name": "页面标题",
+      "status": "FAIL",
+      "message": "页面标题不可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:16.103600"
+    },
+    {
+      "category": "数据分析页面",
+      "test_name": "实时分析图表",
+      "status": "PASS",
+      "message": "图表可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:26.350205"
+    },
+    {
+      "category": "数据分析页面",
+      "test_name": "历史查询面板",
+      "status": "PASS",
+      "message": "查询面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:29.801155"
+    },
+    {
+      "category": "数据分析页面",
+      "test_name": "图表分析面板",
+      "status": "PASS",
+      "message": "图表面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:33.114475"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "审计日志页面",
+      "status": "PASS",
+      "message": "审计日志页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:38.590359"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "系统配置页面",
+      "status": "PASS",
+      "message": "系统配置页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:41.880637"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "个人资料页面",
+      "status": "PASS",
+      "message": "个人资料页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:45.133113"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "关于系统页面",
+      "status": "PASS",
+      "message": "关于系统页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:48.332128"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "性能监控页面",
+      "status": "PASS",
+      "message": "性能监控页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:51.482493"
+    },
+    {
+      "category": "系统设置页面",
+      "test_name": "帮助文档页面",
+      "status": "PASS",
+      "message": "帮助文档页面加载成功",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:54.694980"
+    },
+    {
+      "category": "用户管理页面",
+      "test_name": "页面标题",
+      "status": "FAIL",
+      "message": "页面标题不可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:59.190248"
+    },
+    {
+      "category": "用户管理页面",
+      "test_name": "用户列表表格",
+      "status": "FAIL",
+      "message": "用户表格不可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:52:59.194553"
+    },
+    {
+      "category": "设备连接页面",
+      "test_name": "连接配置面板",
+      "status": "PASS",
+      "message": "配置面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:02.658889"
+    },
+    {
+      "category": "PR路径页面",
+      "test_name": "PR路径编辑器",
+      "status": "PASS",
+      "message": "编辑器可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:06.095304"
+    },
+    {
+      "category": "安全面板页面",
+      "test_name": "安全面板",
+      "status": "PASS",
+      "message": "安全面板可见",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:09.440272"
+    },
+    {
+      "category": "响应式设计",
+      "test_name": "桌面端视图",
+      "status": "PASS",
+      "message": "1920x1080 显示正常",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:13.139129"
+    },
+    {
+      "category": "响应式设计",
+      "test_name": "平板端视图",
+      "status": "PASS",
+      "message": "768x1024 显示正常",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:13.667158"
+    },
+    {
+      "category": "响应式设计",
+      "test_name": "移动端视图",
+      "status": "PASS",
+      "message": "375x667 显示正常",
+      "details": {},
+      "timestamp": "2026-03-16T12:53:14.186321"
+    }
+  ]
+}

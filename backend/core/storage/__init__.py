@@ -57,14 +57,14 @@ from .data_pipeline import DataPipeline
 from .index_optimizer import IndexOptimizer
 
 __all__ = [
+    "DataPipeline",
     "DataStorage",
     "DatabaseConnectionPool",
     "DatabasePoolManager",
-    "get_pool_manager",
-    "get_default_pool",
-    "init_database_pool",
-    "create_pool",
-    "TimeSeriesStorage",
-    "DataPipeline",
     "IndexOptimizer",
+    "TimeSeriesStorage",
+    "create_pool",
+    "get_default_pool",
+    "get_pool_manager",
+    "init_database_pool",
 ]

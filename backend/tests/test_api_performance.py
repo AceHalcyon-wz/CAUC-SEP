@@ -18,14 +18,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.performance import router
-from core.profiler import (
+from core.monitoring.profiler import (
     FunctionProfile,
     MemorySnapshot,
     PerformanceProfiler,
     PerformanceReport,
     SystemMonitor,
-    set_profiler,
-    set_system_monitor,
+    get_profiler,
+    get_system_monitor,
 )
 
 
@@ -35,15 +35,13 @@ class TestPerformanceAPI:
     @pytest.fixture
     def profiler(self):
         """创建性能分析器。"""
-        profiler = PerformanceProfiler()
-        set_profiler(profiler)
+        profiler = get_profiler()
         yield profiler
 
     @pytest.fixture
     def monitor(self):
         """创建系统监控器。"""
-        monitor = SystemMonitor()
-        set_system_monitor(monitor)
+        monitor = get_system_monitor()
         yield monitor
 
     @pytest.fixture

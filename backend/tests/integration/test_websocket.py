@@ -834,28 +834,26 @@ class TestWebSocketIntegrationWithFastAPI:
         """测试WebSocket端点连接。"""
         app, manager = test_app
 
-        with TestClient(app) as client:
-            with client.websocket_connect("/ws/test") as websocket:
-                # 连接成功
-                assert manager.connection_count == 1
+        with TestClient(app) as client, client.websocket_connect("/ws/test") as websocket:
+            # 连接成功
+            assert manager.connection_count == 1
 
     @pytest.mark.asyncio
     async def test_websocket_endpoint_message_exchange(self, test_app):
         """测试WebSocket端点消息交换。"""
         app, manager = test_app
 
-        with TestClient(app) as client:
-            with client.websocket_connect("/ws/test") as websocket:
-                # 发送PONG消息
-                websocket.send_json({"type": "pong"})
+        with TestClient(app) as client, client.websocket_connect("/ws/test") as websocket:
+            # 发送PONG消息
+            websocket.send_json({"type": "pong"})
 
-                # 等待处理
-                import time
+            # 等待处理
+            import time
 
-                time.sleep(0.1)
+            time.sleep(0.1)
 
-                # 验证心跳更新
-                assert manager.connection_count == 1
+            # 验证心跳更新
+            assert manager.connection_count == 1
 
 
 class TestWebSocketDeviceSpecificEndpoints:

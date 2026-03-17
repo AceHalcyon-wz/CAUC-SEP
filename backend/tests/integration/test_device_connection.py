@@ -585,13 +585,13 @@ class TestDeviceConnectionMultipleDevices:
 
         # 并发连接所有设备
         results = await asyncio.gather(
-            *[recovery.connect_device(device_id) for device_id in devices.keys()]
+            *[recovery.connect_device(device_id) for device_id in devices]
         )
 
         assert all(results)
 
         # 验证所有设备状态
-        for device_id in devices.keys():
+        for device_id in devices:
             state = recovery.get_device_state(device_id)
             assert state["connected"] is True
 

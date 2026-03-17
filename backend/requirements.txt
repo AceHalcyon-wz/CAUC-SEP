@@ -117,3 +117,9 @@ aiofiles>=23.2.0,<24.0.0
 # 用于缓存、会话存储和消息队列
 # 官方文档: https://redis-py.readthedocs.io/
 redis>=5.0.0,<6.0.0
+
+# ==================== 结构化日志 ====================
+# structlog: 结构化日志库
+# 支持 JSON 格式输出和丰富的上下文信息
+# 官方文档: https://www.structlog.org/
+structlog>=24.0.0,<25.0.0

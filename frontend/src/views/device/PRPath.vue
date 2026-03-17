@@ -748,8 +748,22 @@ function selectPath(pathNum) {
  * @param {number} pathNum - 路径编号
  * @returns {boolean} 是否已配置
  */
-function isPathConfigured(_pathNum) {
-  // TODO: 实际判断逻辑
+function isPathConfigured(pathNum) {
+  const pathKey = `path_${pathNum}`
+  const pathConfig = motorStore.prPaths[pathKey]
+  
+  if (!pathConfig) {
+    return false
+  }
+  
+  if (Array.isArray(pathConfig.points) && pathConfig.points.length > 0) {
+    return true
+  }
+  
+  if (pathConfig.configured === true) {
+    return true
+  }
+  
   return false
 }
 
@@ -805,9 +819,54 @@ function handlePathPointsUpdate(points) {
  * 
  * @param {Array} points - 要保存的路径点
  */
-async function handleSavePathPoints(_points) {
-  // TODO: 保存到后端
-  ElMessage.success('路径配置已保存')
+async function handleSavePathPoints(points) {
+  if (!points || points.length === 0) {
+    ElMessage.warning('没有路径点可保存')
+    return
+  }
+  
+  if (!selectedPath.value) {
+    ElMessage.warning('请先选择一个路径')
+    return
+  }
+  
+  try {
+    const pathKey = `path_${selectedPath.value}`
+    
+    const pathConfig = {
+      path_number: selectedPath.value,
+      points: points,
+      configured: true,
+      updatedAt: new Date().toISOString()
+    }
+    
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i]
+      const config = {
+        path_number: selectedPath.value,
+        point_index: i,
+        mode: point.mode || 0,
+        position_mm: point.position_mm || 0,
+        velocity_mm_s: point.velocity_mm_s || 10,
+        accel_time: point.accel_time || 100,
+        decel_time: point.decel_time || 100,
+        dwell_time: point.dwell_time || 0,
+        special_param: point.special_param || 0
+      }
+      
+      const success = await motorStore.configurePRPath(config)
+      if (!success) {
+        ElMessage.error(`保存路径点 ${i + 1} 失败`)
+        return
+      }
+    }
+    
+    motorStore.prPaths[pathKey] = pathConfig
+    
+    ElMessage.success(`路径 ${selectedPath.value} 配置已保存（${points.length} 个点）`)
+  } catch (error) {
+    ElMessage.error(`保存失败: ${error.message || '未知错误'}`)
+  }
 }
 
 /**
@@ -930,7 +989,7 @@ function handleFileChange(file) {
         format: 'JSON',
         pathCount: data.paths ? data.paths.length : (data.points ? 1 : 0)
       }
-    } catch (error) {
+    } catch {
       ElMessage.error('文件解析失败')
       importPreview.value = null
     }
@@ -956,7 +1015,7 @@ function handleImport() {
       
       importDialogVisible.value = false
       ElMessage.success('配置已导入')
-    } catch (error) {
+    } catch {
       ElMessage.error('导入失败')
     }
   }

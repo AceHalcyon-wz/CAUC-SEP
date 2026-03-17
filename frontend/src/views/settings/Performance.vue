@@ -638,7 +638,8 @@ import {
   User,
   Top
 } from '@element-plus/icons-vue'
-import { apiRequest } from '@/utils/apiRequest'
+import { API_BASE_URL } from '@/config/api'
+import { unwrapResponse } from '@/utils/request'
 
 // ==================== 响应式状态 ====================
 
@@ -683,8 +684,13 @@ let autoRefreshTimer = null
  */
 async function loadSystemInfo() {
   try {
-    const data = await apiRequest('/api/v1/performance/system')
-    systemInfo.value = data
+    const response = await fetch(`${API_BASE_URL}/api/v1/performance/system`)
+    if (response.ok) {
+      const data = await response.json()
+      systemInfo.value = unwrapResponse(data)
+    } else {
+      console.error('[Performance] Failed to load system info:', response.statusText)
+    }
   } catch (error) {
     console.error('[Performance] Failed to load system info:', error)
   }
@@ -695,10 +701,16 @@ async function loadSystemInfo() {
  */
 async function loadSummary() {
   try {
-    const data = await apiRequest('/api/v1/performance/summary')
-    systemSummary.value = data.system || {}
-    functionSummary.value = data.functions || {}
-    memorySummary.value = data.memory || {}
+    const response = await fetch(`${API_BASE_URL}/api/v1/performance/summary`)
+    if (response.ok) {
+      const data = await response.json()
+      const unwrapped = unwrapResponse(data)
+      systemSummary.value = unwrapped.system || {}
+      functionSummary.value = unwrapped.functions || {}
+      memorySummary.value = unwrapped.memory || {}
+    } else {
+      console.error('[Performance] Failed to load summary:', response.statusText)
+    }
   } catch (error) {
     console.error('[Performance] Failed to load summary:', error)
   }
@@ -710,8 +722,13 @@ async function loadSummary() {
 async function loadFunctionProfiles() {
   loadingFunctions.value = true
   try {
-    const data = await apiRequest('/api/v1/performance/functions')
-    functionProfiles.value = data.function_profiles || []
+    const result = await apiRequest('/api/v1/performance/functions')
+    if (result.success) {
+      functionProfiles.value = result.data.function_profiles || []
+    } else {
+      console.error('[Performance] Failed to load function profiles:', result.message)
+      ElMessage.error('加载函数性能数据失败')
+    }
   } catch (error) {
     console.error('[Performance] Failed to load function profiles:', error)
     ElMessage.error('加载函数性能数据失败')
@@ -726,10 +743,15 @@ async function loadFunctionProfiles() {
 async function loadHotspots() {
   loadingHotspots.value = true
   try {
-    const data = await apiRequest(
+    const result = await apiRequest(
       `/api/v1/performance/hotspots?threshold_ms=${hotspotThreshold.value}&limit=50`
     )
-    hotspots.value = data.hotspots || []
+    if (result.success) {
+      hotspots.value = result.data.hotspots || []
+    } else {
+      console.error('[Performance] Failed to load hotspots:', result.message)
+      ElMessage.error('加载性能热点失败')
+    }
   } catch (error) {
     console.error('[Performance] Failed to load hotspots:', error)
     ElMessage.error('加载性能热点失败')
@@ -744,8 +766,13 @@ async function loadHotspots() {
 async function loadMemorySnapshots() {
   loadingMemory.value = true
   try {
-    const data = await apiRequest('/api/v1/performance/memory/snapshots')
-    memorySnapshots.value = data.snapshots || []
+    const result = await apiRequest('/api/v1/performance/memory/snapshots')
+    if (result.success) {
+      memorySnapshots.value = result.data.snapshots || []
+    } else {
+      console.error('[Performance] Failed to load memory snapshots:', result.message)
+      ElMessage.error('加载内存快照失败')
+    }
   } catch (error) {
     console.error('[Performance] Failed to load memory snapshots:', error)
     ElMessage.error('加载内存快照失败')
@@ -837,10 +864,10 @@ async function generateReport() {
 async function handleExportReport() {
   try {
     const data = await apiRequest(
-      '/api/v1/performance/report/export?format=pdf',
+      '/api/v1/performance/report/export?format=html',
       { method: 'POST' }
     )
-    ElMessage.success('性能报告已导出')
+    ElMessage.success(`性能报告已导出: ${data.filename || 'report.html'}`)
     console.log('[Performance] Report exported:', data)
   } catch (error) {
     console.error('[Performance] Failed to export report:', error)
@@ -925,13 +952,13 @@ onMounted(() => {
   // 初始加载数据
   refreshData()
 
-  // 设置自动刷新（每10秒）
+  // 设置自动刷新（每 1 秒）
   autoRefreshTimer = setInterval(() => {
     loadSummary()
     if (activeTab.value === 'system') {
       loadSystemInfo()
     }
-  }, 10000)
+  }, 1000)
 })
 
 onUnmounted(() => {

@@ -39,16 +39,16 @@ from core.electromagnet_driver import (
 )
 
 __all__ = [
+    "MAX_CURRENT",
+    "MAX_FIELD",
+    "MAX_SCAN_RATE",
+    "MAX_TEMPERATURE",
+    "MIN_CURRENT",
+    "MIN_SCAN_RATE",
+    "OVERCURRENT_THRESHOLD",
+    "CalibrationPoint",
     "ElectromagnetDriver",
     "ElectromagnetStatus",
     "ScanMode",
     "ScanParameters",
-    "CalibrationPoint",
-    "MAX_CURRENT",
-    "MIN_CURRENT",
-    "MAX_FIELD",
-    "MIN_SCAN_RATE",
-    "MAX_SCAN_RATE",
-    "OVERCURRENT_THRESHOLD",
-    "MAX_TEMPERATURE",
 ]

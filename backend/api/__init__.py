@@ -6,6 +6,7 @@ API 路由模块
 功能: API路由模块入口，统一导出所有子模块路由
 作者: CAUC-SEP Team
 创建日期: 2024-01-01
+更新日期: 2026-03-16
 依赖: FastAPI
 
 子模块说明：
@@ -24,6 +25,8 @@ API 路由模块
 - performance: 性能分析 API（系统监控、函数分析）
 - tracing: 链路追踪 API（追踪查询、可视化分析）
 - user: 用户认证 API（JWT认证、用户信息管理）
+- upload: 文件上传 API（安全文件上传、类型验证）
+- websocket_validators: WebSocket 消息验证（消息格式验证、安全过滤）
 - schemas: Pydantic 数据模型（从 schemas 模块导入）
 """
 
@@ -43,22 +46,28 @@ from api import (
     temperature,
     tracing,
     user,
+    upload,
 )
 
+# WebSocket 验证模块（工具函数，非路由）
+from api import websocket_validators
+
 __all__ = [
-    "motor",
-    "device",
-    "experiment",
-    "analysis",
-    "temperature",
-    "piezo",
     "ammeter",
-    "electromagnet",
+    "analysis",
     "cache_api",
     "crash_report",
+    "device",
+    "electromagnet",
+    "experiment",
     "health",
     "logs",
+    "motor",
     "performance",
+    "piezo",
+    "temperature",
     "tracing",
+    "upload",
     "user",
+    "websocket_validators",
 ]

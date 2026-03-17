@@ -32,10 +32,10 @@ from core.picoammeter import (
 )
 
 __all__ = [
-    "Picoammeter",
-    "CurrentRange",
-    "FilterType",
+    "AcquisitionConfig",
     "ChannelConfig",
     "ChannelData",
-    "AcquisitionConfig",
+    "CurrentRange",
+    "FilterType",
+    "Picoammeter",
 ]

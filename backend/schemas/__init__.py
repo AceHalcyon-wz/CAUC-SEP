@@ -6,13 +6,15 @@ Pydantic 数据模型模块
 功能: 定义所有 API 请求/响应的数据模型，提供完整的类型提示和验证，按功能模块组织
 作者: Backend Engineer Agent
 创建日期: 2026-03-14
+更新日期: 2026-03-15
 依赖: pydantic
 
 模块结构：
+- api: API 通用响应模型（ApiResponse, PaginatedData, ApiError）
 - common: 通用响应模型（成功/错误响应）
 - motor: 电机控制模型（运动控制、限位配置、PR路径）
-- device: 设备管理模型（设备信息）
-- experiment: 实验管理模型（实验创建、查询）
+- device: 设备管理模型（设备信息、状态、控制请求/响应）
+- experiment: 实验管理模型（实验创建、查询、参数、数据）
 - analysis: 数据分析模型（信号平滑、曲线拟合、磁滞回线分析）
 - electromagnet: 电磁铁控制模型（电流设置、扫描、校准）
 - piezo: 压电陶瓷控制模型（电压设置、位移控制、校准）
@@ -20,6 +22,15 @@ Pydantic 数据模型模块
 - temperature: 温度控制模型（温度设定、程序控制、PID参数）
 """
 
+# API 通用响应模型
+from schemas.api import (
+    ApiError,
+    ApiResponse,
+    PaginatedData,
+    PaginationParams,
+)
+
+# 通用响应模型
 from schemas.common import (
     ErrorCode,
     ErrorResponse,
@@ -27,6 +38,8 @@ from schemas.common import (
     ValidationErrorDetail,
     ValidationErrorResponse,
 )
+
+# 电机控制模型
 from schemas.motor import (
     AlarmCodeResponse,
     CommunicationConfigReadResponse,
@@ -48,8 +61,40 @@ from schemas.motor import (
     SupportedBaudratesResponse,
     SupportedDataTypesResponse,
 )
-from schemas.device import DeviceInfo
-from schemas.experiment import ExperimentInfo, ExperimentRequest
+
+# 设备管理模型
+from schemas.device import (
+    DeviceInfo,
+    DeviceInfoResponse,
+    DeviceStatus,
+    DeviceType,
+    DeviceConnectRequest,
+    DeviceConnectResponse,
+    StepperMotorStatus,
+    StepperMoveRequest,
+    ElectromagnetStatus,
+    ElectromagnetControlRequest,
+    TemperatureControllerStatus,
+    TemperatureControlRequest,
+    PiezoControllerStatus,
+    PiezoControlRequest,
+    PicoammeterStatus,
+)
+
+# 实验管理模型
+from schemas.experiment import (
+    ExperimentInfo,
+    ExperimentRequest,
+    ExperimentResponse,
+    ExperimentStatus,
+    ExperimentCreateRequest,
+    ExperimentUpdateRequest,
+    ExperimentParameters,
+    ExperimentDataPoint,
+    ExperimentDataResponse,
+)
+
+# 数据分析模型
 from schemas.analysis import (
     AnalysisReportResponse,
     CompareDataset,
@@ -71,6 +116,8 @@ from schemas.analysis import (
     SmoothRequest,
     SmoothResponse,
 )
+
+# 电磁铁控制模型
 from schemas.electromagnet import (
     CalibrationPoint,
     ElectromagnetCalibrateRequest,
@@ -85,6 +132,8 @@ from schemas.electromagnet import (
     ELECTROMAGNET_MAX_SCAN_RATE,
     ELECTROMAGNET_MIN_SCAN_RATE,
 )
+
+# 压电陶瓷控制模型
 from schemas.piezo import (
     CalibrationDataResponse,
     CalibrationPerformRequest,
@@ -97,6 +146,8 @@ from schemas.piezo import (
     VoltageResponse,
     VoltageSetRequest,
 )
+
+# 微电流采集模型
 from schemas.ammeter import (
     AmmeterChannelConfigRequest,
     AmmeterChannelData,
@@ -105,6 +156,8 @@ from schemas.ammeter import (
     AmmeterStartRequest,
     AmmeterStatusResponse,
 )
+
+# 温度控制模型
 from schemas.temperature import (
     PIDParametersRequest,
     ProtectionConfigRequest,
@@ -120,11 +173,18 @@ from schemas.temperature import (
 )
 
 __all__ = [
+    # API 通用响应
+    "ApiError",
+    "ApiResponse",
+    "PaginatedData",
+    "PaginationParams",
+    # 通用响应
     "SuccessResponse",
     "ErrorCode",
     "ErrorResponse",
     "ValidationErrorDetail",
     "ValidationErrorResponse",
+    # 电机控制
     "MoveRequest",
     "MoveResponse",
     "JogRequest",
@@ -144,9 +204,33 @@ __all__ = [
     "DriverSoftLimitReadResponse",
     "SupportedBaudratesResponse",
     "SupportedDataTypesResponse",
+    # 设备管理
     "DeviceInfo",
-    "ExperimentRequest",
+    "DeviceInfoResponse",
+    "DeviceStatus",
+    "DeviceType",
+    "DeviceConnectRequest",
+    "DeviceConnectResponse",
+    "StepperMotorStatus",
+    "StepperMoveRequest",
+    "ElectromagnetStatus",
+    "ElectromagnetControlRequest",
+    "TemperatureControllerStatus",
+    "TemperatureControlRequest",
+    "PiezoControllerStatus",
+    "PiezoControlRequest",
+    "PicoammeterStatus",
+    # 实验管理
     "ExperimentInfo",
+    "ExperimentRequest",
+    "ExperimentResponse",
+    "ExperimentStatus",
+    "ExperimentCreateRequest",
+    "ExperimentUpdateRequest",
+    "ExperimentParameters",
+    "ExperimentDataPoint",
+    "ExperimentDataResponse",
+    # 数据分析
     "SmoothRequest",
     "SmoothResponse",
     "FitRequest",
@@ -166,6 +250,7 @@ __all__ = [
     "CompareRequest",
     "CompareDatasetResult",
     "CompareResponse",
+    # 电磁铁控制
     "ScanMode",
     "ELECTROMAGNET_MAX_CURRENT",
     "ELECTROMAGNET_MAX_FIELD",
@@ -178,6 +263,7 @@ __all__ = [
     "ElectromagnetScanValidateResponse",
     "ElectromagnetCalibrateRequest",
     "ElectromagnetStatusResponse",
+    # 压电陶瓷控制
     "VoltageSetRequest",
     "DisplacementSetRequest",
     "CalibrationPointRequest",
@@ -188,12 +274,14 @@ __all__ = [
     "CalibrationPointResponse",
     "CalibrationDataResponse",
     "PiezoStatusResponse",
+    # 微电流采集
     "AmmeterStartRequest",
     "AmmeterChannelConfigRequest",
     "AmmeterChannelData",
     "AmmeterDataResponse",
     "AmmeterChannelStatus",
     "AmmeterStatusResponse",
+    # 温度控制
     "TEMP_MIN_K",
     "TEMP_MAX_K",
     "TemperatureSetpointRequest",

@@ -41,12 +41,12 @@ from core.temperature_controller import (
 )
 
 __all__ = [
+    "NUM_SENSOR_CHANNELS",
+    "RATE_CALCULATION_WINDOW_SIZE",
+    "PIDParameters",
+    "ProtectionCallback",
+    "SensorChannel",
     "TemperatureController",
     "TemperatureControllerMode",
     "TemperatureProtectionType",
-    "PIDParameters",
-    "SensorChannel",
-    "ProtectionCallback",
-    "NUM_SENSOR_CHANNELS",
-    "RATE_CALCULATION_WINDOW_SIZE",
 ]

@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from core.tracing import (
+from core.monitoring.tracing import (
     Span,
     SpanKind,
     SpanStatus,
@@ -409,7 +409,7 @@ class TestTracingMiddleware:
     @pytest.mark.asyncio
     async def test_middleware_http_request(self, mock_app):
         """测试HTTP请求追踪。"""
-        from core.tracing import TracingMiddleware
+        from core.monitoring.tracing import TracingMiddleware
 
         tracer = Tracer(service_name="test_service")
         middleware = TracingMiddleware(mock_app, tracer=tracer)
@@ -575,7 +575,7 @@ class TestSpanEvent:
 
     def test_span_event_creation(self):
         """测试Span事件创建。"""
-        from core.tracing import SpanEvent
+        from core.monitoring.tracing import SpanEvent
 
         event = SpanEvent(
             name="test_event",
@@ -869,7 +869,7 @@ class TestAPIResponseModels:
 
     def test_trace_detail_response(self):
         """测试追踪详情响应模型。"""
-        from core.tracing import TraceDetailResponse
+        from core.monitoring.tracing import TraceDetailResponse
 
         response = TraceDetailResponse(
             trace_id="test_id",
@@ -885,7 +885,7 @@ class TestAPIResponseModels:
 
     def test_trace_statistics_response(self):
         """测试追踪统计响应模型。"""
-        from core.tracing import TraceStatisticsResponse
+        from core.monitoring.tracing import TraceStatisticsResponse
 
         response = TraceStatisticsResponse(
             total_traces=100,

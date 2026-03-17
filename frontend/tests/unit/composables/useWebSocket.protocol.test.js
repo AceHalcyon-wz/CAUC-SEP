@@ -10,7 +10,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { nextTick } from 'vue'
 import msgpack from 'msgpack-lite'
-import { useWebSocket, ProtocolType } from '../useWebSocket'
+import { useWebSocket, ProtocolType } from '@/composables/useWebSocket'
 
 // Mock WebSocket
 class MockWebSocket {

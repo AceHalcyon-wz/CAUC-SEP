@@ -25,6 +25,7 @@ const SettingsConfig = () => import('../views/settings/Config.vue')
 const SettingsProfile = () => import('../views/settings/Profile.vue')
 const SettingsAbout = () => import('../views/settings/About.vue')
 const SettingsPerformance = () => import('../views/settings/Performance.vue')
+const HelpDocs = () => import('../views/settings/HelpDocs.vue')
 const UserManagement = () => import('../views/settings/UserManagement.vue')
 const DeviceConnection = () => import('../views/device/Connection.vue')
 const DevicePRPath = () => import('../views/device/PRPath.vue')
@@ -223,6 +224,16 @@ const routes = [
         }
       },
       {
+        path: 'settings/help-docs',
+        name: 'HelpDocs',
+        component: HelpDocs,
+        meta: {
+          title: '帮助文档',
+          icon: 'BookOutlined',
+          skeleton: 'default'
+        }
+      },
+      {
         path: 'settings/user-management',
         name: 'UserManagement',
         component: UserManagement,
@@ -312,8 +323,19 @@ router.beforeEach((to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - CAUC-SEP` : 'CAUC-SEP'
 
   const token = localStorage.getItem('auth_token')
-  if (!to.meta.public && !token) {
-    next('/login')
+  const publicPages = ['/login', '/register', '/forgot-password']
+  const isPublicPage = to.meta.public || publicPages.includes(to.path)
+  const isDevelopment = import.meta.env.DEV
+  
+  if (!isPublicPage && !token) {
+    if (isDevelopment) {
+      next()
+    } else {
+      const currentPath = to.path
+      next({ path: '/login', query: { redirect: currentPath } })
+    }
+  } else if (token && to.path === '/login') {
+    next('/device/status')
   } else {
     next()
   }

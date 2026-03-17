@@ -387,9 +387,7 @@ class DatabaseConnectionPool:
 
             # 执行简单查询测试连接
             with self._engine.connect() as conn:
-                if self._db_type == DatabaseType.SQLITE:
-                    conn.execute(text("SELECT 1"))
-                elif self._db_type == DatabaseType.POSTGRESQL:
+                if self._db_type == DatabaseType.SQLITE or self._db_type == DatabaseType.POSTGRESQL:
                     conn.execute(text("SELECT 1"))
 
             result["connection_test"] = "passed"

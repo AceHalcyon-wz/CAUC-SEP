@@ -18,7 +18,7 @@ sys.path.insert(0, r"c:\Users\15272\Downloads\kimiOKC\cauc-sep\backend")
 
 def test_ring_buffer_performance():
     """测试 RingBuffer 性能。"""
-    from core.data_pipeline import RingBuffer
+    from core.storage.data_pipeline import RingBuffer
 
     print("\n" + "=" * 60)
     print("RingBuffer 性能测试")
@@ -84,7 +84,7 @@ def test_ring_buffer_performance():
 
 def test_stream_processor_performance():
     """测试 StreamProcessor 性能。"""
-    from core.data_pipeline import StreamProcessor, TriggerType
+    from core.storage.data_pipeline import StreamProcessor, TriggerType
 
     print("\n" + "=" * 60)
     print("StreamProcessor 性能测试")

@@ -4,40 +4,85 @@
 #
 # 文件名: pyproject.toml
 # 路径: d:\cauc-sep\backend\pyproject.toml
-# 功能: 后端项目配置文件，定义代码质量工具配置
-# 版本: v0.3.0
-# 创建日期: 2024-01-20
-# 最后更新: 2026-03-14
+# 功能: 后端项目配置文件
+# 版本: v0.4.1
+# Python: 3.13.2
+# 最后更新: 2026-03-16
 #
-# 说明:
-#   本配置文件定义了后端项目的代码质量工具配置，包含：
-#   - MyPy 类型检查配置
-#   - Black 代码格式化配置
-#   - isort 导入排序配置
-#   - Ruff 代码检查配置
-#   - Pytest 测试配置
-#   - Coverage 覆盖率配置
-#
-# 注意:
-#   本文件是后端子项目的配置，根目录的 pyproject.toml
-#   包含项目整体配置。
 # ============================================================================
 
-# ==================== MyPy 类型检查配置 ====================
-# MyPy: Python静态类型检查工具
-# 官方文档: https://mypy.readthedocs.io/
-[tool.mypy]
-python_version = "3.11"              # 目标Python版本
-explicit_package_bases = true        # 使用显式包基路径
-warn_return_any = false              # 警告返回Any类型的函数
-warn_unused_configs = true           # 警告未使用的配置
-disallow_untyped_defs = false        # 禁止无类型注解的函数定义
-disallow_incomplete_defs = false     # 禁止不完整的类型注解
-check_untyped_defs = true            # 检查无类型注解函数的内部类型
-ignore_missing_imports = true        # 忽略缺失的导入类型存根
+[project]
+name = "cauc-sep-backend"
+version = "0.4.0"
+description = "CAUC-SEP 自旋电子器件实验平台后端"
+readme = "README.md"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+authors = [
+    {name = "CAUC-SEP Team"}
+]
+keywords = ["experiment", "physics", "spintronics", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 
-# MyPy 模块覆盖配置
-# 对特定模块放宽类型检查要求
+[project.optional-dependencies]
+dev = [
+    "black==25.1.0",
+    "isort==6.0.1",
+    "ruff==0.11.2",
+    "mypy==1.15.0",
+    "pytest==8.3.5",
+    "pytest-asyncio==0.25.3",
+    "pytest-cov==6.0.0",
+    "coverage==7.7.1",
+    "httpx==0.28.1",
+    "pytest-httpx==0.35.0",
+]
+
+# ==================== MyPy 类型检查配置 ====================
+[tool.mypy]
+python_version = "3.13"
+explicit_package_bases = true
+
+# 严格模式配置
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+ignore_missing_imports = false
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+show_column_numbers = true
+pretty = true
+
+# 核心模块严格类型检查
+[[tool.mypy.overrides]]
+module = [
+    "core.abstract",
+    "core.types",
+    "core.dm2c_driver",
+    "core.electromagnet_driver",
+    "core.temperature_controller",
+    "core.piezo_controller",
+    "core.picoammeter",
+    "schemas.api",
+    "schemas.validators",
+]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+strict = true
+
+# 第三方库忽略
 [[tool.mypy.overrides]]
 module = [
     "pymodbus.*",
@@ -49,79 +94,123 @@ module = [
     "fastapi.*",
     "pydantic.*",
     "uvicorn.*",
-    "models",
-    "core.data_storage",
-    "tests.*",
+    "structlog.*",
+    "redis.*",
+    "h5py.*",
+    "matplotlib.*",
 ]
+ignore_missing_imports = true
+
+# 测试模块放宽限制
+[[tool.mypy.overrides]]
+module = ["tests.*"]
 ignore_missing_imports = true
 ignore_errors = true
 
 # ==================== Black 代码格式化配置 ====================
-# Black: 不妥协的Python代码格式化工具
-# 官方文档: https://black.readthedocs.io/
 [tool.black]
-line-length = 100                    # 每行最大字符数
-target-version = ["py311"]           # 目标Python版本
+line-length = 100
+target-version = ["py313"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | migrations
+    | node_modules
+)/
+'''
 
 # ==================== isort 导入排序配置 ====================
-# isort: Python导入语句排序工具
-# 官方文档: https://pycqa.github.io/isort/
 [tool.isort]
-profile = "black"                    # 与Black兼容的配置
-line_length = 100                    # 每行最大字符数
-force_single_line = true             # 强制每个导入单独一行
+profile = "black"
+line_length = 100
+force_single_line = true
+known_first_party = ["core", "api", "devices", "drivers", "models", "schemas", "middleware"]
+known_third_party = ["fastapi", "pydantic", "sqlalchemy", "numpy", "scipy"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+skip = [".git", ".hg", ".mypy_cache", ".tox", ".venv", "migrations"]
 
 # ==================== Ruff 代码检查配置 ====================
-# Ruff: 极速Python代码检查工具
-# 官方文档: https://docs.astral.sh/ruff/
 [tool.ruff]
-line-length = 100                    # 每行最大字符数
-target-version = "py311"             # 目标Python版本
-
-# Ruff 规则选择
-[tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
-ignore = [
-    "I001",  # Import block is un-sorted (conflicts with isort)
-    "B008",  # FastAPI Depends in argument defaults is standard practice
-    "B904",  # raise ... from is not always necessary
-    "B028",  # stacklevel in warnings.warn is optional
-    "N803",  # Argument name should be lowercase (Ms is standard in physics)
-    "N806",  # Variable in function should be lowercase (L is standard in physics)
-    "B007",  # Loop control variable not used (common in tests)
-    "E731",  # Lambda expression assignment (common in tests)
-    "E501",  # Line too long (handled by black)
-    "E402",  # Module level import not at top (common in tests)
-    "F841",  # Local variable assigned but never used (common in tests)
-    "B017",  # Blind exception assertion (common in tests)
-    "C416",  # Unnecessary list comprehension (minor issue)
-    "W293",  # Blank line contains whitespace
-    "W291",  # Trailing whitespace
-    "B027",  # Empty method in abstract base class without abstract decorator
-    "UP042", # Use StrEnum instead of str, Enum
-    "B905",  # zip() without strict parameter
-    "N818",  # Exception name should have Error suffix
-    "N802",  # Function name should be lowercase
-    "N801",  # Class name should use CapWords convention
-    "F401",  # Imported but unused (common in __init__.py for re-exports)
+line-length = 100
+target-version = "py313"
+exclude = [
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "migrations",
+    "node_modules",
 ]
 
-# Ruff 文件特定忽略规则
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "RUF",    # Ruff-specific rules
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+]
+ignore = [
+    "I001",   # Import block is un-sorted (conflicts with isort)
+    "B008",   # FastAPI Depends in argument defaults
+    "B904",   # raise ... from is not always necessary
+    "B028",   # stacklevel in warnings.warn
+    "N803",   # Argument name should be lowercase (Ms is standard)
+    "N806",   # Variable should be lowercase (L is standard in physics)
+    "B007",   # Loop control variable not used
+    "E731",   # Lambda expression assignment
+    "E501",   # Line too long (handled by black)
+    "E402",   # Module level import not at top
+    "F841",   # Local variable assigned but never used
+    "B017",   # Blind exception assertion
+    "C416",   # Unnecessary list comprehension
+    "W293",   # Blank line contains whitespace
+    "W291",   # Trailing whitespace
+    "B027",   # Empty method without abstract decorator
+    "UP042",  # Use StrEnum instead of str, Enum
+    "B905",   # zip() without strict parameter
+    "N818",   # Exception name should have Error suffix
+    "N802",   # Function name should be lowercase
+    "N801",   # Class name should use CapWords
+    "F401",   # Imported but unused
+    "RUF001", # String contains ambiguous character
+    "RUF002", # Docstring contains ambiguous character
+    "RUF003", # Comment contains ambiguous character
+    "SIM108", # Use ternary operator
+]
+
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["B007", "E731", "E501", "E402", "F841", "B017", "C416", "F401", "B905"]
+"tests/*" = ["B007", "E731", "E501", "E402", "F841", "B017", "C416", "F401", "B905", "S101"]
 "migrations/*" = ["W291", "W293", "E501"]
 "docs/*" = ["W293", "W291", "E501"]
 
 # ==================== Pytest 测试配置 ====================
-# Pytest: Python测试框架
-# 官方文档: https://docs.pytest.org/
 [tool.pytest.ini_options]
-testpaths = ["tests"]                # 测试文件路径
-python_files = ["test_*.py"]         # 测试文件命名模式
-python_classes = ["Test*"]           # 测试类命名模式
-python_functions = ["test_*"]        # 测试函数命名模式
-addopts = "-v --tb=short --strict-markers"  # 默认命令行选项
-asyncio_mode = "auto"                # 异步测试模式
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers --asyncio-mode=auto"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::UserWarning",
@@ -131,27 +220,28 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "windows: marks tests that only run on Windows",
+    "hardware: marks tests that require physical hardware",
 ]
 
 # ==================== Coverage 覆盖率配置 ====================
-# Coverage: Python代码覆盖率测量工具
-# 官方文档: https://coverage.readthedocs.io/
 [tool.coverage.run]
-source = ["core", "api"]             # 测量覆盖率的源代码路径
+source = ["core", "api", "devices", "drivers", "middleware", "schemas", "models"]
 omit = [
     "tests/*",
     "*/__pycache__/*",
     "*/site-packages/*",
     "*/migrations/*",
     "*/examples/*",
+    "main.py",
+    "scripts/*",
 ]
-branch = true                        # 启用分支覆盖
-parallel = true                      # 并行测量
+branch = true
+parallel = true
 
 [tool.coverage.report]
-precision = 2                        # 百分比精度
-show_missing = true                  # 显示未覆盖的行
-skip_covered = false                 # 跳过已完全覆盖的文件
+precision = 2
+show_missing = true
+skip_covered = false
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
@@ -161,12 +251,17 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
     "if sys.platform",
+    "if __debug__:",
 ]
-fail_under = 70                      # 覆盖率低于70%时失败
+fail_under = 80
 
 [tool.coverage.html]
-directory = "htmlcov"                # HTML报告输出目录
+directory = "htmlcov"
 title = "CAUC-SEP Backend Coverage Report"
 
 [tool.coverage.xml]
-output = "coverage.xml"              # XML报告输出路径
+output = "coverage.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
+pretty_print = true

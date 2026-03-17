@@ -69,7 +69,7 @@
         :lg="12"
         class="control-col"
       >
-        <AmmeterControl class="control-card" />
+        <AmmeterControlPanel class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
@@ -392,7 +392,7 @@ import {
   DataLine,
   TrendCharts
 } from '@element-plus/icons-vue'
-import { AmmeterControl } from '@/components/experiment/ammeter'
+import { AmmeterControl as AmmeterControlPanel } from '@/components/experiment/ammeter'
 import { useAmmeterStore } from '@/stores/ammeter'
 
 /** Ammeter Store实例 */

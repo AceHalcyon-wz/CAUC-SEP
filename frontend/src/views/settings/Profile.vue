@@ -46,12 +46,23 @@
               </template>
               <div class="avatar-section">
                 <div class="avatar-display">
-                  <el-avatar
-                    :size="100"
-                    class="user-avatar"
-                  >
-                    {{ userStore.avatarText }}
-                  </el-avatar>
+                  <div class="avatar-wrapper">
+                    <el-avatar
+                      :size="100"
+                      class="user-avatar"
+                      :src="avatarPreviewUrl || userStore.currentUser?.avatar"
+                    >
+                      {{ userStore.avatarText }}
+                    </el-avatar>
+                    <div
+                      v-if="avatarUploading"
+                      class="avatar-loading"
+                    >
+                      <el-icon class="is-loading">
+                        <Loading />
+                      </el-icon>
+                    </div>
+                  </div>
                   <div class="avatar-info">
                     <p class="avatar-tip">
                       支持 JPG、PNG 格式，大小不超过 2MB
@@ -64,13 +75,15 @@
                       :show-file-list="false"
                       :on-change="handleAvatarChange"
                       accept="image/jpeg,image/png"
+                      :disabled="avatarUploading"
                     >
                       <el-button
                         type="primary"
                         size="small"
+                        :loading="avatarUploading"
                       >
                         <el-icon><Upload /></el-icon>
-                        上传头像
+                        {{ avatarUploading ? '上传中...' : '上传头像' }}
                       </el-button>
                     </el-upload>
                   </div>
@@ -594,7 +607,8 @@ import {
   Upload,
   Search,
   Refresh,
-  Delete
+  Delete,
+  Loading
 } from '@element-plus/icons-vue'
 import { useUserStore, USER_ROLES, OPERATION_TYPES } from '@/stores/user'
 import { useErrorHandler } from '@/composables/useErrorHandler'
@@ -654,6 +668,12 @@ const passwordLoading = ref(false)
 
 /** 操作历史加载状态 */
 const historyLoading = ref(false)
+
+/** 头像上传加载状态 */
+const avatarUploading = ref(false)
+
+/** 头像预览URL */
+const avatarPreviewUrl = ref(null)
 
 /** 操作详情对话框可见性 */
 const detailDialogVisible = ref(false)
@@ -793,17 +813,52 @@ async function saveProfile() {
 /**
  * 处理头像变更
  *
- * @param {Object} file - 上传的文件
+ * @param {Object} uploadFile - 上传的文件对象
  */
-function handleAvatarChange(file) {
+async function handleAvatarChange(uploadFile) {
   const maxSize = 2 * 1024 * 1024 // 2MB
-  if (file.raw.size > maxSize) {
+  if (uploadFile.raw.size > maxSize) {
     ElMessage.error('头像大小不能超过 2MB')
     return
   }
 
-  // 这里可以调用上传接口
-  ElMessage.info('头像上传功能开发中...')
+  const allowedTypes = ['image/jpeg', 'image/png']
+  if (!allowedTypes.includes(uploadFile.raw.type)) {
+    ElMessage.error('只支持 JPG、PNG 格式的图片')
+    return
+  }
+
+  try {
+    avatarUploading.value = true
+
+    const previewUrl = URL.createObjectURL(uploadFile.raw)
+    avatarPreviewUrl.value = previewUrl
+
+    const formData = new FormData()
+    formData.append('avatar', uploadFile.raw)
+    formData.append('userId', userStore.currentUser?.id)
+
+    const result = await userStore.uploadAvatar(formData)
+
+    if (result.success) {
+      ElMessage.success('头像上传成功')
+      if (avatarPreviewUrl.value && avatarPreviewUrl.value !== previewUrl) {
+        URL.revokeObjectURL(avatarPreviewUrl.value)
+      }
+    } else {
+      ElMessage.error(result.message || '头像上传失败')
+      URL.revokeObjectURL(previewUrl)
+      avatarPreviewUrl.value = null
+    }
+  } catch (error) {
+    handleError(error, { action: '上传头像' })
+    if (avatarPreviewUrl.value) {
+      URL.revokeObjectURL(avatarPreviewUrl.value)
+      avatarPreviewUrl.value = null
+    }
+  } finally {
+    avatarUploading.value = false
+  }
 }
 
 /**
@@ -1219,6 +1274,26 @@ watch(
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   transition: var(--transition-transform);
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
 }
 
 .avatar-card:hover .user-avatar {

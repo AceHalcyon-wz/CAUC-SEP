@@ -164,6 +164,12 @@
         </Transition>
       </div>
     </div>
+
+    <!-- 告警管理对话框 -->
+    <AlarmManagementDialog v-model="showAlarmDialog" />
+
+    <!-- 历史记录对话框 -->
+    <StatusHistoryDialog v-model="showHistoryDialog" />
   </div>
 </template>
 
@@ -181,10 +187,14 @@ import { useDevicesStore } from '@/stores/devices'
 import { ElMessage } from 'element-plus'
 import { DataBoard, Monitor, ArrowDown, Refresh, Bell, Download, Clock } from '@element-plus/icons-vue'
 import { DeviceStatusDashboard, DeviceStatusMonitor } from '@/components/device'
+import AlarmManagementDialog from '@/components/device/AlarmManagementDialog.vue'
+import StatusHistoryDialog from '@/components/device/StatusHistoryDialog.vue'
 
 const devicesStore = useDevicesStore()
 const statusMonitorRef = ref(null)
 const showDetailedMonitor = ref(false)
+const showAlarmDialog = ref(false)
+const showHistoryDialog = ref(false)
 
 /** 未确认告警数量 */
 const unacknowledgedAlarmsCount = computed(() => devicesStore.unacknowledgedAlarmsCount)
@@ -200,29 +210,89 @@ function toggleDetailedMonitor() {
  * 刷新所有设备状态
  */
 function refreshAllStatus() {
-  devicesStore.refreshAllDevices()
+  devicesStore.refreshAll()
   ElMessage.success('设备状态已刷新')
 }
 
 /**
- * 查看告警
+ * 查看告警 - 打开告警管理对话框
  */
 function viewAlarms() {
-  ElMessage.info('打开告警管理面板')
+  showAlarmDialog.value = true
 }
 
 /**
- * 导出状态报告
+ * 导出状态报告 - 生成并下载JSON报告
  */
 function exportStatus() {
+  const report = generateStatusReport()
+  downloadReport(report)
   ElMessage.success('状态报告已生成')
 }
 
 /**
- * 查看历史记录
+ * 生成状态报告
+ * @returns {Object} 报告数据对象
+ */
+function generateStatusReport() {
+  const devices = devicesStore.devices
+  const alarms = devicesStore.alarms
+  const timestamp = new Date().toISOString()
+  
+  return {
+    title: 'CAUC-SEP 设备状态报告',
+    generatedAt: timestamp,
+    systemStatus: {
+      status: devicesStore.systemStatus,
+      statusText: devicesStore.systemStatusText,
+      health: devicesStore.systemHealth,
+      healthText: devicesStore.systemHealthText,
+      connectedCount: devicesStore.connectedCount,
+      totalDevices: devicesStore.totalDevicesCount
+    },
+    devices: Object.values(devices).map(device => ({
+      id: device.id,
+      name: device.name,
+      status: device.status,
+      isConnected: device.isConnected,
+      health: device.health,
+      healthScore: device.healthScore,
+      lastUpdate: device.lastUpdate,
+      error: device.error,
+      metrics: device.metrics
+    })),
+    alarms: {
+      total: alarms.length,
+      unacknowledged: alarms.filter(a => !a.acknowledged).length,
+      critical: alarms.filter(a => a.severity === 'critical').length,
+      recent: alarms.slice(0, 10)
+    },
+    statusHistory: devicesStore.statusHistory.slice(0, 50)
+  }
+}
+
+/**
+ * 下载报告文件
+ * @param {Object} report - 报告数据对象
+ */
+function downloadReport(report) {
+  const content = JSON.stringify(report, null, 2)
+  const blob = new Blob([content], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `device_status_report_${new Date().toISOString().slice(0, 10)}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * 查看历史记录 - 打开历史记录对话框
  */
 function viewHistory() {
-  ElMessage.info('打开历史记录面板')
+  showHistoryDialog.value = true
 }
 
 // ==================== 生命周期 ====================

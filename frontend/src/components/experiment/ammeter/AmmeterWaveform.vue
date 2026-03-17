@@ -142,19 +142,19 @@
         <div class="stat-values">
           <div class="stat-value">
             <span class="stat-label">最大值</span>
-            <span class="stat-number">{{ formatCurrent(channel.stats.max) }}</span>
+            <span class="stat-number">{{ formatCurrent(channel.stats?.max ?? 0) }}</span>
           </div>
           <div class="stat-value">
             <span class="stat-label">最小值</span>
-            <span class="stat-number">{{ formatCurrent(channel.stats.min) }}</span>
+            <span class="stat-number">{{ formatCurrent(channel.stats?.min ?? 0) }}</span>
           </div>
           <div class="stat-value">
             <span class="stat-label">平均值</span>
-            <span class="stat-number">{{ formatCurrent(channel.stats.avg) }}</span>
+            <span class="stat-number">{{ formatCurrent(channel.stats?.avg ?? 0) }}</span>
           </div>
           <div class="stat-value">
             <span class="stat-label">标准差</span>
-            <span class="stat-number">{{ formatCurrent(channel.stats.std) }}</span>
+            <span class="stat-number">{{ formatCurrent(channel.stats?.std ?? 0) }}</span>
           </div>
         </div>
       </div>
@@ -514,8 +514,8 @@ function updateOverlayChart(data, times) {
       data: times
     },
     yAxis: {
-      min: (value) => value.min * 0.95,
-      max: (value) => value.max * 1.05
+      min: (value) => value?.min ? value.min * 0.95 : 0,
+      max: (value) => value?.max ? value.max * 1.05 : 1
     },
     series
   })

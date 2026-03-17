@@ -1094,7 +1094,7 @@ async def get_health():
 
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Health check failed: {e!s}")
 
 
 @router.get("/metrics")
@@ -1305,7 +1305,7 @@ async def get_metrics():
 
     except Exception as e:
         logger.error(f"Failed to generate metrics: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate metrics: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate metrics: {e!s}")
 
 
 @router.get("/devices/status", response_model=DeviceStatusSummary)
@@ -1345,7 +1345,7 @@ async def get_devices_status():
 
     except Exception as e:
         logger.error(f"Failed to get devices status: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get devices status: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get devices status: {e!s}")
 
 
 @router.get("/resources", response_model=SystemResourcesResponse)
@@ -1440,7 +1440,7 @@ async def get_system_resources():
 
     except Exception as e:
         logger.error(f"Failed to get system resources: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get system resources: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get system resources: {e!s}")
 
 
 # ==================== 告警 API 端点 ====================
@@ -1478,7 +1478,7 @@ async def get_alerts(limit: int = 100):
 
     except Exception as e:
         logger.error(f"Failed to get alerts: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get alerts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get alerts: {e!s}")
 
 
 @router.get("/alerts/active")
@@ -1498,7 +1498,7 @@ async def get_active_alerts():
         return alert_manager.get_active_alerts()
     except Exception as e:
         logger.error(f"Failed to get active alerts: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get active alerts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get active alerts: {e!s}")
 
 
 @router.post("/alerts/{alert_id}/acknowledge")
@@ -1527,7 +1527,7 @@ async def acknowledge_alert(alert_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to acknowledge alert: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to acknowledge alert: {e!s}")
 
 
 @router.get("/alerts/rules")
@@ -1547,7 +1547,7 @@ async def get_alert_rules():
         return alert_manager.get_rules()
     except Exception as e:
         logger.error(f"Failed to get alert rules: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get alert rules: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get alert rules: {e!s}")
 
 
 @router.post("/alerts/rules")
@@ -1573,7 +1573,7 @@ async def add_alert_rule(rule: AlertRule):
         return {"success": True, "message": f"Alert rule {rule.rule_id} added"}
     except Exception as e:
         logger.error(f"Failed to add alert rule: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to add alert rule: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to add alert rule: {e!s}")
 
 
 @router.delete("/alerts/rules/{rule_id}")
@@ -1602,7 +1602,7 @@ async def remove_alert_rule(rule_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to remove alert rule: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to remove alert rule: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to remove alert rule: {e!s}")
 
 
 @router.get("/health/score")
@@ -1635,4 +1635,4 @@ async def get_health_score():
 
     except Exception as e:
         logger.error(f"Failed to get health score: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get health score: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get health score: {e!s}")

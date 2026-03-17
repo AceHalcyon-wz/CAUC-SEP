@@ -12,7 +12,7 @@ from datetime import datetime
 
 import pytest
 
-from core.profiler import (
+from core.monitoring.profiler import (
     FunctionProfile,
     MemorySnapshot,
     MetricType,
@@ -762,7 +762,7 @@ class TestAPIResponseModels:
 
     def test_performance_metrics_response(self):
         """测试性能指标响应模型。"""
-        from core.profiler import PerformanceMetricsResponse
+        from core.monitoring.profiler import PerformanceMetricsResponse
 
         response = PerformanceMetricsResponse(
             metrics=[{"name": "cpu", "value": 50.0}],
@@ -774,7 +774,7 @@ class TestAPIResponseModels:
 
     def test_function_profile_response(self):
         """测试函数性能响应模型。"""
-        from core.profiler import FunctionProfileResponse
+        from core.monitoring.profiler import FunctionProfileResponse
 
         response = FunctionProfileResponse(
             function_profiles=[{"function_name": "test"}],
@@ -786,7 +786,7 @@ class TestAPIResponseModels:
 
     def test_memory_snapshot_response(self):
         """测试内存快照响应模型。"""
-        from core.profiler import MemorySnapshotResponse
+        from core.monitoring.profiler import MemorySnapshotResponse
 
         response = MemorySnapshotResponse(
             current_memory_mb=256.0,
@@ -800,7 +800,7 @@ class TestAPIResponseModels:
 
     def test_system_info_response(self):
         """测试系统信息响应模型。"""
-        from core.profiler import SystemInfoResponse
+        from core.monitoring.profiler import SystemInfoResponse
 
         response = SystemInfoResponse(
             cpu={"percent": 50.0},

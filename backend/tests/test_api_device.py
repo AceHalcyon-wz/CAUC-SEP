@@ -119,9 +119,8 @@ class TestDeviceStorageIntegration:
         app.include_router(device.router)
         device.set_storage(None)
 
-        with TestClient(app) as client:
-            with pytest.raises(Exception):
-                client.get("/api/v1/device/list")
+        with TestClient(app) as client, pytest.raises(Exception):
+            client.get("/api/v1/device/list")
 
 
 class TestDeviceEndpointsWithStorage:

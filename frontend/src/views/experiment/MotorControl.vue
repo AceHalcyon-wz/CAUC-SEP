@@ -70,7 +70,7 @@
           <ConnectionPanel class="control-card" />
           
           <!-- 电机控制 - 核心控制 -->
-          <MotorControl class="control-card" />
+          <MotorControlPanel class="control-card" />
           
           <!-- 位置显示 - 辅助显示 -->
           <PositionDisplay class="monitor-card" />
@@ -267,7 +267,7 @@ import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useMotorStore } from '@/stores/motor'
 import { ConnectionPanel, PositionDisplay, PositionChart, IOConfig } from '@/components/device'
-import { MotorControl } from '@/components/experiment/motor'
+import { MotorControl as MotorControlPanel } from '@/components/experiment/motor'
 import { ExperimentPanel } from '@/components/experiment'
 
 const motorStore = useMotorStore()

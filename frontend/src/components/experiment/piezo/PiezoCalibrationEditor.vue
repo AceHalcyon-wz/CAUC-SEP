@@ -530,6 +530,21 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus';
 import * as echarts from 'echarts';
 import { usePiezoStore } from '@/stores/piezo';
+import {
+  Upload,
+  Download,
+  Clock,
+  Plus,
+  Close,
+  Check,
+  Select,
+  Delete,
+  SuccessFilled,
+  DataAnalysis,
+  WarningFilled,
+  Document,
+  RefreshRight
+} from '@element-plus/icons-vue';
 
 // ============ Store 初始化 ============
 

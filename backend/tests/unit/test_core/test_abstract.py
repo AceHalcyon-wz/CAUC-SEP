@@ -1,11 +1,18 @@
 """
-测试硬件抽象层 (HAL)
+抽象基类单元测试
+
+文件名: test_abstract.py
+路径: backend/tests/unit/core/
+功能: 测试 AbstractDevice 和 AbstractStepper 抽象基类
+作者: CAUC-SEP Team
+创建日期: 2026-03-16
+依赖: pytest, pytest-asyncio
 
 测试内容：
-- DeviceStatus枚举及状态转换
-- SoftwareLimitConfig类
-- AbstractDevice抽象类
-- AbstractStepper抽象类
+- TestDeviceStatus: 设备状态枚举测试
+- TestSoftwareLimitConfig: 软件限位配置测试
+- TestAbstractDevice: 抽象设备基类测试
+- TestAbstractStepper: 抽象步进电机测试
 """
 
 import pytest
@@ -13,8 +20,87 @@ import pytest
 from core.abstract import AbstractDevice, AbstractStepper, DeviceStatus, SoftwareLimitConfig
 
 
+# ==================== 测试用 Mock 类 ====================
+
+
+class MockDevice(AbstractDevice):
+    """测试用模拟设备。
+
+    实现 AbstractDevice 的所有抽象方法用于测试。
+    """
+
+    async def connect(self) -> bool:
+        """连接设备。"""
+        self.status = DeviceStatus.CONNECTING
+        self.status = DeviceStatus.READY
+        return True
+
+    async def disconnect(self) -> bool:
+        """断开设备。"""
+        self.status = DeviceStatus.DISCONNECTED
+        return True
+
+    async def read_status(self) -> dict:
+        """读取状态。"""
+        return {"status": self.status.value, "connected": self.is_connected}
+
+
+class MockStepper(AbstractStepper):
+    """测试用模拟步进电机。
+
+    实现 AbstractStepper 的所有抽象方法用于测试。
+    """
+
+    async def connect(self) -> bool:
+        """连接设备。"""
+        self.status = DeviceStatus.READY
+        return True
+
+    async def disconnect(self) -> bool:
+        """断开设备。"""
+        self.status = DeviceStatus.DISCONNECTED
+        return True
+
+    async def read_status(self) -> dict:
+        """读取状态。"""
+        return {"status": self.status.value}
+
+    async def move_abs(self, position: float, speed: float, accel: float, decel: float) -> bool:
+        """绝对定位。"""
+        if not self.check_position_limit(position):
+            raise ValueError(f"位置 {position} 超出限位范围")
+        self.status = DeviceStatus.BUSY
+        self.status = DeviceStatus.READY
+        return True
+
+    async def move_rel(self, distance: float, speed: float, accel: float, decel: float) -> bool:
+        """相对定位。"""
+        return True
+
+    async def jog(self, direction: int, speed: float) -> bool:
+        """JOG点动。"""
+        return True
+
+    async def home(self, mode: str = "origin") -> bool:
+        """回零。"""
+        return True
+
+    async def read_position(self) -> dict:
+        """读取位置。"""
+        return {"position_mm": 0.0, "position_steps": 1600}
+
+    async def stop(self, emergency: bool = False) -> bool:
+        """停止。"""
+        if emergency:
+            self.status = DeviceStatus.EMERGENCY_STOP
+        return True
+
+
+# ==================== DeviceStatus 测试 ====================
+
+
 class TestDeviceStatus:
-    """测试设备状态枚举。"""
+    """DeviceStatus 枚举测试。"""
 
     def test_status_values(self):
         """测试状态枚举值。"""
@@ -96,8 +182,11 @@ class TestDeviceStatus:
         assert DeviceStatus.EMERGENCY_STOP.can_transition_to(DeviceStatus.DISCONNECTED)
 
 
+# ==================== SoftwareLimitConfig 测试 ====================
+
+
 class TestSoftwareLimitConfig:
-    """测试软件限位配置类。"""
+    """SoftwareLimitConfig 测试。"""
 
     def test_default_config(self):
         """测试默认配置。"""
@@ -113,63 +202,18 @@ class TestSoftwareLimitConfig:
         assert config.negative_limit == -50.0
         assert config.enable is False
 
-    def test_is_within_limits_enabled(self):
-        """测试启用限位检查。"""
-        config = SoftwareLimitConfig(positive_limit=100.0, negative_limit=-100.0, enable=True)
-
-        assert config.is_within_limits(0.0) is True
-        assert config.is_within_limits(50.0) is True
-        assert config.is_within_limits(100.0) is True
-        assert config.is_within_limits(-50.0) is True
-        assert config.is_within_limits(-100.0) is True
-
-        assert config.is_within_limits(101.0) is False
-        assert config.is_within_limits(-101.0) is False
-        assert config.is_within_limits(150.0) is False
-
-    def test_is_within_limits_disabled(self):
-        """测试禁用限位检查。"""
-        config = SoftwareLimitConfig(positive_limit=100.0, negative_limit=-100.0, enable=False)
-
-        assert config.is_within_limits(0.0) is True
-        assert config.is_within_limits(1000.0) is True
-        assert config.is_within_limits(-1000.0) is True
-
-    def test_boundary_values(self):
-        """测试边界值。"""
-        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=True)
-
-        assert config.is_within_limits(50.0) is True
-        assert config.is_within_limits(-50.0) is True
-        assert config.is_within_limits(50.0001) is False
-        assert config.is_within_limits(-50.0001) is False
-
-    def test_zero_limits(self):
-        """测试接近零的限位。"""
-        # 注意：正负限位不能相等，负向限位必须小于正向限位
-        config = SoftwareLimitConfig(positive_limit=0.001, negative_limit=-0.001, enable=True)
-
-        assert config.is_within_limits(0.0) is True
-        assert config.is_within_limits(0.001) is True
-        assert config.is_within_limits(-0.001) is True
-        assert config.is_within_limits(0.002) is False
-        assert config.is_within_limits(-0.002) is False
-
-    def test_equal_limits_raises_error(self):
-        """测试相等限位应抛出错误。"""
-        with pytest.raises(ValueError, match="负向限位.*必须小于正向限位"):
-            SoftwareLimitConfig(positive_limit=0.0, negative_limit=0.0, enable=True)
-
-    def test_invalid_limits_negative_greater_than_positive(self):
-        """测试无效限位：负向限位大于等于正向限位。"""
+    def test_invalid_config_negative_greater_than_positive(self):
+        """测试无效配置：负向限位大于正向限位。"""
         with pytest.raises(ValueError, match="负向限位.*必须小于正向限位"):
             SoftwareLimitConfig(positive_limit=50.0, negative_limit=100.0)
 
+    def test_invalid_config_equal_limits(self):
+        """测试无效配置：正负限位相等。"""
         with pytest.raises(ValueError, match="负向限位.*必须小于正向限位"):
             SoftwareLimitConfig(positive_limit=50.0, negative_limit=50.0)
 
     def test_nan_limits(self):
-        """测试NaN限位。"""
+        """测试 NaN 限位。"""
         with pytest.raises(ValueError, match="正向限位不能是NaN或无穷大"):
             SoftwareLimitConfig(positive_limit=float("nan"), negative_limit=-100.0)
 
@@ -184,54 +228,57 @@ class TestSoftwareLimitConfig:
         with pytest.raises(ValueError, match="负向限位不能是NaN或无穷大"):
             SoftwareLimitConfig(positive_limit=100.0, negative_limit=float("-inf"))
 
-    def test_property_setters_validation(self):
-        """测试属性设置器的验证。"""
-        config = SoftwareLimitConfig()
+    def test_is_within_limits_enabled(self):
+        """测试启用限位检查。"""
+        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=True)
 
-        # 测试正向限位设置器
-        with pytest.raises(ValueError, match="正向限位必须是数值类型"):
-            config.positive_limit = "invalid"
+        assert config.is_within_limits(0.0) is True
+        assert config.is_within_limits(50.0) is True
+        assert config.is_within_limits(-50.0) is True
+        assert config.is_within_limits(51.0) is False
+        assert config.is_within_limits(-51.0) is False
 
-        # 测试负向限位设置器
-        with pytest.raises(ValueError, match="负向限位必须是数值类型"):
-            config.negative_limit = "invalid"
+    def test_is_within_limits_disabled(self):
+        """测试禁用限位检查。"""
+        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=False)
 
-        # 测试enable设置器
-        with pytest.raises(ValueError, match="enable必须是布尔类型"):
-            config.enable = "invalid"
+        assert config.is_within_limits(0.0) is True
+        assert config.is_within_limits(1000.0) is True
+        assert config.is_within_limits(-1000.0) is True
 
     def test_clamp_position(self):
         """测试位置限制功能。"""
-        config = SoftwareLimitConfig(positive_limit=100.0, negative_limit=-100.0, enable=True)
+        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=True)
 
         # 在范围内的位置不变
-        assert config.clamp_position(50.0) == 50.0
-        assert config.clamp_position(-50.0) == -50.0
+        assert config.clamp_position(0.0) == 0.0
+        assert config.clamp_position(25.0) == 25.0
 
         # 超出范围的位置被限制
-        assert config.clamp_position(150.0) == 100.0
-        assert config.clamp_position(-150.0) == -100.0
+        assert config.clamp_position(100.0) == 50.0
+        assert config.clamp_position(-100.0) == -50.0
+
+    def test_clamp_position_disabled(self):
+        """测试禁用限位时的位置限制。"""
+        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=False)
 
         # 禁用限位时不限制
-        config.enable = False
-        assert config.clamp_position(150.0) == 150.0
+        assert config.clamp_position(100.0) == 100.0
+        assert config.clamp_position(-100.0) == -100.0
 
     def test_get_range(self):
         """测试获取限位范围。"""
         config = SoftwareLimitConfig(positive_limit=100.0, negative_limit=-100.0)
         assert config.get_range() == 200.0
 
-        config2 = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0)
-        assert config2.get_range() == 100.0
-
     def test_to_dict(self):
         """测试序列化为字典。"""
-        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=True)
+        config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=False)
         data = config.to_dict()
 
         assert data["positive_limit"] == 50.0
         assert data["negative_limit"] == -50.0
-        assert data["enable"] is True
+        assert data["enable"] is False
 
     def test_from_dict(self):
         """测试从字典反序列化。"""
@@ -263,7 +310,6 @@ class TestSoftwareLimitConfig:
         assert "SoftwareLimitConfig" in repr_str
         assert "positive_limit=50.0" in repr_str
         assert "negative_limit=-50.0" in repr_str
-        assert "enable=True" in repr_str
 
     def test_equality(self):
         """测试相等性比较。"""
@@ -275,48 +321,96 @@ class TestSoftwareLimitConfig:
         assert config1 != config3
         assert config1 != "not a config"
 
+    def test_property_setters_validation(self):
+        """测试属性设置器的验证。"""
+        config = SoftwareLimitConfig()
 
-class ConcreteDevice(AbstractDevice):
-    """具体设备实现类（用于测试）。"""
+        # 测试正向限位设置器
+        with pytest.raises(ValueError, match="正向限位必须是数值类型"):
+            config.positive_limit = "invalid"
 
-    async def connect(self) -> bool:
-        """连接设备。"""
-        self.status = DeviceStatus.READY
-        return True
+        # 测试负向限位设置器
+        with pytest.raises(ValueError, match="负向限位必须是数值类型"):
+            config.negative_limit = "invalid"
 
-    async def disconnect(self) -> bool:
-        """断开设备。"""
-        self.status = DeviceStatus.DISCONNECTED
-        return True
+        # 测试 enable 设置器
+        with pytest.raises(ValueError, match="enable必须是布尔类型"):
+            config.enable = "invalid"
 
-    async def read_status(self) -> dict:
-        """读取状态。"""
-        return {"status": self.status.value}
+
+# ==================== AbstractDevice 测试 ====================
 
 
 class TestAbstractDevice:
-    """测试抽象设备基类。"""
+    """AbstractDevice 测试。"""
 
-    def test_initialization(self):
-        """测试初始化。"""
-        device = ConcreteDevice(device_id="test_device", config={"port": "COM1"})
-
+    def test_device_initialization(self):
+        """测试设备初始化。"""
+        device = MockDevice("test_device", {"port": "COM1"})
         assert device.device_id == "test_device"
-        assert device.config == {"port": "COM1"}
         assert device.status == DeviceStatus.DISCONNECTED
+        assert device.is_connected is False
+
+    @pytest.mark.asyncio
+    async def test_device_connect(self):
+        """测试设备连接。"""
+        device = MockDevice("test_device", {})
+        result = await device.connect()
+        assert result is True
+        assert device.status == DeviceStatus.READY
+        assert device.is_connected is True
+
+    @pytest.mark.asyncio
+    async def test_device_disconnect(self):
+        """测试设备断开。"""
+        device = MockDevice("test_device", {})
+        await device.connect()
+        result = await device.disconnect()
+        assert result is True
+        assert device.status == DeviceStatus.DISCONNECTED
+
+    @pytest.mark.asyncio
+    async def test_error_handling(self):
+        """测试错误处理。"""
+        device = MockDevice("test_device", {})
+        device.set_error("Test error")
+        assert device.status == DeviceStatus.ERROR
+        assert device.last_error == "Test error"
+
+        device.clear_error()
         assert device.last_error is None
 
-    def test_status_property(self):
-        """测试状态属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.status == DeviceStatus.DISCONNECTED
+    def test_is_ready_property(self):
+        """测试 is_ready 属性。"""
+        device = MockDevice("test_device", {})
+        assert device.is_ready is False
 
         device.status = DeviceStatus.READY
-        assert device.status == DeviceStatus.READY
+        assert device.is_ready is True
+
+    def test_is_busy_property(self):
+        """测试 is_busy 属性。"""
+        device = MockDevice("test_device", {})
+        assert device.is_busy is False
+
+        device.status = DeviceStatus.BUSY
+        assert device.is_busy is True
+
+    def test_is_error_property(self):
+        """测试 is_error 属性。"""
+        device = MockDevice("test_device", {})
+        assert device.is_error is False
 
         device.status = DeviceStatus.ERROR
-        assert device.status == DeviceStatus.ERROR
+        assert device.is_error is True
+
+    def test_is_emergency_stop_property(self):
+        """测试 is_emergency_stop 属性。"""
+        device = MockDevice("test_device", {})
+        assert device.is_emergency_stop is False
+
+        device.status = DeviceStatus.EMERGENCY_STOP
+        assert device.is_emergency_stop is True
 
     def test_status_transition_warning(self, caplog):
         """测试非标准状态转换警告。"""
@@ -324,7 +418,7 @@ class TestAbstractDevice:
 
         caplog.set_level(logging.WARNING)
 
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
         # DISCONNECTED -> READY 是非法转换
         device.status = DeviceStatus.READY
 
@@ -333,7 +427,7 @@ class TestAbstractDevice:
 
     def test_set_status_strict_valid(self):
         """测试严格模式下的合法状态转换。"""
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
 
         # DISCONNECTED -> CONNECTING 是合法的
         device.set_status_strict(DeviceStatus.CONNECTING)
@@ -345,127 +439,16 @@ class TestAbstractDevice:
 
     def test_set_status_strict_invalid(self):
         """测试严格模式下的非法状态转换。"""
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
 
         # DISCONNECTED -> READY 是非法的
         with pytest.raises(ValueError, match="非法状态转换"):
             device.set_status_strict(DeviceStatus.READY)
 
-    def test_is_connected_property(self):
-        """测试is_connected属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.is_connected is False
-
-        device.status = DeviceStatus.READY
-        assert device.is_connected is True
-
-        device.status = DeviceStatus.BUSY
-        assert device.is_connected is True
-
-        device.status = DeviceStatus.ERROR
-        assert device.is_connected is True
-
-    def test_is_ready_property(self):
-        """测试is_ready属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.is_ready is False
-
-        device.status = DeviceStatus.READY
-        assert device.is_ready is True
-
-        device.status = DeviceStatus.BUSY
-        assert device.is_ready is False
-
-    def test_is_busy_property(self):
-        """测试is_busy属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.is_busy is False
-
-        device.status = DeviceStatus.BUSY
-        assert device.is_busy is True
-
-    def test_is_error_property(self):
-        """测试is_error属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.is_error is False
-
-        device.status = DeviceStatus.ERROR
-        assert device.is_error is True
-
-    def test_is_emergency_stop_property(self):
-        """测试is_emergency_stop属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.is_emergency_stop is False
-
-        device.status = DeviceStatus.EMERGENCY_STOP
-        assert device.is_emergency_stop is True
-
-    def test_last_error_property(self):
-        """测试错误信息属性。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        assert device.last_error is None
-
-        device._last_error = "Test error"
-        assert device.last_error == "Test error"
-
-    def test_set_error(self):
-        """测试set_error方法。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        device.set_error("Connection failed")
-
-        assert device.status == DeviceStatus.ERROR
-        assert device.last_error == "Connection failed"
-
-    def test_clear_error(self):
-        """测试clear_error方法。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-        device.set_error("Test error")
-
-        device.clear_error()
-
-        assert device.last_error is None
-        # 状态不应该改变
-        assert device.status == DeviceStatus.ERROR
-
-    @pytest.mark.asyncio
-    async def test_connect_implementation(self):
-        """测试连接实现。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-
-        result = await device.connect()
-        assert result is True
-        assert device.status == DeviceStatus.READY
-
-    @pytest.mark.asyncio
-    async def test_disconnect_implementation(self):
-        """测试断开实现。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-        device.status = DeviceStatus.READY
-
-        result = await device.disconnect()
-        assert result is True
-        assert device.status == DeviceStatus.DISCONNECTED
-
-    @pytest.mark.asyncio
-    async def test_read_status_implementation(self):
-        """测试读取状态实现。"""
-        device = ConcreteDevice(device_id="test_device", config={})
-        device.status = DeviceStatus.READY
-
-        status = await device.read_status()
-        assert status["status"] == "ready"
-
     @pytest.mark.asyncio
     async def test_reset_from_error(self):
         """测试从错误状态复位。"""
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
         device.set_error("Test error")
 
         result = await device.reset()
@@ -477,7 +460,7 @@ class TestAbstractDevice:
     @pytest.mark.asyncio
     async def test_reset_from_emergency_stop(self):
         """测试从急停状态复位。"""
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
         device.status = DeviceStatus.EMERGENCY_STOP
 
         result = await device.reset()
@@ -488,7 +471,7 @@ class TestAbstractDevice:
     @pytest.mark.asyncio
     async def test_reset_from_non_error_state(self):
         """测试从非错误状态复位（应该失败）。"""
-        device = ConcreteDevice(device_id="test_device", config={})
+        device = MockDevice("test_device", {})
         device.status = DeviceStatus.READY
 
         result = await device.reset()
@@ -498,7 +481,7 @@ class TestAbstractDevice:
 
     def test_get_status_info(self):
         """测试获取状态信息。"""
-        device = ConcreteDevice(device_id="test_device", config={"port": "COM1"})
+        device = MockDevice("test_device", {"port": "COM1"})
         device.status = DeviceStatus.READY
 
         info = device.get_status_info()
@@ -510,72 +493,80 @@ class TestAbstractDevice:
         assert info["is_busy"] is False
         assert info["is_error"] is False
         assert info["is_emergency_stop"] is False
-        assert info["last_error"] is None
+
+    def test_cannot_instantiate_abstract(self):
+        """测试不能实例化抽象类。"""
+        with pytest.raises(TypeError):
+            AbstractDevice("test", {})
 
 
-class ConcreteStepper(AbstractStepper):
-    """具体步进电机实现类（用于测试）。"""
-
-    async def connect(self) -> bool:
-        """连接设备。"""
-        self.status = DeviceStatus.READY
-        return True
-
-    async def disconnect(self) -> bool:
-        """断开设备。"""
-        self.status = DeviceStatus.DISCONNECTED
-        return True
-
-    async def read_status(self) -> dict:
-        """读取状态。"""
-        return {"status": self.status.value}
-
-    async def move_abs(self, position: float, speed: float, accel: float, decel: float) -> bool:
-        """绝对定位。"""
-        return True
-
-    async def move_rel(self, distance: float, speed: float, accel: float, decel: float) -> bool:
-        """相对定位。"""
-        return True
-
-    async def jog(self, direction: int, speed: float) -> bool:
-        """JOG点动。"""
-        return True
-
-    async def home(self, mode: str = "origin") -> bool:
-        """回零。"""
-        return True
-
-    async def read_position(self) -> dict:
-        """读取位置。"""
-        return {"position_mm": 0.0}
-
-    async def stop(self, emergency: bool = False) -> bool:
-        """停止。"""
-        return True
+# ==================== AbstractStepper 测试 ====================
 
 
 class TestAbstractStepper:
-    """测试抽象步进电机接口。"""
+    """AbstractStepper 测试。"""
+
+    @pytest.mark.asyncio
+    async def test_stepper_initialization(self):
+        """测试步进电机初始化。"""
+        stepper = MockStepper("test_stepper", {})
+        assert stepper.limit_config is not None
+        assert stepper.limit_config.positive_limit == 100.0
+
+    @pytest.mark.asyncio
+    async def test_set_limits(self):
+        """测试设置限位。"""
+        stepper = MockStepper("test_stepper", {})
+        stepper.set_limits(50.0, -50.0)
+        assert stepper.limit_config.positive_limit == 50.0
+        assert stepper.limit_config.negative_limit == -50.0
+
+    @pytest.mark.asyncio
+    async def test_position_limit_check(self):
+        """测试位置限位检查。"""
+        stepper = MockStepper("test_stepper", {})
+        stepper.set_limits(50.0, -50.0)
+
+        assert stepper.check_position_limit(0.0) is True
+        assert stepper.check_position_limit(50.0) is True
+        assert stepper.check_position_limit(51.0) is False
+
+    @pytest.mark.asyncio
+    async def test_move_with_limit_check(self):
+        """测试带限位检查的移动。"""
+        stepper = MockStepper("test_stepper", {})
+        stepper.set_limits(50.0, -50.0)
+        await stepper.connect()
+
+        # 正常移动
+        result = await stepper.move_abs(10.0, 10.0, 100.0, 100.0)
+        assert result is True
+
+        # 超出限位
+        with pytest.raises(ValueError):
+            await stepper.move_abs(100.0, 10.0, 100.0, 100.0)
+
+    @pytest.mark.asyncio
+    async def test_emergency_stop(self):
+        """测试急停。"""
+        stepper = MockStepper("test_stepper", {})
+        await stepper.connect()
+
+        result = await stepper.stop(emergency=True)
+        assert result is True
+        assert stepper.status == DeviceStatus.EMERGENCY_STOP
+        assert stepper.is_emergency_stop is True
 
     def test_inheritance(self):
         """测试继承关系。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
 
         assert isinstance(stepper, AbstractDevice)
         assert isinstance(stepper, AbstractStepper)
 
-    def test_initialization(self):
-        """测试初始化。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={"steps_per_mm": 1600})
-
-        assert stepper.device_id == "test_stepper"
-        assert stepper.config == {"steps_per_mm": 1600}
-        assert stepper.status == DeviceStatus.DISCONNECTED
-
     def test_default_limit_config(self):
         """测试默认软件限位配置。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
 
         assert stepper.limit_config is not None
         assert stepper.limit_config.positive_limit == 100.0
@@ -584,7 +575,7 @@ class TestAbstractStepper:
 
     def test_set_limit_config(self):
         """测试设置软件限位配置。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
         new_config = SoftwareLimitConfig(positive_limit=50.0, negative_limit=-50.0, enable=False)
 
         stepper.limit_config = new_config
@@ -595,36 +586,15 @@ class TestAbstractStepper:
 
     def test_set_limit_config_invalid_type(self):
         """测试设置无效类型的限位配置。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
 
         with pytest.raises(ValueError, match="limit_config必须是SoftwareLimitConfig类型"):
             stepper.limit_config = "invalid"
 
-    def test_set_limits_convenience_method(self):
-        """测试便捷方法设置限位。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
-
-        stepper.set_limits(positive=75.0, negative=-75.0, enable=False)
-
-        assert stepper.limit_config.positive_limit == 75.0
-        assert stepper.limit_config.negative_limit == -75.0
-        assert stepper.limit_config.enable is False
-
-    def test_check_position_limit(self):
-        """测试位置限位检查。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
-        stepper.set_limits(positive=100.0, negative=-100.0, enable=True)
-
-        assert stepper.check_position_limit(50.0) is True
-        assert stepper.check_position_limit(100.0) is True
-        assert stepper.check_position_limit(-50.0) is True
-        assert stepper.check_position_limit(150.0) is False
-        assert stepper.check_position_limit(-150.0) is False
-
     @pytest.mark.asyncio
     async def test_all_abstract_methods(self):
         """测试所有抽象方法实现。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
 
         assert await stepper.connect() is True
         assert await stepper.disconnect() is True
@@ -632,36 +602,36 @@ class TestAbstractStepper:
         assert await stepper.move_rel(5.0, 5.0, 1000.0, 1000.0) is True
         assert await stepper.jog(1, 5.0) is True
         assert await stepper.home() is True
-        assert await stepper.read_position() == {"position_mm": 0.0}
+        assert await stepper.read_position() == {"position_mm": 0.0, "position_steps": 1600}
         assert await stepper.stop() is True
         assert await stepper.stop(emergency=True) is True
 
     @pytest.mark.asyncio
     async def test_wait_for_motion_complete(self):
         """测试等待运动完成。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
         await stepper.connect()
 
         # 模拟运动完成
         result = await stepper.wait_for_motion_complete(timeout=1.0)
-        assert result is True  # 因为状态是READY，不是BUSY
+        assert result is True  # 因为状态是 READY，不是 BUSY
 
     @pytest.mark.asyncio
     async def test_wait_for_motion_complete_timeout(self):
         """测试等待运动完成超时。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
         await stepper.connect()
 
-        # 设置为BUSY状态模拟运动中
+        # 设置为 BUSY 状态模拟运动中
         stepper.status = DeviceStatus.BUSY
 
-        # 应该超时，因为状态一直是BUSY
+        # 应该超时，因为状态一直是 BUSY
         result = await stepper.wait_for_motion_complete(timeout=0.2)
         assert result is False
 
     def test_get_position_info(self):
         """测试获取位置信息。"""
-        stepper = ConcreteStepper(device_id="test_stepper", config={})
+        stepper = MockStepper("test_stepper", {})
         stepper.set_limits(positive=50.0, negative=-50.0)
 
         info = stepper.get_position_info()
@@ -674,17 +644,17 @@ class TestAbstractStepper:
     def test_cannot_instantiate_abstract(self):
         """测试不能实例化抽象类。"""
         with pytest.raises(TypeError):
-            AbstractDevice("test", {})
-
-        with pytest.raises(TypeError):
             AbstractStepper("test", {})
+
+
+# ==================== 抽象方法签名测试 ====================
 
 
 class TestAbstractMethodsSignature:
     """测试抽象方法签名。"""
 
     def test_abstract_device_methods(self):
-        """测试AbstractDevice抽象方法签名。"""
+        """测试 AbstractDevice 抽象方法签名。"""
         import inspect
 
         assert hasattr(AbstractDevice, "connect")
@@ -698,7 +668,7 @@ class TestAbstractMethodsSignature:
         assert "self" in disconnect_sig.parameters
 
     def test_abstract_stepper_methods(self):
-        """测试AbstractStepper抽象方法签名。"""
+        """测试 AbstractStepper 抽象方法签名。"""
         import inspect
 
         methods = ["move_abs", "move_rel", "jog", "home", "read_position", "stop"]

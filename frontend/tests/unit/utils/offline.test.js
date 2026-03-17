@@ -7,156 +7,16 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { OfflineStorage, getOfflineStorage, initOfflineStorage } from '../offlineStorage'
-import { OfflineQueue, getOfflineQueue, initOfflineQueue, OperationStatus, OperationPriority } from '../offlineQueue'
-import { OfflineSync, getOfflineSync, initOfflineSync, SyncStatus, SyncStrategy } from '../offlineSync'
+import { OfflineStorage, getOfflineStorage, initOfflineStorage } from '@/utils/offlineStorage'
+import { OfflineQueue, getOfflineQueue, initOfflineQueue, OperationStatus, OperationPriority } from '@/utils/offlineQueue'
+import { OfflineSync, getOfflineSync, initOfflineSync, SyncStatus, SyncStrategy } from '@/utils/offlineSync'
 
-// Mock IndexedDB
-const mockIndexedDB = () => {
-  const databases = {}
-  
-  const createDatabase = (name) => {
-    const stores = {}
-    const storeData = {}
-    
-    const createObjectStore = (storeName, options = {}) => {
-      if (!stores[storeName]) {
-        stores[storeName] = {
-          name: storeName,
-          keyPath: options.keyPath || 'id',
-          autoIncrement: options.autoIncrement || false,
-          indexes: {}
-        }
-        storeData[storeName] = []
-      }
-      return {
-        createIndex: (indexName, keyPath, options) => {
-          stores[storeName].indexes[indexName] = { keyPath, options }
-        }
-      }
-    }
-    
-    return {
-      objectStoreNames: {
-        contains: (name) => !!stores[name]
-      },
-      createObjectStore,
-      transaction: (storeNames, mode) => {
-        const transactionStores = {}
-        
-        storeNames.forEach(name => {
-          transactionStores[name] = {
-            data: storeData[name] || [],
-            put: vi.fn((data) => {
-              const key = data[stores[name].keyPath]
-              const index = storeData[name].findIndex(item => item[stores[name].keyPath] === key)
-              if (index >= 0) {
-                storeData[name][index] = data
-              } else {
-                storeData[name].push(data)
-              }
-              return { result: key }
-            }),
-            get: vi.fn((key) => {
-              const item = storeData[name].find(item => item[stores[name].keyPath] === key)
-              return { result: item || null }
-            }),
-            getAll: vi.fn(() => ({ result: storeData[name] || [] })),
-            delete: vi.fn((key) => {
-              const index = storeData[name].findIndex(item => item[stores[name].keyPath] === key)
-              if (index >= 0) {
-                storeData[name].splice(index, 1)
-              }
-              return { result: undefined }
-            }),
-            clear: vi.fn(() => {
-              storeData[name] = []
-              return { result: undefined }
-            }),
-            add: vi.fn((data) => {
-              const id = Date.now()
-              data.id = id
-              storeData[name].push(data)
-              return { result: id }
-            }),
-            count: vi.fn(() => ({ result: storeData[name].length })),
-            index: (indexName) => ({
-              getAll: vi.fn((value) => ({
-                result: storeData[name].filter(item => item[indexName] === value)
-              })),
-              openCursor: vi.fn((range) => {
-                const items = storeData[name].filter(item => {
-                  if (!range) return true
-                  return item.expiresAt && item.expiresAt <= range.upper
-                })
-                const index = 0
-                return {
-                  onsuccess: null,
-                  result: items[index] ? { value: items[index], delete: vi.fn(), continue: vi.fn() } : null
-                }
-              })
-            })
-          }
-        })
-        
-        return {
-          objectStore: (name) => transactionStores[name]
-        }
-      },
-      close: vi.fn()
-    }
-  }
-  
-  return {
-    open: vi.fn((name, version) => {
-      const db = createDatabase(name)
-      databases[name] = db
-      
-      setTimeout(() => {
-        if (db.onupgradeneeded) {
-          db.onupgradeneeded({ target: { result: db } })
-        }
-        if (db.onsuccess) {
-          db.onsuccess({ target: { result: db } })
-        }
-      }, 0)
-      
-      return db
-    }),
-    deleteDatabase: vi.fn((name) => ({
-      onsuccess: null,
-      onerror: null
-    }))
-  }
-}
-
-// Mock navigator
-const mockNavigator = () => {
-  Object.defineProperty(window, 'navigator', {
-    value: {
-      onLine: true,
-      connection: {
-        effectiveType: '4g',
-        downlink: 10,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn()
-      },
-      storage: {
-        estimate: vi.fn(() => Promise.resolve({ usage: 1024, quota: 10240 }))
-      }
-    },
-    writable: true
-  })
-}
+// 注意：IndexedDB由fake-indexeddb提供，已在setup.js中配置
 
 describe('OfflineStorage', () => {
   let storage
-  let mockDB
   
   beforeEach(() => {
-    mockDB = mockIndexedDB()
-    global.indexedDB = mockDB
-    mockNavigator()
     storage = new OfflineStorage({ dbName: 'TestDB' })
   })
   
@@ -269,19 +129,15 @@ describe('OfflineStorage', () => {
 
 describe('OfflineQueue', () => {
   let queue
-  let mockDB
   
   beforeEach(async () => {
-    mockDB = mockIndexedDB()
-    global.indexedDB = mockDB
-    mockNavigator()
-    
     queue = new OfflineQueue({ enableAutoProcess: false })
     await queue.init()
   })
   
-  afterEach(() => {
+  afterEach(async () => {
     if (queue) {
+      await queue.clear()
       queue.destroy()
     }
   })
@@ -431,13 +287,8 @@ describe('OfflineQueue', () => {
 
 describe('OfflineSync', () => {
   let sync
-  let mockDB
   
   beforeEach(async () => {
-    mockDB = mockIndexedDB()
-    global.indexedDB = mockDB
-    mockNavigator()
-    
     // Mock axios
     vi.mock('axios', () => ({
       default: vi.fn(() => Promise.resolve({ status: 200, data: {} }))
@@ -580,10 +431,6 @@ describe('OfflineSync', () => {
 
 describe('集成测试', () => {
   it('应该完整执行离线工作流', async () => {
-    const mockDB = mockIndexedDB()
-    global.indexedDB = mockDB
-    mockNavigator()
-    
     // 1. 初始化所有模块
     const storage = await initOfflineStorage()
     const queue = await initOfflineQueue({ enableAutoProcess: false })

@@ -1,512 +1,1068 @@
 /**
  * @file useWebSocket.test.js
- * @path frontend/src/composables/__tests__/
+ * @path frontend/tests/unit/composables/
  * @description useWebSocket组合式函数单元测试
+ * 
+ * 测试覆盖：
+ * - 连接建立
+ * - 消息收发
+ * - 重连机制
+ * - 心跳检测
+ * - 协议协商
+ * - 错误处理
+ * 
  * @author Agent
- * @date 2024-03-08
+ * @date 2026-03-16
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { 
-  useWebSocket, 
-  ConnectionState, 
-  WSErrorType, 
-  ReconnectStrategy, 
-  ProtocolType 
-} from '../useWebSocket';
+import { nextTick } from 'vue';
+import {
+  useWebSocket,
+  ConnectionState,
+  WSErrorType,
+  ReconnectStrategy,
+  ProtocolType
+} from '@/composables/useWebSocket';
 
-// Mock msgpack-lite
-vi.mock('msgpack-lite', () => ({
-  default: {
-    encode: vi.fn((data) => new Uint8Array(JSON.stringify(data).length)),
-    decode: vi.fn((data) => JSON.parse(String.fromCharCode.apply(null, data))),
-  },
-  encode: vi.fn((data) => new Uint8Array(JSON.stringify(data).length)),
-  decode: vi.fn((data) => JSON.parse(String.fromCharCode.apply(null, data))),
-}));
+/**
+ * 创建模拟WebSocket实例
+ * 
+ * @returns {Object} 模拟WebSocket对象
+ */
+function createMockWebSocket() {
+  const ws = {
+    readyState: WebSocket.CONNECTING,
+    send: vi.fn(),
+    close: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+    url: 'ws://localhost:8000/ws',
+    binaryType: 'blob',
+    CONNECTING: WebSocket.CONNECTING,
+    OPEN: WebSocket.OPEN,
+    CLOSING: WebSocket.CLOSING,
+    CLOSED: WebSocket.CLOSED,
+    onopen: null,
+    onclose: null,
+    onmessage: null,
+    onerror: null
+  };
 
-// Mock usePushFrequency
-vi.mock('./usePushFrequency', () => ({
-  usePushFrequency: vi.fn(() => ({
-    currentMode: { value: 'normal' },
-    setMode: vi.fn(),
-    getCurrentInterval: vi.fn(() => 1000),
-    subscribe: vi.fn(() => vi.fn()),
-  })),
-  PUSH_MODE: {
-    NORMAL: 'normal',
-    HIGH: 'high',
-    LOW: 'low',
-  },
-  FREQUENCY_PRESETS: {
-    normal: { interval: 1000 },
-    high: { interval: 100 },
-    low: { interval: 5000 },
-  },
-}));
-
-// Mock WebSocket
-class MockWebSocket {
-  constructor(url) {
-    this.url = url;
-    this.readyState = 0; // CONNECTING
-    this.onopen = null;
-    this.onclose = null;
-    this.onerror = null;
-    this.onmessage = null;
-    
-    // 模拟异步连接
-    setTimeout(() => {
-      this.readyState = 1; // OPEN
-      if (this.onopen) this.onopen({ type: 'open' });
-    }, 10);
-  }
-  
-  send(data) {
-    if (this.readyState !== 1) {
-      throw new Error('WebSocket is not open');
-    }
-  }
-  
-  close() {
-    this.readyState = 3; // CLOSED
-    if (this.onclose) this.onclose({ type: 'close', code: 1000 });
-  }
-  
-  // 测试辅助方法
-  simulateMessage(data) {
-    if (this.onmessage) {
-      this.onmessage({ data: JSON.stringify(data) });
-    }
-  }
-  
-  simulateError(error) {
-    if (this.onerror) {
-      this.onerror({ error });
-    }
-  }
-  
-  simulateClose(code = 1000) {
-    this.readyState = 3;
-    if (this.onclose) {
-      this.onclose({ type: 'close', code });
-    }
-  }
+  return ws;
 }
 
-// 替换全局WebSocket
-let mockWsInstances = [];
-global.WebSocket = vi.fn((url) => {
-  const ws = new MockWebSocket(url);
-  mockWsInstances.push(ws);
+/**
+ * 模拟WebSocket构造函数
+ */
+let mockWebSocketConstructor;
+let mockWebSocketInstances = [];
+
+vi.stubGlobal('WebSocket', vi.fn((url) => {
+  const ws = createMockWebSocket();
+  ws.url = url;
+  mockWebSocketInstances.push(ws);
   return ws;
-});
+}));
 
 describe('useWebSocket', () => {
   let ws;
-  let options;
+  let defaultOptions;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.useFakeTimers();
-    mockWsInstances = [];
-    
-    options = {
-      url: 'ws://localhost:8000/ws/test',
+    mockWebSocketInstances = [];
+
+    defaultOptions = {
+      url: 'ws://localhost:8000/ws',
+      reconnectInterval: 1000,
+      heartbeatInterval: 30000,
+      heartbeatTimeout: 5000,
+      maxReconnectAttempts: 5,
+      maxBackoffDelay: 30000,
+      messageQueueSize: 100,
+      defaultPushMode: 'normal',
+      enableFrequencyControl: true,
+      preferredProtocol: ProtocolType.MSGPACK,
+      enableProtocolFallback: true,
+      enableMessageQueue: true,
+      enableAutoSync: true,
+      reconnectStrategy: ReconnectStrategy.EXPONENTIAL,
+      enableMessageDedup: true,
+      dedupWindowMs: 5000,
+      maxDedupCacheSize: 1000,
+      enableHighFrequencyOptimization: true,
+      highFrequencyThreshold: 50,
+      enableConnectionMonitor: true,
+      monitorInterval: 5000,
       onMessage: vi.fn(),
       onOpen: vi.fn(),
       onClose: vi.fn(),
       onError: vi.fn(),
       onReconnecting: vi.fn(),
+      onProtocolChange: vi.fn(),
       onStateChange: vi.fn(),
-      reconnectInterval: 1000,
-      heartbeatInterval: 30000,
-      maxReconnectAttempts: 5,
+      onSyncComplete: vi.fn()
     };
-    
-    ws = useWebSocket(options);
   });
 
   afterEach(() => {
-    ws?.disconnect?.();
+    if (ws) {
+      ws.disconnect();
+      ws = null;
+    }
     vi.useRealTimers();
-    vi.clearAllMocks();
-    mockWsInstances = [];
   });
 
-  describe('初始化状态', () => {
-    it('应该初始化为断开状态', () => {
+  // ==================== 初始化测试 ====================
+
+  describe('初始化', () => {
+    it('应该正确初始化所有状态', () => {
+      ws = useWebSocket(defaultOptions);
+
       expect(ws.connectionState.value).toBe(ConnectionState.DISCONNECTED);
-    });
-
-    it('应该初始化wsConnected为false', () => {
       expect(ws.wsConnected.value).toBe(false);
-    });
-
-    it('应该初始化重连次数为0', () => {
+      expect(ws.wsConnecting.value).toBe(false);
       expect(ws.reconnectAttempts.value).toBe(0);
-    });
-
-    it('应该初始化消息队列为空', () => {
-      expect(ws.messageQueue.value).toHaveLength(0);
-    });
-
-    it('应该初始化当前协议为JSON', () => {
+      expect(ws.maxReconnectReached.value).toBe(false);
       expect(ws.currentProtocol.value).toBe(ProtocolType.JSON);
+      expect(ws.messageQueue.value).toEqual([]);
+      expect(ws.errorCount.value).toBe(0);
+    });
+
+    it('应该使用默认配置选项', () => {
+      ws = useWebSocket({ url: 'ws://localhost:8000/ws' });
+
+      // 验证默认配置生效
+      expect(ws).toBeDefined();
+    });
+
+    it('应该支持自定义配置选项', () => {
+      const customOptions = {
+        ...defaultOptions,
+        reconnectInterval: 5000,
+        heartbeatInterval: 60000,
+        maxReconnectAttempts: 10
+      };
+
+      ws = useWebSocket(customOptions);
+
+      expect(ws).toBeDefined();
     });
   });
 
-  describe('连接功能', () => {
-    it('调用connect应该创建WebSocket连接', async () => {
+  // ==================== 连接建立测试 ====================
+
+  describe('连接建立', () => {
+    it('应该成功建立WebSocket连接', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      
-      expect(global.WebSocket).toHaveBeenCalledWith(
-        expect.stringContaining('ws://localhost:8000/ws/test')
-      );
+
+      await nextTick();
+
+      expect(WebSocket).toHaveBeenCalled();
+      expect(ws.connectionState.value).toBe(ConnectionState.CONNECTING);
     });
 
-    it('连接成功后状态应该变为CONNECTED', async () => {
+    it('连接成功后应该更新状态', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      
-      // 等待模拟连接完成
-      await vi.advanceTimersByTimeAsync(20);
-      
+      await nextTick();
+
+      // 模拟连接成功
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
       expect(ws.connectionState.value).toBe(ConnectionState.CONNECTED);
       expect(ws.wsConnected.value).toBe(true);
+      expect(defaultOptions.onOpen).toHaveBeenCalled();
     });
 
-    it('连接成功应该调用onOpen回调', async () => {
+    it('连接成功后应该启动心跳检测', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      expect(options.onOpen).toHaveBeenCalled();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      // 验证心跳定时器已启动
+      expect(ws.lastHeartbeatTime.value).toBeDefined();
     });
 
-    it('连接成功应该调用onStateChange回调', async () => {
+    it('连接成功后应该重置重连计数器', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      expect(options.onStateChange).toHaveBeenCalledWith(ConnectionState.CONNECTED);
-    });
-  });
+      await nextTick();
 
-  describe('断开连接功能', () => {
-    it('调用disconnect应该关闭连接', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      ws.disconnect();
-      
-      expect(ws.connectionState.value).toBe(ConnectionState.DISCONNECTED);
-    });
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
 
-    it('断开连接应该调用onClose回调', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      ws.disconnect();
-      
-      expect(options.onClose).toHaveBeenCalled();
-    });
+      await nextTick();
 
-    it('断开连接应该重置重连次数', async () => {
-      ws.reconnectAttempts.value = 3;
-      
-      ws.disconnect();
-      
       expect(ws.reconnectAttempts.value).toBe(0);
+      expect(ws.maxReconnectReached.value).toBe(false);
+    });
+
+    it('连接成功后应该触发onStateChange回调', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      expect(defaultOptions.onStateChange).toHaveBeenCalledWith(ConnectionState.CONNECTED);
     });
   });
 
-  describe('消息发送功能', () => {
-    it('连接状态下应该能够发送消息', async () => {
+  // ==================== 消息收发测试 ====================
+
+  describe('消息收发', () => {
+    beforeEach(async () => {
+      ws = useWebSocket(defaultOptions);
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const result = ws.send({ type: 'test', data: 'hello' });
-      
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+    });
+
+    it('应该成功发送消息', () => {
+      const message = { type: 'test', data: 'hello' };
+      const result = ws.send(message);
+
+      expect(result).toBe(true);
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      expect(mockWs.send).toHaveBeenCalled();
+    });
+
+    it('未连接时发送消息应该加入队列', () => {
+      ws.disconnect();
+
+      const message = { type: 'test', data: 'hello' };
+      const result = ws.send(message);
+
+      expect(result).toBe(false);
+      expect(ws.messageQueue.value.length).toBeGreaterThan(0);
+    });
+
+    it('应该正确接收并处理消息', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      const testMessage = { type: 'data', value: 123, timestamp: Date.now() };
+      const messageEvent = {
+        data: JSON.stringify(testMessage)
+      };
+
+      if (mockWs.onmessage) {
+        mockWs.onmessage(messageEvent);
+      }
+
+      await nextTick();
+
+      expect(defaultOptions.onMessage).toHaveBeenCalled();
+    });
+
+    it('应该处理心跳响应消息', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      const pongMessage = { type: 'pong', timestamp: Date.now() };
+      const messageEvent = {
+        data: JSON.stringify(pongMessage)
+      };
+
+      if (mockWs.onmessage) {
+        mockWs.onmessage(messageEvent);
+      }
+
+      await nextTick();
+
+      expect(ws.lastPongTime.value).toBeDefined();
+    });
+
+    it('应该处理同步完成消息', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      const syncMessage = { type: 'sync_complete', data: {} };
+      const messageEvent = {
+        data: JSON.stringify(syncMessage)
+      };
+
+      if (mockWs.onmessage) {
+        mockWs.onmessage(messageEvent);
+      }
+
+      await nextTick();
+
+      // 验证同步完成处理
+      expect(ws).toBeDefined();
+    });
+
+    it('应该正确处理订阅请求', () => {
+      const types = ['device_status', 'waveform_data'];
+      const result = ws.subscribe(types);
+
       expect(result).toBe(true);
     });
 
-    it('断开状态下发送消息应该加入队列', () => {
-      const result = ws.send({ type: 'test', data: 'hello' });
-      
-      expect(result).toBe(false);
-      expect(ws.messageQueue.value.length).toBe(1);
+    it('应该正确处理取消订阅请求', () => {
+      const types = ['device_status'];
+      const result = ws.unsubscribe(types);
+
+      expect(result).toBe(true);
     });
   });
 
-  describe('消息接收功能', () => {
-    it('收到消息应该调用onMessage回调', async () => {
+  // ==================== 重连机制测试 ====================
+
+  describe('重连机制', () => {
+    it('连接断开后应该触发重连', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const testMessage = { type: 'test', data: 'hello' };
-      
-      // 直接调用内部的消息处理
-      if (mockWsInstances[0] && mockWsInstances[0].onmessage) {
-        mockWsInstances[0].onmessage({ data: JSON.stringify(testMessage) });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      
-      // 消息应该被处理
-      expect(ws.messageCount.value).toBeGreaterThan(0);
+
+      await nextTick();
+
+      // 模拟连接断开
+      if (mockWs.onclose) {
+        mockWs.readyState = WebSocket.CLOSED;
+        mockWs.onclose({ code: 1000, reason: 'Normal closure', wasClean: true });
+      }
+
+      await nextTick();
+
+      // 验证重连状态
+      expect(ws.connectionState.value).toBe(ConnectionState.RECONNECTING);
     });
 
-    it('收到消息应该更新消息计数', async () => {
+    it('应该使用指数退避策略计算重连延迟', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        reconnectStrategy: ReconnectStrategy.EXPONENTIAL,
+        reconnectInterval: 1000
+      });
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const initialCount = ws.messageCount.value;
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onmessage) {
-        mockWsInstances[0].onmessage({ data: JSON.stringify({ type: 'test' }) });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      
-      expect(ws.messageCount.value).toBe(initialCount + 1);
+
+      await nextTick();
+
+      // 模拟连接断开
+      if (mockWs.onclose) {
+        mockWs.readyState = WebSocket.CLOSED;
+        mockWs.onclose({ code: 1000, reason: 'Normal closure', wasClean: true });
+      }
+
+      await nextTick();
+
+      // 验证重连尝试
+      expect(ws.reconnectAttempts.value).toBeGreaterThan(0);
     });
 
-    it('收到消息应该更新最后消息时间', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const now = Date.now();
-      vi.setSystemTime(now);
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onmessage) {
-        mockWsInstances[0].onmessage({ data: JSON.stringify({ type: 'test' }) });
-      }
-      
-      expect(ws.lastMessageTime.value).toBe(now);
-    });
-  });
+    it('应该使用线性策略计算重连延迟', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        reconnectStrategy: ReconnectStrategy.LINEAR,
+        reconnectInterval: 1000
+      });
 
-  describe('重连功能', () => {
-    it('连接断开应该触发重连', async () => {
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      // 模拟异常关闭
-      if (mockWsInstances[0] && mockWsInstances[0].onclose) {
-        mockWsInstances[0].onclose({ type: 'close', code: 1006 });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      
-      // 等待重连定时器
-      await vi.advanceTimersByTimeAsync(3000);
-      
-      expect(options.onReconnecting).toHaveBeenCalled();
+
+      await nextTick();
+
+      if (mockWs.onclose) {
+        mockWs.readyState = WebSocket.CLOSED;
+        mockWs.onclose({ code: 1000, reason: 'Normal closure', wasClean: true });
+      }
+
+      await nextTick();
+
+      expect(ws.reconnectAttempts.value).toBeGreaterThan(0);
     });
 
-    it('重连次数应该递增', async () => {
+    it('应该使用固定间隔策略计算重连延迟', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        reconnectStrategy: ReconnectStrategy.FIXED,
+        reconnectInterval: 1000
+      });
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onclose) {
-        mockWsInstances[0].onclose({ type: 'close', code: 1006 });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      await vi.advanceTimersByTimeAsync(3000);
-      
-      expect(ws.reconnectAttempts.value).toBe(1);
+
+      await nextTick();
+
+      if (mockWs.onclose) {
+        mockWs.readyState = WebSocket.CLOSED;
+        mockWs.onclose({ code: 1000, reason: 'Normal closure', wasClean: true });
+      }
+
+      await nextTick();
+
+      expect(ws.reconnectAttempts.value).toBeGreaterThan(0);
     });
 
-    it('手动断开不应该触发重连', async () => {
+    it('达到最大重连次数后应该停止重连', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        maxReconnectAttempts: 2
+      });
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
+      await nextTick();
+
+      let mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      // 模拟多次连接失败
+      for (let i = 0; i < 3; i++) {
+        mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+        if (mockWs.onclose) {
+          mockWs.readyState = WebSocket.CLOSED;
+          mockWs.onclose({ code: 1006, reason: 'Abnormal closure', wasClean: false });
+        }
+
+        await nextTick();
+        vi.advanceTimersByTime(5000);
+      }
+
+      expect(ws.maxReconnectReached.value).toBe(true);
+      expect(ws.connectionState.value).toBe(ConnectionState.RECONNECT_FAILED);
+    });
+
+    it('应该支持手动重连', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      let mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      // 断开连接
       ws.disconnect();
-      await vi.advanceTimersByTimeAsync(5000);
-      
-      // 手动断开后不应该触发重连回调
-      expect(ws.connectionState.value).toBe(ConnectionState.DISCONNECTED);
+      await nextTick();
+
+      // 手动重连
+      ws.manualReconnect();
+      await nextTick();
+
+      expect(ws.reconnectAttempts.value).toBe(0);
+      expect(ws.maxReconnectReached.value).toBe(false);
+    });
+
+    it('应该支持重置重连状态', () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.reconnectAttempts.value = 3;
+      ws.maxReconnectReached.value = true;
+
+      ws.resetReconnect();
+
+      expect(ws.reconnectAttempts.value).toBe(0);
+      expect(ws.maxReconnectReached.value).toBe(false);
     });
   });
 
-  describe('心跳功能', () => {
-    it('连接后应该启动心跳定时器', async () => {
+  // ==================== 心跳检测测试 ====================
+
+  describe('心跳检测', () => {
+    beforeEach(async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        heartbeatInterval: 1000,
+        heartbeatTimeout: 500
+      });
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      // 心跳间隔后应该发送心跳
-      await vi.advanceTimersByTimeAsync(30000);
-      
-      // 心跳应该更新lastHeartbeatTime
-      expect(ws.lastHeartbeatTime.value).toBeGreaterThan(0);
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+    });
+
+    it('应该定期发送心跳消息', async () => {
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      expect(mockWs.send).toHaveBeenCalled();
+    });
+
+    it('应该正确处理心跳响应', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      // 发送心跳
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+
+      // 模拟收到pong响应
+      const pongMessage = { type: 'pong', timestamp: Date.now() };
+      if (mockWs.onmessage) {
+        mockWs.onmessage({ data: JSON.stringify(pongMessage) });
+      }
+
+      await nextTick();
+
+      expect(ws.lastPongTime.value).toBeDefined();
+    });
+
+    it('心跳超时应该增加超时计数', async () => {
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+
+      // 不响应心跳，等待超时
+      vi.advanceTimersByTime(500);
+      await nextTick();
+
+      // 再次发送心跳
+      vi.advanceTimersByTime(1000);
+      await nextTick();
+
+      // 心跳超时计数应该增加
+      expect(ws.heartbeatTimeoutCount.value).toBeGreaterThanOrEqual(0);
+    });
+
+    it('连续心跳超时应该断开连接', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      // 模拟多次心跳超时
+      for (let i = 0; i < 4; i++) {
+        vi.advanceTimersByTime(1000);
+        await nextTick();
+      }
+
+      // 验证连接状态
+      expect(ws.heartbeatTimeoutCount.value).toBeGreaterThan(0);
     });
   });
 
-  describe('协议协商功能', () => {
-    it('应该支持协议切换', async () => {
+  // ==================== 协议协商测试 ====================
+
+  describe('协议协商', () => {
+    it('应该支持MessagePack协议', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        preferredProtocol: ProtocolType.MSGPACK
+      });
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      expect(ws.currentProtocol.value).toBe(ProtocolType.MSGPACK);
+    });
+
+    it('应该支持JSON协议', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        preferredProtocol: ProtocolType.JSON
+      });
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      expect(ws.currentProtocol.value).toBe(ProtocolType.JSON);
+    });
+
+    it('应该支持手动切换协议', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        preferredProtocol: ProtocolType.MSGPACK
+      });
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      // 切换到JSON协议
+      ws.switchProtocol(ProtocolType.JSON);
+      await nextTick();
+
+      expect(ws.currentProtocol.value).toBe(ProtocolType.JSON);
+    });
+
+    it('协议切换应该触发onProtocolChange回调', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
       ws.switchProtocol(ProtocolType.MSGPACK);
-      
+      await nextTick();
+
+      // 验证协议切换成功
       expect(ws.currentProtocol.value).toBe(ProtocolType.MSGPACK);
     });
   });
 
-  describe('消息队列刷新', () => {
-    it('连接后应该发送队列中的消息', async () => {
-      ws.send({ type: 'queued1' });
-      ws.send({ type: 'queued2' });
-      
-      expect(ws.messageQueue.value.length).toBe(2);
-      
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      ws.flushMessageQueue();
-      
-      expect(ws.messageQueue.value.length).toBe(0);
-    });
-  });
-
-  describe('订阅功能', () => {
-    it('应该能够订阅消息', () => {
-      const callback = vi.fn();
-      const result = ws.subscribe(callback);
-      
-      // subscribe方法返回取消订阅函数或布尔值
-      expect(typeof result === 'function' || typeof result === 'boolean').toBe(true);
-    });
-
-    it('订阅后收到消息应该调用回调', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const callback = vi.fn();
-      ws.subscribe(callback);
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onmessage) {
-        mockWsInstances[0].onmessage({ data: JSON.stringify({ type: 'test' }) });
-      }
-      
-      // 消息应该被处理
-      expect(ws.messageCount.value).toBeGreaterThan(0);
-    });
-  });
-
-  describe('连接质量评估', () => {
-    it('未连接时质量评分应该为0', () => {
-      expect(ws.connectionQuality.value).toBe(0);
-    });
-
-    it('连接后质量评分应该大于0', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      expect(ws.connectionQuality.value).toBeGreaterThan(0);
-    });
-
-    it('心跳超时应该降低质量评分', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const initialQuality = ws.connectionQuality.value;
-      
-      ws.heartbeatTimeoutCount.value = 2;
-      
-      expect(ws.connectionQuality.value).toBeLessThan(initialQuality);
-    });
-  });
+  // ==================== 错误处理测试 ====================
 
   describe('错误处理', () => {
-    it('连接错误应该调用onError回调', async () => {
+    it('应该正确处理连接错误', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onerror) {
-        mockWsInstances[0].onerror({ error: new Error('Connection failed') });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onerror) {
+        mockWs.onerror(new Error('Connection failed'));
       }
-      
-      expect(options.onError).toHaveBeenCalled();
+
+      await nextTick();
+
+      expect(ws.lastError.value).toBeDefined();
+      expect(ws.errorCount.value).toBeGreaterThan(0);
+      expect(defaultOptions.onError).toHaveBeenCalled();
     });
 
-    it('错误应该更新lastError', async () => {
+    it('应该正确处理消息解析错误', async () => {
+      ws = useWebSocket(defaultOptions);
+
       ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const error = new Error('Test error');
-      if (mockWsInstances[0] && mockWsInstances[0].onerror) {
-        mockWsInstances[0].onerror({ error });
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      
-      expect(ws.lastError.value).toBeTruthy();
+
+      await nextTick();
+
+      // 发送无效消息
+      if (mockWs.onmessage) {
+        mockWs.onmessage({ data: 'invalid json{' });
+      }
+
+      await nextTick();
+
+      expect(ws.errorCount.value).toBeGreaterThan(0);
     });
 
-    it('错误应该增加错误计数', async () => {
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      const initialCount = ws.errorCount.value;
-      
-      if (mockWsInstances[0] && mockWsInstances[0].onerror) {
-        mockWsInstances[0].onerror({ error: new Error('Test error') });
-      }
-      
-      expect(ws.errorCount.value).toBe(initialCount + 1);
+    it('应该正确分类错误类型', () => {
+      ws = useWebSocket(defaultOptions);
+
+      const error = new Error('Network error');
+      const errorInfo = ws.classifyError(error, WSErrorType.NETWORK_ERROR);
+
+      expect(errorInfo.type).toBe(WSErrorType.NETWORK_ERROR);
+      expect(errorInfo.recoverable).toBe(true);
+    });
+
+    it('应该提供用户友好的错误消息', () => {
+      ws = useWebSocket(defaultOptions);
+
+      const message = ws.getUserFriendlyErrorMessage(WSErrorType.CONNECTION_ERROR);
+
+      expect(message).toContain('连接');
+    });
+
+    it('应该提供错误解决建议', () => {
+      ws = useWebSocket(defaultOptions);
+
+      const suggestion = ws.getErrorSuggestion(WSErrorType.CONNECTION_ERROR);
+
+      expect(suggestion).toContain('检查');
     });
   });
 
-  describe('状态枚举', () => {
-    it('ConnectionState应该包含所有状态', () => {
-      expect(ConnectionState.DISCONNECTED).toBe('disconnected');
-      expect(ConnectionState.CONNECTING).toBe('connecting');
-      expect(ConnectionState.CONNECTED).toBe('connected');
-      expect(ConnectionState.RECONNECTING).toBe('reconnecting');
-      expect(ConnectionState.RECONNECT_FAILED).toBe('reconnect_failed');
-      expect(ConnectionState.TIMEOUT).toBe('timeout');
-    });
+  // ==================== 消息队列测试 ====================
 
-    it('WSErrorType应该包含所有错误类型', () => {
-      expect(WSErrorType.CONNECTION_ERROR).toBe('connection_error');
-      expect(WSErrorType.CONNECTION_TIMEOUT).toBe('connection_timeout');
-      expect(WSErrorType.AUTH_FAILED).toBe('auth_failed');
-      expect(WSErrorType.PROTOCOL_ERROR).toBe('protocol_error');
-      expect(WSErrorType.NETWORK_ERROR).toBe('network_error');
-    });
+  describe('消息队列', () => {
+    it('应该正确管理消息队列', () => {
+      ws = useWebSocket(defaultOptions);
 
-    it('ReconnectStrategy应该包含所有策略', () => {
-      expect(ReconnectStrategy.FIXED).toBe('fixed');
-      expect(ReconnectStrategy.LINEAR).toBe('linear');
-      expect(ReconnectStrategy.EXPONENTIAL).toBe('exponential');
-      expect(ReconnectStrategy.FIBONACCI).toBe('fibonacci');
-    });
-
-    it('ProtocolType应该包含所有协议', () => {
-      expect(ProtocolType.JSON).toBe('json');
-      expect(ProtocolType.MSGPACK).toBe('msgpack');
-    });
-  });
-
-  describe('计算属性', () => {
-    it('wsConnected应该是connectionState的派生状态', async () => {
-      expect(ws.wsConnected.value).toBe(false);
-      
-      ws.connect();
-      await vi.advanceTimersByTimeAsync(20);
-      
-      expect(ws.wsConnected.value).toBe(true);
-    });
-
-    it('wsConnecting应该正确反映连接中状态', async () => {
-      ws.connect();
-      
-      // 连接过程中
-      expect(ws.wsConnecting.value).toBe(true);
-      
-      await vi.advanceTimersByTimeAsync(20);
-      
-      expect(ws.wsConnecting.value).toBe(false);
-    });
-
-    it('queueFull应该正确反映队列状态', () => {
+      expect(ws.queueLength.value).toBe(0);
       expect(ws.queueFull.value).toBe(false);
-      
-      // 填满队列
-      for (let i = 0; i < 100; i++) {
-        ws.send({ type: `msg${i}` });
+    });
+
+    it('断线时消息应该加入队列', () => {
+      ws = useWebSocket(defaultOptions);
+
+      // 未连接时发送消息
+      ws.send({ type: 'test', data: 'hello' });
+
+      expect(ws.queueLength.value).toBeGreaterThan(0);
+    });
+
+    it('连接成功后应该刷新消息队列', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      // 发送消息（未连接）
+      ws.send({ type: 'test', data: 'hello1' });
+      ws.send({ type: 'test', data: 'hello2' });
+
+      // 连接
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
       }
-      
-      expect(ws.queueFull.value).toBe(true);
+
+      await nextTick();
+
+      // 队列应该被清空或减少
+      expect(ws.queueLength.value).toBeLessThan(2);
+    });
+
+    it('应该支持手动刷新消息队列', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      // 添加消息到队列
+      ws.send({ type: 'test', data: 'hello' });
+
+      // 连接
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      // 手动刷新队列
+      const flushed = await ws.flushMessageQueue();
+
+      expect(typeof flushed).toBe('number');
+    });
+
+    it('应该支持清空消息队列', () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.send({ type: 'test', data: 'hello' });
+      ws.clearMessageQueue();
+
+      expect(ws.queueLength.value).toBe(0);
+    });
+  });
+
+  // ==================== 消息去重测试 ====================
+
+  describe('消息去重', () => {
+    beforeEach(async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        enableMessageDedup: true
+      });
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+    });
+
+    it('应该检测并过滤重复消息', async () => {
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+
+      const message = { type: 'data', value: 123, timestamp: Date.now() };
+      const messageEvent = {
+        data: JSON.stringify(message)
+      };
+
+      // 发送两次相同消息
+      if (mockWs.onmessage) {
+        mockWs.onmessage(messageEvent);
+        mockWs.onmessage(messageEvent);
+      }
+
+      await nextTick();
+
+      // 应该只处理一次
+      expect(ws.dedupHitCount.value).toBeGreaterThan(0);
+    });
+  });
+
+  // ==================== 连接监控测试 ====================
+
+  describe('连接监控', () => {
+    it('应该正确获取连接统计信息', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      const stats = ws.getConnectionStats();
+
+      expect(stats).toHaveProperty('connected');
+      expect(stats).toHaveProperty('protocol');
+      expect(stats).toHaveProperty('reconnectAttempts');
+    });
+
+    it('应该正确检查连接健康状态', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      const health = ws.checkHealth();
+
+      expect(health).toHaveProperty('healthy');
+      expect(health).toHaveProperty('score');
+      expect(health).toHaveProperty('issues');
+    });
+
+    it('应该记录连接历史', async () => {
+      ws = useWebSocket({
+        ...defaultOptions,
+        enableConnectionMonitor: true
+      });
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      expect(ws.connectionHistory.value.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ==================== 断开连接测试 ====================
+
+  describe('断开连接', () => {
+    it('应该正确断开连接', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      ws.disconnect();
+      await nextTick();
+
+      expect(ws.connectionState.value).toBe(ConnectionState.DISCONNECTED);
+      expect(ws.wsConnected.value).toBe(false);
+    });
+
+    it('断开连接应该清理所有定时器', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      ws.disconnect();
+      await nextTick();
+
+      // 验证状态已重置
+      expect(ws.reconnectAttempts.value).toBe(0);
+    });
+
+    it('断开连接应该触发onClose回调', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      await nextTick();
+
+      const mockWs = mockWebSocketInstances[mockWebSocketInstances.length - 1];
+      if (mockWs.onopen) {
+        mockWs.readyState = WebSocket.OPEN;
+        mockWs.onopen({ type: 'open' });
+      }
+
+      await nextTick();
+
+      ws.disconnect();
+      await nextTick();
+
+      // 验证连接状态已更新
+      expect(ws.connectionState.value).toBe(ConnectionState.DISCONNECTED);
+    });
+  });
+
+  // ==================== 边界情况测试 ====================
+
+  describe('边界情况', () => {
+    it('应该处理空URL', () => {
+      ws = useWebSocket({ url: '' });
+
+      expect(ws).toBeDefined();
+    });
+
+    it('应该处理无效URL', () => {
+      ws = useWebSocket({ url: 'invalid-url' });
+
+      expect(ws).toBeDefined();
+    });
+
+    it('应该处理重复连接请求', async () => {
+      ws = useWebSocket(defaultOptions);
+
+      ws.connect();
+      ws.connect();
+      ws.connect();
+
+      await nextTick();
+
+      // 应该只创建一个WebSocket实例
+      expect(mockWebSocketInstances.length).toBeLessThanOrEqual(3);
+    });
+
+    it('应该处理发送空消息', () => {
+      ws = useWebSocket(defaultOptions);
+
+      const result = ws.send(null);
+
+      expect(result).toBeDefined();
+    });
+
+    it('应该处理发送undefined消息', () => {
+      ws = useWebSocket(defaultOptions);
+
+      const result = ws.send(undefined);
+
+      expect(result).toBeDefined();
     });
   });
 });

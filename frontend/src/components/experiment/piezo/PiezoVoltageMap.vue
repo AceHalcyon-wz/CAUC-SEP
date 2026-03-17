@@ -195,6 +195,15 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus';
 import * as echarts from 'echarts';
 import { usePiezoStore } from '@/stores/piezo';
+import {
+  VideoCamera,
+  Download,
+  Delete,
+  TrendCharts,
+  Top,
+  Bottom,
+  DataAnalysis
+} from '@element-plus/icons-vue';
 
 // ============ Store 初始化 ============
 

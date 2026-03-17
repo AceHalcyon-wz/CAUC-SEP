@@ -304,6 +304,14 @@ export async function request(options) {
         signal: controller.signal
       }
 
+      // 验证 URL 格式
+      try {
+        new URL(config.url)
+      } catch (urlError) {
+        console.error('[API] Invalid URL:', config.url, 'Base:', API_BASE_URL, 'Path:', url)
+        throw new Error(`Invalid URL: ${config.url}`)
+      }
+
       if (!skipAuth) {
         const token = localStorage.getItem('auth_token')
         if (token) {
@@ -506,3 +514,29 @@ export async function parallelRequest(requests) {
 }
 
 export const apiRequest = request
+
+/**
+ * 解包 API 响应数据
+ * 
+ * @param {Object} response - apiRequest 返回的响应对象
+ * @returns {any} 实际的数据
+ * 
+ * @description
+ * apiRequest 返回的格式是 {success: boolean, data?: any, message?: string}
+ * 这个函数帮助解包出实际的数据
+ * 
+ * @example
+ * const response = await get('/api/users')
+ * const data = unwrapResponse(response) // 直接获取实际数据
+ */
+export function unwrapResponse(response) {
+  if (!response) {
+    return null
+  }
+  // 如果已经是解包后的数据（直接是对象且有 items 等字段）
+  if (response.items || response.total || response.id) {
+    return response
+  }
+  // 如果是 apiRequest 包装的格式
+  return response.data || response
+}

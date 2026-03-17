@@ -185,18 +185,18 @@ export function detectDataCharacteristics(data) {
     return DATA_CHARACTERISTICS.STABLE;
   }
 
+  // 检测趋势（优先于周期性检测，避免单调趋势被误判为周期性）
+  const trend = detectTrend(data);
+  if (Math.abs(trend) > 0.5) {
+    return DATA_CHARACTERISTICS.TREND;
+  }
+
   // 检测周期性
   const windowSize = Math.min(SAMPLING_CONFIG.PERIOD_DETECTION_WINDOW, Math.floor(data.length / 3));
   const autocorr = calculateAutocorrelation(data, windowSize);
   
   if (autocorr.maxCorrelation > 0.7 && autocorr.period > 0) {
     return DATA_CHARACTERISTICS.PERIODIC;
-  }
-
-  // 检测趋势
-  const trend = detectTrend(data);
-  if (Math.abs(trend) > 0.5) {
-    return DATA_CHARACTERISTICS.TREND;
   }
 
   // 默认为波动数据

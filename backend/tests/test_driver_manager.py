@@ -13,7 +13,7 @@ from typing import Any
 import pytest
 
 from core.abstract import AbstractDevice, DeviceStatus
-from core.driver_manager import (
+from core.device_management.driver_manager import (
     DriverProcessConfig,
     DriverProcessInfo,
     DriverProcessManager,

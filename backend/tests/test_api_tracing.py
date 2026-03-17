@@ -20,7 +20,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.tracing import router
-from core.tracing import Span, TraceContext, Tracer, TraceStorage, set_trace_storage
+from core.monitoring.tracing import Span, TraceContext, Tracer, TraceStorage, get_trace_storage
 
 
 class TestTracingAPI:
@@ -32,7 +32,6 @@ class TestTracingAPI:
         with tempfile.TemporaryDirectory() as temp_dir:
             db_path = os.path.join(temp_dir, "test_tracing.db")
             storage = TraceStorage(db_path=db_path)
-            set_trace_storage(storage)
             yield storage
 
     @pytest.fixture

@@ -433,11 +433,11 @@ class UpdateManager:
                 self._status = UpdateStatus.FAILED
                 self._progress = UpdateProgress(
                     status=UpdateStatus.FAILED,
-                    current_step=f"检查失败: {str(e)}",
+                    current_step=f"检查失败: {e!s}",
                 )
             raise HTTPException(
                 status_code=500,
-                detail=f"检查更新失败: {str(e)}",
+                detail=f"检查更新失败: {e!s}",
             )
 
     def _get_mock_latest_version(self, channel: str) -> VersionInfo:
@@ -810,12 +810,12 @@ class UpdateManager:
                 self._status = UpdateStatus.FAILED
                 self._progress = UpdateProgress(
                     status=UpdateStatus.FAILED,
-                    current_step=f"更新失败: {str(e)}",
+                    current_step=f"更新失败: {e!s}",
                 )
 
             raise HTTPException(
                 status_code=500,
-                detail=f"更新应用失败: {str(e)}",
+                detail=f"更新应用失败: {e!s}",
             )
 
     async def _extract_and_apply(self, package_path: Path) -> None:
@@ -946,12 +946,12 @@ class UpdateManager:
                 self._status = UpdateStatus.FAILED
                 self._progress = UpdateProgress(
                     status=UpdateStatus.FAILED,
-                    current_step=f"回滚失败: {str(e)}",
+                    current_step=f"回滚失败: {e!s}",
                 )
 
             raise HTTPException(
                 status_code=500,
-                detail=f"回滚失败: {str(e)}",
+                detail=f"回滚失败: {e!s}",
             )
 
     async def list_backups(self) -> BackupListResponse:

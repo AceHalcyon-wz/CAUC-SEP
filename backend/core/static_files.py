@@ -36,7 +36,7 @@ def get_base_path() -> Path:
         return Path(__file__).parent.parent.parent.resolve()
 
 
-def get_frontend_path() -> Optional[str]:
+def get_frontend_path() -> str | None:
     """
     获取前端静态文件路径。
 
@@ -69,7 +69,7 @@ def get_frontend_path() -> Optional[str]:
     return None
 
 
-def get_assets_path() -> Optional[Path]:
+def get_assets_path() -> Path | None:
     """
     获取资源文件路径（图标、配置等）。
 
@@ -158,7 +158,7 @@ def get_db_path(db_name: str = "experiments.db") -> Path:
     return data_path / db_name
 
 
-def mount_static_files(app, frontend_path: Optional[str] = None):
+def mount_static_files(app, frontend_path: str | None = None):
     """
     挂载静态文件服务到FastAPI应用。
 

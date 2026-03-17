@@ -252,7 +252,7 @@ async def tracing_health_check():
         logger.error(f"[Tracing] Health check failed: {e}")
         return {
             "status": "unhealthy",
-            "message": f"Health check failed: {str(e)}",
+            "message": f"Health check failed: {e!s}",
         }
 
 

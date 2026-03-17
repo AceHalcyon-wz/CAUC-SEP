@@ -22,9 +22,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 
 from api.logs import router, set_storage
-from core.data_storage import DataStorage
+from core.storage.data_storage import DataStorage
 from models import Base
-from models.user import AuditLog
+from models.logs import AuditLog
 
 
 class TestLogsAPI:

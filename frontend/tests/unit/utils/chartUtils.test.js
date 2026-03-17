@@ -29,7 +29,7 @@ import {
   FPSMonitor,
   BatchDataProcessor,
   generateOptimizationSuggestions,
-} from '../chartUtils';
+} from '@/utils/chartUtils';
 
 describe('chartUtils', () => {
   describe('smartSampling', () => {

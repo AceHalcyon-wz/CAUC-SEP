@@ -374,7 +374,7 @@ class TestTemperatureReadAndSet:
         temp = await controller.read_temperature()
 
         assert isinstance(temp, float)
-        assert TemperatureController.MIN_TEMPERATURE * 0.9 <= temp
+        assert temp >= TemperatureController.MIN_TEMPERATURE * 0.9
 
     @pytest.mark.asyncio
     async def test_set_temperature_valid(self):

@@ -1,0 +1,10 @@
+{
+  "motor_1": {
+    "device_id": "motor_1",
+    "connected": false,
+    "last_connected_time": 1773662174.858678,
+    "last_error": null,
+    "reconnect_count": 0,
+    "state": "idle"
+  }
+}

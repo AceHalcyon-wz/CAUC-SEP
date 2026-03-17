@@ -66,14 +66,14 @@ from .crash_upload import (
 )
 
 __all__ = [
-    "setup_logging",
-    "get_log_stats",
-    "cleanup_old_logs",
     "CrashReportManager",
-    "get_crash_report_storage",
-    "init_crash_report_manager",
     "CrashReportUploader",
-    "upload_crash_report",
-    "init_crash_uploader",
+    "cleanup_old_logs",
+    "get_crash_report_storage",
     "get_crash_uploader",
+    "get_log_stats",
+    "init_crash_report_manager",
+    "init_crash_uploader",
+    "setup_logging",
+    "upload_crash_report",
 ]

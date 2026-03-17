@@ -46,7 +46,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 import bcrypt
@@ -921,6 +921,396 @@ async def clear_history(
     return SuccessResponse(success=True, message=f"已清除 {deleted_count} 条操作历史")
 
 
+# ==================== 管理员API ====================
+
+
+class UserCreateRequest(BaseModel):
+    """用户创建请求模型。"""
+
+    username: str = Field(..., description="用户名", min_length=3, max_length=50)
+    email: EmailStr = Field(..., description="邮箱地址")
+    password: str = Field(..., description="密码", min_length=6, max_length=100)
+    role: str = Field(default="user", description="角色: admin/user/viewer")
+
+
+class UserUpdateRequest(BaseModel):
+    """用户更新请求模型。"""
+
+    email: EmailStr | None = Field(None, description="邮箱地址")
+    role: str | None = Field(None, description="角色: admin/user/viewer")
+    is_active: bool | None = Field(None, description="是否激活")
+
+
+class UserListResponse(BaseModel):
+    """用户列表响应模型。"""
+
+    id: int
+    username: str
+    email: str
+    role: str
+    is_active: bool
+    avatar: str | None
+    created_at: str
+    updated_at: str
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    """
+    验证当前用户是否为管理员。
+
+    Args:
+        current_user: 当前用户
+
+    Returns:
+        User: 当前用户
+
+    Raises:
+        HTTPException: 权限不足
+    """
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="需要管理员权限",
+        )
+    return current_user
+
+
+@router.get("/users")
+async def list_users(
+    page: int = 1,
+    page_size: int = 20,
+    username: str | None = None,
+    role: str | None = None,
+    is_active: bool | None = None,
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    获取用户列表（管理员）。
+
+    Args:
+        page: 页码
+        page_size: 每页数量
+        username: 用户名过滤
+        role: 角色过滤
+        is_active: 状态过滤
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        dict: 用户列表和分页信息
+    """
+    query = db.query(User)
+
+    if username:
+        query = query.filter(User.username.contains(username))
+    if role:
+        query = query.filter(User.role == role)
+    if is_active is not None:
+        query = query.filter(User.is_active == is_active)
+
+    total = query.count()
+    users = query.order_by(User.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": [
+            {
+                "id": u.id,
+                "username": u.username,
+                "email": u.email,
+                "role": u.role,
+                "is_active": u.is_active,
+                "avatar": u.avatar,
+                "created_at": u.created_at.isoformat() if u.created_at else None,
+                "updated_at": u.updated_at.isoformat() if u.updated_at else None,
+            }
+            for u in users
+        ],
+    }
+
+
+@router.post("/users", response_model=UserListResponse)
+async def create_user(
+    request: UserCreateRequest,
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    创建用户（管理员）。
+
+    Args:
+        request: 创建请求
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        UserListResponse: 创建的用户信息
+
+    Raises:
+        HTTPException: 用户名或邮箱已存在
+    """
+    existing = db.query(User).filter(
+        (User.username == request.username) | (User.email == request.email)
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="用户名或邮箱已存在",
+        )
+
+    user = User(
+        username=request.username,
+        email=request.email,
+        password_hash=get_password_hash(request.password),
+        role=request.role,
+        preferences=json.dumps(DEFAULT_PREFERENCES, ensure_ascii=False),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    record_operation(db, admin.id, "user_create", {"created_user_id": user.id, "username": user.username})
+
+    logger.info(f"User created by admin {admin.username}: {user.username}")
+
+    return UserListResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role,
+        is_active=user.is_active,
+        avatar=user.avatar,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        updated_at=user.updated_at.isoformat() if user.updated_at else None,
+    )
+
+
+@router.get("/users/{user_id}", response_model=UserListResponse)
+async def get_user(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    获取指定用户信息（管理员）。
+
+    Args:
+        user_id: 用户ID
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        UserListResponse: 用户信息
+
+    Raises:
+        HTTPException: 用户不存在
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在",
+        )
+
+    return UserListResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role,
+        is_active=user.is_active,
+        avatar=user.avatar,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        updated_at=user.updated_at.isoformat() if user.updated_at else None,
+    )
+
+
+@router.put("/users/{user_id}", response_model=UserListResponse)
+async def update_user(
+    user_id: int,
+    request: UserUpdateRequest,
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    更新指定用户信息（管理员）。
+
+    Args:
+        user_id: 用户ID
+        request: 更新请求
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        UserListResponse: 更新后的用户信息
+
+    Raises:
+        HTTPException: 用户不存在
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在",
+        )
+
+    if request.email is not None:
+        existing = db.query(User).filter(User.email == request.email, User.id != user_id).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="邮箱已被使用",
+            )
+        user.email = request.email
+
+    if request.role is not None:
+        user.role = request.role
+
+    if request.is_active is not None:
+        user.is_active = request.is_active
+
+    user.updated_at = datetime.now()
+    db.commit()
+    db.refresh(user)
+
+    record_operation(db, admin.id, "user_update", {"updated_user_id": user_id, "fields": list(request.model_dump(exclude_none=True).keys())})
+
+    logger.info(f"User updated by admin {admin.username}: {user.username}")
+
+    return UserListResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role,
+        is_active=user.is_active,
+        avatar=user.avatar,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        updated_at=user.updated_at.isoformat() if user.updated_at else None,
+    )
+
+
+@router.delete("/users/{user_id}", response_model=SuccessResponse)
+async def delete_user(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    删除用户（管理员）。
+
+    Args:
+        user_id: 用户ID
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        SuccessResponse: 删除结果
+
+    Raises:
+        HTTPException: 用户不存在或不能删除自己
+    """
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="不能删除自己的账户",
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在",
+        )
+
+    username = user.username
+    db.delete(user)
+    db.commit()
+
+    record_operation(db, admin.id, "user_delete", {"deleted_user_id": user_id, "username": username})
+
+    logger.info(f"User deleted by admin {admin.username}: {username}")
+
+    return SuccessResponse(success=True, message=f"用户 {username} 已删除")
+
+
+@router.post("/users/batch-delete", response_model=SuccessResponse)
+async def batch_delete_users(
+    user_ids: list[int],
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    批量删除用户（管理员）。
+
+    Args:
+        user_ids: 用户ID列表
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        SuccessResponse: 删除结果
+
+    Raises:
+        HTTPException: 不能删除自己
+    """
+    if admin.id in user_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="不能删除自己的账户",
+        )
+
+    deleted_count = db.query(User).filter(User.id.in_(user_ids)).delete(synchronize_session=False)
+    db.commit()
+
+    record_operation(db, admin.id, "user_batch_delete", {"deleted_count": deleted_count, "user_ids": user_ids})
+
+    logger.info(f"Users batch deleted by admin {admin.username}: {deleted_count} users")
+
+    return SuccessResponse(success=True, message=f"已删除 {deleted_count} 个用户")
+
+
+@router.post("/users/{user_id}/reset-password", response_model=SuccessResponse)
+async def reset_user_password(
+    user_id: int,
+    new_password: str = Body(..., description="新密码", min_length=6, max_length=100),
+    admin: User = Depends(require_admin),
+    db=Depends(get_db),
+):
+    """
+    重置用户密码（管理员）。
+
+    Args:
+        user_id: 用户ID
+        new_password: 新密码
+        admin: 管理员用户
+        db: 数据库会话
+
+    Returns:
+        SuccessResponse: 重置结果
+
+    Raises:
+        HTTPException: 用户不存在
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在",
+        )
+
+    user.password_hash = get_password_hash(new_password)
+    user.updated_at = datetime.now()
+    db.commit()
+
+    record_operation(db, admin.id, "password_reset", {"reset_user_id": user_id, "username": user.username})
+
+    logger.info(f"Password reset by admin {admin.username} for user: {user.username}")
+
+    return SuccessResponse(success=True, message=f"用户 {user.username} 密码已重置")
+
+
 # ==================== 初始化函数 ====================
 
 
@@ -930,10 +1320,8 @@ def init_user_system():
 
     创建数据库表和默认管理员用户。
     """
-    # 创建上传目录
     os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
 
-    # 创建默认管理员
     create_default_admin()
 
     logger.info("User system initialized")

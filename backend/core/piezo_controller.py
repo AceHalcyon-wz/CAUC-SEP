@@ -247,7 +247,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"连接失败: {str(e)}"
+            self._last_error = f"连接失败: {e!s}"
             self.status = DeviceStatus.ERROR
             return False
 
@@ -268,7 +268,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"断开连接失败: {str(e)}"
+            self._last_error = f"断开连接失败: {e!s}"
             return False
 
     async def read_status(self) -> dict[str, Any]:
@@ -343,7 +343,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"设置电压失败: {str(e)}"
+            self._last_error = f"设置电压失败: {e!s}"
             return False
 
     async def get_voltage(self) -> float:
@@ -429,7 +429,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"设置控制模式失败: {str(e)}"
+            self._last_error = f"设置控制模式失败: {e!s}"
             return False
 
     def get_control_mode(self) -> ControlMode:
@@ -469,7 +469,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"添加校准点失败: {str(e)}"
+            self._last_error = f"添加校准点失败: {e!s}"
             return False
 
     async def clear_calibration(self) -> bool:
@@ -532,7 +532,7 @@ class PiezoController(AbstractDevice):
             return True
 
         except Exception as e:
-            self._last_error = f"校准失败: {str(e)}"
+            self._last_error = f"校准失败: {e!s}"
             self._calibration_data.valid = False
             return False
 

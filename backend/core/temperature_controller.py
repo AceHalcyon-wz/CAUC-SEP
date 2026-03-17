@@ -1260,10 +1260,7 @@ class TemperatureController(AbstractDevice):
                 current_setpoint = target_temp
 
             # 检查是否到达目标温度
-            if ramp_rate > 0 and current_setpoint >= target_temp:
-                current_setpoint = target_temp
-                break
-            elif ramp_rate < 0 and current_setpoint <= target_temp:
+            if (ramp_rate > 0 and current_setpoint >= target_temp) or (ramp_rate < 0 and current_setpoint <= target_temp):
                 current_setpoint = target_temp
                 break
             elif abs(ramp_rate) < 0.001:

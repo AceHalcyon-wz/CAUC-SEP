@@ -39,7 +39,7 @@
         :lg="12"
         class="control-col"
       >
-        <PiezoControl class="control-card" />
+        <PiezoControlPanel class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
@@ -310,7 +310,7 @@ import {
   RefreshLeft,
   TopRight
 } from '@element-plus/icons-vue'
-import { PiezoControl } from '@/components/experiment/piezo'
+import { PiezoControl as PiezoControlPanel } from '@/components/experiment/piezo'
 import { usePiezoStore } from '@/stores/piezo'
 import { ElMessage } from 'element-plus'
 

@@ -11,7 +11,6 @@
 import { ref, computed, onMounted, onUnmounted, watch, defineAsyncComponent, provide, shallowRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { wsClient } from '../api/websocket'
 import { useDevicesStore } from '../stores/devices'
 import { useLoading } from '../composables/useLoading'
 
@@ -19,12 +18,11 @@ const SidebarIDE = defineAsyncComponent(() => import('../components/layout/Sideb
 const TopbarIDE = defineAsyncComponent(() => import('../components/layout/TopbarIDE.vue'))
 const StatusBarIDE = defineAsyncComponent(() => import('../components/layout/StatusBarIDE.vue'))
 const GlobalLoading = defineAsyncComponent(() => import('../components/common/GlobalLoading.vue'))
-const PageSkeleton = defineAsyncComponent(() => import('../components/common/PageSkeleton.vue'))
 
 const route = useRoute()
 const router = useRouter()
 const devicesStore = useDevicesStore()
-const { startLoading, stopLoading, showGlobalOverlay } = useLoading()
+const { startLoading, stopLoading } = useLoading()
 
 const sidebarCollapsed = ref(false)
 const isMobile = ref(false)
@@ -32,8 +30,6 @@ const mobileMenuOpen = ref(false)
 const showCommandPalette = ref(false)
 const commandQuery = ref('')
 const commandInputRef = ref(null)
-const isPageLoading = ref(false)
-const pageLoadingKey = ref(0)
 
 provide('layoutContext', {
   sidebarCollapsed,
@@ -70,18 +66,6 @@ const filteredCommands = computed(() => {
  * 当前页面标题
  */
 const pageTitle = computed(() => route.meta?.title || 'CAUC-SEP')
-
-/**
- * 页面类型（用于骨架屏）
- */
-const pageType = computed(() => {
-  const path = route.path
-  if (path.includes('/experiment/')) return 'control'
-  if (path.includes('/analysis/')) return 'analysis'
-  if (path.includes('/settings/')) return 'settings'
-  if (path.includes('/device/')) return 'default'
-  return 'default'
-})
 
 /**
  * 切换侧边栏
@@ -172,29 +156,29 @@ onMounted(() => {
 
   startLoading('app-init', { message: '正在初始化...', showOverlay: true })
   
-  const wsConnectTimeout = setTimeout(() => {
+  const initTimeout = setTimeout(() => {
     stopLoading('app-init', false)
-    console.warn('[LayoutIDE] WebSocket连接超时，已跳过')
-  }, 5000)
+    console.warn('[LayoutIDE] 初始化超时，已跳过')
+  }, 3000)
   
-  wsClient.connect()
-    .then(() => {
-      clearTimeout(wsConnectTimeout)
-      stopLoading('app-init', true)
-    })
-    .catch((error) => {
-      clearTimeout(wsConnectTimeout)
-      stopLoading('app-init', false)
-      console.warn('[LayoutIDE] WebSocket连接失败，应用仍可正常使用:', error)
-    })
-
   devicesStore.init()
+  
+  const checkInterval = setInterval(() => {
+    if (devicesStore.wsConnected) {
+      clearTimeout(initTimeout)
+      clearInterval(checkInterval)
+      stopLoading('app-init', true)
+    }
+  }, 100)
+  
+  setTimeout(() => {
+    clearInterval(checkInterval)
+  }, 3000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
   document.removeEventListener('keydown', handleKeyboardShortcuts)
-  wsClient.disconnect()
   devicesStore.cleanup()
 })
 </script>
@@ -226,36 +210,15 @@ onUnmounted(() => {
 
       <!-- 页面内容区域 -->
       <main class="ide-layout__content">
-        <!-- 骨架屏加载状态 -->
-        <transition
-          name="skeleton-fade"
-          mode="out-in"
-        >
-          <PageSkeleton
-            v-if="isPageLoading"
-            :key="pageLoadingKey"
-            :type="pageType"
-          />
-          <!-- 路由视图 -->
-          <router-view
-            v-else
-            v-slot="{ Component }"
-          >
-            <transition
-              name="page-slide"
-              mode="out-in"
-              @before-enter="isPageLoading = true"
-              @after-enter="isPageLoading = false"
-            >
-              <keep-alive :include="['DeviceStatus', 'MotorControl', 'RealtimeAnalysis', 'ElectromagnetControl', 'TemperatureControl']">
-                <component
-                  :is="Component"
-                  :key="route.path"
-                />
-              </keep-alive>
-            </transition>
-          </router-view>
-        </transition>
+        <!-- 路由视图 - 简化结构提升性能 -->
+        <router-view v-slot="{ Component }">
+          <keep-alive :max="5">
+            <component
+              :is="Component"
+              :key="route.path"
+            />
+          </keep-alive>
+        </router-view>
       </main>
 
       <!-- IDE风格底部状态栏 - 固定在主界面上层 -->
@@ -351,20 +314,18 @@ onUnmounted(() => {
   padding-bottom: 40px;
 }
 
-/* 过渡动画 */
+/* 过渡动画 - 优化为快速切换 */
 .page-slide-enter-active,
 .page-slide-leave-active {
-  transition: all 0.15s ease;
+  transition: opacity 0.1s ease;
 }
 
 .page-slide-enter-from {
   opacity: 0;
-  transform: translateX(10px);
 }
 
 .page-slide-leave-to {
   opacity: 0;
-  transform: translateX(-10px);
 }
 
 /* 骨架屏过渡动画 */

@@ -890,7 +890,7 @@ export function useWebSocket(options = {}) {
   }
 
   /**
-   * 构建带协议参数的WebSocket URL
+   * 构建WebSocket URL（不添加查询参数）
    *
    * @param {string} protocol - 协议类型
    * @returns {string} 完整的WebSocket URL
@@ -899,8 +899,16 @@ export function useWebSocket(options = {}) {
   function buildUrlWithProtocol(protocol) {
     if (!baseUrl) return baseUrl
     
+    // 检查是否已经是完整URL
+    if (baseUrl.startsWith('ws://') || baseUrl.startsWith('wss://')) {
+      // 已经是完整URL，直接返回（不添加查询参数）
+      // 如果URL已有查询参数，只保留base部分
+      return baseUrl.split('?')[0]
+    }
+    
+    // 相对路径，使用window.location.origin作为base
     const urlObj = new URL(baseUrl, window.location.origin)
-    urlObj.searchParams.set('protocol', protocol)
+    // 不添加查询参数
     return urlObj.toString()
   }
 

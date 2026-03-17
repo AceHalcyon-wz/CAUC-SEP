@@ -4,12 +4,56 @@
 文件名: CHANGELOG.md
 路径: docs/technical-docs/00-索引与导航/
 功能: 文档更新日志
-版本: v4.0.0
+版本: v4.1.0
 作者: CAUC-SEP 开发团队
 创建日期: 2026-03-15
 -->
 
 本文档记录 CAUC-SEP 技术文档集的所有重要变更。
+
+---
+
+## v4.1.0 (2026-03-17)
+
+### 前端兼容性修复与 API 调用优化
+
+#### Vue 3.5 + Element Plus 兼容性修复
+- **微电流计页面空白问题修复**: 解决 Vue 3.5.13 与 Element Plus 2.9.7 之间的兼容性问题
+  - 升级 Element Plus 从 2.9.7 到 2.13.5
+  - Element Plus 2.13.0 才正式支持 Vue 3.5
+  - 修复 `TabNavRenderer` 渲染错误导致的页面崩溃
+  - 相关文件: `frontend/src/components/experiment/ammeter/AmmeterControl.vue`
+  - 相关文件: `frontend/src/components/experiment/ammeter/AmmeterWaveform.vue`
+
+#### API 调用响应处理修复
+- **系统性 API 调用错误修复**: 修复前端组件对 API 响应数据结构的错误访问
+  - 添加 `unwrapResponse` 工具函数用于解包 API 响应
+  - apiRequest 返回格式: `{success: boolean, data?: any, message?: string}`
+  - 实际数据在 `response.data` 中，组件直接访问 `response.items` 导致错误
+  - 相关文件: `frontend/src/utils/apiRequest.js`
+  - 相关文件: `frontend/src/utils/request.js`
+
+#### 硬件监控实时刷新功能
+- **性能监控页面实时刷新**: 实现系统资源数据的实时更新
+  - 添加 1 秒间隔自动刷新定时器
+  - 实时更新 CPU、内存、磁盘使用率
+  - 组件卸载时自动清理定时器
+  - 相关文件: `frontend/src/views/settings/Performance.vue`
+
+#### 用户管理页面修复
+- **用户列表加载问题修复**: 解决用户管理页面无法加载用户列表的问题
+  - 使用 `unwrapResponse` 正确解包分页数据
+  - 修复 `response.items` 访问 undefined 的问题
+  - 相关文件: `frontend/src/views/settings/UserManagement.vue`
+
+#### 文档更新
+- **技术栈说明文档更新**: 更新前端技术栈版本信息
+  - Vue: 3.5.13
+  - Element Plus: 2.13.5
+  - Pinia: 3.0.2
+  - Vite: 6.2.2
+  - TypeScript: 5.8.2
+  - 添加 Vue 3.5 + Element Plus 兼容性说明
 
 ---
 

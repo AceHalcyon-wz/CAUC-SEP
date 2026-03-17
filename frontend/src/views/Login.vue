@@ -145,9 +145,9 @@ async function handleGuestLogin() {
  * 处理账号选择
  */
 function handleAccountClick(account) {
-  if (currentMode === LoginMode.GUEST) {
+  if (currentMode.value === LoginMode.GUEST) {
     handleGuestLogin()
-  } else if (currentMode === LoginMode.QUICK) {
+  } else if (currentMode.value === LoginMode.QUICK) {
     handleQuickLogin(account)
   } else {
     handleTraditionalLogin(account)

@@ -39,7 +39,7 @@
         :lg="12"
         class="control-col"
       >
-        <ElectromagnetControl class="control-card" />
+        <ElectromagnetControlPanel class="control-card" />
       </el-col>
 
       <!-- 右侧：实时数据展示区域（支持折叠） -->
@@ -187,7 +187,7 @@
                   type="warning"
                   @click="handlePauseScan"
                 >
-                  <el-icon><Pause /></el-icon>
+                  <el-icon><VideoPause /></el-icon>
                   暂停
                 </el-button>
                 <el-button
@@ -347,7 +347,7 @@ import {
   Delete,
   ArrowDown
 } from '@element-plus/icons-vue'
-import { ElectromagnetControl } from '@/components/experiment/electromagnet'
+import { ElectromagnetControl as ElectromagnetControlPanel } from '@/components/experiment/electromagnet'
 import { useElectromagnetStore } from '@/stores/electromagnet'
 import { ElMessage } from 'element-plus'
 
@@ -395,17 +395,14 @@ const workModeText = computed(() => {
     scan: '扫描模式',
     program: '程序控制'
   }
-  return modeMap[scanStatus.value.mode] || '手动控制'
+  if (isScanning.value) return '扫描模式'
+  return '手动控制'
 })
 
 /** 工作模式标签类型 */
 const workModeType = computed(() => {
-  const typeMap = {
-    manual: 'primary',
-    scan: 'success',
-    program: 'warning'
-  }
-  return typeMap[scanStatus.value.mode] || 'primary'
+  if (isScanning.value) return 'success'
+  return 'primary'
 })
 
 /** 设备状态文本 */

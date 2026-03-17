@@ -225,7 +225,7 @@ def main() -> int:
     print("=" * 60)
     print("CAUC-SEP Backend Build Script (Electron Integration)")
     print(f"Python: {sys.version}")
-    print(f"编译器: MSVC (latest)")
+    print("编译器: MSVC (latest)")
     print(f"输出目录: {OUTPUT_DIR}")
     print("=" * 60)
 

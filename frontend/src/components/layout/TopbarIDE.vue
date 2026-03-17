@@ -8,7 +8,7 @@
  */
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { message, Modal } from 'ant-design-vue'
@@ -26,10 +26,10 @@ import {
   CloseCircleOutlined,
   QuestionCircleOutlined,
   GithubOutlined,
-  BugOutlined,
   ThunderboltOutlined,
   BookOutlined,
-  CustomerServiceOutlined
+  ReloadOutlined,
+  SyncOutlined
 } from '@ant-design/icons-vue'
 import { wsClient } from '../../api/websocket'
 import { useDevicesStore } from '../../stores/devices'
@@ -55,6 +55,7 @@ const searchQuery = ref('')
 const searchFocused = ref(false)
 const showSearch = ref(false)
 const showNotifications = ref(false)
+const autoRefresh = ref(false)
 const notifications = ref([
   { id: 1, title: '系统更新', content: '新版本 v3.6.0 已发布', time: '10分钟前', read: false },
   { id: 2, title: '设备告警', content: '温度传感器超出阈值', time: '30分钟前', read: false },
@@ -197,11 +198,7 @@ function handleKeyboardShortcuts(event) {
  * 打开帮助文档
  */
 function openHelp() {
-  Modal.info({
-    title: '帮助文档',
-    content: 'CAUC-SEP 自旋电子器件实验平台帮助文档即将上线，敬请期待！',
-    okText: '我知道了'
-  })
+  router.push('/settings/help-docs')
 }
 
 /**
@@ -212,18 +209,22 @@ function openGitHub() {
 }
 
 /**
- * 报告问题
+ * 刷新当前页面
  */
-function reportBug() {
-  Modal.confirm({
-    title: '报告问题',
-    content: '是否要提交问题反馈？这将帮助我们改进产品。',
-    okText: '提交反馈',
-    cancelText: '取消',
-    onOk() {
-      message.success('感谢您的反馈！我们会尽快处理。')
-    }
-  })
+function refreshPage() {
+  router.go(0)
+}
+
+/**
+ * 切换自动刷新
+ */
+function toggleAutoRefresh() {
+  autoRefresh.value = !autoRefresh.value
+  if (autoRefresh.value) {
+    message.success('已开启页面自动刷新')
+  } else {
+    message.info('已关闭页面自动刷新')
+  }
 }
 
 /**
@@ -291,6 +292,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyboardShortcuts)
+})
+
+watch(() => route.path, () => {
+  if (autoRefresh.value) {
+    router.go(0)
+  }
 })
 </script>
 
@@ -369,6 +376,25 @@ onUnmounted(() => {
         @click="openCommandPalette"
       >
         <ThunderboltOutlined />
+      </button>
+
+      <!-- 刷新按钮 -->
+      <button
+        class="ide-topbar__tool-btn"
+        title="刷新页面"
+        @click="refreshPage"
+      >
+        <ReloadOutlined />
+      </button>
+
+      <!-- 自动刷新开关 -->
+      <button
+        class="ide-topbar__tool-btn"
+        :class="{ 'is-active': autoRefresh }"
+        :title="autoRefresh ? '关闭自动刷新' : '开启自动刷新'"
+        @click="toggleAutoRefresh"
+      >
+        <SyncOutlined :spin="autoRefresh" />
       </button>
 
       <!-- 连接状态 -->
@@ -469,19 +495,6 @@ onUnmounted(() => {
                 <GithubOutlined />
               </template>
               GitHub
-            </a-menu-item>
-            <a-menu-item @click="reportBug">
-              <template #icon>
-                <BugOutlined />
-              </template>
-              报告问题
-            </a-menu-item>
-            <a-menu-divider />
-            <a-menu-item @click="message.info('客服支持功能即将上线')">
-              <template #icon>
-                <CustomerServiceOutlined />
-              </template>
-              联系支持
             </a-menu-item>
           </a-menu>
         </template>
@@ -708,6 +721,11 @@ onUnmounted(() => {
 
 .ide-topbar__tool-btn:hover {
   background: var(--color-interactive-hover);
+  color: var(--color-primary-500);
+}
+
+.ide-topbar__tool-btn.is-active {
+  background: var(--color-primary-50);
   color: var(--color-primary-500);
 }
 

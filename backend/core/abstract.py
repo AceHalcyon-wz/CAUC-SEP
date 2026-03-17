@@ -494,7 +494,7 @@ class AbstractDevice(ABC):
             # 重新连接
             return await self.connect()
         except Exception as e:
-            self.set_error(f"复位失败: {str(e)}")
+            self.set_error(f"复位失败: {e!s}")
             return False
 
     def get_status_info(self) -> dict[str, Any]:

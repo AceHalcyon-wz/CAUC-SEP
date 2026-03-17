@@ -6,6 +6,7 @@
  * 本配置文件用于设置Vitest单元测试的运行环境，包括：
  * - Vue Test Utils全局配置
  * - Element Plus组件库注册
+ * - IndexedDB Mock实现（使用fake-indexeddb）
  * - HTMLCanvasElement Mock实现
  * - window.matchMedia Mock实现
  * - ResizeObserver和IntersectionObserver Mock实现
@@ -16,12 +17,14 @@
  * 
  * @author Agent
  * @date 2024-03-07
- * @dependencies @vue/test-utils, vitest, element-plus
+ * @updated 2026-03-16 添加fake-indexeddb支持
+ * @dependencies @vue/test-utils, vitest, element-plus, fake-indexeddb
  */
 
 import { config } from '@vue/test-utils';
 import { vi, afterEach } from 'vitest';
 import ElementPlus from 'element-plus';
+import 'fake-indexeddb/auto';
 
 /**
  * 注册Element Plus为全局插件
@@ -72,6 +75,9 @@ HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
     addColorStop: vi.fn(),
   })),
   createPattern: vi.fn(),
+  setLineDash: vi.fn(),
+  getLineDash: vi.fn(() => []),
+  lineDashOffset: 0,
   font: '',
   textAlign: '',
   textBaseline: '',

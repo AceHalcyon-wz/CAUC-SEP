@@ -31,7 +31,6 @@ import {
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useDevicesStore } from '../../stores/devices'
-import { wsClient } from '../../api/websocket'
 
 const route = useRoute()
 const router = useRouter()
@@ -119,11 +118,16 @@ function updateSystemResources() {
  */
 function reconnectWebSocket() {
   message.loading('正在重新连接...')
-  wsClient.disconnect()
+  devicesStore.cleanup()
   setTimeout(() => {
-    wsClient.connect()
-      .then(() => message.success('连接成功'))
-      .catch(() => message.error('连接失败'))
+    devicesStore.init()
+    setTimeout(() => {
+      if (devicesStore.wsConnected) {
+        message.success('连接成功')
+      } else {
+        message.error('连接失败')
+      }
+    }, 1000)
   }, 500)
 }
 
@@ -132,6 +136,13 @@ function reconnectWebSocket() {
  */
 function openDeviceConnection() {
   router.push('/device/connection')
+}
+
+/**
+ * 打开性能监控页面
+ */
+function openPerformance() {
+  router.push('/settings/performance')
 }
 
 /**
@@ -237,8 +248,8 @@ onUnmounted(() => {
       <!-- CPU使用率 -->
       <button
         class="status-item status-item--info"
-        title="CPU使用率"
-        @click="openSettings"
+        title="CPU使用率 - 点击查看详情"
+        @click="openPerformance"
       >
         <ThunderboltOutlined />
         <span class="status-text">CPU {{ cpuUsage }}%</span>
@@ -247,8 +258,8 @@ onUnmounted(() => {
       <!-- 内存使用 -->
       <button
         class="status-item status-item--info"
-        title="内存使用率"
-        @click="openSettings"
+        title="内存使用率 - 点击查看详情"
+        @click="openPerformance"
       >
         <DatabaseOutlined />
         <span class="status-text">MEM {{ memoryUsage }}%</span>

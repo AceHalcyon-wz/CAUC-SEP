@@ -1180,7 +1180,7 @@ async def query_history_data(
         # 返回空数据而不是抛出异常
         return HistoryQueryResponse(
             success=False,
-            message=f"查询失败: {str(e)}",
+            message=f"查询失败: {e!s}",
             total=0,
             data=[],
             statistics={},

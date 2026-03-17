@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from core.crash_report import (
+from core.logging.crash_report import (
     CrashReport,
     CrashReportManager,
     CrashReportStorage,

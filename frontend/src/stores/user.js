@@ -383,6 +383,65 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  /**
+   * 上传头像
+   *
+   * @param {FormData} formData - 包含头像文件的FormData对象
+   * @returns {Promise<Object>} 上传结果
+   */
+  async function uploadAvatar(formData) {
+    loading.value = true
+    errorMessage.value = ''
+
+    try {
+      const response = await fetch('/api/v1/user/avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token.value}`
+        },
+        body: formData
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        if (currentUser.value) {
+          currentUser.value = {
+            ...currentUser.value,
+            avatar: result.data?.url || result.data?.avatar
+          }
+        }
+
+        recordOperation({
+          type: OPERATION_TYPES.UPDATE_PROFILE,
+          description: '上传头像',
+          metadata: {
+            uploadedAt: new Date().toISOString()
+          }
+        })
+
+        return {
+          success: true,
+          avatar: result.data?.url || result.data?.avatar
+        }
+      }
+
+      errorMessage.value = result.message || '头像上传失败'
+      return {
+        success: false,
+        message: errorMessage.value
+      }
+    } catch (error) {
+      errorMessage.value = error.message || '头像上传请求失败'
+      return {
+        success: false,
+        message: errorMessage.value
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
   // ==================== 偏好设置管理 ====================
 
   /**
@@ -667,6 +726,7 @@ export const useUserStore = defineStore('user', () => {
     // 用户信息管理
     updateProfile,
     changePassword,
+    uploadAvatar,
 
     // 偏好设置管理
     fetchPreferences,

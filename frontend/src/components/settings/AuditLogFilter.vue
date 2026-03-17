@@ -498,10 +498,69 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAuditStore } from '@/stores/audit'
 
+// ==================== Types ====================
+
+interface FilterFormType {
+  timeRange: [string, string] | null
+  user_id: string | null
+  device_id: string | null
+  category: string | null
+  operation_type: string | null
+  status: string | null
+  keyword: string
+  response_status_min: number | null
+  response_status_max: number | null
+  duration_min: number | null
+  duration_max: number | null
+}
+
+interface SavedFilterType {
+  name: string
+  description: string
+  filters: FilterFormType
+  quickTimeRange: string
+  createdAt: string
+}
+
+interface FilterParams {
+  start_time?: string
+  end_time?: string
+  user_id?: string
+  device_id?: string
+  category?: string
+  operation_type?: string
+  status?: string
+  keyword?: string
+  response_status_min?: number
+  response_status_max?: number
+  duration_min?: number
+  duration_max?: number
+}
+
+interface UserItem {
+  id: string
+  name: string
+}
+
+interface DeviceItem {
+  id: string
+  name: string
+}
+
+interface CategoryItem {
+  code: string
+  name: string
+}
+
+interface OperationTypeItem {
+  type: string
+  description: string
+}
+
 // ==================== Props & Emits ====================
 
 const emit = defineEmits<{
-  (e: 'filter', filters: any): void
+  (e: 'filter', filters: FilterParams): void
   (e: 'reset'): void
 }>()
 
@@ -512,10 +571,10 @@ const auditStore = useAuditStore()
 // ==================== 本地状态 ====================
 
 /** 快捷时间选择 */
-const quickTimeRange = ref('today')
+const quickTimeRange = ref<string>('today')
 
 /** 筛选表单 */
-const filterForm = reactive({
+const filterForm = reactive<FilterFormType>({
   timeRange: null,
   user_id: null,
   device_id: null,
@@ -530,7 +589,7 @@ const filterForm = reactive({
 })
 
 /** 保存的筛选条件 */
-const savedFilters = ref([])
+const savedFilters = ref<SavedFilterType[]>([])
 
 /** 保存筛选对话框 */
 const saveFilterDialogVisible = ref(false)
@@ -565,10 +624,10 @@ const hasActiveFilters = computed(() => {
 /**
  * 获取时间范围
  * 
- * @param {string} type - 时间类型
- * @returns {Array<string>} 时间范围数组
+ * @param type - 时间类型
+ * @returns 时间范围数组或null
  */
-function getTimeRange(type) {
+function getTimeRange(type: string): [string, string] | null {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   
@@ -685,9 +744,9 @@ function handleResetFilter() {
 /**
  * 移除单个筛选条件
  * 
- * @param {string} field - 字段名
+ * @param field - 字段名
  */
-function removeFilter(field) {
+function removeFilter(field: string): void {
   switch (field) {
     case 'timeRange':
       filterForm.timeRange = null
@@ -727,10 +786,10 @@ function removeFilter(field) {
 /**
  * 获取筛选参数
  * 
- * @returns {Object} 筛选参数对象
+ * @returns 筛选参数对象
  */
-function getFilterParams() {
-  const params = {}
+function getFilterParams(): FilterParams {
+  const params: FilterParams = {}
   
   if (filterForm.timeRange && filterForm.timeRange.length === 2) {
     params.start_time = filterForm.timeRange[0]
@@ -791,9 +850,9 @@ function confirmSaveFilter() {
 /**
  * 加载保存的筛选条件
  * 
- * @param {number} index - 筛选条件索引
+ * @param index - 筛选条件索引
  */
-function handleLoadSavedFilter(index) {
+function handleLoadSavedFilter(index: number): void {
   const filterData = savedFilters.value[index]
   if (!filterData) return
   
@@ -810,10 +869,10 @@ function handleLoadSavedFilter(index) {
 /**
  * 格式化时间范围显示
  * 
- * @param {Array<string>} range - 时间范围
- * @returns {string} 格式化后的时间范围字符串
+ * @param range - 时间范围
+ * @returns 格式化后的时间范围字符串
  */
-function formatTimeRange(range) {
+function formatTimeRange(range: [string, string] | null): string {
   if (!range || range.length !== 2) return ''
   const start = new Date(range[0]).toLocaleString('zh-CN', {
     month: '2-digit',
@@ -833,55 +892,55 @@ function formatTimeRange(range) {
 /**
  * 获取用户名称
  * 
- * @param {string} userId - 用户ID
- * @returns {string} 用户名称
+ * @param userId - 用户ID
+ * @returns 用户名称
  */
-function getUserName(userId) {
-  const user = auditStore.userList.find(u => u.id === userId)
+function getUserName(userId: string): string {
+  const user = (auditStore.userList as UserItem[]).find((u: UserItem) => u.id === userId)
   return user?.name || userId
 }
 
 /**
  * 获取设备名称
  * 
- * @param {string} deviceId - 设备ID
- * @returns {string} 设备名称
+ * @param deviceId - 设备ID
+ * @returns 设备名称
  */
-function getDeviceName(deviceId) {
-  const device = auditStore.deviceList.find(d => d.id === deviceId)
+function getDeviceName(deviceId: string): string {
+  const device = (auditStore.deviceList as DeviceItem[]).find((d: DeviceItem) => d.id === deviceId)
   return device?.name || deviceId
 }
 
 /**
  * 获取分类名称
  * 
- * @param {string} category - 分类代码
- * @returns {string} 分类名称
+ * @param category - 分类代码
+ * @returns 分类名称
  */
-function getCategoryName(category) {
-  const cat = auditStore.categories.find(c => c.code === category)
+function getCategoryName(category: string): string {
+  const cat = (auditStore.categories as CategoryItem[]).find((c: CategoryItem) => c.code === category)
   return cat?.name || category
 }
 
 /**
  * 获取操作名称
  * 
- * @param {string} type - 操作类型
- * @returns {string} 操作描述
+ * @param type - 操作类型
+ * @returns 操作描述
  */
-function getOperationName(type) {
-  const op = auditStore.operationTypes.find(o => o.type === type)
+function getOperationName(type: string): string {
+  const op = (auditStore.operationTypes as OperationTypeItem[]).find((o: OperationTypeItem) => o.type === type)
   return op?.description || type
 }
 
 /**
  * 获取状态名称
  * 
- * @param {number} status - 状态码
- * @returns {string} 状态名称
+ * @param status - 状态码
+ * @returns 状态名称
  */
-function getStatusName(status) {
-  const statusNames = {
+function getStatusName(status: number): string {
+  const statusNames: Record<number, string> = {
     200: '成功 (2xx)',
     300: '重定向 (3xx)',
     400: '客户端错误 (4xx)',

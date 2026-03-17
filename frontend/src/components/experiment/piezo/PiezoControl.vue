@@ -362,7 +362,8 @@ function onVoltageInput(value) {
 async function handleVoltageChange(value) {
   const success = await piezoStore.setVoltage(value);
   if (success) {
-    ElMessage.success(`电压已设置为 ${value.toFixed(1)}V`);
+    const voltageValue = typeof value === 'number' ? value : Number(value);
+    ElMessage.success(`电压已设置为 ${voltageValue.toFixed(1)}V`);
   }
 }
 
@@ -689,21 +690,14 @@ function updateCalibrationChart() {
 // ============ 生命周期钩子 ============
 
 onMounted(() => {
-  // 初始化图表
   nextTick(() => {
     initChart();
   });
 
-  // 初始化Store
   piezoStore.init();
 
-  // 连接WebSocket
-  piezoStore.connectWebSocket();
-
-  // 同步电压值
   voltageValue.value = piezoStore.currentVoltage;
 
-  // 窗口大小变化时重新调整图表
   window.addEventListener('resize', () => {
     if (chartInstance) {
       chartInstance.resize();

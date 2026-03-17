@@ -1,32 +1,40 @@
 # CAUC-SEP 自旋电子器件实验平台
 
-**版本**: v0.3.0  
-**开发周期**: 4周  
+**版本**: v0.3.1\
+**开发周期**: 4周\
 **适用对象**: 材料物理专业大二实验项目
 
----
+***
 
 ## 项目概述
 
 **CAUC-SEP** (CAUC Spintronic Experiment Platform) 是一个**多设备集成**的自旋电子器件实验平台，支持步进电机、电磁铁、温度控制器、压电控制器和皮安装培计等多种实验设备的统一控制与管理，实现高级运动控制、数据采集、分析和实验管理功能。
 
+### 最新更新 (2026-03-17)
+
+- **Vue 3.5 + Element Plus 兼容性修复**: 升级 Element Plus 到 2.13.5，解决微电流计页面空白问题
+- **API 调用响应处理修复**: 添加 `unwrapResponse` 工具函数，修复前端组件对 API 响应数据结构的错误访问
+- **硬件监控实时刷新**: 实现性能监控页面 1 秒间隔自动刷新 CPU、内存、磁盘数据
+- **用户管理页面修复**: 解决用户列表加载问题，正确解包分页数据
+
 ### 支持设备
 
-| 设备 | 型号/类型 | 功能 |
-|------|----------|------|
-| 步进电机 | 雷赛 DM2C | 精密位置控制、PR路径编程 |
-| 电磁铁 | 可编程电流源 | 磁场扫描、校准管理 |
-| 温度控制器 | PID温控 | 程序控温、保护限值 |
-| 压电控制器 | 电压/位移控制 | 开闭环模式、校准 |
-| 皮安装培计 | 微电流测量 | 多通道采集、SNR分析 |
+| 设备    | 型号/类型   | 功能            |
+| ----- | ------- | ------------- |
+| 步进电机  | 雷赛 DM2C | 精密位置控制、PR路径编程 |
+| 电磁铁   | 可编程电流源  | 磁场扫描、校准管理     |
+| 温度控制器 | PID温控   | 程序控温、保护限值     |
+| 压电控制器 | 电压/位移控制 | 开闭环模式、校准      |
+| 皮安装培计 | 微电流测量   | 多通道采集、SNR分析   |
 
----
+***
 
 ## 核心功能
 
 ### 一、步进电机控制 (DM2C)
 
 #### 运动控制
+
 - 绝对/相对定位
 - JOG点动模式
 - 16段PR路径编程配置与触发
@@ -34,12 +42,14 @@
 - 软件限位保护（防止机械撞机）
 
 #### IO端口配置
+
 - 数字输入(DI)端口配置（DI1-DI7）
 - 数字输出(DO)端口配置（DO1-DO3）
 - 支持常开/常闭模式选择
 - 实时IO状态监控
 
 #### 安全功能
+
 - 软件急停按钮
 - 报警复位、参数保存、恢复出厂设置
 - 状态字和报警代码实时监控
@@ -47,16 +57,19 @@
 ### 二、电磁铁控制
 
 #### 电流控制
+
 - 恒流模式：精确设定目标电流
 - 扫描模式：正向扫描、反向扫描、三角波扫描
 - 可配置扫描参数（起始电流、终止电流、步长、停留时间）
 
 #### 校准管理
+
 - 电流-磁场校准曲线
 - 校准数据持久化存储
 - 校准历史记录查询
 
 #### 安全保护
+
 - 过流保护阈值设置
 - 急停功能
 - 实时状态监控
@@ -64,21 +77,25 @@
 ### 三、温度控制器
 
 #### PID控制
+
 - PID参数配置（Kp、Ki、Kd）
 - 自动调谐支持
 - 实时温度监控
 
 #### 程序控温
+
 - 多段温度程序编排
 - 升降温速率控制
 - 恒温保持时间设置
 
 #### 保护功能
+
 - 最高/最低温度限值
 - 最大升温/降温速率限制
 - 超温保护
 
 #### 历史管理
+
 - 温度历史数据记录
 - 历史曲线查询
 - 数据导出
@@ -86,17 +103,20 @@
 ### 四、压电控制器
 
 #### 控制模式
+
 - 电压控制模式
 - 位移控制模式
 - 开环/闭环切换
 
 #### 校准功能
+
 - 线性校准
 - 多项式校准
 - 分段校准
 - 校准数据管理
 
 #### 精密定位
+
 - 纳米级分辨率
 - 位移-电压转换
 - 实时位移反馈
@@ -104,16 +124,19 @@
 ### 五、皮安装培计
 
 #### 数据采集
+
 - 多通道同步采集
 - 可配置采样率
 - 缓冲区管理
 
 #### 信号分析
+
 - 信噪比(SNR)计算
 - 数字滤波（低通、带通、陷波）
 - 背景扣除
 
 #### 数据管理
+
 - 实时数据流
 - 历史数据查询
 - 数据导出（CSV/HDF5）
@@ -121,16 +144,19 @@
 ### 六、数据分析
 
 #### 信号处理
+
 - Savitzky-Golay滤波
 - 巴特沃斯低通滤波
 - 背景扣除和数据校正
 
 #### 曲线拟合
+
 - Langevin函数拟合
 - 线性拟合
 - 多项式拟合
 
 #### 磁滞回线分析
+
 - 矫顽力 (Hc)
 - 剩磁 (Mr)
 - 饱和磁矩 (Ms)
@@ -142,33 +168,37 @@
 - Web控制界面（Vue3 + Element Plus）
 - 多格式数据导出（CSV/HDF5）
 
----
+***
 
 ## 技术栈
 
 ### 后端
 
-| 组件 | 版本 | 用途 |
-|------|------|------|
-| FastAPI | 0.109+ | Web框架 |
-| PyModbus | 3.5+ | Modbus通信 |
-| NumPy | 2.0+ | 数值计算 |
-| SciPy | 1.10+ | 科学计算 |
-| lmfit | 1.2+ | 曲线拟合 |
-| SQLAlchemy | 2.0+ | ORM |
-| Pydantic | 2.5+ | 数据验证 |
-| h5py | 3.10+ | HDF5存储 |
+| 组件         | 版本     | 用途       |
+| ---------- | ------ | -------- |
+| FastAPI    | 0.109+ | Web框架    |
+| PyModbus   | 3.5+   | Modbus通信 |
+| NumPy      | 2.0+   | 数值计算     |
+| SciPy      | 1.10+  | 科学计算     |
+| lmfit      | 1.2+   | 曲线拟合     |
+| SQLAlchemy | 2.0+   | ORM      |
+| Pydantic   | 2.5+   | 数据验证     |
+| h5py       | 3.10+  | HDF5存储   |
 
 ### 前端
 
-| 组件 | 版本 | 用途 |
-|------|------|------|
-| Vue | 3.4+ | 前端框架 |
-| Element Plus | 2.5+ | UI组件库 |
-| Pinia | 2.1+ | 状态管理 |
-| ECharts | 5.4+ | 数据可视化 |
-| Vue Router | 4.2+ | 路由管理 |
-| Axios | 1.6+ | HTTP客户端 |
+| 组件           | 版本   | 用途      |
+| ------------ | ---- | ------- |
+| Vue          | 3.5.13 | 前端框架    |
+| Element Plus | 2.13.5 | UI组件库   |
+| Pinia        | 3.0.2 | 状态管理    |
+| ECharts      | 5.6.0 | 数据可视化   |
+| Vue Router   | 4.5.0 | 路由管理    |
+| Axios        | 1.8.3 | HTTP客户端 |
+| TypeScript   | 5.8.2 | 类型安全    |
+| Vite         | 6.2.2 | 构建工具    |
+
+> **重要**: Vue 3.5.x 必须配合 Element Plus 2.13.0+ 使用，否则会出现组件渲染错误。详见 [故障排除](docs/technical-docs/附录/故障排除.md)。
 
 ### 通信协议
 
@@ -176,7 +206,7 @@
 - **WebSocket**: 实时数据推送
 - **REST API**: 前后端通信
 
----
+***
 
 ## 快速开始
 
@@ -191,26 +221,30 @@
 ### 安装步骤
 
 1. **克隆仓库**
+
 ```bash
 git clone <repository-url>
 cd cauc-sep
 ```
 
-2. **安装Python依赖**
+1. **安装Python依赖**
+
 ```bash
 cd backend
 pip install -r requirements.txt
 cd ..
 ```
 
-3. **安装Node依赖**
+1. **安装Node依赖**
+
 ```bash
 cd frontend
 npm install
 cd ..
 ```
 
-4. **配置硬件连接**
+1. **配置硬件连接**
+
 - 使用USB-RS485转换器连接电脑和设备
 - 确认COM口号（默认COM3）
 - 根据实际设备修改配置参数
@@ -218,6 +252,7 @@ cd ..
 ### 启动开发环境
 
 **方法一：使用启动脚本**
+
 ```bash
 scripts/start_dev.bat
 ```
@@ -225,21 +260,23 @@ scripts/start_dev.bat
 **方法二：手动启动**
 
 终端1 - 启动后端：
+
 ```bash
 cd backend
 python main.py
 ```
 
 终端2 - 启动前端：
+
 ```bash
 cd frontend
 npm run dev
 ```
 
-**访问应用**: http://localhost:5173  
-**API文档 (Swagger)**: http://127.0.0.1:8000/docs
+**访问应用**: <http://localhost:5173>\
+**API文档 (Swagger)**: <http://127.0.0.1:8000/docs>
 
----
+***
 
 ## 使用说明
 
@@ -252,11 +289,13 @@ npm run dev
 ### 2. 步进电机控制
 
 #### 基础控制
+
 - **绝对定位**: 输入目标位置和速度，点击"绝对定位"
 - **JOG点动**: 按住JOG+或JOG-按钮进行点动
 - **回零**: 选择回零模式，点击"回零"执行归零操作
 
 #### PR路径编程
+
 1. 切换到"PR路径配置"面板
 2. 选择路径编号（1-16）
 3. 配置运行模式、目标位置、速度、加减速时间等参数
@@ -264,11 +303,13 @@ npm run dev
 5. 点击"触发路径"执行预设的运动路径
 
 #### 设备管理
+
 - **报警复位**: 清除驱动器报警状态
 - **保存参数**: 将当前配置保存到驱动器EEPROM
 - **恢复出厂设置**: 重置驱动器为出厂默认设置
 
 #### IO端口配置
+
 1. 切换到"IO端口配置"面板
 2. 选择DI或DO选项卡
 3. 从下拉菜单选择端口功能
@@ -279,15 +320,18 @@ npm run dev
 ### 3. 电磁铁控制
 
 #### 恒流模式
+
 1. 设置目标电流值
 2. 点击"设置电流"执行
 
 #### 扫描模式
+
 1. 选择扫描类型（正向/反向/三角波）
 2. 配置扫描参数（起始电流、终止电流、步长、停留时间）
 3. 点击"开始扫描"
 
 #### 校准管理
+
 1. 进入校准面板
 2. 添加校准点（电流-磁场对应值）
 3. 保存校准曲线
@@ -295,11 +339,13 @@ npm run dev
 ### 4. 温度控制
 
 #### PID控制
+
 1. 设置目标温度
 2. 配置PID参数（或使用自动调谐）
 3. 启动温度控制
 
 #### 程序控温
+
 1. 创建温度程序
 2. 添加温度段（目标温度、升降温速率、保持时间）
 3. 运行程序
@@ -307,11 +353,13 @@ npm run dev
 ### 5. 压电控制
 
 #### 电压/位移控制
+
 1. 选择控制模式（电压/位移）
 2. 设置目标值
 3. 选择开环或闭环模式
 
 #### 校准
+
 1. 选择校准类型（线性/多项式/分段）
 2. 添加校准点
 3. 执行校准
@@ -319,11 +367,13 @@ npm run dev
 ### 6. 皮安装培计
 
 #### 数据采集
+
 1. 配置采样参数（采样率、通道）
 2. 点击"开始采集"
 3. 实时查看数据曲线
 
 #### 信号分析
+
 1. 选择滤波器类型
 2. 配置滤波参数
 3. 计算SNR
@@ -340,7 +390,7 @@ npm run dev
 4. 点击"停止记录"
 5. 在列表中导出数据或进行数据分析
 
----
+***
 
 ## 技术架构说明
 
@@ -404,148 +454,148 @@ npm run dev
 - **响应式设计**: Element Plus 提供现代化UI
 - **组合式函数**: 可复用的逻辑封装
 
----
+***
 
 ## API 文档
 
-完整的 API 文档可通过 Swagger UI 访问：**http://127.0.0.1:8000/docs**
+完整的 API 文档可通过 Swagger UI 访问：**<http://127.0.0.1:8000/docs>**
 
 ### 技术文档集
 
 项目文档已整合为结构化的技术文档集，位于 `docs/technical-docs/` 目录：
 
-| 章节 | 路径 | 说明 |
-|------|------|------|
-| 索引与导航 | [00-索引与导航/](docs/technical-docs/00-索引与导航/README.md) | 文档集总览与导航 |
-| 项目概述 | [01-项目概述/](docs/technical-docs/01-项目概述/) | 项目背景、技术栈、设备清单 |
-| 快速开始 | [02-快速开始/](docs/technical-docs/02-快速开始/) | 环境要求、安装配置、验证测试 |
-| 系统架构 | [03-系统架构/](docs/technical-docs/03-系统架构/) | 整体架构、后端架构、前端架构 |
-| 核心模块 | [04-核心模块/](docs/technical-docs/04-核心模块/) | 设备驱动与核心模块详解 |
-| 数据库设计 | [05-数据库设计/](docs/technical-docs/05-数据库设计/) | 数据模型与存储方案 |
-| 通信协议 | [06-通信协议/](docs/technical-docs/06-通信协议/) | Modbus/WebSocket/REST协议 |
-| API参考 | [07-API参考/](docs/technical-docs/07-API参考/) | 完整API接口文档 |
-| 前端组件 | [08-前端组件/](docs/technical-docs/08-前端组件/) | Vue组件文档 |
-| 开发指南 | [09-开发指南/](docs/technical-docs/09-开发指南/) | 开发环境与代码规范 |
-| 部署运维 | [10-部署运维/](docs/technical-docs/10-部署运维/) | 打包部署与监控告警 |
-| 用户手册 | [11-用户手册/](docs/technical-docs/11-用户手册/) | 用户操作指南 |
-| 开发者指南 | [12-开发者指南/](docs/technical-docs/12-开发者指南/) | 高级开发指南 |
-| 附录 | [附录/](docs/technical-docs/附录/) | 故障排除、更新日志、术语表 |
+| 章节    | 路径                                                  | 说明                      |
+| ----- | --------------------------------------------------- | ----------------------- |
+| 索引与导航 | [00-索引与导航/](docs/technical-docs/00-索引与导航/README.md) | 文档集总览与导航                |
+| 项目概述  | [01-项目概述/](docs/technical-docs/01-项目概述/)            | 项目背景、技术栈、设备清单           |
+| 快速开始  | [02-快速开始/](docs/technical-docs/02-快速开始/)            | 环境要求、安装配置、验证测试          |
+| 系统架构  | [03-系统架构/](docs/technical-docs/03-系统架构/)            | 整体架构、后端架构、前端架构          |
+| 核心模块  | [04-核心模块/](docs/technical-docs/04-核心模块/)            | 设备驱动与核心模块详解             |
+| 数据库设计 | [05-数据库设计/](docs/technical-docs/05-数据库设计/)          | 数据模型与存储方案               |
+| 通信协议  | [06-通信协议/](docs/technical-docs/06-通信协议/)            | Modbus/WebSocket/REST协议 |
+| API参考 | [07-API参考/](docs/technical-docs/07-API参考/)          | 完整API接口文档               |
+| 前端组件  | [08-前端组件/](docs/technical-docs/08-前端组件/)            | Vue组件文档                 |
+| 开发指南  | [09-开发指南/](docs/technical-docs/09-开发指南/)            | 开发环境与代码规范               |
+| 部署运维  | [10-部署运维/](docs/technical-docs/10-部署运维/)            | 打包部署与监控告警               |
+| 用户手册  | [11-用户手册/](docs/technical-docs/11-用户手册/)            | 用户操作指南                  |
+| 开发者指南 | [12-开发者指南/](docs/technical-docs/12-开发者指南/)          | 高级开发指南                  |
+| 附录    | [附录/](docs/technical-docs/附录/)                      | 故障排除、更新日志、术语表           |
 
 ### 步进电机 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/v1/motor/status` | GET | 获取电机状态 |
-| `/api/v1/motor/connect` | POST | 连接电机 |
-| `/api/v1/motor/move` | POST | 绝对定位 |
-| `/api/v1/motor/jog` | POST | JOG点动 |
-| `/api/v1/motor/emergency_stop` | POST | 急停 |
-| `/api/v1/motor/limits` | POST | 设置限位 |
-| `/api/v1/motor/pr/config` | POST | 配置PR路径 |
-| `/api/v1/motor/pr/trigger` | POST | 触发PR路径 |
-| `/api/v1/motor/home` | POST | 回零操作 |
-| `/api/v1/motor/reset_alarm` | POST | 报警复位 |
-| `/api/v1/motor/save_params` | POST | 保存参数 |
-| `/api/v1/motor/factory_reset` | POST | 恢复出厂设置 |
+| 端点                             | 方法   | 说明     |
+| ------------------------------ | ---- | ------ |
+| `/api/v1/motor/status`         | GET  | 获取电机状态 |
+| `/api/v1/motor/connect`        | POST | 连接电机   |
+| `/api/v1/motor/move`           | POST | 绝对定位   |
+| `/api/v1/motor/jog`            | POST | JOG点动  |
+| `/api/v1/motor/emergency_stop` | POST | 急停     |
+| `/api/v1/motor/limits`         | POST | 设置限位   |
+| `/api/v1/motor/pr/config`      | POST | 配置PR路径 |
+| `/api/v1/motor/pr/trigger`     | POST | 触发PR路径 |
+| `/api/v1/motor/home`           | POST | 回零操作   |
+| `/api/v1/motor/reset_alarm`    | POST | 报警复位   |
+| `/api/v1/motor/save_params`    | POST | 保存参数   |
+| `/api/v1/motor/factory_reset`  | POST | 恢复出厂设置 |
 
 ### IO端口配置 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/v1/device/{device_id}/io/di/functions` | GET | 获取DI功能代码列表 |
-| `/api/v1/device/{device_id}/io/do/functions` | GET | 获取DO功能代码列表 |
-| `/api/v1/device/{device_id}/io/di/configure` | POST | 配置DI端口功能 |
-| `/api/v1/device/{device_id}/io/do/configure` | POST | 配置DO端口功能 |
-| `/api/v1/device/{device_id}/io/di/status` | GET | 读取所有DI端口状态 |
-| `/api/v1/device/{device_id}/io/do/status` | GET | 读取所有DO端口状态 |
-| `/api/v1/device/{device_id}/io/di/{di_number}/config` | GET | 读取指定DI端口配置 |
-| `/api/v1/device/{device_id}/io/do/{do_number}/config` | GET | 读取指定DO端口配置 |
+| 端点                                                    | 方法   | 说明         |
+| ----------------------------------------------------- | ---- | ---------- |
+| `/api/v1/device/{device_id}/io/di/functions`          | GET  | 获取DI功能代码列表 |
+| `/api/v1/device/{device_id}/io/do/functions`          | GET  | 获取DO功能代码列表 |
+| `/api/v1/device/{device_id}/io/di/configure`          | POST | 配置DI端口功能   |
+| `/api/v1/device/{device_id}/io/do/configure`          | POST | 配置DO端口功能   |
+| `/api/v1/device/{device_id}/io/di/status`             | GET  | 读取所有DI端口状态 |
+| `/api/v1/device/{device_id}/io/do/status`             | GET  | 读取所有DO端口状态 |
+| `/api/v1/device/{device_id}/io/di/{di_number}/config` | GET  | 读取指定DI端口配置 |
+| `/api/v1/device/{device_id}/io/do/{do_number}/config` | GET  | 读取指定DO端口配置 |
 
 ### 电磁铁 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/electromagnet/status` | GET | 获取电磁铁状态 |
-| `/api/electromagnet/current` | POST | 设置电流 |
-| `/api/electromagnet/scan` | POST | 启动扫描 |
-| `/api/electromagnet/calibrate` | POST | 执行校准 |
-| `/api/electromagnet/emergency_stop` | POST | 急停 |
+| 端点                                  | 方法   | 说明      |
+| ----------------------------------- | ---- | ------- |
+| `/api/electromagnet/status`         | GET  | 获取电磁铁状态 |
+| `/api/electromagnet/current`        | POST | 设置电流    |
+| `/api/electromagnet/scan`           | POST | 启动扫描    |
+| `/api/electromagnet/calibrate`      | POST | 执行校准    |
+| `/api/electromagnet/emergency_stop` | POST | 急停      |
 
 ### 温度控制器 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/temperature/status` | GET | 获取温度状态 |
-| `/api/temperature/setpoint` | POST | 设置目标温度 |
-| `/api/temperature/program` | POST | 配置温度程序 |
-| `/api/temperature/pid` | POST | 设置PID参数 |
-| `/api/temperature/protection` | POST | 设置保护限值 |
-| `/api/temperature/history` | GET | 获取历史数据 |
+| 端点                            | 方法   | 说明      |
+| ----------------------------- | ---- | ------- |
+| `/api/temperature/status`     | GET  | 获取温度状态  |
+| `/api/temperature/setpoint`   | POST | 设置目标温度  |
+| `/api/temperature/program`    | POST | 配置温度程序  |
+| `/api/temperature/pid`        | POST | 设置PID参数 |
+| `/api/temperature/protection` | POST | 设置保护限值  |
+| `/api/temperature/history`    | GET  | 获取历史数据  |
 
 ### 压电控制器 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/piezo/status` | GET | 获取压电状态 |
-| `/api/piezo/voltage` | POST | 设置电压 |
-| `/api/piezo/displacement` | POST | 设置位移 |
-| `/api/piezo/calibrate` | POST | 执行校准 |
-| `/api/piezo/mode` | POST | 切换控制模式 |
+| 端点                        | 方法   | 说明     |
+| ------------------------- | ---- | ------ |
+| `/api/piezo/status`       | GET  | 获取压电状态 |
+| `/api/piezo/voltage`      | POST | 设置电压   |
+| `/api/piezo/displacement` | POST | 设置位移   |
+| `/api/piezo/calibrate`    | POST | 执行校准   |
+| `/api/piezo/mode`         | POST | 切换控制模式 |
 
 ### 皮安装培计 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/ammeter/status` | GET | 获取皮安表状态 |
-| `/api/ammeter/start` | POST | 开始采集 |
-| `/api/ammeter/stop` | POST | 停止采集 |
-| `/api/ammeter/data` | GET | 获取采集数据 |
-| `/api/ammeter/channel/config` | POST | 配置通道 |
-| `/api/ammeter/snr` | GET | 计算信噪比 |
+| 端点                            | 方法   | 说明      |
+| ----------------------------- | ---- | ------- |
+| `/api/ammeter/status`         | GET  | 获取皮安表状态 |
+| `/api/ammeter/start`          | POST | 开始采集    |
+| `/api/ammeter/stop`           | POST | 停止采集    |
+| `/api/ammeter/data`           | GET  | 获取采集数据  |
+| `/api/ammeter/channel/config` | POST | 配置通道    |
+| `/api/ammeter/snr`            | GET  | 计算信噪比   |
 
 ### 数据分析 API
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/v1/analysis/smooth` | POST | 信号平滑 |
+| 端点                            | 方法   | 说明     |
+| ----------------------------- | ---- | ------ |
+| `/api/v1/analysis/smooth`     | POST | 信号平滑   |
 | `/api/v1/analysis/hysteresis` | POST | 磁滞回线分析 |
-| `/api/v1/analysis/fit` | POST | 曲线拟合 |
+| `/api/v1/analysis/fit`        | POST | 曲线拟合   |
 
 ### WebSocket 端点
 
-| 端点 | 说明 |
-|------|------|
-| `/ws/motor` | 电机实时数据推送 |
+| 端点                  | 说明        |
+| ------------------- | --------- |
+| `/ws/motor`         | 电机实时数据推送  |
 | `/ws/electromagnet` | 电磁铁实时数据推送 |
-| `/ws/temperature` | 温度实时数据推送 |
-| `/ws/piezo` | 压电实时数据推送 |
-| `/ws/ammeter` | 皮安表实时数据推送 |
-| `/ws/devices` | 所有设备状态推送 |
+| `/ws/temperature`   | 温度实时数据推送  |
+| `/ws/piezo`         | 压电实时数据推送  |
+| `/ws/ammeter`       | 皮安表实时数据推送 |
+| `/ws/devices`       | 所有设备状态推送  |
 
----
+***
 
 ## 安全特性
 
 ### 速率限制 (Rate Limiting)
 
-| 操作类型 | 限制 | 说明 |
-|----------|------|------|
-| 全局请求 | 100次/分钟 | 默认限制 |
-| 敏感操作 | 30次/分钟 | 急停、复位等 |
-| 校准操作 | 10次/分钟 | 设备校准 |
-| 工厂重置 | 5次/分钟 | 恢复出厂设置 |
-| 数据导出 | 60次/分钟 | 实验数据查询 |
+| 操作类型 | 限制      | 说明     |
+| ---- | ------- | ------ |
+| 全局请求 | 100次/分钟 | 默认限制   |
+| 敏感操作 | 30次/分钟  | 急停、复位等 |
+| 校准操作 | 10次/分钟  | 设备校准   |
+| 工厂重置 | 5次/分钟   | 恢复出厂设置 |
+| 数据导出 | 60次/分钟  | 实验数据查询 |
 
 ### 安全响应头
 
-| 响应头 | 值 | 说明 |
-|--------|-----|------|
-| `X-Content-Type-Options` | `nosniff` | 防止MIME类型嗅探 |
-| `X-Frame-Options` | `DENY` | 防止点击劫持 |
-| `X-XSS-Protection` | `1; mode=block` | XSS保护 |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | 引用策略 |
-| `Content-Security-Policy` | (动态) | 内容安全策略 |
-| `Cache-Control` | `no-store` | API响应禁用缓存 |
+| 响应头                       | 值                                 | 说明         |
+| ------------------------- | --------------------------------- | ---------- |
+| `X-Content-Type-Options`  | `nosniff`                         | 防止MIME类型嗅探 |
+| `X-Frame-Options`         | `DENY`                            | 防止点击劫持     |
+| `X-XSS-Protection`        | `1; mode=block`                   | XSS保护      |
+| `Referrer-Policy`         | `strict-origin-when-cross-origin` | 引用策略       |
+| `Content-Security-Policy` | (动态)                              | 内容安全策略     |
+| `Cache-Control`           | `no-store`                        | API响应禁用缓存  |
 
 ### 审计日志
 
@@ -557,16 +607,18 @@ npm run dev
 ### CORS 配置
 
 **开发环境**:
+
 ```python
 allow_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 ```
 
 **生产环境**:
+
 ```python
 allow_origins = ["https://your-domain.com"]
 ```
 
----
+***
 
 ## 项目结构
 
@@ -645,7 +697,7 @@ cauc-sep/                                   # 项目根目录
 
 > **注意**: 项目已清理所有 `__pycache__/` 目录、`.pyc` 编译文件、备份文件（如 `.bak`、`.backup`、`.orig`）和临时文件，保持代码仓库整洁。
 
----
+***
 
 ## 打包发布
 
@@ -674,12 +726,13 @@ scripts/build-nuitka.bat
 ```
 
 **Nuitka打包优势**：
+
 - 原生编译，启动速度提升50%+
 - 更好的代码保护
 - 更小的内存占用
 - 支持Windows安装程序
 
----
+***
 
 ## 安全提示
 
@@ -695,7 +748,7 @@ scripts/build-nuitka.bat
 
 **校准操作需在专业人员指导下进行**
 
----
+***
 
 ## 已知限制
 
@@ -705,7 +758,7 @@ scripts/build-nuitka.bat
 4. **设备同步**：多设备同步精度受通信延迟影响
 5. **校准精度**：校准精度受环境温度和设备老化影响
 
----
+***
 
 ## 故障排除
 
@@ -749,7 +802,7 @@ scripts/build-nuitka.bat
 3. 验证通道配置
 4. 检查信号接地
 
----
+***
 
 ## 后续迭代
 
@@ -770,20 +823,20 @@ scripts/build-nuitka.bat
 - [ ] 数据云同步
 - [ ] 多语言支持
 
----
+***
 
 ## 开发团队
 
-- **开发者**: [你的名字]
-- **导师**: [导师名字]
-- **学校**: [学校名称]
+- **开发者**: \[acehalcyon]
+- **导师**: \[导师名字]
+- **学校**: \[学校名称]
 
----
+***
 
 ## 许可证
 
 Apache License 2.0
 
----
+***
 
 **免责声明**: 本软件按"原样"提供，作者不对因使用本软件导致的任何损害负责。实验时必须遵守实验室安全规范。

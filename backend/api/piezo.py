@@ -167,7 +167,7 @@ async def set_voltage(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to set voltage: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e!s}")
 
 
 @router.get("/voltage", response_model=VoltageResponse)
@@ -246,7 +246,7 @@ async def set_displacement(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to set displacement: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e!s}")
 
 
 @router.get("/displacement", response_model=DisplacementResponse)
@@ -321,7 +321,7 @@ async def add_calibration_point(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to add calibration point: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e!s}")
 
 
 @router.post("/calibrate/perform", response_model=SuccessResponse)
@@ -378,7 +378,7 @@ async def perform_calibration(
         raise
     except Exception as e:
         logger.error(f"Failed to perform calibration: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e!s}")
 
 
 @router.get("/calibrate/data", response_model=CalibrationDataResponse)
@@ -455,7 +455,7 @@ async def set_control_mode(
         raise
     except Exception as e:
         logger.error(f"Failed to set control mode: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e!s}")
 
 
 @router.get("/mode")

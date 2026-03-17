@@ -346,7 +346,7 @@ class TimeSeriesStorage:
         """
         # 先刷新该实验的缓冲区数据
         with self._buffer_lock:
-            if experiment_id in self._hot_buffer and self._hot_buffer[experiment_id]:
+            if self._hot_buffer.get(experiment_id):
                 # 将缓冲区数据合并到结果中
                 buffered_data = self._hot_buffer[experiment_id].copy()
             else:

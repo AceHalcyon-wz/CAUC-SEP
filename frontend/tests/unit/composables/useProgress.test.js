@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useProgress, OPERATION_STATUS, createProgressTracker } from '../useProgress';
+import { useProgress, OPERATION_STATUS, createProgressTracker } from '@/composables/useProgress';
 
 describe('useProgress', () => {
   let progress;

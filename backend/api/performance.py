@@ -205,7 +205,7 @@ async def start_profiling(background_tasks: BackgroundTasks):
         logger.error(f"[Performance] Failed to start profiling: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to start profiling: {str(e)}",
+            detail=f"Failed to start profiling: {e!s}",
         )
 
 
@@ -234,7 +234,7 @@ async def stop_profiling():
         logger.error(f"[Performance] Failed to stop profiling: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to stop profiling: {str(e)}",
+            detail=f"Failed to stop profiling: {e!s}",
         )
 
 
@@ -318,7 +318,7 @@ async def start_memory_tracking():
         logger.error(f"[Performance] Failed to start memory tracking: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to start memory tracking: {str(e)}",
+            detail=f"Failed to start memory tracking: {e!s}",
         )
 
 
@@ -348,7 +348,7 @@ async def stop_memory_tracking():
         logger.error(f"[Performance] Failed to stop memory tracking: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to stop memory tracking: {str(e)}",
+            detail=f"Failed to stop memory tracking: {e!s}",
         )
 
 
@@ -479,7 +479,7 @@ async def clear_performance_data():
         logger.error(f"[Performance] Failed to clear data: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to clear data: {str(e)}",
+            detail=f"Failed to clear data: {e!s}",
         )
 
 
@@ -532,7 +532,7 @@ async def performance_health_check():
         logger.error(f"[Performance] Health check failed: {e}")
         return {
             "status": "unhealthy",
-            "message": f"Health check failed: {str(e)}",
+            "message": f"Health check failed: {e!s}",
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -596,17 +596,14 @@ async def get_performance_summary():
     monitor = get_system_monitor()
     profiler = get_profiler()
 
-    # 系统资源
     cpu_percent = monitor.get_cpu_percent(interval=0.0)
     mem_info = monitor.get_memory_info()
     proc_info = monitor.get_process_info()
 
-    # 函数统计
     function_stats = profiler.get_function_stats()
     total_calls = sum(f.get("total_calls", 0) for f in function_stats)
     total_time = sum(f.get("total_time", 0) for f in function_stats)
 
-    # 内存快照
     memory_snapshots = profiler.get_memory_snapshots()
     peak_memory = max((s.get("peak_memory_mb", 0) for s in memory_snapshots), default=0)
 
@@ -627,3 +624,119 @@ async def get_performance_summary():
         },
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.post("/report/export")
+async def export_performance_report(
+    format: str = Query("json", description="导出格式 (json, csv, html)"),
+    include_functions: bool = Query(True, description="包含函数性能数据"),
+    include_memory: bool = Query(True, description="包含内存数据"),
+    include_system: bool = Query(True, description="包含系统数据"),
+):
+    """
+    导出性能报告。
+
+    Args:
+        format: 导出格式 (json, csv, html)
+        include_functions: 是否包含函数性能数据
+        include_memory: 是否包含内存数据
+        include_system: 是否包含系统数据
+
+    Returns:
+        dict: 导出结果，包含文件路径或数据内容
+
+    Example:
+        POST /api/v1/performance/report/export?format=json
+    """
+    profiler = get_profiler()
+    monitor = get_system_monitor()
+
+    report = PerformanceReport()
+
+    if include_system:
+        system_data = {
+            "cpu_percent": monitor.get_cpu_percent(interval=0.0),
+            **monitor.get_memory_info(),
+            "disk": monitor.get_disk_info(),
+            "process": monitor.get_process_info(),
+        }
+        report.add_section("系统资源", system_data)
+
+    if include_functions:
+        function_stats = profiler.get_function_stats()
+        report.add_section("函数性能", {"function_profiles": function_stats})
+
+    if include_memory:
+        memory_snapshots = profiler.get_memory_snapshots()
+        if memory_snapshots:
+            report.add_section("内存分析", memory_snapshots[0])
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    if format == "json":
+        import json
+        import os
+
+        export_dir = "exports/performance"
+        os.makedirs(export_dir, exist_ok=True)
+        filepath = f"{export_dir}/performance_report_{timestamp}.json"
+
+        report_data = report.generate_full_report()
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(report_data, f, ensure_ascii=False, indent=2)
+
+        return {
+            "success": True,
+            "format": "json",
+            "filepath": filepath,
+            "filename": f"performance_report_{timestamp}.json",
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    elif format == "html":
+        import os
+
+        export_dir = "exports/performance"
+        os.makedirs(export_dir, exist_ok=True)
+        filepath = f"{export_dir}/performance_report_{timestamp}.html"
+
+        html_content = report.generate_html()
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(html_content)
+
+        return {
+            "success": True,
+            "format": "html",
+            "filepath": filepath,
+            "filename": f"performance_report_{timestamp}.html",
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    elif format == "csv":
+        import csv
+        import os
+
+        export_dir = "exports/performance"
+        os.makedirs(export_dir, exist_ok=True)
+        filepath = f"{export_dir}/performance_report_{timestamp}.csv"
+
+        function_stats = profiler.get_function_stats()
+        with open(filepath, "w", newline="", encoding="utf-8") as f:
+            if function_stats:
+                writer = csv.DictWriter(f, fieldnames=function_stats[0].keys())
+                writer.writeheader()
+                writer.writerows(function_stats)
+
+        return {
+            "success": True,
+            "format": "csv",
+            "filepath": filepath,
+            "filename": f"performance_report_{timestamp}.csv",
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported format: {format}. Supported formats: json, csv, html",
+        )

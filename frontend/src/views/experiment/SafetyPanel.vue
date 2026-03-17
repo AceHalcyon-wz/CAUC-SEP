@@ -134,32 +134,76 @@
                   <Bell />
                 </el-icon>
                 <span class="header-title">报警历史</span>
+                <el-badge
+                  v-if="alarmCount > 0"
+                  :value="alarmCount"
+                  type="danger"
+                  class="alarm-badge"
+                />
               </div>
-              <el-icon
-                class="collapse-icon"
-                :class="{ 'is-collapsed': alarmCollapsed }"
-              >
-                <ArrowDown />
-              </el-icon>
+              <div class="header-actions">
+                <el-button
+                  type="primary"
+                  size="small"
+                  link
+                  :loading="isLoading"
+                  @click.stop="refreshAlarms"
+                >
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+                <el-icon
+                  class="collapse-icon"
+                  :class="{ 'is-collapsed': alarmCollapsed }"
+                >
+                  <ArrowDown />
+                </el-icon>
+              </div>
             </div>
           </template>
           <el-collapse-transition>
             <div v-show="!alarmCollapsed">
-              <el-timeline>
+              <div
+                v-if="alarmHistory.length === 0"
+                class="empty-alarms"
+              >
+                <el-empty
+                  description="暂无告警记录"
+                  :image-size="80"
+                />
+              </div>
+              <el-timeline v-else>
                 <el-timeline-item
-                  v-for="(alarm, index) in alarmHistory"
-                  :key="index"
+                  v-for="alarm in alarmHistory"
+                  :key="alarm.id"
                   :type="alarm.type"
                   :timestamp="alarm.time"
                   placement="top"
                 >
                   <div class="alarm-item">
-                    <div class="alarm-title">
-                      {{ alarm.title }}
+                    <div class="alarm-header">
+                      <div class="alarm-title">
+                        {{ alarm.title }}
+                      </div>
+                      <el-button
+                        v-if="!alarm.acknowledged"
+                        type="primary"
+                        size="small"
+                        link
+                        @click="acknowledgeAlarm(alarm.id)"
+                      >
+                        确认
+                      </el-button>
                     </div>
                     <div class="alarm-desc">
                       {{ alarm.description }}
                     </div>
+                    <el-tag
+                      v-if="alarm.acknowledged"
+                      type="success"
+                      size="small"
+                    >
+                      已确认
+                    </el-tag>
                   </div>
                 </el-timeline-item>
               </el-timeline>
@@ -217,9 +261,13 @@
  * @date 2024-03-07
  */
 
-import { ref, computed } from 'vue'
-import { Warning, CircleCheck, Bell, InfoFilled } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { Warning, CircleCheck, Bell, InfoFilled, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { SafetyPanel } from '@/components/experiment'
+import { useDevicesStore } from '@/stores/devices'
+
+const devicesStore = useDevicesStore()
 
 /** 系统状态 */
 const systemStatus = ref('normal')
@@ -230,9 +278,6 @@ const emergencyStop = ref('released')
 /** 门锁状态 */
 const doorLock = ref('locked')
 
-/** 报警数量 */
-const alarmCount = ref(0)
-
 /** 状态面板折叠状态 */
 const statusCollapsed = ref(false)
 
@@ -241,6 +286,12 @@ const alarmCollapsed = ref(false)
 
 /** 指南面板折叠状态 */
 const guideCollapsed = ref(false)
+
+/** 加载状态 */
+const isLoading = ref(false)
+
+/** 自动刷新定时器 */
+let refreshTimer = null
 
 /** 系统状态文本 */
 const systemStatusText = computed(() => {
@@ -292,27 +343,68 @@ const doorLockType = computed(() => {
   return doorLock.value === 'locked' ? 'success' : 'warning'
 })
 
-/** 报警历史 */
-const alarmHistory = ref([
-  {
-    time: '2024-03-07 14:30:25',
-    title: '温度过高警告',
-    description: '电磁铁线圈温度达到58C',
-    type: 'warning'
-  },
-  {
-    time: '2024-03-07 10:15:12',
-    title: '通信中断',
-    description: '电机控制器通信丢失5秒',
-    type: 'danger'
-  },
-  {
-    time: '2024-03-06 16:45:33',
-    title: '电压异常',
-    description: '压电陶瓷电压超出安全范围',
-    type: 'warning'
+/** 报警数量 - 从store获取 */
+const alarmCount = computed(() => {
+  return devicesStore.alarms.filter(a => !a.acknowledged).length
+})
+
+/** 报警历史 - 从store获取并格式化 */
+const alarmHistory = computed(() => {
+  const alarms = devicesStore.alarms || []
+  return alarms.slice(0, 10).map(alarm => ({
+    id: alarm.id,
+    time: formatTimestamp(alarm.timestamp),
+    title: alarm.message || alarm.title || '未知告警',
+    description: alarm.description || getDeviceName(alarm.deviceId),
+    type: getAlarmType(alarm.severity),
+    acknowledged: alarm.acknowledged,
+    deviceId: alarm.deviceId
+  }))
+})
+
+/**
+ * 格式化时间戳
+ * @param {number|string} timestamp - 时间戳
+ * @returns {string} 格式化后的时间字符串
+ */
+function formatTimestamp(timestamp) {
+  if (!timestamp) return '-'
+  const date = new Date(timestamp)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+/**
+ * 获取设备名称
+ * @param {string} deviceId - 设备ID
+ * @returns {string} 设备名称
+ */
+function getDeviceName(deviceId) {
+  if (!deviceId) return '系统'
+  const device = devicesStore.devices[deviceId]
+  return device ? device.name : deviceId
+}
+
+/**
+ * 获取告警类型
+ * @param {string} severity - 告警严重程度
+ * @returns {string} Element Plus类型
+ */
+function getAlarmType(severity) {
+  const typeMap = {
+    critical: 'danger',
+    error: 'danger',
+    warning: 'warning',
+    info: 'primary'
   }
-])
+  return typeMap[severity] || 'warning'
+}
 
 /** 安全操作指南 */
 const safetyGuides = [
@@ -353,6 +445,98 @@ function toggleAlarmPanel() {
 function toggleGuidePanel() {
   guideCollapsed.value = !guideCollapsed.value
 }
+
+/**
+ * 刷新告警数据
+ */
+async function refreshAlarms() {
+  isLoading.value = true
+  try {
+    await devicesStore.fetchAlarms()
+    ElMessage.success('告警数据已刷新')
+  } catch (error) {
+    ElMessage.error('刷新失败: ' + (error.message || '未知错误'))
+  } finally {
+    isLoading.value = false
+  }
+}
+
+/**
+ * 确认告警
+ * @param {string} alarmId - 告警ID
+ */
+async function acknowledgeAlarm(alarmId) {
+  const success = devicesStore.acknowledgeAlarm(alarmId, 'user')
+  if (success) {
+    ElMessage.success('告警已确认')
+  }
+}
+
+/**
+ * 初始化数据
+ */
+async function initData() {
+  isLoading.value = true
+  try {
+    await devicesStore.init()
+    updateSystemStatus()
+  } catch (error) {
+    console.error('初始化失败:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+/**
+ * 更新系统状态
+ */
+function updateSystemStatus() {
+  const health = devicesStore.systemHealth
+  const statusMap = {
+    healthy: 'normal',
+    degraded: 'warning',
+    critical: 'error',
+    emergency: 'emergency'
+  }
+  systemStatus.value = statusMap[health] || 'normal'
+  
+  const hasEmergency = devicesStore.alarms.some(a => a.severity === 'critical' && !a.acknowledged)
+  if (hasEmergency) {
+    systemStatus.value = 'emergency'
+  }
+}
+
+/**
+ * 开始自动刷新
+ */
+function startAutoRefresh() {
+  refreshTimer = setInterval(() => {
+    devicesStore.fetchAlarms()
+    updateSystemStatus()
+  }, 30000)
+}
+
+/**
+ * 停止自动刷新
+ */
+function stopAutoRefresh() {
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
+}
+
+// ==================== 生命周期 ====================
+
+onMounted(() => {
+  initData()
+  startAutoRefresh()
+})
+
+onBeforeUnmount(() => {
+  stopAutoRefresh()
+  devicesStore.cleanup()
+})
 </script>
 
 <style scoped lang="scss">
@@ -591,6 +775,12 @@ function toggleGuidePanel() {
   gap: var(--spacing-1);
 }
 
+.alarm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .alarm-title {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -600,6 +790,20 @@ function toggleGuidePanel() {
 .alarm-desc {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+}
+
+.alarm-badge {
+  margin-left: var(--spacing-2);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.empty-alarms {
+  padding: var(--spacing-4) 0;
 }
 
 /* ==================== 指南 ==================== */

@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from core.timeseries_storage import (
+from core.storage.timeseries_storage import (
     CompressionType,
     DataArchiver,
     DataTier,

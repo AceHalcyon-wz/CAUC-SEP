@@ -8,17 +8,20 @@
 - CORS安全配置：跨域资源共享策略
 - 输入验证增强：XSS过滤、SQL注入防护
 - 敏感信息脱敏：自动识别和脱敏敏感数据
+- 全局异常处理器：统一错误响应格式
+- 安全响应头中间件：添加 CSP、X-Frame-Options 等安全头
 
 作者：Backend Engineer Agent
 创建日期：2026-03-08
-更新日期：2026-03-14
-依赖：fastapi, starlette, python-jose, passlib, redis (可选)
+更新日期：2026-03-16
+依赖：fastapi, starlette, python-jose, passlib, redis (可选), structlog
 
 使用示例：
-    >>> from middleware import setup_cors, RateLimitMiddleware
+    >>> from middleware import setup_cors, RateLimitMiddleware, register_exception_handlers
     >>> app = FastAPI()
     >>> setup_cors(app)
     >>> app.add_middleware(RateLimitMiddleware)
+    >>> register_exception_handlers(app)
 """
 
 # 审计模块
@@ -115,6 +118,24 @@ from .validation import (
     validate_request_data,
 )
 
+# 异常处理模块
+from .exception_handler import (
+    app_exception_handler,
+    generic_exception_handler,
+    get_timestamp,
+    register_exception_handlers,
+    validation_exception_handler,
+)
+
+# 安全响应头模块
+from .security_headers import (
+    SECURITY_HEADERS_CONFIG,
+    SecurityHeadersMiddleware,
+    create_security_headers_middleware,
+    get_csp_policy_for_environment,
+    get_security_config,
+)
+
 __all__ = [
     # ==================== 审计模块 ====================
     "AuditMiddleware",
@@ -197,4 +218,16 @@ __all__ = [
     # ==================== 常量 ====================
     "SENSITIVE_FIELDS",
     "SENSITIVE_PATTERNS",
+    # ==================== 异常处理 ====================
+    "register_exception_handlers",
+    "app_exception_handler",
+    "validation_exception_handler",
+    "generic_exception_handler",
+    "get_timestamp",
+    # ==================== 安全响应头 ====================
+    "SecurityHeadersMiddleware",
+    "create_security_headers_middleware",
+    "get_csp_policy_for_environment",
+    "get_security_config",
+    "SECURITY_HEADERS_CONFIG",
 ]

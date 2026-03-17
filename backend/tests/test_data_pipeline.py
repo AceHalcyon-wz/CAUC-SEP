@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from core.data_pipeline import (
+from core.storage.data_pipeline import (
     DataPipeline,
     PipelineStatistics,
     RingBuffer,

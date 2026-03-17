@@ -449,7 +449,7 @@ async function handleReset() {
 
     settingsStore.resetConfig()
     ElMessage.success('配置已重置')
-  } catch (error) {
+  } catch {
     // 用户取消操作
   }
 }
@@ -489,7 +489,7 @@ function handleFileChange(file) {
     try {
       const data = JSON.parse(event.target.result)
       importPreview.value = data
-    } catch (error) {
+    } catch {
       ElMessage.error('配置文件格式错误')
       importPreview.value = null
     }

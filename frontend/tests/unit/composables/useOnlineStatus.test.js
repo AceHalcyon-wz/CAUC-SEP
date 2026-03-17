@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useOnlineStatus, getNetworkConnectionInfo, isNetworkInformationSupported } from '../useOnlineStatus';
+import { useOnlineStatus, getNetworkConnectionInfo, isNetworkInformationSupported } from '@/composables/useOnlineStatus';
 
 describe('useOnlineStatus', () => {
   let onlineStatus;

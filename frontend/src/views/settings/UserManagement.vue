@@ -494,6 +494,7 @@ import {
   Delete
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import request, { unwrapResponse } from '@/utils/request'
 
 const _userStore = useUserStore()
 
@@ -552,7 +553,7 @@ const userForm = reactive({
   email: '',
   password: '',
   confirmPassword: '',
-  role: 'operator',
+  role: 'user',
   status: 'active',
   remark: ''
 })
@@ -561,7 +562,7 @@ const userForm = reactive({
 const userRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '用户名长度在 2 到 20 个字符', trigger: 'blur' }
+    { min: 3, max: 50, message: '用户名长度在 3 到 50 个字符', trigger: 'blur' }
   ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -569,7 +570,7 @@ const userRules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
+    { min: 6, max: 100, message: '密码长度在 6 到 100 个字符', trigger: 'blur' }
   ],
   confirmPassword: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -637,37 +638,25 @@ onMounted(() => {
 async function loadUserList() {
   loading.value = true
   try {
-    // 模拟数据
-    userList.value = [
-      {
-        id: '1',
-        username: 'admin',
-        email: 'admin@cauc.edu.cn',
-        role: 'admin',
-        status: 'active',
-        lastLogin: new Date().toISOString(),
-        createdAt: '2024-01-01T00:00:00.000Z'
-      },
-      {
-        id: '2',
-        username: 'operator1',
-        email: 'operator1@cauc.edu.cn',
-        role: 'operator',
-        status: 'active',
-        lastLogin: new Date(Date.now() - 86400000).toISOString(),
-        createdAt: '2024-02-15T00:00:00.000Z'
-      },
-      {
-        id: '3',
-        username: 'viewer1',
-        email: 'viewer1@cauc.edu.cn',
-        role: 'viewer',
-        status: 'active',
-        lastLogin: null,
-        createdAt: '2024-03-01T00:00:00.000Z'
-      }
-    ]
-    pagination.total = userList.value.length
+    const params = {
+      page: pagination.page,
+      page_size: pagination.pageSize
+    }
+    if (filterForm.username) params.username = filterForm.username
+    if (filterForm.role) params.role = filterForm.role
+    if (filterForm.status) params.is_active = filterForm.status === 'active'
+
+    const response = await request.get('/api/v1/user/users', { params })
+    
+    // 使用 unwrapResponse 解包数据
+    const data = unwrapResponse(response)
+    userList.value = (data.items || []).map(user => ({
+      ...user,
+      status: user.is_active ? 'active' : 'inactive',
+      lastLogin: user.last_login || user.updated_at,
+      createdAt: user.created_at
+    }))
+    pagination.total = data.total || 0
   } catch (error) {
     console.error('[UserManagement] Failed to load users:', error)
     ElMessage.error('加载用户列表失败')
@@ -738,14 +727,28 @@ async function handleSaveUser() {
 
     saving.value = true
 
-    // 模拟保存
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (isEditing.value) {
+      await request.put(`/api/v1/user/users/${currentUser.value.id}`, {
+        email: userForm.email,
+        role: userForm.role,
+        is_active: userForm.status === 'active'
+      })
+      ElMessage.success('用户更新成功')
+    } else {
+      await request.post('/api/v1/user/users', {
+        username: userForm.username,
+        email: userForm.email,
+        password: userForm.password,
+        role: userForm.role
+      })
+      ElMessage.success('用户创建成功')
+    }
 
-    ElMessage.success(isEditing.value ? '用户更新成功' : '用户创建成功')
     userDialogVisible.value = false
     loadUserList()
   } catch (error) {
     console.error('[UserManagement] Failed to save user:', error)
+    ElMessage.error(error.response?.data?.detail || '保存用户失败')
   } finally {
     saving.value = false
   }
@@ -766,13 +769,14 @@ async function handleDeleteUser(user) {
       }
     )
 
-    // 模拟删除
-    await new Promise(resolve => setTimeout(resolve, 300))
-
+    await request.delete(`/api/v1/user/users/${user.id}`)
     ElMessage.success('用户删除成功')
     loadUserList()
   } catch (error) {
-    // 用户取消
+    if (error !== 'cancel') {
+      console.error('[UserManagement] Failed to delete user:', error)
+      ElMessage.error(error.response?.data?.detail || '删除用户失败')
+    }
   }
 }
 
@@ -791,11 +795,17 @@ async function handleBatchDelete() {
       }
     )
 
+    const userIds = selectedUsers.value.map(u => u.id)
+    await request.post('/api/v1/user/users/batch-delete', userIds)
+    
     ElMessage.success('批量删除成功')
     selectedUsers.value = []
     loadUserList()
   } catch (error) {
-    // 用户取消
+    if (error !== 'cancel') {
+      console.error('[UserManagement] Failed to batch delete:', error)
+      ElMessage.error(error.response?.data?.detail || '批量删除失败')
+    }
   }
 }
 
@@ -826,11 +836,14 @@ async function handleSavePermissions() {
  */
 async function handleStatusChange(user) {
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await request.put(`/api/v1/user/users/${user.id}`, {
+      is_active: user.status === 'active'
+    })
     ElMessage.success(`用户 ${user.username} 已${user.status === 'active' ? '启用' : '禁用'}`)
   } catch (error) {
-    // 恢复原状态
+    console.error('[UserManagement] Failed to update status:', error)
     user.status = user.status === 'active' ? 'inactive' : 'active'
+    ElMessage.error(error.response?.data?.detail || '状态更新失败')
   }
 }
 
@@ -866,7 +879,7 @@ function resetUserForm() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'operator',
+    role: 'user',
     status: 'active',
     remark: ''
   })
@@ -888,7 +901,7 @@ function getAvatarText(username) {
 function getRoleTagType(role) {
   const types = {
     admin: 'danger',
-    operator: 'primary',
+    user: 'primary',
     viewer: 'info'
   }
   return types[role] || 'info'
@@ -900,7 +913,7 @@ function getRoleTagType(role) {
 function getRoleLabel(role) {
   const labels = {
     admin: '管理员',
-    operator: '操作员',
+    user: '操作员',
     viewer: '观察者'
   }
   return labels[role] || role
@@ -926,7 +939,7 @@ function formatDateTime(datetime) {
  */
 function isPermissionDisabled(_key) {
   if (currentUser.value?.role === 'admin') {
-    return true // 管理员拥有所有权限
+    return true
   }
   return false
 }

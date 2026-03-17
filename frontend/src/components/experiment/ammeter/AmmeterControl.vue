@@ -709,6 +709,16 @@
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Aim,
+  VideoPlay,
+  VideoPause,
+  Delete,
+  Refresh,
+  Plus,
+  Document,
+  Warning
+} from '@element-plus/icons-vue'
 import { useAmmeterStore } from '@/stores/ammeter'
 import { AMMETER } from '@/config/constants'
 import AmmeterWaveform from './AmmeterWaveform.vue'
@@ -1173,20 +1183,6 @@ onBeforeUnmount(() => {
   // 清理 Store
   ammeterStore.cleanup()
 })
-
-// ============ 监听器 ============
-
-// 监听 Store 中的采样率变化
-watch(sampleRate, (newRate) => {
-  sampleRateValue.value = newRate
-})
-
-// 监听 Store 中的通道配置变化
-watch(() => ammeterStore.channelConfig, (newConfig) => {
-  Object.keys(newConfig).forEach(channel => {
-    channelConfigs[channel] = { ...newConfig[channel] }
-  })
-}, { deep: true })
 
 // ============ 监听器 ============
 
