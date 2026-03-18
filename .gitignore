@@ -259,3 +259,7 @@ ipython_config.py
 exports/
 data/
 config/local/
+
+# ==================== Electron 打包产物 ====================
+electron/resources/
+electron/dist/

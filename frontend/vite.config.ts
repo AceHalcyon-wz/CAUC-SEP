@@ -69,6 +69,7 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       sourcemap: !isProduction,
       minify: 'esbuild',
+      target: 'esnext',
       esbuild: {
         drop: isProduction ? ['console', 'debugger'] : [],
       },

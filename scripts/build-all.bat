@@ -238,7 +238,7 @@ if "%SKIP_ELECTRON%"=="0" (
 
         REM 执行打包
         echo   - 执行 electron-builder 打包...
-        call npm run build:electron
+        call npm run build:win
         if errorlevel 1 (
             echo [警告] Electron 打包可能失败
             echo   - 请检查 electron-builder 配置

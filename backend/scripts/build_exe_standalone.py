@@ -241,8 +241,8 @@ def main() -> int:
     # 创建输出目录
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # standalone 输出目录 (Nuitka 会创建 backend.dist)
-    standalone_dir = OUTPUT_DIR / "backend.dist"
+    # standalone 输出目录 (Nuitka 会根据入口文件名创建 main.dist)
+    standalone_dir = OUTPUT_DIR / "main.dist"
 
     # 清理旧的输出目录
     if standalone_dir.exists():

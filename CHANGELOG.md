@@ -5,6 +5,32 @@
 本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.3.5] - 2026-03-18
+
+### 新增
+
+- **桌面应用打包**: 完成 Nuitka + Electron + electron-builder 完整打包流程
+  - 生成 Windows 安装包: `CAUC-SEP-3.5.0-x64-setup.exe` (207.47 MB)
+  - 解压后大小: 819.80 MB
+  - 输出路径: `electron/dist/`
+
+### 变更
+
+- **部署文档重构**: 移除 Docker 部署内容，专注桌面应用部署
+  - 更新 `docs/technical-docs/10-部署运维/部署配置.md`
+  - 保留生产环境配置、安全加固、数据库维护等内容
+- **打包脚本修复**: 修正 Nuitka 输出目录配置
+  - Nuitka 根据入口文件名输出 `main.dist` 目录
+  - 同步更新 `electron-builder.yml`、`package.json`、`main.js` 路径配置
+  - 更新 `backend/scripts/build_exe_standalone.py` 输出目录检查
+
+### 技术细节
+
+- **前端构建**: Vue 3 + Vite 构建，输出到 `electron/resources/frontend/`
+- **后端编译**: Nuitka standalone 模式，MSVC 14.5 编译器
+- **Electron打包**: electron-builder 24.13.3，NSIS 安装程序
+- **打包耗时**: Nuitka 编译约 30 分钟，Electron 打包约 2 分钟
+
 ## [0.3.4] - 2026-03-18
 
 ### 变更
