@@ -273,8 +273,8 @@ class MainWindow {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: path.join(__dirname, "preload.js"),
-        webSecurity: true,
+        preload: path.join(__dirname, "preload.cjs"),
+        webSecurity: false, // 禁用 webSecurity 以允许本地文件加载
         spellcheck: false,
       },
       show: false, // 先隐藏，加载完成后显示
@@ -335,15 +335,37 @@ class MainWindow {
         return;
       }
 
+      // 添加 webContents 错误监听
+      this.window?.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
+        log.error(`[Frontend] 页面加载失败: ${errorCode} - ${errorDescription}`);
+        this.window?.loadURL(
+          `data:text/html;charset=utf-8,${encodeURIComponent(this.getErrorPage(`加载失败: ${errorDescription}`))}`
+        );
+      });
+
+      // 添加控制台消息监听
+      this.window?.webContents.on("console-message", (event, level, message, line, sourceId) => {
+        log.info(`[Frontend Console] ${message} (source: ${sourceId}:${line})`);
+      });
+
       // 加载本地 HTML 文件
       await this.window?.loadFile(frontendPath);
 
+      log.info("[Frontend] 页面加载成功");
+      
       // 显示窗口
       this.window?.show();
 
-      // 开发环境打开开发者工具
+      // 开发环境打开开发者工具，生产环境可通过快捷键 F12 打开
       if (!app.isPackaged) {
         this.window?.webContents.openDevTools({ mode: "right" });
+      } else {
+        // 生产环境添加 F12 快捷键打开开发者工具
+        this.window?.webContents.on("before-input-event", (event, input) => {
+          if (input.key === "F12") {
+            this.window?.webContents.toggleDevTools();
+          }
+        });
       }
     } catch (err) {
       log.error(`[Frontend] 加载失败: ${err}`);

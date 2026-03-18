@@ -7,7 +7,7 @@
  * @version 3.6.0
  */
 
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const LayoutIDE = () => import('../views/LayoutIDE.vue')
 
@@ -267,7 +267,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
   scrollBehavior() {
     return { top: 0 }
@@ -325,7 +325,11 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('auth_token')
   const publicPages = ['/login', '/register', '/forgot-password']
   const isPublicPage = to.meta.public || publicPages.includes(to.path)
-  const isDevelopment = import.meta.env.DEV
+  const isElectronApp = typeof window !== 'undefined' && 
+    (window.location.protocol === 'file:' || 
+     window.electronAPI !== undefined ||
+     navigator.userAgent.includes('Electron'))
+  const isDevelopment = import.meta.env.DEV || isElectronApp
   
   if (!isPublicPage && !token) {
     if (isDevelopment) {

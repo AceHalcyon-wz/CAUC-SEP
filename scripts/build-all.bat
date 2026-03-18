@@ -32,7 +32,7 @@ cd /d "%~dp0.."
 REM ============================================================================
 REM 配置参数
 REM ============================================================================
-set "APP_VERSION=0.3.0"
+set "APP_VERSION=4.0.0"
 set "PROJECT_ROOT=%cd%"
 set "FRONTEND_DIR=%PROJECT_ROOT%\frontend"
 set "BACKEND_DIR=%PROJECT_ROOT%\backend"

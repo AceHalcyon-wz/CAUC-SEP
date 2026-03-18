@@ -1,48 +1,41 @@
 # ========================================
 # CAUC-SEP Electron Builder 配置文件
 # ========================================
-# 版本: 3.5.0
+# 版本: 4.0.0
 # 作者: CAUC-SEP Team
 # 日期: 2024-03-15
 # ========================================
 
-# 应用标识
 appId: com.cauc.sep
 productName: CAUC-SEP
 copyright: Copyright © 2024 CAUC-SEP Team
 
-# 目录配置
 directories:
   output: dist
   buildResources: build
 
-# 包含文件
 files:
   - src/**/*
   - package.json
   - "!**/*.map"
   - "!**/*.ts"
   - "!**/node_modules/.cache/**/*"
+  - "!src/preload.js"
 
-# 额外资源（后端和前端）
 extraResources:
-  # 后端可执行文件及依赖（Nuitka standalone输出）
   - from: resources/backend/main.dist
     to: backend/main.dist
     filter:
       - "**/*"
-  # 前端构建产物
   - from: resources/frontend
     to: frontend
     filter:
       - "**/*"
-  # 资源文件
   - from: ../assets
     to: assets
     filter:
       - "**/*"
 
-# Windows 配置
 win:
   target:
     - target: nsis
@@ -50,50 +43,24 @@ win:
         - x64
   icon: ../assets/icons/icon.ico
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
-  # 签名配置（可选）
-  # certificateFile: path/to/certificate.pfx
-  # certificatePassword: ${env.CERT_PASSWORD}
-  # signingHashAlgorithms:
-  #   - sha256
 
-# NSIS 安装程序配置
 nsis:
-  # 安装模式
   oneClick: false
   perMachine: true
   allowToChangeInstallationDirectory: true
-  
-  # 图标
   installerIcon: ../assets/icons/icon.ico
   uninstallerIcon: ../assets/icons/icon.ico
   installerHeaderIcon: ../assets/icons/icon.ico
-  
-  # 快捷方式
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: CAUC-SEP 科学实验平台
-  
-  # 自定义脚本（可选）
-  include: build/installer.nsh
-  
-  # 卸载配置
   deleteAppDataOnUninstall: false
-  
-  # 语言配置
   displayLanguageSelector: false
   installerLanguages:
     - zh_CN
     - en_US
-  language: "2052"  # 简体中文
-  
-  # 安装界面配置
-  installerSidebar: build/installerSidebar.bmp
-  uninstallerSidebar: build/uninstallerSidebar.bmp
-  
-  # 许可协议（可选）
-  # license: ../LICENSE
+  language: "2052"
 
-# macOS 配置
 mac:
   target:
     - target: dmg
@@ -103,28 +70,8 @@ mac:
   icon: ../assets/icons/icon.png
   category: public.app-category.science
   hardenedRuntime: true
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.plist
   artifactName: ${productName}-${version}-${arch}.${ext}
-  
-  # 签名配置（可选）
-  # identity: "Developer ID Application: Your Name (XXXXXXXXXX)"
-  # provisioningProfile: embed.provisionprofile
 
-# DMG 配置（macOS）
-dmg:
-  contents:
-    - x: 130
-      y: 220
-    - x: 410
-      y: 220
-      type: link
-      path: /Applications
-  window:
-    width: 540
-    height: 380
-
-# Linux 配置
 linux:
   target:
     - AppImage
@@ -133,49 +80,8 @@ linux:
   category: Science
   artifactName: ${productName}-${version}-${arch}.${ext}
   maintainer: CAUC-SEP Team <team@cauc.edu.cn>
-  desktop:
-    Name: CAUC-SEP
-    Comment: 科学实验平台
-    Categories: Science;Education;
-    StartupWMClass: cauc-sep
 
-# AppImage 配置（Linux）
-appImage:
-  systemIntegration: ask
-
-# DEB 配置（Linux）
-deb:
-  priority: optional
-  compression: xz
-
-# RPM 配置（Linux）
-rpm:
-  compression: xz
-
-# 发布配置（禁用自动发布）
 publish: null
-
-# 更新配置（可选，用于自动更新）
-# publish:
-#   provider: github
-#   owner: cauc
-#   repo: sep
-#   releaseType: release
-
-# 构建前钩子
-beforeBuild: |
-  echo "开始构建 CAUC-SEP ${npm_package_version}..."
-
-# 构建后钩子
-afterSign: |
-  echo "构建完成"
-
-# 异步钩子支持
+compression: maximum
 nodeGypRebuild: false
 npmRebuild: true
-
-# 压缩配置
-compression: maximum
-
-# 最低 Node.js 版本
-nodeVersion: "20.0.0"

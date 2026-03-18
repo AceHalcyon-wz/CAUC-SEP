@@ -8,6 +8,7 @@ import { defineConfig, type PluginOption } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import fs from 'fs'
 
 function serveDocsPlugin(): PluginOption {
@@ -35,7 +36,17 @@ export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze'
   const isProduction = mode === 'production'
 
-  const plugins: PluginOption[] = [serveDocsPlugin(), vue()]
+  const plugins: PluginOption[] = [
+    serveDocsPlugin(), 
+    vue(),
+    nodePolyfills({
+      include: ['buffer', 'process', 'util', 'stream', 'events', 'crypto'],
+      globals: {
+        Buffer: true,
+        process: true,
+      },
+    }),
+  ]
 
   if (isAnalyze) {
     plugins.push(

@@ -159,7 +159,7 @@ export default [
       '@typescript-eslint/prefer-as-const': 'error',
       '@typescript-eslint/prefer-enum-initializers': 'warn',
       '@typescript-eslint/prefer-literal-enum-member': 'error',
-      '@typescript-eslint/ban-types': 'warn',
+      // '@typescript-eslint/ban-types': 'warn', // 已在新版本中移除
       '@typescript-eslint/adjacent-overload-signatures': 'error',
       '@typescript-eslint/array-type': ['error', { default: 'array' }],
       '@typescript-eslint/consistent-indexed-object-style': ['warn', 'record'],

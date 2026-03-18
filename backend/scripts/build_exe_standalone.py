@@ -34,7 +34,7 @@ OUTPUT_DIR = ELECTRON_DIR / "resources" / "backend"
 # ============================================================================
 # 应用信息
 # ============================================================================
-APP_VERSION = "0.3.0"
+APP_VERSION = "4.0.0"
 COMPANY_NAME = "CAUC"
 DESCRIPTION = "CAUC Spintronics Experiment Platform - Backend Service"
 

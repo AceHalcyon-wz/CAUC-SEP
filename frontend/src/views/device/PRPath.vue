@@ -737,9 +737,15 @@ const filteredTemplates = computed(() => {
  */
 function selectPath(pathNum) {
   selectedPath.value = pathNum
-  // TODO: 从后端加载该路径的配置
-  // 当前使用空数组或模拟数据
-  currentPathPoints.value = []
+  // 从 Vuex store 加载该路径的配置
+  const pathKey = `path_${pathNum}`
+  const pathConfig = motorStore.prPaths[pathKey]
+  
+  if (pathConfig && Array.isArray(pathConfig.points)) {
+    currentPathPoints.value = [...pathConfig.points]
+  } else {
+    currentPathPoints.value = []
+  }
 }
 
 /**
@@ -925,11 +931,20 @@ function handleExport() {
       exportedAt: new Date().toISOString()
     }
   } else if (exportScope.value === 'all') {
+    // 收集所有已配置的路径
+    const allPaths = {}
+    for (let i = 1; i <= 8; i++) {
+      const pathKey = `path_${i}`
+      const pathConfig = motorStore.prPaths[pathKey]
+      if (pathConfig && pathConfig.points && pathConfig.points.length > 0) {
+        allPaths[pathKey] = pathConfig
+      }
+    }
+    
     data = {
-      paths: [],
+      paths: allPaths,
       exportedAt: new Date().toISOString()
     }
-    // TODO: 收集所有路径配置
   }
   
   const content = JSON.stringify(data, null, 2)

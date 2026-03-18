@@ -1,6 +1,6 @@
 {
   "name": "cauc-sep",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "description": "CAUC-SEP 科学实验平台桌面应用程序",
   "main": "src/main.js",
   "type": "module",
@@ -28,75 +28,6 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "extends": null,
-    "appId": "com.cauc.sep",
-    "productName": "CAUC-SEP",
-    "copyright": "Copyright © 2024 CAUC-SEP Team",
-    "directories": {
-      "output": "dist",
-      "buildResources": "build"
-    },
-    "files": [
-      "src/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "resources/backend/main.dist",
-        "to": "backend/main.dist",
-        "filter": ["**/*"]
-      },
-      {
-        "from": "resources/frontend",
-        "to": "frontend",
-        "filter": ["**/*"]
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ],
-      "icon": "../assets/icons/icon.ico",
-      "artifactName": "${productName}-${version}-${arch}-setup.${ext}"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "../assets/icons/icon.ico",
-      "uninstallerIcon": "../assets/icons/icon.ico",
-      "installerHeaderIcon": "../assets/icons/icon.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "CAUC-SEP 科学实验平台",
-      "include": "build/installer.nsh",
-      "deleteAppDataOnUninstall": false,
-      "displayLanguageSelector": false,
-      "installerLanguages": ["zh_CN", "en_US"],
-      "language": "2052"
-    },
-    "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
-        }
-      ],
-      "icon": "../assets/icons/icon.png",
-      "hardenedRuntime": true,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
-    },
-    "linux": {
-      "target": ["AppImage", "deb"],
-      "icon": "../assets/icons",
-      "category": "Science",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
-    },
-    "publish": null
+    "extends": "./electron-builder.yml"
   }
 }
