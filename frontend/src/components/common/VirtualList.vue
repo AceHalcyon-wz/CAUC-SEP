@@ -14,7 +14,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
  */
 interface Props {
   /** 数据列表 */
-  items: Array<any>;
+  items: Array<Record<string, unknown>>;
   /** 每项高度（像素） */
   itemHeight: number;
   /** 可见项数量 */
@@ -51,7 +51,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'scroll', scrollTop: number): void;
   (e: 'lazy-load'): void;
-  (e: 'item-click', item: any, index: number): void;
+  (e: 'item-click', item: Record<string, unknown>, index: number): void;
   (e: 'visible-change', startIndex: number, endIndex: number): void;
 }>();
 
@@ -164,7 +164,7 @@ function scrollToBottom(): void {
 /**
  * 滚动到指定项
  */
-function scrollToItem(predicate: (item: any) => boolean): boolean {
+function scrollToItem(predicate: (item: Record<string, unknown>) => boolean): boolean {
   const index = props.items.findIndex(predicate);
   if (index >= 0) {
     scrollToIndex(index);
@@ -176,7 +176,7 @@ function scrollToItem(predicate: (item: any) => boolean): boolean {
 /**
  * 处理项点击
  */
-function handleItemClick(item: any, index: number): void {
+function handleItemClick(item: Record<string, unknown>, index: number): void {
   emit('item-click', item, index);
 }
 

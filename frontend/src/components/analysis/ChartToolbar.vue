@@ -46,14 +46,14 @@ import {
 interface ChartType {
   value: string;
   label: string;
-  icon: any;
+  icon: Component;
 }
 
 /** 标注类型定义 */
 interface AnnotationType {
   value: string;
   label: string;
-  icon: any;
+  icon: Component;
 }
 
 /** Props定义 */

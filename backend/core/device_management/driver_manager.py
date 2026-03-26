@@ -806,6 +806,22 @@ class DriverProcessManager:
         """
         return {driver_id: self.get_driver_info(driver_id) for driver_id in self._drivers}
 
+    def get_all_drivers(self) -> dict[str, dict[str, Any]]:
+        """获取所有驱动信息（别名方法）。
+
+        此方法为get_all_drivers_info的别名，提供更简洁的调用方式。
+
+        Returns:
+            Dict[str, Dict[str, Any]]: 所有驱动信息，key为driver_id，value为驱动详情
+
+        Example:
+            >>> manager = DriverProcessManager()
+            >>> drivers = manager.get_all_drivers()
+            >>> for driver_id, info in drivers.items():
+            ...     print(f"{driver_id}: {info['status']}")
+        """
+        return self.get_all_drivers_info()
+
     def _start_monitor_thread(self) -> None:
         """启动监控线程。"""
         if self._monitor_thread and self._monitor_thread.is_alive():

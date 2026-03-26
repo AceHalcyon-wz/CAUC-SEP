@@ -458,3 +458,117 @@ class SupportedDataTypesResponse(BaseModel):
     """
 
     data_types: dict[int, str]
+
+
+# ==================== 软件限位防护体系 ====================
+
+
+class LimitLockoutStatus(BaseModel):
+    """
+    限位锁止状态模型。
+
+    用于描述限位触发后的锁止状态，防止继续向限位方向运动。
+
+    Attributes:
+        is_locked: 是否处于锁止状态
+        lockout_direction: 锁止方向，'positive' 或 'negative'，仅锁止时有效
+        triggered_position_mm: 触发锁止时的位置(mm)
+        triggered_at: 触发时间戳
+        auto_unlock_enabled: 是否启用自动解锁（离开限位区域后自动解锁）
+
+    Note:
+        限位锁止机制：
+        - 正向限位触发后，禁止正向运动，允许负向运动
+        - 负向限位触发后，禁止负向运动，允许正向运动
+        - 离开限位区域后自动解锁（可配置）
+    """
+
+    is_locked: bool = Field(..., description="是否处于锁止状态")
+    lockout_direction: str | None = Field(None, description="锁止方向: positive 或 negative")
+    triggered_position_mm: float | None = Field(None, description="触发锁止时的位置(mm)")
+    triggered_at: str | None = Field(None, description="触发时间戳")
+    auto_unlock_enabled: bool = Field(True, description="是否启用自动解锁")
+
+
+class LimitVerificationResult(BaseModel):
+    """
+    限位参数二次校验结果模型。
+
+    用于限位参数写入后的自动读取校验。
+
+    Attributes:
+        success: 校验是否成功
+        expected_positive_mm: 预期正向限位(mm)
+        expected_negative_mm: 预期负向限位(mm)
+        actual_positive_mm: 实际读取的正向限位(mm)
+        actual_negative_mm: 实际读取的负向限位(mm)
+        positive_match: 正向限位是否匹配
+        negative_match: 负向限位是否匹配
+        tolerance_mm: 允许的误差范围(mm)
+        message: 校验结果描述
+
+    Warning:
+        校验失败时，参数可能未正确写入驱动器，需要告警并建议重新写入。
+    """
+
+    success: bool = Field(..., description="校验是否成功")
+    expected_positive_mm: float = Field(..., description="预期正向限位(mm)")
+    expected_negative_mm: float = Field(..., description="预期负向限位(mm)")
+    actual_positive_mm: float = Field(..., description="实际读取的正向限位(mm)")
+    actual_negative_mm: float = Field(..., description="实际读取的负向限位(mm)")
+    positive_match: bool = Field(..., description="正向限位是否匹配")
+    negative_match: bool = Field(..., description="负向限位是否匹配")
+    tolerance_mm: float = Field(0.1, description="允许的误差范围(mm)")
+    message: str = Field(..., description="校验结果描述")
+
+
+class LimitConfigWithVerificationRequest(BaseModel):
+    """
+    带二次校验的限位配置请求。
+
+    用于设置限位参数并自动进行读取校验。
+
+    Attributes:
+        positive_mm: 正向限位(mm)
+        negative_mm: 负向限位(mm)
+        enable_verification: 是否启用二次校验，默认True
+        verification_tolerance_mm: 校验允许误差(mm)，默认0.1
+        sync_to_driver: 是否同步到驱动器寄存器，默认True
+        save_to_eeprom: 是否保存到EEPROM，默认False
+
+    Note:
+        二次校验流程：
+        1. 写入限位参数到本地配置
+        2. 同步到驱动器寄存器（可选）
+        3. 读取驱动器寄存器验证
+        4. 比较写入值与读取值
+        5. 不匹配时返回告警
+    """
+
+    positive_mm: float = Field(50.0, description="正向限位(mm)")
+    negative_mm: float = Field(-50.0, description="负向限位(mm)")
+    enable_verification: bool = Field(True, description="是否启用二次校验")
+    verification_tolerance_mm: float = Field(0.1, description="校验允许误差(mm)", ge=0.01, le=1.0)
+    sync_to_driver: bool = Field(True, description="是否同步到驱动器寄存器")
+    save_to_eeprom: bool = Field(False, description="是否保存到EEPROM")
+
+
+class LimitConfigWithVerificationResponse(BaseModel):
+    """
+    带二次校验的限位配置响应。
+
+    Attributes:
+        success: 配置是否成功
+        message: 操作消息
+        local_config_success: 本地配置是否成功
+        driver_sync_success: 驱动器同步是否成功
+        verification: 二次校验结果
+        eeprom_save_success: EEPROM保存是否成功
+    """
+
+    success: bool = Field(..., description="配置是否成功")
+    message: str = Field(..., description="操作消息")
+    local_config_success: bool = Field(..., description="本地配置是否成功")
+    driver_sync_success: bool | None = Field(None, description="驱动器同步是否成功")
+    verification: LimitVerificationResult | None = Field(None, description="二次校验结果")
+    eeprom_save_success: bool | None = Field(None, description="EEPROM保存是否成功")

@@ -55,16 +55,40 @@ from .database import (
 from .timeseries_storage import TimeSeriesStorage
 from .data_pipeline import DataPipeline
 from .index_optimizer import IndexOptimizer
+from .database_optimizer import (
+    DatabaseOptimizer,
+    SQLiteOptimizedConnection,
+    DatabaseCacheManager,
+    BatchWriteManager,
+    HDF5StorageManager,
+    SQLiteOptimizationConfig,
+    CacheConfig,
+    BatchWriteConfig,
+    HDF5Config,
+    create_optimized_database,
+    optimize_sqlite_database,
+)
 
 __all__ = [
+    "BatchWriteConfig",
+    "BatchWriteManager",
+    "CacheConfig",
     "DataPipeline",
     "DataStorage",
+    "DatabaseCacheManager",
     "DatabaseConnectionPool",
+    "DatabaseOptimizer",
     "DatabasePoolManager",
+    "HDF5Config",
+    "HDF5StorageManager",
     "IndexOptimizer",
+    "SQLiteOptimizationConfig",
+    "SQLiteOptimizedConnection",
     "TimeSeriesStorage",
+    "create_optimized_database",
     "create_pool",
     "get_default_pool",
     "get_pool_manager",
     "init_database_pool",
+    "optimize_sqlite_database",
 ]

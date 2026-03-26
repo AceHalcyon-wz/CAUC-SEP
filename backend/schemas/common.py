@@ -1,6 +1,4 @@
 """
-通用响应模型
-
 文件名: common.py
 路径: backend/schemas/
 功能: 定义通用的成功/错误响应模型，提供统一的 API 响应格式
@@ -9,11 +7,13 @@
 依赖: pydantic, enum, typing
 
 错误码分类：
-- E1xxx: 设备相关错误（未初始化、未连接、急停、忙碌、设备故障）
-- E2xxx: 参数相关错误（无效参数、参数超限、参数缺失）
-- E3xxx: 限位相关错误（软限位超限、硬件限位触发）
-- E4xxx: 操作相关错误（操作失败、运动失败、连接失败）
-- E5xxx: 系统相关错误（内部错误、通信错误、超时错误）
+- E1xxx: 设备相关错误（未初始化、未连接、急停、忙碌、设备故障、不存在、超时、需校准）
+- E2xxx: 参数相关错误（无效参数、参数超限、参数缺失、类型错误、 格式错误、 重复）
+- E3xxx: 限位相关错误（软限位超限、硬件限位触发、锁定激活、 验证失败、 同步失败、 配置无效）
+- E4xxx: 操作相关错误（操作失败、运动失败、连接失败、超时、 取消、 不允许、 进行中）
+- E5xxx: 系统相关错误（内部错误、通信错误、超时错误、数据库错误、 缓存错误、 文件系统错误、 配置错误、 服务不可用）
+- E6xxx: 认证授权错误（未认证、 权限不足、 令牌过期、 令牌无效、 账户禁用、 账户锁定）
+- E7xxx: 数据相关错误（数据不存在、 数据已存在、 完整性错误、 导出失败、 导入失败）
 """
 
 from enum import Enum
@@ -53,47 +53,120 @@ class ErrorCode(str, Enum):
         - DEVICE_IN_EMERGENCY_STOP: 设备处于急停状态
         - DEVICE_BUSY: 设备忙碌
         - DEVICE_ERROR: 设备故障
+        - DEVICE_NOT_FOUND: 设备不存在
+        - DEVICE_TIMEOUT: 设备响应超时
+        - DEVICE_CALIBRATION_REQUIRED: 设备需要校准
 
     参数错误 (E2xxx):
         - INVALID_PARAMETER: 无效参数
         - PARAM_OUT_OF_RANGE: 参数超限
         - MISSING_PARAMETER: 参数缺失
+        - PARAM_TYPE_ERROR: 参数类型错误
+        - PARAM_FORMAT_ERROR: 参数格式错误
+        - PARAM_DUPLICATE: 参数重复
 
     限位错误 (E3xxx):
         - SOFT_LIMIT_EXCEEDED: 软限位超限
         - HARDWARE_LIMIT_TRIGGERED: 硬件限位触发
+        - LIMIT_LOCKOUT_ACTIVE: 限位锁定激活
+        - LIMIT_VERIFICATION_FAILED: 限位验证失败
+        - LIMIT_SYNC_FAILED: 限位同步失败
+        - LIMIT_CONFIG_INVALID: 限位配置无效
 
     操作错误 (E4xxx):
         - OPERATION_FAILED: 操作失败
         - MOTION_FAILED: 运动失败
         - CONNECTION_FAILED: 连接失败
+        - OPERATION_TIMEOUT: 操作超时
+        - OPERATION_CANCELLED: 操作已取消
+        - OPERATION_NOT_ALLOWED: 操作不允许
+        - OPERATION_IN_PROGRESS: 操作进行中
 
     系统错误 (E5xxx):
         - INTERNAL_ERROR: 内部错误
         - COMMUNICATION_ERROR: 通信错误
         - TIMEOUT_ERROR: 超时错误
+        - DATABASE_ERROR: 数据库错误
+        - CACHE_ERROR: 缓存错误
+        - FILE_SYSTEM_ERROR: 文件系统错误
+        - CONFIG_ERROR: 配置错误
+        - SERVICE_UNAVAILABLE: 服务不可用
+
+    认证授权错误 (E6xxx):
+        - UNAUTHORIZED: 未认证
+        - FORBIDDEN: 权限不足
+        - TOKEN_EXPIRED: 令牌过期
+        - TOKEN_INVALID: 令牌无效
+        - ACCOUNT_DISABLED: 账户已禁用
+        - ACCOUNT_LOCKED: 账户已锁定
+
+    数据错误 (E7xxx):
+        - DATA_NOT_FOUND: 数据不存在
+        - DATA_ALREADY_EXISTS: 数据已存在
+        - DATA_INTEGRITY_ERROR: 数据完整性错误
+        - DATA_EXPORT_FAILED: 数据导出失败
+        - DATA_IMPORT_FAILED: 数据导入失败
     """
 
+    # 设备错误 (E1xxx)
     DEVICE_NOT_INITIALIZED = "E1001"
     DEVICE_NOT_CONNECTED = "E1002"
     DEVICE_IN_EMERGENCY_STOP = "E1003"
     DEVICE_BUSY = "E1004"
     DEVICE_ERROR = "E1005"
+    DEVICE_NOT_FOUND = "E1006"
+    DEVICE_TIMEOUT = "E1007"
+    DEVICE_CALIBRATION_REQUIRED = "E1008"
 
+    # 参数错误 (E2xxx)
     INVALID_PARAMETER = "E2001"
     PARAM_OUT_OF_RANGE = "E2002"
     MISSING_PARAMETER = "E2003"
+    PARAM_TYPE_ERROR = "E2004"
+    PARAM_FORMAT_ERROR = "E2005"
+    PARAM_DUPLICATE = "E2006"
 
+    # 限位错误 (E3xxx)
     SOFT_LIMIT_EXCEEDED = "E3001"
     HARDWARE_LIMIT_TRIGGERED = "E3002"
+    LIMIT_LOCKOUT_ACTIVE = "E3003"
+    LIMIT_VERIFICATION_FAILED = "E3004"
+    LIMIT_SYNC_FAILED = "E3005"
+    LIMIT_CONFIG_INVALID = "E3006"
 
+    # 操作错误 (E4xxx)
     OPERATION_FAILED = "E4001"
     MOTION_FAILED = "E4002"
     CONNECTION_FAILED = "E4003"
+    OPERATION_TIMEOUT = "E4004"
+    OPERATION_CANCELLED = "E4005"
+    OPERATION_NOT_ALLOWED = "E4006"
+    OPERATION_IN_PROGRESS = "E4007"
 
+    # 系统错误 (E5xxx)
     INTERNAL_ERROR = "E5001"
     COMMUNICATION_ERROR = "E5002"
     TIMEOUT_ERROR = "E5003"
+    DATABASE_ERROR = "E5004"
+    CACHE_ERROR = "E5005"
+    FILE_SYSTEM_ERROR = "E5006"
+    CONFIG_ERROR = "E5007"
+    SERVICE_UNAVAILABLE = "E5008"
+
+    # 认证授权错误 (E6xxx)
+    UNAUTHORIZED = "E6001"
+    FORBIDDEN = "E6002"
+    TOKEN_EXPIRED = "E6003"
+    TOKEN_INVALID = "E6004"
+    ACCOUNT_DISABLED = "E6005"
+    ACCOUNT_LOCKED = "E6006"
+
+    # 数据错误 (E7xxx)
+    DATA_NOT_FOUND = "E7001"
+    DATA_ALREADY_EXISTS = "E7002"
+    DATA_INTEGRITY_ERROR = "E7003"
+    DATA_EXPORT_FAILED = "E7004"
+    DATA_IMPORT_FAILED = "E7005"
 
 
 class ErrorResponse(BaseModel):
@@ -158,7 +231,7 @@ class ValidationErrorResponse(BaseModel):
     Attributes:
         error_code: 错误代码，默认为 'VALIDATION_ERROR'
         detail: 错误概述，描述验证失败的整体情况
-        errors: 详细错误列表，包含每个字段的验证错误
+        errors: 详细错误列表,包含每个字段的验证错误
 
     Example:
         >>> response = ValidationErrorResponse(

@@ -1,5 +1,5 @@
 """
-设备基类模块
+设备基类模块（已废弃）
 
 功能：
 - 定义所有设备驱动的抽象基类
@@ -8,14 +8,42 @@
 
 作者：Backend Engineer Agent
 创建日期：2026-03-14
+最后更新：2026-03-26
+
+⚠️ 废弃警告：
+本模块已废弃，请使用统一的设备抽象基类：
+- backend.core.hardware.BaseDevice
+- backend.core.hardware.DeviceStatus
+- backend.core.hardware.DeviceConfig
+
+迁移指南：backend.core.hardware.migration_guide
+
+废弃时间：2026-03-26
+移除时间：2026-05-26
 """
 
+import warnings
 from enum import Enum
 from typing import Any
 
+# 发出废弃警告
+warnings.warn(
+    "backend.devices.base 模块已废弃，请使用 backend.core.hardware 模块。"
+    "迁移指南：backend.core.hardware.migration_guide",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class DeviceStatus(str, Enum):
-    """设备状态枚举"""
+    """
+    设备状态枚举（已废弃）。
+    
+    ⚠️ 请使用 backend.core.hardware.DeviceStatus
+    
+    废弃时间：2026-03-26
+    移除时间：2026-05-26
+    """
 
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"

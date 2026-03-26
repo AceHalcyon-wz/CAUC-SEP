@@ -1,374 +1,751 @@
 """
-日志配置模块。
+文件名: logging_config.py
+路径: backend/core/logging/
+功能: 分级日志体系，支持系统运行日志、硬件通信日志、设备操作日志、安全事件日志
+版本: v2.0
+创建日期: 2026-03-15
+最后更新: 2026-03-25
+作者: Backend Engineer Agent
 
-支持日志轮转、归档和多级别日志输出，提供完整的日志管理功能。
+依赖:
+    - structlog>=24.0.0
+    - core.config (settings)
 
-功能：
-    - 按大小轮转日志文件
-    - 按时间轮转日志文件
-    - 分级别日志输出（INFO/ERROR分离）
-    - JSON格式日志支持
-    - 日志压缩归档
-
-作者：运维工程师 Agent
-创建日期：2026-03-07
+安全约束:
+    - 敏感信息自动脱敏
+    - 日志文件权限控制
+    - 日志轮转防止磁盘占满
 """
 
-import gzip
-import json
 import logging
-import os
-import shutil
-from datetime import datetime, timedelta
-from logging.handlers import RotatingFileHandler
+import logging.handlers
+import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional, Set
+from datetime import datetime, UTC
+from enum import Enum
+
+try:
+    import structlog
+    from structlog.types import Processor
+    STRUCTLOG_AVAILABLE = True
+except ImportError:
+    STRUCTLOG_AVAILABLE = False
+
+from core.config import settings
 
 
-class JsonFormatter(logging.Formatter):
-    """JSON格式日志格式化器。
+class LogCategory(str, Enum):
+    """日志分类枚举。"""
+    SYSTEM = "system"  # 系统运行日志
+    DEVICE = "device"  # 设备操作日志
+    COMMUNICATION = "communication"  # 硬件通信日志
+    SECURITY = "security"  # 安全事件日志
+    PERFORMANCE = "performance"  # 性能监控日志
+    AUDIT = "audit"  # 审计日志
 
-    将日志记录格式化为JSON字符串，便于日志聚合系统解析。
+
+class LogLevel(str, Enum):
+    """日志级别枚举。"""
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+    FATAL = "FATAL"
+
+
+# 敏感字段集合
+SENSITIVE_FIELDS: Set[str] = {
+    "password", "token", "secret", "key", "authorization",
+    "jwt", "credential", "api_key", "access_token", "refresh_token",
+    "private_key", "session_id", "cookie"
+}
+
+
+def mask_sensitive_data(data: Any, sensitive_fields: Set[str] = None) -> Any:
     """
+    脱敏敏感数据。
 
-    def format(self, record: logging.LogRecord) -> str:
-        """格式化日志记录为JSON。
+    Args:
+        data: 原始数据
+        sensitive_fields: 敏感字段名集合
 
-        Args:
-            record: 日志记录对象
+    Returns:
+        Any: 脱敏后的数据
+    """
+    if sensitive_fields is None:
+        sensitive_fields = SENSITIVE_FIELDS
+    
+    if isinstance(data, dict):
+        masked_dict = {}
+        for key, value in data.items():
+            if key.lower() in sensitive_fields:
+                masked_dict[key] = "***MASKED***"
+            elif isinstance(value, (dict, list)):
+                masked_dict[key] = mask_sensitive_data(value, sensitive_fields)
+            else:
+                masked_dict[key] = value
+        return masked_dict
+    elif isinstance(data, list):
+        return [mask_sensitive_data(item, sensitive_fields) for item in data]
+    elif isinstance(data, str):
+        # 检查字符串中是否包含敏感信息
+        for field in sensitive_fields:
+            if field in data.lower():
+                return "***MASKED***"
+        return data
+    else:
+        return data
 
-        Returns:
-            str: JSON格式的日志字符串
-        """
-        log_data: dict[str, Any] = {
-            "timestamp": datetime.fromtimestamp(record.created).isoformat(),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-            "line": record.lineno,
+
+def add_app_context(
+    logger: Any,
+    method_name: str,
+    event_dict: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    添加应用上下文信息。
+
+    为每条日志记录添加应用名称、版本和环境信息。
+
+    Args:
+        logger: 日志器实例
+        method_name: 方法名称
+        event_dict: 事件字典
+
+    Returns:
+        Dict[str, Any]: 添加了上下文信息的事件字典
+
+    Example:
+        日志输出将包含：
+        {
+            "event": "device_connected",
+            "app": "CAUC-SEP",
+            "version": "0.4.0",
+            "env": "development",
+            ...
         }
-
-        # 添加异常信息
-        if record.exc_info:
-            log_data["exception"] = self.formatException(record.exc_info)
-
-        # 添加额外字段
-        if hasattr(record, "device_id"):
-            log_data["device_id"] = record.device_id
-        if hasattr(record, "experiment_id"):
-            log_data["experiment_id"] = record.experiment_id
-        if hasattr(record, "user_id"):
-            log_data["user_id"] = record.user_id
-
-        return json.dumps(log_data, ensure_ascii=False)
-
-
-class CompressedRotatingFileHandler(RotatingFileHandler):
-    """支持压缩的轮转文件处理器。
-
-    在日志轮转时自动压缩旧日志文件，节省存储空间。
     """
-
-    def doRollover(self) -> None:
-        """执行日志轮转并压缩旧文件。"""
-        if self.stream:
-            self.stream.close()
-            self.stream = None
-
-        # 压缩并重命名旧日志文件
-        for i in range(self.backupCount - 1, 0, -1):
-            source = f"{self.baseFilename}.{i}.gz"
-            dest = f"{self.baseFilename}.{i + 1}.gz"
-
-            if os.path.exists(source):
-                if os.path.exists(dest):
-                    os.remove(dest)
-                os.rename(source, dest)
-
-        # 压缩当前日志文件
-        if os.path.exists(self.baseFilename):
-            compressed_file = f"{self.baseFilename}.1.gz"
-            with open(self.baseFilename, "rb") as f_in:
-                with gzip.open(compressed_file, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-            os.remove(self.baseFilename)
-
-        # 创建新日志文件
-        self.stream = self._open()
+    event_dict["app"] = settings.app_name
+    event_dict["version"] = settings.app_version
+    event_dict["env"] = settings.app_env
+    return event_dict
 
 
-class DeviceLogFilter(logging.Filter):
-    """设备日志过滤器。
-
-    为日志记录添加设备相关上下文信息。
+def add_log_category(
+    logger: Any,
+    method_name: str,
+    event_dict: dict[str, Any]
+) -> dict[str, Any]:
     """
+    添加日志分类信息。
 
-    def __init__(self, device_id: str | None = None):
-        """初始化过滤器。
+    Args:
+        logger: 日志器实例
+        method_name: 方法名称
+        event_dict: 事件字典
 
-        Args:
-            device_id: 设备ID，用于标识日志来源
+    Returns:
+        Dict[str, Any]: 添加了分类信息的事件字典
+    """
+    # 从logger名称推断分类
+    logger_name = event_dict.get("logger", "")
+    
+    if "device" in logger_name.lower() or "motor" in logger_name.lower():
+        event_dict["category"] = LogCategory.DEVICE.value
+    elif "comm" in logger_name.lower() or "modbus" in logger_name.lower() or "serial" in logger_name.lower():
+        event_dict["category"] = LogCategory.COMMUNICATION.value
+    elif "security" in logger_name.lower() or "auth" in logger_name.lower():
+        event_dict["category"] = LogCategory.SECURITY.value
+    elif "performance" in logger_name.lower():
+        event_dict["category"] = LogCategory.PERFORMANCE.value
+    elif "audit" in logger_name.lower():
+        event_dict["category"] = LogCategory.AUDIT.value
+    else:
+        event_dict["category"] = LogCategory.SYSTEM.value
+    
+    return event_dict
+
+
+def mask_sensitive_processor(
+    logger: Any,
+    method_name: str,
+    event_dict: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    敏感信息脱敏处理器。
+
+    Args:
+        logger: 日志器实例
+        method_name: 方法名称
+        event_dict: 事件字典
+
+    Returns:
+        Dict[str, Any]: 脱敏后的事件字典
+    """
+    return mask_sensitive_data(event_dict)
+
+
+class CategoryBasedFormatter(logging.Formatter):
+    """
+    基于分类的日志格式化器。
+    
+    根据日志分类使用不同的格式和输出目标。
+    """
+    
+    def format(self, record: logging.LogRecord) -> str:
         """
-        super().__init__()
-        self.device_id = device_id
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        """过滤并增强日志记录。
+        格式化日志记录。
 
         Args:
             record: 日志记录对象
 
         Returns:
-            bool: 总是返回True，允许所有记录通过
+            str: 格式化后的日志字符串
         """
-        if self.device_id and not hasattr(record, "device_id"):
-            record.device_id = self.device_id
-        return True
+        # 添加分类信息
+        if not hasattr(record, 'category'):
+            record.category = LogCategory.SYSTEM.value
+        
+        # 调用父类格式化方法
+        return super().format(record)
 
 
 def setup_logging(
-    log_dir: str = "logs",
-    max_bytes: int = 10 * 1024 * 1024,  # 10MB
-    backup_count: int = 5,
-    level: int = logging.INFO,
-    json_format: bool = False,
-    compress_logs: bool = True,
-) -> logging.Logger:
-    """配置日志轮转系统。
-
-    创建完整的日志配置，包括控制台输出、文件轮转和错误日志分离。
+    log_dir: str = None,
+    max_bytes: int = None,
+    backup_count: int = None,
+    level: int = None,
+    json_format: bool = None,
+    compress_logs: bool = False,
+) -> Any:
+    """
+    配置分级日志体系。
 
     Args:
-        log_dir: 日志目录路径
-        max_bytes: 单个日志文件最大大小（字节）
-        backup_count: 保留的日志文件数量
-        level: 日志级别
-        json_format: 是否使用JSON格式
+        log_dir: 日志目录路径，默认使用settings配置
+        max_bytes: 单个日志文件最大字节数，默认使用settings配置
+        backup_count: 备份文件数量，默认使用settings配置
+        level: 日志级别，默认使用settings配置
+        json_format: 是否使用JSON格式，默认使用settings配置
         compress_logs: 是否压缩旧日志文件
 
     Returns:
-        logging.Logger: 配置好的根日志器
+        配置好的日志器实例
 
     Example:
-        >>> logger = setup_logging(log_dir="logs", max_bytes=10*1024*1024)
-        >>> logger.info("服务启动完成")
+        >>> logger = setup_logging()
+        >>> logger.info("device_connected", device_id="stepper_01", port="COM3")
     """
-    # 创建日志目录
-    log_path = Path(log_dir)
-    log_path.mkdir(parents=True, exist_ok=True)
-
-    # 获取根日志器
-    root_logger = logging.getLogger()
-    root_logger.setLevel(level)
-
-    # 清除现有处理器（避免重复添加）
-    root_logger.handlers.clear()
-
-    # 控制台处理器
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(level)
-    console_format = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
+    if not STRUCTLOG_AVAILABLE:
+        logging.warning(
+            "structlog not available, falling back to standard logging"
+        )
+        return setup_standard_logging(
+            log_dir=log_dir or settings.log_dir,
+            max_bytes=max_bytes or settings.log_max_bytes,
+            backup_count=backup_count or settings.log_backup_count,
+            level=level or getattr(logging, settings.log_level.upper()),
+        )
+    
+    _log_dir = Path(log_dir or settings.log_dir)
+    _log_dir.mkdir(parents=True, exist_ok=True)
+    
+    _max_bytes = max_bytes or settings.log_max_bytes
+    _backup_count = backup_count or settings.log_backup_count
+    _level = level or getattr(logging, settings.log_level.upper())
+    _json_format = json_format if json_format is not None else settings.log_json_format
+    
+    # 共享处理器
+    shared_processors: list = [
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+        add_app_context,
+        add_log_category,
+        mask_sensitive_processor,  # 敏感信息脱敏
+    ]
+    
+    # 根据环境选择渲染器
+    if _json_format or settings.is_production:
+        renderer = structlog.processors.JSONRenderer(ensure_ascii=False)
+    else:
+        renderer = structlog.dev.ConsoleRenderer(colors=True)
+    
+    # 配置structlog
+    structlog.configure(
+        processors=shared_processors + [
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
     )
-    console_handler.setFormatter(console_format)
-
-    # 主日志文件处理器
-    if compress_logs:
-        file_handler = CompressedRotatingFileHandler(
-            log_path / "cauc_sep.log",
-            maxBytes=max_bytes,
-            backupCount=backup_count,
-            encoding="utf-8",
-        )
-    else:
-        file_handler = RotatingFileHandler(
-            log_path / "cauc_sep.log",
-            maxBytes=max_bytes,
-            backupCount=backup_count,
-            encoding="utf-8",
-        )
-    file_handler.setLevel(level)
-
-    if json_format:
-        file_handler.setFormatter(JsonFormatter())
-    else:
-        file_format = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        file_handler.setFormatter(file_format)
-
-    # 错误日志单独记录
-    error_handler = RotatingFileHandler(
-        log_path / "error.log",
-        maxBytes=max_bytes,
-        backupCount=backup_count,
+    
+    formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=shared_processors,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            renderer,
+        ],
+    )
+    
+    # ==================== 创建分类日志文件处理器 ====================
+    
+    # 1. 系统运行日志（所有级别）
+    system_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "system.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
         encoding="utf-8",
     )
+    system_handler.setFormatter(formatter)
+    system_handler.setLevel(logging.DEBUG)
+    
+    # 2. 设备操作日志
+    device_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "device.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    device_handler.setFormatter(formatter)
+    device_handler.setLevel(logging.DEBUG)
+    # 添加分类过滤器
+    device_handler.addFilter(lambda record: getattr(record, 'category', '') == LogCategory.DEVICE.value)
+    
+    # 3. 硬件通信日志
+    comm_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "communication.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    comm_handler.setFormatter(formatter)
+    comm_handler.setLevel(logging.DEBUG)
+    comm_handler.addFilter(lambda record: getattr(record, 'category', '') == LogCategory.COMMUNICATION.value)
+    
+    # 4. 安全事件日志
+    security_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "security.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    security_handler.setFormatter(formatter)
+    security_handler.setLevel(logging.INFO)  # 安全日志从INFO级别开始
+    security_handler.addFilter(lambda record: getattr(record, 'category', '') == LogCategory.SECURITY.value)
+    
+    # 5. 性能监控日志
+    performance_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "performance.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    performance_handler.setFormatter(formatter)
+    performance_handler.setLevel(logging.INFO)
+    performance_handler.addFilter(lambda record: getattr(record, 'category', '') == LogCategory.PERFORMANCE.value)
+    
+    # 6. 审计日志
+    audit_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "audit.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    audit_handler.setFormatter(formatter)
+    audit_handler.setLevel(logging.INFO)
+    audit_handler.addFilter(lambda record: getattr(record, 'category', '') == LogCategory.AUDIT.value)
+    
+    # 7. 错误日志（ERROR及以上）
+    error_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "error.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    error_handler.setFormatter(formatter)
     error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(file_handler.formatter)
-
-    # WebSocket日志（用于实时日志推送）
-    ws_handler = RotatingFileHandler(
-        log_path / "websocket.log",
-        maxBytes=max_bytes,
-        backupCount=backup_count,
-        encoding="utf-8",
-    )
-    ws_handler.setLevel(logging.DEBUG)
-    ws_handler.setFormatter(file_handler.formatter)
-
-    # 添加处理器
+    
+    # 8. 控制台处理器
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    
+    # ==================== 配置根日志器 ====================
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    
+    # 添加所有处理器
     root_logger.addHandler(console_handler)
-    root_logger.addHandler(file_handler)
+    root_logger.addHandler(system_handler)
+    root_logger.addHandler(device_handler)
+    root_logger.addHandler(comm_handler)
+    root_logger.addHandler(security_handler)
+    root_logger.addHandler(performance_handler)
+    root_logger.addHandler(audit_handler)
     root_logger.addHandler(error_handler)
-
-    # 配置第三方库日志级别（减少噪音）
+    
+    # 设置日志级别
+    root_logger.setLevel(_level)
+    
+    # 降低第三方库日志级别
     logging.getLogger("uvicorn").setLevel(logging.WARNING)
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
     logging.getLogger("uvicorn.error").setLevel(logging.WARNING)
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    
+    return structlog.get_logger()
 
+
+def setup_standard_logging(
+    log_dir: str = None,
+    max_bytes: int = None,
+    backup_count: int = None,
+    level: int = None,
+) -> logging.Logger:
+    """
+    配置标准日志（structlog不可用时的回退方案）。
+
+    Args:
+        log_dir: 日志目录路径
+        max_bytes: 单个日志文件最大字节数
+        backup_count: 备份文件数量
+        level: 日志级别
+
+    Returns:
+        logging.Logger: 标准日志器实例
+    """
+    _log_dir = Path(log_dir or settings.log_dir)
+    _log_dir.mkdir(parents=True, exist_ok=True)
+    
+    _max_bytes = max_bytes or settings.log_max_bytes
+    _backup_count = backup_count or settings.log_backup_count
+    _level = level or getattr(logging, settings.log_level.upper())
+    
+    # 创建格式化器
+    formatter = logging.Formatter(
+        fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+    
+    # 创建文件处理器
+    file_handler = logging.handlers.RotatingFileHandler(
+        _log_dir / "app.log",
+        maxBytes=_max_bytes,
+        backupCount=_backup_count,
+        encoding="utf-8",
+    )
+    file_handler.setFormatter(formatter)
+    
+    # 创建控制台处理器
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    
+    # 配置根日志器
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.addHandler(file_handler)
+    root_logger.addHandler(console_handler)
+    root_logger.setLevel(_level)
+    
     return root_logger
 
 
-def setup_device_logging(
-    device_id: str,
-    log_dir: str = "logs",
-    max_bytes: int = 5 * 1024 * 1024,  # 5MB
-    backup_count: int = 3,
-) -> logging.Logger:
-    """为特定设备创建专用日志器。
+def get_logger(name: str | None = None, category: LogCategory = None) -> Any:
+    """
+    获取日志器。
+
+    如果 structlog 可用，返回 structlog 日志器；
+    否则返回标准 logging 日志器。
 
     Args:
-        device_id: 设备唯一标识
-        log_dir: 日志目录路径
-        max_bytes: 单个日志文件最大大小
-        backup_count: 保留的日志文件数量
+        name: 日志器名称，通常使用 __name__
+        category: 日志分类，可选
 
     Returns:
-        logging.Logger: 设备专用日志器
+        日志器实例
 
     Example:
-        >>> device_logger = setup_device_logging("stepper_01")
-        >>> device_logger.info("电机启动")
+        >>> logger = get_logger(__name__)
+        >>> logger.info("operation_started", operation="move_motor")
+        
+        >>> # 指定日志分类
+        >>> device_logger = get_logger(__name__, category=LogCategory.DEVICE)
+        >>> device_logger.info("motor_moved", position=1000)
     """
-    # 创建设备日志目录
-    device_log_path = Path(log_dir) / "devices"
-    device_log_path.mkdir(parents=True, exist_ok=True)
-
-    # 创建设备专用日志器
-    logger = logging.getLogger(f"device.{device_id}")
-    logger.setLevel(logging.DEBUG)
-
-    # 添加设备过滤器
-    logger.addFilter(DeviceLogFilter(device_id))
-
-    # 设备日志文件处理器
-    handler = RotatingFileHandler(
-        device_log_path / f"{device_id}.log",
-        maxBytes=max_bytes,
-        backupCount=backup_count,
-        encoding="utf-8",
-    )
-    handler.setLevel(logging.DEBUG)
-
-    format_str = (
-        f"%(asctime)s - [{device_id}] - %(levelname)s - " f"%(filename)s:%(lineno)d - %(message)s"
-    )
-    handler.setFormatter(logging.Formatter(format_str, datefmt="%Y-%m-%d %H:%M:%S"))
-
-    logger.addHandler(handler)
-
-    return logger
+    if STRUCTLOG_AVAILABLE:
+        logger_instance = structlog.get_logger(name)
+        if category:
+            # 绑定分类信息
+            return logger_instance.bind(category=category.value)
+        return logger_instance
+    else:
+        logger_instance = logging.getLogger(name)
+        if category:
+            # 为标准日志器添加分类属性
+            old_factory = logging.getLogRecordFactory()
+            
+            def record_factory(*args, **kwargs):
+                record = old_factory(*args, **kwargs)
+                record.category = category.value
+                return record
+            
+            logging.setLogRecordFactory(record_factory)
+        
+        return logger_instance
 
 
-def cleanup_old_logs(
-    log_dir: str = "logs",
-    max_age_days: int = 30,
-) -> int:
-    """清理过期日志文件。
+def log_device_operation(
+    device_id: str,
+    operation: str,
+    params: Dict[str, Any] = None,
+    result: str = "success",
+    error: str = None
+) -> None:
+    """
+    记录设备操作日志。
 
-    删除超过指定天数的日志文件，包括压缩的日志文件。
+    Args:
+        device_id: 设备ID
+        operation: 操作名称
+        params: 操作参数
+        result: 操作结果
+        error: 错误信息（可选）
+    """
+    logger = get_logger("device", category=LogCategory.DEVICE)
+    
+    log_data = {
+        "device_id": device_id,
+        "operation": operation,
+        "result": result,
+    }
+    
+    if params:
+        log_data["params"] = mask_sensitive_data(params)
+    
+    if error:
+        log_data["error"] = error
+        logger.error("device_operation_failed", **log_data)
+    else:
+        logger.info("device_operation_completed", **log_data)
+
+
+def log_communication(
+    device_id: str,
+    direction: str,
+    data: Any,
+    protocol: str = "modbus",
+    success: bool = True
+) -> None:
+    """
+    记录硬件通信日志。
+
+    Args:
+        device_id: 设备ID
+        direction: 通信方向（send/receive）
+        data: 通信数据
+        protocol: 通信协议
+        success: 是否成功
+    """
+    logger = get_logger("communication", category=LogCategory.COMMUNICATION)
+    
+    log_data = {
+        "device_id": device_id,
+        "direction": direction,
+        "protocol": protocol,
+        "success": success,
+        "data": mask_sensitive_data(data),
+    }
+    
+    if success:
+        logger.debug("communication_success", **log_data)
+    else:
+        logger.warning("communication_failed", **log_data)
+
+
+def log_security_event(
+    event_type: str,
+    user_id: str = None,
+    ip_address: str = None,
+    details: Dict[str, Any] = None,
+    severity: LogLevel = LogLevel.INFO
+) -> None:
+    """
+    记录安全事件日志。
+
+    Args:
+        event_type: 事件类型
+        user_id: 用户ID（可选）
+        ip_address: IP地址（可选）
+        details: 事件详情
+        severity: 严重程度
+    """
+    logger = get_logger("security", category=LogCategory.SECURITY)
+    
+    log_data = {
+        "event_type": event_type,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+    
+    if user_id:
+        log_data["user_id"] = user_id
+    
+    if ip_address:
+        log_data["ip_address"] = ip_address
+    
+    if details:
+        log_data["details"] = mask_sensitive_data(details)
+    
+    # 根据严重程度选择日志方法
+    if severity == LogLevel.DEBUG:
+        logger.debug("security_event", **log_data)
+    elif severity == LogLevel.INFO:
+        logger.info("security_event", **log_data)
+    elif severity == LogLevel.WARNING:
+        logger.warning("security_event", **log_data)
+    elif severity == LogLevel.ERROR:
+        logger.error("security_event", **log_data)
+    elif severity in (LogLevel.CRITICAL, LogLevel.FATAL):
+        logger.critical("security_event", **log_data)
+
+
+def log_performance_metric(
+    metric_name: str,
+    value: float,
+    unit: str = None,
+    tags: Dict[str, str] = None
+) -> None:
+    """
+    记录性能监控日志。
+
+    Args:
+        metric_name: 指标名称
+        value: 指标值
+        unit: 单位（可选）
+        tags: 标签（可选）
+    """
+    logger = get_logger("performance", category=LogCategory.PERFORMANCE)
+    
+    log_data = {
+        "metric_name": metric_name,
+        "value": value,
+    }
+    
+    if unit:
+        log_data["unit"] = unit
+    
+    if tags:
+        log_data["tags"] = tags
+    
+    logger.info("performance_metric", **log_data)
+
+
+def log_audit_trail(
+    action: str,
+    resource_type: str,
+    resource_id: str,
+    user_id: str = None,
+    changes: Dict[str, Any] = None
+) -> None:
+    """
+    记录审计日志。
+
+    Args:
+        action: 操作类型（create/update/delete）
+        resource_type: 资源类型
+        resource_id: 资源ID
+        user_id: 用户ID（可选）
+        changes: 变更内容（可选）
+    """
+    logger = get_logger("audit", category=LogCategory.AUDIT)
+    
+    log_data = {
+        "action": action,
+        "resource_type": resource_type,
+        "resource_id": resource_id,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+    
+    if user_id:
+        log_data["user_id"] = user_id
+    
+    if changes:
+        log_data["changes"] = mask_sensitive_data(changes)
+    
+    logger.info("audit_trail", **log_data)
+
+
+def get_log_stats(log_dir: str = "logs") -> Dict[str, Any]:
+    """
+    获取日志统计信息。
 
     Args:
         log_dir: 日志目录路径
-        max_age_days: 日志保留天数
+
+    Returns:
+        Dict[str, Any]: 包含日志文件数量、总大小等统计信息
+    """
+    log_path = Path(log_dir)
+    if not log_path.exists():
+        return {
+            "file_count": 0,
+            "total_size_bytes": 0,
+            "total_size_mb": 0.0,
+            "files": [],
+        }
+
+    log_files = list(log_path.glob("*.log*"))
+    total_size = sum(f.stat().st_size for f in log_files if f.is_file())
+
+    return {
+        "file_count": len(log_files),
+        "total_size_bytes": total_size,
+        "total_size_mb": round(total_size / (1024 * 1024), 2),
+        "files": [
+            {
+                "name": f.name,
+                "size_bytes": f.stat().st_size,
+                "modified": datetime.fromtimestamp(f.stat().st_mtime, UTC).isoformat(),
+            }
+            for f in sorted(log_files, key=lambda x: x.stat().st_mtime, reverse=True)
+        ],
+    }
+
+
+def cleanup_old_logs(log_dir: str = "logs", max_age_days: int = 30) -> int:
+    """
+    清理过期的日志文件。
+
+    Args:
+        log_dir: 日志目录路径
+        max_age_days: 最大保留天数
 
     Returns:
         int: 删除的文件数量
-
-    Example:
-        >>> deleted_count = cleanup_old_logs(max_age_days=30)
-        >>> print(f"删除了 {deleted_count} 个过期日志文件")
     """
     log_path = Path(log_dir)
     if not log_path.exists():
         return 0
 
-    cutoff_date = datetime.now() - timedelta(days=max_age_days)
     deleted_count = 0
+    cutoff_time = datetime.now(UTC).timestamp() - (max_age_days * 24 * 60 * 60)
 
-    for log_file in log_path.rglob("*.log*"):
-        try:
-            # 获取文件修改时间
-            mtime = datetime.fromtimestamp(log_file.stat().st_mtime)
-
-            if mtime < cutoff_date:
-                log_file.unlink()
-                deleted_count += 1
-        except OSError:
-            # 忽略无法访问的文件
-            continue
+    for log_file in log_path.glob("*.log.*"):
+        if log_file.is_file():
+            try:
+                if log_file.stat().st_mtime < cutoff_time:
+                    log_file.unlink()
+                    deleted_count += 1
+            except OSError:
+                pass
 
     return deleted_count
 
 
-def get_log_stats(log_dir: str = "logs") -> dict[str, Any]:
-    """获取日志目录统计信息。
-
-    Args:
-        log_dir: 日志目录路径
-
-    Returns:
-        dict: 包含日志文件数量、总大小等统计信息
-
-    Example:
-        >>> stats = get_log_stats()
-        >>> print(f"日志总大小: {stats['total_size_mb']:.2f} MB")
-    """
-    log_path = Path(log_dir)
-    if not log_path.exists():
-        return {
-            "exists": False,
-            "file_count": 0,
-            "total_size_bytes": 0,
-            "total_size_mb": 0.0,
-        }
-
-    total_size = 0
-    file_count = 0
-    files_by_type: dict[str, int] = {}
-
-    for log_file in log_path.rglob("*.log*"):
-        try:
-            total_size += log_file.stat().st_size
-            file_count += 1
-
-            # 按类型统计
-            ext = log_file.suffix
-            files_by_type[ext] = files_by_type.get(ext, 0) + 1
-        except OSError:
-            continue
-
-    return {
-        "exists": True,
-        "file_count": file_count,
-        "total_size_bytes": total_size,
-        "total_size_mb": total_size / (1024 * 1024),
-        "files_by_type": files_by_type,
-        "log_dir": str(log_path.absolute()),
-    }
+# 初始化日志器
+logger = setup_logging()

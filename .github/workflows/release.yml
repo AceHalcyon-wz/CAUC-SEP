@@ -1,0 +1,269 @@
+# ============================================================================
+# CAUC-SEP Release Workflow
+# ============================================================================
+#
+# 文件名: release.yml
+# 路径: .github/workflows/release.yml
+# 功能: 版本发布流水线 - 构建、打包、发布
+# 版本: v1.0.0
+# 创建日期: 2026-03-25
+# 作者: DevOps Engineer Agent
+#
+# 触发条件:
+#   - push: v*.*.* 标签
+#   - workflow_dispatch: 手动触发
+#
+# 发布流程:
+#   1. 验证版本号
+#   2. 构建前端
+#   3. 构建后端
+#   4. 打包 Electron 应用
+#   5. 创建 GitHub Release
+#   6. 上传安装包
+#
+# 安全约束:
+#   - 仅 main 分支可触发发布
+#   - 版本号必须符合语义化版本规范
+#   - 所有产物必须通过测试
+# ============================================================================
+
+name: CAUC-SEP Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号 (例如: 4.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: '预发布版本'
+        required: false
+        type: boolean
+        default: false
+
+# 并发控制：同一版本只运行一个实例
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: '3.13'
+  NODE_VERSION: '20'
+
+jobs:
+  # ==================== 版本验证 ====================
+  validate:
+    name: 验证版本
+    runs-on: windows-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_tag: ${{ steps.version.outputs.version_tag }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 解析版本号
+        id: version
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ github.event.inputs.version }}"
+          } else {
+            $tag = "${{ github.ref_name }}"
+            $version = $tag -replace "^v", ""
+          }
+          
+          # 验证版本号格式
+          if ($version -notmatch "^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$") {
+            Write-Error "Invalid version format: $version"
+            Write-Error "Expected format: X.Y.Z or X.Y.Z-prerelease"
+            exit 1
+          }
+          
+          $versionTag = "v$version"
+          Write-Output "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Output "version_tag=$versionTag" >> $env:GITHUB_OUTPUT
+          Write-Output "Version: $version"
+          Write-Output "Tag: $versionTag"
+
+      - name: 验证版本一致性
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          
+          # 检查 package.json 版本
+          $frontendPkg = Get-Content "frontend/package.json" | ConvertFrom-Json
+          if ($frontendPkg.version -ne $version) {
+            Write-Warning "frontend/package.json version ($($frontendPkg.version)) does not match release version ($version)"
+          }
+          
+          # 检查 electron/package.json 版本
+          $electronPkg = Get-Content "electron/package.json" | ConvertFrom-Json
+          if ($electronPkg.version -ne $version) {
+            Write-Warning "electron/package.json version ($($electronPkg.version)) does not match release version ($version)"
+          }
+          
+          # 检查 CHANGELOG
+          $changelog = Get-Content "CHANGELOG.md" -Raw
+          if ($changelog -notmatch "\[?$version\]?") {
+            Write-Warning "CHANGELOG.md does not contain version $version"
+          }
+
+  # ==================== 构建前端 ====================
+  build-frontend:
+    name: 构建前端
+    runs-on: windows-latest
+    needs: validate
+    timeout-minutes: 20
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 安装依赖
+        working-directory: frontend
+        run: npm ci
+
+      - name: 构建生产版本
+        working-directory: frontend
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7
+
+  # ==================== 打包 Electron 应用 ====================
+  build-electron:
+    name: 打包 Electron 应用
+    runs-on: windows-latest
+    needs: [validate, build-frontend]
+    timeout-minutes: 120
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: electron/package-lock.json
+
+      - name: 下载前端构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: electron/resources/frontend/
+
+      - name: 安装 Electron 依赖
+        working-directory: electron
+        run: npm ci
+
+      - name: 打包 Windows 应用
+        working-directory: electron
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            electron/dist/*.exe
+            electron/dist/*.yml
+          retention-days: 30
+
+  # ==================== 创建 GitHub Release ====================
+  create-release:
+    name: 创建 GitHub Release
+    runs-on: windows-latest
+    needs: [validate, build-electron]
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载安装包
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/
+
+      - name: 提取 CHANGELOG
+        id: changelog
+        run: |
+          $version = "${{ needs.validate.outputs.version }}"
+          $changelog = Get-Content "CHANGELOG.md" -Raw
+          
+          # 提取当前版本的更新日志
+          $pattern = "(?s)##\s*\[?$version\]?.*?(?=##\s*\[?\d|\Z)"
+          if ($changelog -match $pattern) {
+            $notes = $matches[0]
+          } else {
+            $notes = "请查看 CHANGELOG.md 获取详细更新内容。"
+          }
+          
+          # 保存到文件
+          $notes | Out-File -FilePath "release-notes.md" -Encoding utf8
+          Write-Output "notes_file=release-notes.md" >> $env:GITHUB_OUTPUT
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.validate.outputs.version_tag }}
+          name: CAUC-SEP ${{ needs.validate.outputs.version_tag }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          files: |
+            dist/*.exe
+            dist/*.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 发布成功通知
+        run: |
+          Write-Output "=========================================="
+          Write-Output "  发布成功!"
+          Write-Output "  版本: ${{ needs.validate.outputs.version }}"
+          Write-Output "  标签: ${{ needs.validate.outputs.version_tag }}"
+          Write-Output "=========================================="
+
+  # ==================== 发布后清理 ====================
+  post-release:
+    name: 发布后清理
+    runs-on: windows-latest
+    needs: [create-release]
+    if: always()
+
+    steps:
+      - name: 清理旧产物
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            frontend-dist
+            windows-installer
+          failOnError: false

@@ -13,7 +13,7 @@
 
 [project]
 name = "cauc-sep-backend"
-version = "0.4.0"
+version = "4.0.0"
 description = "CAUC-SEP 自旋电子器件实验平台后端"
 readme = "README.md"
 requires-python = ">=3.13"

@@ -32,6 +32,7 @@ DM2C步进驱动器驱动
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
@@ -652,6 +653,13 @@ class LeadshineDM2C(AbstractStepper):
 
         # 软件限位配置
         self.limit_config = SoftwareLimitConfig()
+
+        # 限位锁止状态管理
+        self._limit_lockout_active = False
+        self._limit_lockout_direction: str | None = None
+        self._limit_lockout_position_mm: float | None = None
+        self._limit_lockout_timestamp: str | None = None
+        self._limit_auto_unlock_enabled = True
 
         # 仿真模式标志（当pymodbus不可用时自动启用）
         self._simulation = not PYMODBUS_AVAILABLE

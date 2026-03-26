@@ -1,277 +1,325 @@
 """
 文件名: devices.py
 路径: backend/api/v1/
-功能: 设备管理 API 路由，提供设备连接、状态查询、控制等接口
+功能: 设备管理API路由，提供单设备急停、状态查询、复位校验等接口
 版本: v1.0
 作者: Backend Engineer Agent
-创建日期: 2026-03-15
-依赖: fastapi, schemas
+创建日期: 2026-03-25
+依赖: fastapi, schemas, services
+安全约束: 急停指令必须保障最高执行优先级，急停原因未消除时禁止复位
 """
 
-from typing import List
+import logging
+from datetime import datetime
+from typing import Any
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Query
 
-from schemas.api import ApiResponse, PaginatedData
-from schemas.device import (
-    DeviceInfoResponse,
-    DeviceConnectRequest,
-    DeviceConnectResponse,
-    StepperMotorStatus,
-    StepperMoveRequest,
-    ElectromagnetStatus,
-    ElectromagnetControlRequest,
-    TemperatureControllerStatus,
-    TemperatureControlRequest,
-    PiezoControllerStatus,
-    PiezoControlRequest,
-    PicoammeterStatus,
-)
+from schemas.api import ApiResponse, ApiError
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-@router.get(
-    "/",
-    response_model=ApiResponse[list[DeviceInfoResponse]],
-    summary="获取设备列表",
-    description="获取系统中所有已注册设备的列表信息。",
+# ==================== 急停相关常量 ====================
+
+# 急停错误码定义
+EMERGENCY_STOP_ERROR_CODES = {
+    "DEVICE_NOT_FOUND": "E3001",
+    "DEVICE_NOT_CONNECTED": "E3002",
+    "EMERGENCY_STOP_FAILED": "E3003",
+    "RESET_CONDITION_NOT_MET": "E3004",
+    "ALARM_NOT_CLEARED": "E3005",
+    "DEVICE_IN_ERROR_STATE": "E3006",
+}
+
+
+# ==================== 单设备急停API ====================
+
+@router.post(
+    "/{device_id}/emergency_stop",
+    response_model=ApiResponse[dict],
+    summary="单设备紧急停止",
+    description="执行指定设备的软件急停操作，急停指令具有最高优先级，跳过普通指令队列。",
 )
-async def list_devices() -> ApiResponse[list[DeviceInfoResponse]]:
+async def emergency_stop_device(
+    device_id: str = Path(..., description="设备唯一标识符"),
+    reason: str | None = Query(default=None, description="急停原因，用于审计日志"),
+) -> ApiResponse[dict]:
     """
-    获取设备列表。
+    执行单设备紧急停止。
+
+    此接口用于执行指定设备的独立急停操作，与全局急停接口兼容。
+    急停指令具有最高执行优先级，将跳过普通指令队列直接下发。
+
+    Args:
+        device_id: 设备唯一标识符，与项目现有设备模块名一致
+        reason: 可选的急停原因描述，用于审计日志记录
 
     Returns:
-        ApiResponse[List[DeviceInfoResponse]]: 包含所有设备信息的响应。
+        ApiResponse[dict]: 包含急停执行结果的响应
+            - success: True表示急停指令成功下发
+            - device_id: 设备标识
+            - timestamp: 急停执行时间戳
+            - reason: 急停原因
+
+    Raises:
+        HTTPException: 设备不存在、设备未连接或急停执行失败时抛出
 
     Example:
-        >>> response = await list_devices()
-        >>> for device in response.data:
-        ...     print(f"{device.name}: {device.status}")
+        >>> response = await emergency_stop_device("motor_1", "限位触发")
+        >>> assert response.success is True
+
+    安全约束:
+        1. 急停指令必须保障最高执行优先级
+        2. 急停执行后设备进入EMERGENCY_STOP状态
+        3. 所有急停操作必须记录审计日志
     """
-    # TODO: 实现设备列表查询逻辑
-    return ApiResponse(
-        success=True,
-        data=[],
+    from core.device_management.emergency_stop_manager import get_emergency_stop_manager
+
+    logger.warning(f"[EMERGENCY_STOP] 收到单设备急停请求: device_id={device_id}, reason={reason}")
+
+    try:
+        manager = get_emergency_stop_manager()
+        result = await manager.execute_device_emergency_stop(
+            device_id=device_id,
+            reason=reason or "用户触发急停",
+            priority=0  # 最高优先级
+        )
+
+        if result["success"]:
+            logger.info(
+                f"[EMERGENCY_STOP] 设备急停成功: device_id={device_id}, "
+                f"timestamp={result['timestamp']}"
+            )
+            return ApiResponse.ok(
+                data={
+                    "device_id": device_id,
+                    "timestamp": result["timestamp"],
+                    "reason": reason,
+                    "status": "emergency_stop",
+                    "message": "急停指令已成功下发",
+                }
+            )
+        else:
+            logger.error(
+                f"[EMERGENCY_STOP] 设备急停失败: device_id={device_id}, "
+                f"error={result.get('error')}"
+            )
+            return ApiResponse.error(
+                message=result.get("error", "急停执行失败"),
+                error_code=EMERGENCY_STOP_ERROR_CODES.get(
+                    result.get("error_code"), "E3003"
+                ),
+                details={"device_id": device_id}
+            )
+
+    except Exception as e:
+        logger.error(f"[EMERGENCY_STOP] 急停异常: device_id={device_id}, error={str(e)}")
+        return ApiResponse.error(
+            message=f"急停执行异常: {str(e)}",
+            error_code="E3003",
+            details={"device_id": device_id, "exception": str(e)}
+        )
+
+
+# ==================== 急停复位API ====================
+
+@router.post(
+    "/{device_id}/emergency_reset",
+    response_model=ApiResponse[dict],
+    summary="急停复位",
+    description="复位设备的急停状态，执行安全校验后方可复位。",
+)
+async def emergency_reset_device(
+    device_id: str = Path(..., description="设备唯一标识符"),
+    force: bool = Query(default=False, description="是否强制复位（跳过部分校验）"),
+    confirmation: str = Query(..., description="二次确认字符串，必须输入'CONFIRM_RESET'"),
+) -> ApiResponse[dict]:
+    """
+    复位设备急停状态。
+
+    执行急停复位前会进行完整的安全校验流程：
+    1. 设备状态自检
+    2. 报警状态清零
+    3. 急停原因确认
+    4. 二次确认校验
+
+    Args:
+        device_id: 设备唯一标识符
+        force: 是否强制复位（仅跳过部分非关键校验）
+        confirmation: 二次确认字符串，必须输入"CONFIRM_RESET"
+
+    Returns:
+        ApiResponse[dict]: 包含复位结果的响应
+
+    Raises:
+        HTTPException: 校验失败或复位失败时抛出
+
+    安全约束:
+        1. 急停原因未消除时禁止复位
+        2. 设备存在报警时禁止复位
+        3. 必须进行二次确认
+    """
+    from services.emergency_stop_service import EmergencyStopService
+
+    # 二次确认校验
+    if confirmation != "CONFIRM_RESET":
+        logger.warning(
+            f"[EMERGENCY_RESET] 二次确认失败: device_id={device_id}, "
+            f"confirmation={confirmation}"
+        )
+        return ApiResponse.error(
+            message="二次确认失败，请输入'CONFIRM_RESET'",
+            error_code="E3004",
+            details={"device_id": device_id}
+        )
+
+    logger.info(
+        f"[EMERGENCY_RESET] 收到急停复位请求: device_id={device_id}, force={force}"
     )
 
+    try:
+        service = EmergencyStopService()
+        result = await service.reset_emergency_stop(
+            device_id=device_id,
+            force=force
+        )
+
+        if result["success"]:
+            logger.info(f"[EMERGENCY_RESET] 急停复位成功: device_id={device_id}")
+            return ApiResponse.ok(
+                data={
+                    "device_id": device_id,
+                    "timestamp": result["timestamp"],
+                    "status": "ready",
+                    "checks_passed": result.get("checks_passed", []),
+                    "message": "急停复位成功，设备已恢复就绪状态",
+                }
+            )
+        else:
+            logger.warning(
+                f"[EMERGENCY_RESET] 急停复位失败: device_id={device_id}, "
+                f"reason={result.get('reason')}"
+            )
+            return ApiResponse.error(
+                message=result.get("reason", "急停复位失败"),
+                error_code=EMERGENCY_STOP_ERROR_CODES.get(
+                    result.get("error_code"), "E3004"
+                ),
+                details={
+                    "device_id": device_id,
+                    "checks_failed": result.get("checks_failed", []),
+                }
+            )
+
+    except Exception as e:
+        logger.error(
+            f"[EMERGENCY_RESET] 急停复位异常: device_id={device_id}, error={str(e)}"
+        )
+        return ApiResponse.error(
+            message=f"急停复位异常: {str(e)}",
+            error_code="E3004",
+            details={"device_id": device_id, "exception": str(e)}
+        )
+
+
+# ==================== 设备状态查询API ====================
 
 @router.get(
-    "/{device_id}",
-    response_model=ApiResponse[DeviceInfoResponse],
-    summary="获取设备状态",
-    description="根据设备ID获取设备的详细状态信息。",
+    "/{device_id}/status",
+    response_model=ApiResponse[dict],
+    summary="设备状态查询",
+    description="获取指定设备的完整状态信息，包括急停状态、报警状态等。",
 )
 async def get_device_status(
-    device_id: str = Path(..., description="设备唯一标识"),
-) -> ApiResponse[DeviceInfoResponse]:
+    device_id: str = Path(..., description="设备唯一标识符"),
+) -> ApiResponse[dict]:
     """
     获取设备状态。
 
     Args:
-        device_id: 设备唯一标识符。
+        device_id: 设备唯一标识符
 
     Returns:
-        ApiResponse[DeviceInfoResponse]: 设备详细状态信息。
+        ApiResponse[dict]: 包含设备状态信息的响应
 
-    Raises:
-        HTTPException: 设备不存在时返回404。
+    Example:
+        >>> response = await get_device_status("motor_1")
+        >>> print(response.data["status"])
     """
-    # TODO: 实现设备状态查询逻辑
-    raise HTTPException(status_code=404, detail=f"设备 {device_id} 不存在")
+    from core.device_management.driver_manager import DriverProcessManager
+
+    try:
+        # 获取驱动管理器实例
+        manager = DriverProcessManager()
+        info = manager.get_driver_info(device_id)
+
+        return ApiResponse.ok(
+            data={
+                "device_id": device_id,
+                "status": info.get("status", "unknown"),
+                "is_emergency_stop": info.get("status") == "emergency_stop",
+                "last_error": info.get("last_error"),
+                "last_heartbeat": info.get("last_heartbeat"),
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        )
+
+    except KeyError:
+        return ApiResponse.error(
+            message=f"设备不存在: {device_id}",
+            error_code="E3001",
+            details={"device_id": device_id}
+        )
+    except Exception as e:
+        logger.error(f"获取设备状态失败: device_id={device_id}, error={str(e)}")
+        return ApiResponse.error(
+            message=f"获取设备状态失败: {str(e)}",
+            error_code="E3000",
+            details={"device_id": device_id}
+        )
 
 
-@router.post(
-    "/{device_id}/connect",
-    response_model=ApiResponse[DeviceConnectResponse],
-    summary="连接设备",
-    description="建立与指定设备的通信连接。",
+# ==================== 急停状态检查API ====================
+
+@router.get(
+    "/{device_id}/emergency_status",
+    response_model=ApiResponse[dict],
+    summary="急停状态检查",
+    description="检查设备是否处于急停状态，以及急停原因和复位条件。",
 )
-async def connect_device(
-    device_id: str = Path(..., description="设备唯一标识"),
-    request: DeviceConnectRequest = DeviceConnectRequest(),
-) -> ApiResponse[DeviceConnectResponse]:
+async def get_emergency_status(
+    device_id: str = Path(..., description="设备唯一标识符"),
+) -> ApiResponse[dict]:
     """
-    连接设备。
+    获取设备急停状态。
 
     Args:
-        device_id: 设备唯一标识符。
-        request: 连接参数请求体。
+        device_id: 设备唯一标识符
 
     Returns:
-        ApiResponse[DeviceConnectResponse]: 连接结果响应。
-
-    Raises:
-        HTTPException: 连接失败时返回错误。
+        ApiResponse[dict]: 包含急停状态信息的响应
+            - is_emergency_stop: 是否处于急停状态
+            - can_reset: 是否可以复位
+            - reset_conditions: 复位条件列表
+            - emergency_reason: 急停原因
     """
-    # TODO: 实现设备连接逻辑
-    return ApiResponse(
-        success=True,
-        data=DeviceConnectResponse(
-            device_id=device_id,
-            connected=True,
-            message="设备连接成功",
-        ),
-    )
+    from services.emergency_stop_service import EmergencyStopService
 
+    try:
+        service = EmergencyStopService()
+        status = await service.get_emergency_status(device_id)
 
-@router.post(
-    "/{device_id}/disconnect",
-    response_model=ApiResponse[DeviceConnectResponse],
-    summary="断开设备",
-    description="断开与指定设备的通信连接。",
-)
-async def disconnect_device(
-    device_id: str = Path(..., description="设备唯一标识"),
-) -> ApiResponse[DeviceConnectResponse]:
-    """
-    断开设备连接。
+        return ApiResponse.ok(data=status)
 
-    Args:
-        device_id: 设备唯一标识符。
-
-    Returns:
-        ApiResponse[DeviceConnectResponse]: 断开结果响应。
-    """
-    # TODO: 实现设备断开逻辑
-    return ApiResponse(
-        success=True,
-        data=DeviceConnectResponse(
-            device_id=device_id,
-            connected=False,
-            message="设备已断开连接",
-        ),
-    )
-
-
-@router.post(
-    "/{device_id}/emergency-stop",
-    response_model=ApiResponse[DeviceInfoResponse],
-    summary="紧急停止",
-    description="触发设备的紧急停止状态，立即停止所有操作。",
-)
-async def emergency_stop(
-    device_id: str = Path(..., description="设备唯一标识"),
-) -> ApiResponse[DeviceInfoResponse]:
-    """
-    紧急停止设备。
-
-    Args:
-        device_id: 设备唯一标识符。
-
-    Returns:
-        ApiResponse[DeviceInfoResponse]: 设备状态响应。
-
-    Raises:
-        HTTPException: 操作失败时返回错误。
-    """
-    # TODO: 实现紧急停止逻辑
-    raise HTTPException(status_code=500, detail="紧急停止操作失败")
-
-
-@router.post(
-    "/{device_id}/motor/move",
-    response_model=ApiResponse[StepperMotorStatus],
-    summary="电机移动",
-    description="控制步进电机移动到指定位置。",
-)
-async def motor_move(
-    device_id: str = Path(..., description="设备唯一标识"),
-    request: StepperMoveRequest = ...,
-) -> ApiResponse[StepperMotorStatus]:
-    """
-    控制电机移动。
-
-    Args:
-        device_id: 设备唯一标识符。
-        request: 移动参数请求体。
-
-    Returns:
-        ApiResponse[StepperMotorStatus]: 电机状态响应。
-
-    Raises:
-        HTTPException: 移动失败时返回错误。
-    """
-    # TODO: 实现电机移动逻辑
-    raise HTTPException(status_code=500, detail="电机移动失败")
-
-
-@router.post(
-    "/{device_id}/electromagnet/control",
-    response_model=ApiResponse[ElectromagnetStatus],
-    summary="电磁铁控制",
-    description="控制电磁铁输出电流。",
-)
-async def electromagnet_control(
-    device_id: str = Path(..., description="设备唯一标识"),
-    request: ElectromagnetControlRequest = ...,
-) -> ApiResponse[ElectromagnetStatus]:
-    """
-    控制电磁铁。
-
-    Args:
-        device_id: 设备唯一标识符。
-        request: 控制参数请求体。
-
-    Returns:
-        ApiResponse[ElectromagnetStatus]: 电磁铁状态响应。
-
-    Raises:
-        HTTPException: 控制失败时返回错误。
-    """
-    # TODO: 实现电磁铁控制逻辑
-    raise HTTPException(status_code=500, detail="电磁铁控制失败")
-
-
-@router.post(
-    "/{device_id}/temperature/control",
-    response_model=ApiResponse[TemperatureControllerStatus],
-    summary="温度控制",
-    description="控制温控器设定目标温度。",
-)
-async def temperature_control(
-    device_id: str = Path(..., description="设备唯一标识"),
-    request: TemperatureControlRequest = ...,
-) -> ApiResponse[TemperatureControllerStatus]:
-    """
-    控制温度。
-
-    Args:
-        device_id: 设备唯一标识符。
-        request: 控制参数请求体。
-
-    Returns:
-        ApiResponse[TemperatureControllerStatus]: 温控器状态响应。
-
-    Raises:
-        HTTPException: 控制失败时返回错误。
-    """
-    # TODO: 实现温度控制逻辑
-    raise HTTPException(status_code=500, detail="温度控制失败")
-
-
-@router.post(
-    "/{device_id}/piezo/control",
-    response_model=ApiResponse[PiezoControllerStatus],
-    summary="压电控制",
-    description="控制压电陶瓷控制器输出电压。",
-)
-async def piezo_control(
-    device_id: str = Path(..., description="设备唯一标识"),
-    request: PiezoControlRequest = ...,
-) -> ApiResponse[PiezoControllerStatus]:
-    """
-    控制压电陶瓷。
-
-    Args:
-        device_id: 设备唯一标识符。
-        request: 控制参数请求体。
-
-    Returns:
-        ApiResponse[PiezoControllerStatus]: 压电控制器状态响应。
-
-    Raises:
-        HTTPException: 控制失败时返回错误。
-    """
-    # TODO: 实现压电控制逻辑
-    raise HTTPException(status_code=500, detail="压电控制失败")
+    except Exception as e:
+        logger.error(
+            f"获取急停状态失败: device_id={device_id}, error={str(e)}"
+        )
+        return ApiResponse.error(
+            message=f"获取急停状态失败: {str(e)}",
+            error_code="E3000",
+            details={"device_id": device_id}
+        )

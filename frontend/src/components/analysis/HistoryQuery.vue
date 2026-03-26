@@ -26,6 +26,7 @@ import {
   MoreFilled
 } from '@element-plus/icons-vue'
 import { useHistoryQuery } from '@/composables/useHistoryQuery'
+import type { QueryConditionsEvent, TemplateSavedEvent, TemplateAppliedEvent } from '@/types/events'
 
 /**
  * Props定义
@@ -69,10 +70,10 @@ const props = defineProps({
  * Emits定义
  */
 const emit = defineEmits<{
-  (e: 'query', conditions: any): void
+  (e: 'query', conditions: QueryConditionsEvent): void
   (e: 'reset'): void
-  (e: 'template-saved', template: any): void
-  (e: 'template-applied', template: any): void
+  (e: 'template-saved', template: TemplateSavedEvent): void
+  (e: 'template-applied', template: TemplateAppliedEvent): void
 }>()
 
 // ==================== 组合式函数调用 ====================

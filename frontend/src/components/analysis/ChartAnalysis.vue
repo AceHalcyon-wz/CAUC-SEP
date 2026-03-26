@@ -25,6 +25,7 @@ import {
   measureChartPerformance,
   FPSMonitor,
 } from '@/utils/chartUtils';
+import type { ChartSeries, XAxis, YAxis, ChartClickEvent } from '@/types/chart';
 
 /** 图表配置模板接口 */
 interface ChartConfig {
@@ -33,9 +34,9 @@ interface ChartConfig {
   chartType: string;
   showGrid: boolean;
   enableZoom: boolean;
-  series: any[];
-  xAxis: any;
-  yAxis: any;
+  series: ChartSeries[];
+  xAxis: XAxis;
+  yAxis: YAxis;
   annotations: Annotation[];
   createdAt: string;
 }
@@ -44,7 +45,7 @@ interface ChartConfig {
 interface Annotation {
   id: string;
   type: 'point' | 'line' | 'area' | 'measure';
-  data: any;
+  data: ChartClickEvent;
   label?: string;
   color?: string;
 }
@@ -69,7 +70,7 @@ interface Props {
 
 /** Emits定义 */
 const emit = defineEmits<{
-  (e: 'chartClick', params: any): void;
+  (e: 'chartClick', params: ChartClickEvent): void;
   (e: 'annotationAdd', annotation: Annotation): void;
   (e: 'configChange', config: ChartConfig): void;
 }>();

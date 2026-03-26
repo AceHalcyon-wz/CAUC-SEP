@@ -12,10 +12,15 @@ from fastapi import APIRouter
 
 api_v1 = APIRouter(prefix="/api/v1")
 
-from api.v1 import devices, experiments, analysis, system, auth
+from api.v1 import devices, experiments, analysis, system, auth, exception_protection
 
 api_v1.include_router(devices.router, prefix="/devices", tags=["devices"])
 api_v1.include_router(experiments.router, prefix="/experiments", tags=["experiments"])
 api_v1.include_router(analysis.router, prefix="/analysis", tags=["analysis"])
 api_v1.include_router(system.router, prefix="/system", tags=["system"])
 api_v1.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_v1.include_router(
+    exception_protection.router, 
+    prefix="/exception_protection", 
+    tags=["exception_protection"]
+)

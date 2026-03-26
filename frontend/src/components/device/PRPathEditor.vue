@@ -425,6 +425,7 @@ import {
   LegendComponent,
   DataZoomComponent
 } from 'echarts/components'
+import type { TooltipParam } from '@/types/chart'
 
 // 注册ECharts组件
 use([
@@ -574,13 +575,14 @@ const chartOption = computed(() => {
     },
     tooltip: {
       trigger: 'axis',
-      formatter: (params: any) => {
-        const point = pathPoints.value[params[0].dataIndex]
+      formatter: (params: TooltipParam | TooltipParam[]) => {
+        const paramArray = Array.isArray(params) ? params : [params]
+        const point = pathPoints.value[paramArray[0].dataIndex]
         return `
           <div style="padding: 8px;">
-            <div><strong>点 ${params[0].dataIndex + 1}</strong></div>
-            <div>位置: ${params[0].value.toFixed(2)} mm</div>
-            <div>时间: ${params[1].value.toFixed(2)} s</div>
+            <div><strong>点 ${paramArray[0].dataIndex + 1}</strong></div>
+            <div>位置: ${paramArray[0].value.toFixed(2)} mm</div>
+            <div>时间: ${paramArray[1].value.toFixed(2)} s</div>
             <div>速度: ${point.velocity_mm_s.toFixed(1)} mm/s</div>
           </div>
         `
@@ -800,9 +802,9 @@ function formatProgress(percentage: number): string {
 /**
  * 处理图表点击
  * 
- * @param {Object} params - 点击参数
+ * @param params - 点击参数
  */
-function handleChartClick(params: any) {
+function handleChartClick(params: TooltipParam): void {
   if (params.componentType === 'series') {
     selectedPointIndex.value = params.dataIndex
   }

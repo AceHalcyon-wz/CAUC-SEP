@@ -17,6 +17,9 @@ export enum DeviceStatus {
   MAINTENANCE = 'maintenance',
 }
 
+/** 设备连接状态类型 */
+export type DeviceConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
 /** 设备类型枚举 */
 export enum DeviceType {
   STEPPER = 'stepper',

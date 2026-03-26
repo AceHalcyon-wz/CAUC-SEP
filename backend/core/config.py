@@ -1,15 +1,43 @@
 """
 文件名: config.py
 路径: backend/core/
-功能: 应用配置管理，支持环境变量和 .env 文件
-版本: v1.0
+功能: 应用配置管理，支持环境变量和 .env 文件，统一配置管理
+版本: v2.0
 创建日期: 2026-03-15
+最后更新: 2026-03-25
+作者: Backend Engineer Agent
+
+依赖:
+    - pydantic>=2.5.0
+    - pydantic-settings>=2.0.0
+
+安全约束:
+    - 生产环境必须设置安全的JWT密钥
+    - 敏感信息必须通过环境变量配置
+    - 设备参数范围必须经过合法性校验
 """
 
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from functools import lru_cache
+from enum import Enum
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Environment(str, Enum):
+    """运行环境枚举。"""
+    DEVELOPMENT = "development"
+    STAGING = "staging"
+    PRODUCTION = "production"
+
+
+class LogLevel(str, Enum):
+    """日志级别枚举。"""
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
 
 
 class Settings(BaseSettings):
@@ -18,6 +46,17 @@ class Settings(BaseSettings):
     
     支持从环境变量和 .env 文件加载配置。
     环境变量优先级高于 .env 文件。
+    
+    配置分类：
+    1. 应用基础配置 - 应用名称、版本、环境
+    2. 数据库配置 - SQLite连接、连接池
+    3. Redis配置 - 缓存、会话管理
+    4. 设备配置 - 串口、Modbus参数、设备参数范围
+    5. 安全配置 - JWT、密码策略
+    6. 日志配置 - 日志级别、输出格式
+    7. CORS配置 - 跨域访问控制
+    8. WebSocket配置 - 实时通信
+    9. 实验配置 - 并发控制、数据采集
     """
     
     model_config = SettingsConfigDict(
@@ -67,54 +106,83 @@ class Settings(BaseSettings):
     # ==================== 设备配置 - 步进电机 ====================
     motor_device_id: str = "stepper_01"
     motor_port: str = "COM3"
-    motor_slave_id: int = 1
-    motor_baudrate: int = 115200
-    motor_parity: str = "N"
-    motor_stopbits: int = 1
-    motor_bytesize: int = 8
-    motor_timeout: float = 1.0
-    motor_steps_per_mm: int = 1600
-    motor_positive_limit: float = 50.0
-    motor_negative_limit: float = -50.0
+    motor_slave_id: int = Field(default=1, ge=1, le=247, description="Modbus从站ID，范围1-247")
+    motor_baudrate: int = Field(default=115200, description="串口波特率")
+    motor_parity: str = Field(default="N", pattern="^[NEOM]$", description="校验位：N-无，E-偶，O-奇，M-标记")
+    motor_stopbits: int = Field(default=1, ge=1, le=2, description="停止位：1或2")
+    motor_bytesize: int = Field(default=8, ge=5, le=9, description="数据位：5-9位")
+    motor_timeout: float = Field(default=1.0, gt=0, le=30, description="通信超时时间（秒）")
+    motor_steps_per_mm: int = Field(default=1600, gt=0, description="每毫米步数")
+    motor_positive_limit: float = Field(default=50.0, description="正向软件限位（毫米）")
+    motor_negative_limit: float = Field(default=-50.0, description="负向软件限位（毫米）")
     motor_simulation: bool = True
+    
+    # 步进电机参数范围约束
+    motor_speed_min: int = Field(default=100, ge=1, description="最小速度（脉冲/秒）")
+    motor_speed_max: int = Field(default=5000, le=100000, description="最大速度（脉冲/秒）")
+    motor_speed_default: int = Field(default=500, description="默认速度（脉冲/秒）")
+    motor_acceleration_min: int = Field(default=10, ge=1, description="最小加速度（ms）")
+    motor_acceleration_max: int = Field(default=10000, description="最大加速度（ms）")
+    motor_acceleration_default: int = Field(default=100, description="默认加速度（ms）")
+    motor_position_min: int = Field(default=-1000000, description="最小位置（脉冲）")
+    motor_position_max: int = Field(default=1000000, description="最大位置（脉冲）")
     
     # ==================== 设备配置 - 电磁铁 ====================
     electromagnet_device_id: str = "electromagnet_01"
     electromagnet_port: str = "COM4"
-    electromagnet_baudrate: int = 9600
-    electromagnet_parity: str = "N"
-    electromagnet_stopbits: int = 1
-    electromagnet_bytesize: int = 8
-    electromagnet_timeout: float = 1.0
-    electromagnet_max_current: float = 10.0
+    electromagnet_baudrate: int = Field(default=9600, description="串口波特率")
+    electromagnet_parity: str = Field(default="N", pattern="^[NEOM]$", description="校验位")
+    electromagnet_stopbits: int = Field(default=1, ge=1, le=2, description="停止位")
+    electromagnet_bytesize: int = Field(default=8, ge=5, le=9, description="数据位")
+    electromagnet_timeout: float = Field(default=1.0, gt=0, le=30, description="通信超时时间（秒）")
+    electromagnet_max_current: float = Field(default=10.0, gt=0, le=100, description="最大电流（安培）")
     electromagnet_simulation: bool = True
+    
+    # 电磁铁参数范围约束
+    electromagnet_current_min: float = Field(default=0.0, ge=0, description="最小电流（安培）")
+    electromagnet_current_max: float = Field(default=10.0, le=100, description="最大电流（安培）")
+    electromagnet_current_default: float = Field(default=5.0, description="默认电流（安培）")
     
     # ==================== 设备配置 - 温控器 ====================
     temperature_device_id: str = "temp_controller_01"
     temperature_port: str = "COM5"
-    temperature_baudrate: int = 9600
-    temperature_slave_id: int = 1
+    temperature_baudrate: int = Field(default=9600, description="串口波特率")
+    temperature_slave_id: int = Field(default=1, ge=1, le=247, description="Modbus从站ID")
     temperature_simulation: bool = True
-    temperature_pid_kp: float = 1.0
-    temperature_pid_ki: float = 0.1
-    temperature_pid_kd: float = 0.01
-    temperature_max_temp: float = 400.0
-    temperature_min_temp: float = -50.0
+    temperature_pid_kp: float = Field(default=1.0, ge=0, description="PID比例系数")
+    temperature_pid_ki: float = Field(default=0.1, ge=0, description="PID积分系数")
+    temperature_pid_kd: float = Field(default=0.01, ge=0, description="PID微分系数")
+    temperature_max_temp: float = Field(default=400.0, description="最高温度（摄氏度）")
+    temperature_min_temp: float = Field(default=-50.0, description="最低温度（摄氏度）")
+    
+    # 温控器参数范围约束
+    temperature_target_min: float = Field(default=-50.0, description="目标温度下限（摄氏度）")
+    temperature_target_max: float = Field(default=400.0, description="目标温度上限（摄氏度）")
+    temperature_tolerance: float = Field(default=0.5, gt=0, description="温度容差（摄氏度）")
     
     # ==================== 设备配置 - 压电控制器 ====================
     piezo_device_id: str = "piezo_01"
     piezo_port: str = "COM6"
     piezo_simulation: bool = True
-    piezo_max_voltage: float = 150.0
-    piezo_max_displacement: float = 100.0
-    piezo_channels: int = 3
+    piezo_max_voltage: float = Field(default=150.0, gt=0, le=200, description="最大电压（伏特）")
+    piezo_max_displacement: float = Field(default=100.0, gt=0, description="最大位移（微米）")
+    piezo_channels: int = Field(default=3, ge=1, le=8, description="通道数")
+    
+    # 压电控制器参数范围约束
+    piezo_voltage_min: float = Field(default=0.0, ge=0, description="最小电压（伏特）")
+    piezo_voltage_max: float = Field(default=150.0, le=200, description="最大电压（伏特）")
+    piezo_voltage_default: float = Field(default=0.0, description="默认电压（伏特）")
     
     # ==================== 设备配置 - 皮安表 ====================
     ammeter_device_id: str = "picoammeter_01"
     ammeter_port: str = "COM7"
     ammeter_simulation: bool = True
-    ammeter_sample_rate: float = 100.0
-    ammeter_current_range: str = "auto"
+    ammeter_sample_rate: float = Field(default=100.0, gt=0, le=10000, description="采样率（Hz）")
+    ammeter_current_range: str = Field(default="auto", description="电流量程：auto或具体值")
+    
+    # 皮安表参数范围约束
+    ammeter_current_min: float = Field(default=-1e-6, description="最小电流（安培）")
+    ammeter_current_max: float = Field(default=1e-6, description="最大电流（安培）")
     
     # ==================== 安全配置 ====================
     jwt_secret_key: str = Field(

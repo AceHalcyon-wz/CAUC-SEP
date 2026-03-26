@@ -5,6 +5,49 @@
 本文件格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [4.0.0] - 2026-03-25
+
+### 新增
+
+- **CI/CD流水线**: 完整的GitHub Actions自动化流水线
+  - `ci.yml`: 持续集成流水线（代码检查、测试、构建）
+  - `release.yml`: 自动发布流水线（版本验证、构建、发布）
+  - 支持并发控制、缓存优化、测试覆盖率报告
+
+- **环境变量管理**: 统一的环境配置管理
+  - 后端: `.env.production` 生产环境配置模板
+  - 前端: `.env`, `.env.development`, `.env.production` 环境配置
+  - Pydantic Settings 统一配置管理
+
+- **版本管理工具**: 自动化版本号同步
+  - `backend/scripts/sync_version.py`: 版本号同步脚本
+  - 自动同步 pyproject.toml、package.json、electron/package.json
+  - 支持 VERSION 文件生成
+
+- **开发指南文档**: 完善的开发规范文档
+  - `版本管理规范.md`: 语义化版本、Git分支策略、Commit规范
+  - `依赖版本锁定策略.md`: 前后端依赖管理策略
+  - `设备驱动开发指南.md`: 驱动开发规范、接口定义、测试规范
+
+### 变更
+
+- **打包脚本优化**: `scripts/build-all.bat` v4.0
+  - 新增版本号自动同步步骤
+  - 新增构建日志记录
+  - 优化冗余文件清理（.map、.tsbuildinfo）
+  - 支持更多命令行参数
+
+- **测试配置完善**: 
+  - 后端 pytest.ini v2.0: 覆盖率阈值80%、多格式报告、测试标记
+  - 前端 vitest.config.js v2.0: 覆盖率阈值70%、JUnit报告、并行执行
+
+### 技术细节
+
+- **CI/CD环境**: Python 3.13, Node.js 20 LTS
+- **测试覆盖率**: 后端80%, 前端70%
+- **版本同步**: 支持 pyproject.toml → package.json 自动同步
+- **文档结构**: 遵循 docs/technical-docs/ 分层文档体系
+
 ## [0.3.5] - 2026-03-18
 
 ### 新增

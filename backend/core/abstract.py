@@ -1,19 +1,31 @@
 """
-硬件抽象层 (Hardware Abstraction Layer, HAL)
+硬件抽象层 (Hardware Abstraction Layer, HAL)（已废弃）
 
 文件名: abstract.py
 路径: backend/core/
 功能: 定义所有硬件设备的统一抽象接口，提供设备状态管理、软件限位等基础功能
 作者: Backend Engineer Agent
 创建日期: 2024-01-15
-更新日期: 2026-03-14
-版本: 1.0.0
+更新日期: 2026-03-26
+版本: 2.0.0（废弃版本）
+
+⚠️ 废弃警告：
+本模块已废弃，请使用统一的设备抽象基类：
+- backend.core.hardware.BaseDevice
+- backend.core.hardware.ModbusDeviceBase
+- backend.core.hardware.DeviceStatus
+- backend.core.hardware.SoftwareLimitConfig
+
+迁移指南：backend.core.hardware.migration_guide
+
+废弃时间：2026-03-26
+移除时间：2026-05-26
 
 模块内容：
-    - DeviceStatus: 设备状态枚举，定义设备状态机
-    - AbstractDevice: 硬件设备抽象基类，所有设备驱动的基类
-    - AbstractStepper: 步进电机抽象接口，继承自AbstractDevice
-    - SoftwareLimitConfig: 软件限位配置类，提供安全保护功能
+    - DeviceStatus: 设备状态枚举，定义设备状态机（已废弃）
+    - AbstractDevice: 硬件设备抽象基类，所有设备驱动的基类（已废弃）
+    - AbstractStepper: 步进电机抽象接口，继承自AbstractDevice（已废弃）
+    - SoftwareLimitConfig: 软件限位配置类，提供安全保护功能（已废弃）
 
 设计参考：技术设计文档第3.1章节
 
@@ -29,34 +41,38 @@
                            ERROR ← EMERGENCY_STOP
 
 使用示例：
+    >>> # 旧用法（已废弃）
     >>> from backend.core.abstract import AbstractDevice, DeviceStatus
     >>> 
-    >>> class MyDevice(AbstractDevice):
-    ...     async def connect(self) -> bool:
-    ...         self.status = DeviceStatus.CONNECTING
-    ...         # 连接逻辑...
-    ...         self.status = DeviceStatus.READY
-    ...         return True
-    ...     
-    ...     async def disconnect(self) -> bool:
-    ...         self.status = DeviceStatus.DISCONNECTED
-    ...         return True
-    ...     
-    ...     async def read_status(self) -> dict:
-    ...         return {"status": self.status.value}
+    >>> # 新用法（推荐）
+    >>> from backend.core.hardware import BaseDevice, DeviceStatus
 """
 
+import warnings
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any
 
+# 发出废弃警告
+warnings.warn(
+    "backend.core.abstract 模块已废弃，请使用 backend.core.hardware 模块。"
+    "迁移指南：backend.core.hardware.migration_guide",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class DeviceStatus(Enum):
-    """设备状态枚举。
+    """设备状态枚举（已废弃）。
+
+    ⚠️ 请使用 backend.core.hardware.DeviceStatus
 
     状态机说明：
         DISCONNECTED → CONNECTING → READY → BUSY → READY
         任何状态都可能转变为 ERROR 或 EMERGENCY_STOP
+    
+    废弃时间：2026-03-26
+    移除时间：2026-05-26
 
     状态转换规则：
         - DISCONNECTED: 初始状态，只能转换到 CONNECTING
